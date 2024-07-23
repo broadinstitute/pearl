@@ -237,7 +237,7 @@ export const studyEnvAlertsPath = (portalShortcode: string, studyShortcode: stri
 
 /** path for viewing a particular notification config path */
 export const triggerPath = (config: Trigger, currentEnvPath: string) => {
-  return `${currentEnvPath}/notificationContent/triggers/${config.id}`
+  return `${currentEnvPath}/triggers/${config.id}`
 }
 
 /** path to the export preview */

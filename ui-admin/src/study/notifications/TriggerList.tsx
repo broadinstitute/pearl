@@ -6,7 +6,7 @@ import {
   paramsFromContext,
   StudyEnvContextT,
   studyEnvPreEnrollPath, studyEnvSurveyPath,
-  studyEnvTriggerPath,
+  studyEnvTriggerPath, studyEnvWorkflowPath,
   triggerPath
 } from '../StudyEnvironmentRouter'
 import { renderPageHeader } from 'util/pageUtils'
@@ -17,9 +17,10 @@ import { useLoadingEffect } from 'api/api-utils'
 import LoadingSpinner from 'util/LoadingSpinner'
 import CreateTriggerModal from './CreateTriggerModal'
 import { faCheckSquare, faClipboard, faEnvelope, faTasks } from '@fortawesome/free-solid-svg-icons'
+import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons'
 
-const boxClasses = 'border border-1 rounded p-2 my-2'
-const itemClasses = 'bg-dark-subtle m-1 py-2 rounded-2 px-3'
+const boxClasses = 'p-2 my-2'
+const itemClasses = 'border border-1 my-2 py-2 rounded-2 px-3'
 
 /** shows configuration of notifications for a study */
 export default function TriggerList({ studyEnvContext, portalContext }:
@@ -50,7 +51,7 @@ export default function TriggerList({ studyEnvContext, portalContext }:
   useEffect(() => {
     if (previousEnv !== currentEnv.environmentName) {
       // the user has changed the environment -- we need to clear the id off the path if there
-      navigate(`${studyEnvContext.currentEnvPath}/notificationContent`)
+      navigate(studyEnvWorkflowPath(paramsFromContext(studyEnvContext)))
       setPreviousEnv(currentEnv.environmentName)
     }
   }, [currentEnv.environmentName])
@@ -149,7 +150,11 @@ const TriggerListItem = ({ trigger, studyEnvParams }:
   { trigger: Trigger, studyEnvParams: StudyEnvParams }) => {
   return <li className={itemClasses}>
     { trigger.actionType === 'NOTIFICATION' && <Link to={studyEnvTriggerPath(studyEnvParams, trigger)}>
-      <FontAwesomeIcon icon={faEnvelope} className="me-2"/>{trigger.emailTemplate.name}
+      <FontAwesomeIcon icon={faEnvelope} className="me-2"/>
+      {trigger.emailTemplate.name}
+      <span className="text-muted fst-italic ms-3">
+        ({trigger.emailTemplate.localizedEmailTemplates[0].subject})
+      </span>
     </Link>
     }
     { trigger.actionType === 'TASK_STATUS_CHANGE' && <Link to={studyEnvTriggerPath(studyEnvParams, trigger)}>
@@ -157,5 +162,18 @@ const TriggerListItem = ({ trigger, studyEnvParams }:
       Mark {trigger.updateTaskTargetStableId} as {trigger.statusToUpdateTo}
     </Link>
     }
+    { trigger.triggerType === 'TASK_REMINDER' &&
+      <span className="text-muted fst-italic">
+        <FontAwesomeIcon icon={faCalendarAlt} className="ms-3 me-2"/>
+        <span>
+          reminds after {minutesToDayString(trigger.afterMinutesIncomplete)} (max { trigger.maxNumReminders } reminders)
+        </span>
+      </span>
+    }
+
   </li>
+}
+
+const minutesToDayString = (minutes: number) => {
+  return `${Math.round(minutes * 10 / (60 * 24)) / 10  } days`
 }

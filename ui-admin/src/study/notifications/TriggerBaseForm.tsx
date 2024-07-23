@@ -33,7 +33,7 @@ export default function TriggerBaseForm({ trigger, setTrigger }:
   {trigger: Trigger, setTrigger: (trigger: Trigger) => void}) {
   return <>
     <div>
-      { trigger.id && <div className="float-end">
+      { (trigger.id && isNotification(trigger)) && <div className="float-end">
         <NavLink to='notifications'>View sent emails</NavLink>
       </div> }
       <label className="form-label" htmlFor="triggerType">Trigger</label>
