@@ -34,11 +34,10 @@ const scopeOptions: {label: string, value: TriggerScope}[] = [
 ]
 
 /** for viewing and editing a notification config.  saving not yet implemented */
-export default function TriggerView({ studyEnvContext, portalContext, onDelete }:
+export default function TriggerView({ studyEnvContext, portalContext }:
                                                  {
                                                    studyEnvContext: StudyEnvContextT,
-                                                   portalContext: LoadedPortalContextT,
-                                                   onDelete: () => void
+                                                   portalContext: LoadedPortalContextT
                                                  }) {
   const { currentEnv, portal, study, currentEnvPath } = studyEnvContext
   const [showSendModal, setShowSendModal] = useState(false)
@@ -72,11 +71,13 @@ export default function TriggerView({ studyEnvContext, portalContext, onDelete }
   const deleteConfig = async () => {
     if (triggerId) {
       await Api.deleteTrigger(portal.shortcode, study.shortcode, currentEnv.environmentName, triggerId)
-      onDelete()
+      await portalContext.reloadPortal(portal.shortcode)
+      navigate(-1)
     }
   }
 
-  return <div className={'w-100'}>
+  return <div className="container row">
+    <h2 className="h3">Trigger configuration</h2>
     {!isLoading && !!workingTrigger && <form className="bg-white my-2">
       <TriggerBaseForm trigger={workingTrigger} setTrigger={setWorkingTrigger}/>
       { isTaskReminder(workingTrigger) && <div>

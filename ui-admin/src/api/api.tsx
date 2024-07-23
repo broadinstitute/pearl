@@ -515,6 +515,12 @@ export default {
     return await this.processResponse(response)
   },
 
+  async getSurveyById(portalShortcode: string, id: string): Promise<Survey> {
+    const url = `${API_ROOT}/portals/v1/${portalShortcode}/surveys/${id}`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
   async getSurvey(portalShortcode: string, stableId: string, version: number): Promise<Survey> {
     const url = `${API_ROOT}/portals/v1/${portalShortcode}/surveys/${stableId}/${version}`
     const response = await fetch(url, this.getGetInit())

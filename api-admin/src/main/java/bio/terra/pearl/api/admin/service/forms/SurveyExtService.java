@@ -59,6 +59,13 @@ public class SurveyExtService {
   }
 
   @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSON)
+  public Survey get(PortalAuthContext authContext, UUID surveyId) {
+    Survey survey = authUtilService.authSurveyToPortal(authContext.getPortal(), surveyId);
+    surveyService.attachAnswerMappings(survey);
+    return survey;
+  }
+
+  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSON)
   public List<Survey> listVersions(PortalAuthContext authContext, String stableId) {
     // This is used to populate the version selector in the admin UI. It's not necessary
     // to return the surveys with any content or answer mappings, the response will

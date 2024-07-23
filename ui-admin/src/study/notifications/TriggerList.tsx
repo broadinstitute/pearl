@@ -1,26 +1,25 @@
 import React, { useEffect, useState } from 'react'
-import { NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
-import TriggerTypeDisplay, { deliveryTypeDisplayMap } from './TriggerTypeDisplay'
+import { Link, useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
-import { paramsFromContext, StudyEnvContextT, triggerPath } from '../StudyEnvironmentRouter'
-import TriggerView from './TriggerView'
+import {
+  paramsFromContext,
+  StudyEnvContextT,
+  studyEnvPreEnrollPath, studyEnvSurveyPath,
+  studyEnvTriggerPath,
+  triggerPath
+} from '../StudyEnvironmentRouter'
 import { renderPageHeader } from 'util/pageUtils'
 import { LoadedPortalContextT } from '../../portal/PortalProvider'
-import { Trigger } from '@juniper/ui-core'
+import { StudyEnvironmentSurvey, StudyEnvParams, Survey, Trigger } from '@juniper/ui-core'
 import Api from 'api/api'
 import { useLoadingEffect } from 'api/api-utils'
 import LoadingSpinner from 'util/LoadingSpinner'
 import CreateTriggerModal from './CreateTriggerModal'
-import { navDivStyle, navLinkStyleFunc, navListItemStyle } from 'util/subNavStyles'
-import CollapsableMenu from 'navbar/CollapsableMenu'
-import TriggerNotifications from './TriggerNotifications'
+import { faCheckSquare, faClipboard, faEnvelope, faTasks } from '@fortawesome/free-solid-svg-icons'
 
-const TRIGGER_GROUPS = [
-  { title: 'Events', type: 'EVENT' },
-  { title: 'Participant Reminders', type: 'TASK_REMINDER' },
-  { title: 'Ad-hoc', type: 'AD_HOC' }
-]
+const boxClasses = 'border border-1 rounded p-2 my-2'
+const itemClasses = 'bg-dark-subtle m-1 py-2 rounded-2 px-3'
 
 /** shows configuration of notifications for a study */
 export default function TriggerList({ studyEnvContext, portalContext }:
@@ -28,13 +27,24 @@ export default function TriggerList({ studyEnvContext, portalContext }:
   const currentEnv = studyEnvContext.currentEnv
   const navigate = useNavigate()
   const [triggers, setTriggers] = useState<Trigger[]>([])
+  const [studyEnvSurveys, setStudyEnvSurveys] = useState<StudyEnvironmentSurvey[]>([])
+  const [preEnrollSurvey, setPreEnrollSurvey] = useState<Survey>()
   const [previousEnv, setPreviousEnv] = useState<string>(currentEnv.environmentName)
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const { isLoading, reload } = useLoadingEffect(async () => {
-    const triggerList = await Api.findTriggersForStudyEnv(portalContext.portal.shortcode,
-      studyEnvContext.study.shortcode, currentEnv.environmentName)
+    const [triggerList, surveys] = await Promise.all([
+      Api.findTriggersForStudyEnv(portalContext.portal.shortcode,
+        studyEnvContext.study.shortcode, currentEnv.environmentName),
+      Api.findConfiguredSurveys(portalContext.portal.shortcode, studyEnvContext.study.shortcode,
+        currentEnv.environmentName, true, undefined)
+    ])
+    if (currentEnv.preEnrollSurveyId) {
+      const preEnrollSurvey = await Api.getSurveyById(portalContext.portal.shortcode, currentEnv.preEnrollSurveyId)
+      setPreEnrollSurvey(preEnrollSurvey)
+    }
     setTriggers(triggerList)
+    setStudyEnvSurveys(surveys)
   }, [currentEnv.environmentName, studyEnvContext.study.shortcode])
 
   useEffect(() => {
@@ -51,55 +61,101 @@ export default function TriggerList({ studyEnvContext, portalContext }:
     setShowCreateModal(false)
   }
 
-  const onDelete = () => {
-    reload()
-    navigate('')
-  }
 
   return <div className="container-fluid px-4 py-2">
-    { renderPageHeader('Participant email configuration') }
-    <div className="d-flex">
+    { renderPageHeader('Workflow') }
+    <ul className="list-unstyled">
       {isLoading && <LoadingSpinner/>}
-      {!isLoading && <div style={navDivStyle}>
-        <ul className="list-unstyled">
-          { TRIGGER_GROUPS.map(group => <li style={navListItemStyle} key={group.title}>
-            <CollapsableMenu header={group.title} headerClass="text-black" content={
-              <ul className="list-unstyled p-2">
-                { triggers
-                  .filter(trigger => trigger.triggerType === group.type)
-                  .map(trigger => <li key={trigger.id} className="mb-2">
-                    <div className="d-flex">
-                      <NavLink to={`triggers/${trigger.id}`} style={navLinkStyleFunc}>
-                        <TriggerTypeDisplay config={trigger}/>
-                        <span
-                          className="text-muted fst-italic"> ({deliveryTypeDisplayMap[trigger.deliveryType]})</span>
-                      </NavLink>
-                    </div>
-                  </li>
-                  ) }
-              </ul>}
-            />
-          </li>)}
-          { currentEnv.environmentName == 'sandbox' && <li style={navListItemStyle} className="ps-3">
-            <button className="btn btn-secondary" onClick={() => setShowCreateModal(true)}>
+      <li className={boxClasses} >
+        <h3 className="h6">Pre-enroll</h3>
+        <div className={itemClasses}>
+          { preEnrollSurvey &&
+          <Link to={studyEnvPreEnrollPath(paramsFromContext(studyEnvContext), preEnrollSurvey.stableId)}>
+            <FontAwesomeIcon icon={faClipboard} className="me-2"/>{preEnrollSurvey.name}
+          </Link> }
+          { !preEnrollSurvey && <><span className="fst-italic">None</span>
+            <button className="btn btn-secondary" onClick={() => alert('go to forms page')}>
               <FontAwesomeIcon icon={faPlus}/> Add
             </button>
-          </li> }
+          </> }
+        </div>
+      </li>
+      <li className={boxClasses} >
+        <h3 className="h6">Enrollment</h3>
+        <ul className="list-unstyled">
+          { triggers.filter(trigger => trigger.eventType === 'STUDY_ENROLLMENT')
+            .map(trigger =>
+              <TriggerListItem trigger={trigger} key={trigger.id} studyEnvParams={paramsFromContext(studyEnvContext)}/>
+            )
+          }
         </ul>
-      </div> }
-      <div className="flex-grow-1 bg-white p-3">
-        <Routes>
-          <Route path="triggers/:triggerId"
-            element={<TriggerView studyEnvContext={studyEnvContext}
-              portalContext={portalContext} onDelete={onDelete}/>}/>
-          <Route path="triggers/:triggerId/notifications" element={
-            <TriggerNotifications studyEnvContext={studyEnvContext}/>}/>
-        </Routes>
-        <Outlet/>
-      </div>
-      { showCreateModal && <CreateTriggerModal studyEnvParams={paramsFromContext(studyEnvContext)}
-        onDismiss={() => setShowCreateModal(false)} onCreate={onCreate}
-      /> }
-    </div>
+      </li>
+      <li className={boxClasses}>
+        <h3 className="h6">Consents</h3>
+        <ul className="list-unstyled">
+          { studyEnvSurveys.filter(studyEnvSurveys => studyEnvSurveys.survey.surveyType === 'CONSENT')
+            .map(studyEnvSurvey =>
+              <SurveyListItem studyEnvSurvey={studyEnvSurvey} key={studyEnvSurvey.id}
+                studyEnvParams={paramsFromContext(studyEnvContext)}/>
+            )
+          }
+        </ul>
+        <ul className="list-unstyled ms-3">
+          { triggers.filter(trigger => trigger.eventType === 'STUDY_CONSENT' || trigger.taskType === 'CONSENT')
+            .map(trigger =>
+              <TriggerListItem trigger={trigger} key={trigger.id} studyEnvParams={paramsFromContext(studyEnvContext)}/>
+            )
+          }
+        </ul>
+      </li>
+      <li className={boxClasses}>
+        <h3 className="h6">Surveys</h3>
+        <ul className="list-unstyled">
+          { studyEnvSurveys.filter(studyEnvSurveys => studyEnvSurveys.survey.surveyType === 'RESEARCH')
+            .map(studyEnvSurvey =>
+              <SurveyListItem studyEnvSurvey={studyEnvSurvey} key={studyEnvSurvey.id}
+                studyEnvParams={paramsFromContext(studyEnvContext)}/>
+            )
+          }
+        </ul>
+        <ul className="list-unstyled ms-3">
+          { triggers.filter(trigger => trigger.eventType === 'SURVEY_RESPONSE' || trigger.taskType === 'SURVEY')
+            .map(trigger =>
+              <TriggerListItem trigger={trigger} key={trigger.id} studyEnvParams={paramsFromContext(studyEnvContext)}/>
+            )
+          }
+        </ul>
+      </li>
+    </ul>
+    { showCreateModal && <CreateTriggerModal studyEnvParams={paramsFromContext(studyEnvContext)}
+      onDismiss={() => setShowCreateModal(false)} onCreate={onCreate}
+    /> }
   </div>
+}
+
+const SurveyListItem = ({ studyEnvSurvey, studyEnvParams }:
+  { studyEnvSurvey: StudyEnvironmentSurvey, studyEnvParams: StudyEnvParams }) => {
+  return <li className={itemClasses}>
+    <Link to={studyEnvSurveyPath(studyEnvParams, studyEnvSurvey.survey.stableId, studyEnvSurvey.survey.version)}>
+      { studyEnvSurvey.survey.surveyType === 'CONSENT' && <FontAwesomeIcon icon={faCheckSquare} className="me-2"/> }
+      { studyEnvSurvey.survey.surveyType === 'RESEARCH' && <FontAwesomeIcon icon={faClipboard} className="me-2"/> }
+      {studyEnvSurvey.survey.name}
+    </Link>
+  </li>
+}
+
+
+const TriggerListItem = ({ trigger, studyEnvParams }:
+  { trigger: Trigger, studyEnvParams: StudyEnvParams }) => {
+  return <li className={itemClasses}>
+    { trigger.actionType === 'NOTIFICATION' && <Link to={studyEnvTriggerPath(studyEnvParams, trigger)}>
+      <FontAwesomeIcon icon={faEnvelope} className="me-2"/>{trigger.emailTemplate.name}
+    </Link>
+    }
+    { trigger.actionType === 'TASK_STATUS_CHANGE' && <Link to={studyEnvTriggerPath(studyEnvParams, trigger)}>
+      <FontAwesomeIcon icon={faTasks} className="me-2"/>
+      Mark {trigger.updateTaskTargetStableId} as {trigger.statusToUpdateTo}
+    </Link>
+    }
+  </li>
 }

@@ -196,6 +196,20 @@ paths:
           content: { application/json: { schema: { type: object } } }
         '500':
           $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/surveys/{id}:
+    get:
+      summary: gets the requested survey
+      tags: [ survey ]
+      operationId: getById
+      parameters:
+        - { name: portalShortcode, in: path, required: true, schema: { type: string } }
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: survey object
+          content: { application/json: { schema: { type: object } } }
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/surveys/{stableId}:
     delete:
       summary: deletes the specified survey, will fail if the survey has any responses or is in use by a non-sandbox environment

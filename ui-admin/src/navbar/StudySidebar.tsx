@@ -11,9 +11,8 @@ import {
   studyEnvImportPath,
   studyEnvMailingListPath,
   studyEnvMetricsPath,
-  studyEnvNotificationsPath,
   studyEnvSiteContentPath,
-  studyEnvSiteSettingsPath
+  studyEnvSiteSettingsPath, studyEnvWorkflowPath
 } from '../study/StudyEnvironmentRouter'
 import CollapsableMenu from './CollapsableMenu'
 import { userHasPermission, useUser } from 'user/UserProvider'
@@ -86,8 +85,11 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
             className={sidebarNavLinkClasses} style={navStyleFunc}>Forms &amp; Surveys</NavLink>
         </li>
         <li className="mb-2">
-          <NavLink to={studyEnvNotificationsPath(portalShortcode, study.shortcode, 'sandbox')}
-            className={sidebarNavLinkClasses} style={navStyleFunc}>Emails &amp; Notifications</NavLink>
+          <NavLink to={studyEnvWorkflowPath({
+            portalShortcode,
+            studyShortcode: study.shortcode, envName: 'sandbox'
+          })}
+          className={sidebarNavLinkClasses} style={navStyleFunc}>Workflow</NavLink>
         </li>
       </ul>}/>
       <CollapsableMenu header={'Publish'} content={<ul className="list-unstyled">
