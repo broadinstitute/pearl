@@ -18,13 +18,10 @@ import LoadingSpinner from 'util/LoadingSpinner'
 import CreateTriggerModal from './CreateTriggerModal'
 import {
   faAsterisk,
-  faCheckSquare,
-  faClipboard,
   faCodeBranch,
-  faEnvelope,
   faTasks
 } from '@fortawesome/free-solid-svg-icons'
-import { faCalendarAlt } from '@fortawesome/free-regular-svg-icons'
+import { faCalendarAlt, faClipboard, faEnvelope,   faCheckSquare } from '@fortawesome/free-regular-svg-icons'
 import InfoPopup from 'components/forms/InfoPopup'
 import _sortBy from 'lodash/sortBy'
 
@@ -169,6 +166,10 @@ const SurveyListItem = ({ studyEnvSurvey, studyEnvParams }:
   { studyEnvSurvey: StudyEnvironmentSurvey, studyEnvParams: StudyEnvParams }) => {
   const survey = studyEnvSurvey.survey
   return <li className={itemClasses}>
+    { survey.eligibilityRule && <span className="me-2 text-muted fst-italic">
+      <InfoPopup content={survey.eligibilityRule}
+        target={<FontAwesomeIcon icon={faCodeBranch} title="conditional logic"/>}/>
+    </span> }
     <Link to={studyEnvSurveyPath(studyEnvParams, studyEnvSurvey.survey.stableId, survey.version)}>
       { survey.surveyType === 'CONSENT' && <FontAwesomeIcon icon={faCheckSquare} className="me-2"/> }
       { survey.surveyType === 'RESEARCH' && <FontAwesomeIcon icon={faClipboard} className="me-2"/> }
@@ -177,10 +178,7 @@ const SurveyListItem = ({ studyEnvSurvey, studyEnvParams }:
     { survey.required && <span className="ms-2 text-muted">
       <FontAwesomeIcon icon={faAsterisk} title={'required'}/>
     </span> }
-    { survey.eligibilityRule && <span className="ms-2 text-muted fst-italic">
-      <InfoPopup content={survey.eligibilityRule}
-        target={<FontAwesomeIcon icon={faCodeBranch} title="conditional logic"/>}/>
-    </span> }
+
   </li>
 }
 
