@@ -25,6 +25,9 @@
     "emails/surveyReminder.json",
     "emails/outreachReminder.json",
     "emails/invite.json",
+    "emails/kitSent.json",
+    "emails/kitReceived.json",
+    "emails/kitReminder.json",
     "emails/adHoc.json"
   ],
   "studyEnvironmentDtos": [
@@ -83,6 +86,18 @@
         "reminderIntervalMinutes": 10080,
         "maxNumReminders": 2,
         "populateFileName": "emails/outreachReminder.json"
+      },{
+        "triggerType": "EVENT",
+        "eventType": "KIT_SENT",
+        "populateFileName": "emails/kitSent.json"
+      },{
+        "triggerType": "EVENT",
+        "eventType": "KIT_RECEIVED",
+        "populateFileName": "emails/kitReceived.json"
+      },{
+        "triggerType": "TASK_REMINDER",
+        "taskType": "KIT_REQUEST",
+        "populateFileName": "emails/kitReminder.json"
       },{
         "triggerType": "AD_HOC",
         "populateFileName": "emails/adHoc.json"
@@ -176,6 +191,18 @@
         "maxNumReminders": 2,
         "populateFileName": "emails/surveyReminder.json"
       },{
+        "triggerType": "EVENT",
+        "eventType": "KIT_SENT",
+        "populateFileName": "emails/kitSent.json"
+      },{
+        "triggerType": "EVENT",
+        "eventType": "KIT_RECEIVED",
+        "populateFileName": "emails/kitReceived.json"
+      },{
+        "triggerType": "TASK_REMINDER",
+        "taskType": "KIT_REQUEST",
+        "populateFileName": "emails/kitReminder.json"
+      },{
         "triggerType": "AD_HOC",
         "populateFileName": "emails/adHoc.json"
       }]
@@ -224,6 +251,18 @@
         "reminderIntervalMinutes": 10080,
         "maxNumReminders": 2,
         "populateFileName": "emails/surveyReminder.json"
+      },{
+        "triggerType": "EVENT",
+        "eventType": "KIT_SENT",
+        "populateFileName": "emails/kitSent.json"
+      },{
+        "triggerType": "EVENT",
+        "eventType": "KIT_RECEIVED",
+        "populateFileName": "emails/kitReceived.json"
+      },{
+        "triggerType": "TASK_REMINDER",
+        "taskType": "KIT_REQUEST",
+        "populateFileName": "emails/kitReminder.json"
       },{
         "triggerType": "AD_HOC",
         "populateFileName": "emails/adHoc.json"
