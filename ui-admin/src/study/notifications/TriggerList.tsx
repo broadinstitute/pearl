@@ -154,6 +154,16 @@ export default function TriggerList({ studyEnvContext, portalContext }:
           }
         </ul>
       </li>
+      <li className={boxClasses}>
+        <h3 className="h6">Ad-Hoc</h3>
+        <ul className="list-unstyled">
+          { triggers.filter(trigger => trigger.triggerType === 'AD_HOC')
+            .map(trigger =>
+              <TriggerListItem trigger={trigger} key={trigger.id} studyEnvParams={paramsFromContext(studyEnvContext)}/>
+            )
+          }
+        </ul>
+      </li>
 
     </ul>
     { showCreateModal && <CreateTriggerModal studyEnvParams={paramsFromContext(studyEnvContext)}
