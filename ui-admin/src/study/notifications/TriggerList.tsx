@@ -142,6 +142,13 @@ export default function TriggerList({ studyEnvContext, portalContext }:
             )
           }
         </ul>
+        <ul className="list-unstyled ms-3">
+          { triggers.filter(trigger => trigger.eventType === 'SURVEY_RESPONSE' || trigger.taskType === 'OUTREACH')
+            .map(trigger =>
+              <TriggerListItem trigger={trigger} key={trigger.id} studyEnvParams={paramsFromContext(studyEnvContext)}/>
+            )
+          }
+        </ul>
       </li>
       <li className={boxClasses}>
         <h3 className="h6">Kits</h3>
