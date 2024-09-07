@@ -2,7 +2,7 @@ import { act, render, screen } from '@testing-library/react'
 import React from 'react'
 import CreateSurveyModal from './CreateSurveyModal'
 import { mockConfiguredSurvey, mockExpressionApis, mockStudyEnvContext, mockSurvey } from 'test-utils/mocking-utils'
-import userEvent from '@testing-library/user-event'
+import { userEvent } from '@testing-library/user-event'
 import Api from 'api/api'
 import { defaultSurvey, setupRouterTest } from '@juniper/ui-core'
 
@@ -144,7 +144,7 @@ describe('CreateSurveyModal', () => {
         autoUpdateTaskAssignments: true,
         blurb: 'Testing out the screener blurb...',
         assignToExistingEnrollees: true,
-        content: '{"pages":[]}',
+        content: '{"pages":[{"elements":[]}]}',
         createdAt: expect.anything(),
         lastUpdatedAt: expect.anything(),
         id: '',

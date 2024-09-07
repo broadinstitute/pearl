@@ -2,13 +2,18 @@ import { render, screen } from '@testing-library/react'
 import React from 'react'
 import { mockHtmlPage } from 'test-utils/mock-site-content'
 import HtmlPageEditView from './HtmlPageEditView'
-import userEvent from '@testing-library/user-event'
+import { userEvent } from '@testing-library/user-event'
 import { sectionTemplates } from './sectionTemplates'
 import { setupRouterTest } from '@juniper/ui-core'
 import { mockPortalEnvContext } from 'test-utils/mocking-utils'
 import { Store } from 'react-notifications-component'
 
 jest.spyOn(Store, 'addNotification').mockImplementation(() => '')
+
+jest.mock('api/api', () => ({
+  ...jest.requireActual('api/api'),
+  getPortalMedia: jest.fn().mockResolvedValue([])
+}))
 
 test('readOnly disables insert new section button', async () => {
   const mockPage = mockHtmlPage()

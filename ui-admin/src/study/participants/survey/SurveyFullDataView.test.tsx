@@ -6,6 +6,7 @@ import { Question } from 'survey-core'
 import { Answer } from '@juniper/ui-core'
 import { DataChangeRecord } from 'api/api'
 import { AnswerEditHistory } from './AnswerEditHistory'
+import { userEvent } from '@testing-library/user-event'
 
 
 describe('getDisplayValue', () => {
@@ -82,6 +83,17 @@ describe('getDisplayValue', () => {
     expect(screen.getByRole('img')).toHaveAttribute('src', 'data:image/png;base64, test123')
     expect(screen.queryByText('data:image/png;base64, test123')).not.toBeInTheDocument()
   })
+
+  it('renders a malformed object value as an error', async () => {
+    const question = {
+      name: 'testQ', text: 'test question',
+      isVisible: true,
+      getType: () => 'text'
+    }
+    const answer: Answer = { objectValue: '{dfaf }}', questionStableId: 'testQ' } as Answer
+    render(<span>{getDisplayValue(answer, question as unknown as Question)}</span>)
+    expect(screen.getByText('[[ parse error ]]')).toBeInTheDocument()
+  })
 })
 
 describe('ItemDisplay', () => {
@@ -101,8 +113,9 @@ describe('ItemDisplay', () => {
       surveyVersion={1}
       supportedLanguages={[{ languageCode: 'es', languageName: 'Spanish', id: '' }]}
       showFullQuestions={true}/>)
+    userEvent.click(screen.getAllByText('test123')[0])
 
-    expect(screen.getByText('(testQ) (Answered in Spanish)')).toBeInTheDocument()
+    expect(screen.getByText('answered in Spanish')).toBeInTheDocument()
   })
 
   it('renders correctly if a viewedLanguage is not specified', async () => {

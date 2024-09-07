@@ -1,5 +1,5 @@
 import React from 'react'
-import { setupRouterTest } from '@juniper/ui-core'
+import { renderWithRouter, setupRouterTest } from '@juniper/ui-core'
 import { mockStudyEnvContext } from '../test-utils/mocking-utils'
 import {
   render,
@@ -7,8 +7,8 @@ import {
   waitFor
 } from '@testing-library/react'
 import { SearchQueryBuilder } from './SearchQueryBuilder'
-import userEvent from '@testing-library/user-event'
-import Api, { SearchValueTypeDefinition } from 'api/api'
+import { userEvent } from '@testing-library/user-event'
+import { SearchValueTypeDefinition } from 'api/api'
 
 const mailingAddressCountryFacet: { [index: string]: SearchValueTypeDefinition } = {
   'profile.mailingAddress.country': {
@@ -21,10 +21,14 @@ const mailingAddressCountryFacet: { [index: string]: SearchValueTypeDefinition }
   }
 }
 
+jest.mock('../api/api', () => ({
+  ...jest.requireActual('../api/api'),
+  getExpressionSearchFacets: jest.fn().mockResolvedValue(mailingAddressCountryFacet),
+  executeSearchExpression: jest.fn().mockResolvedValue([])
+}))
+
 describe('SearchQueryBuilder', () => {
   it('should render with basic options', async () => {
-    jest.spyOn(Api, 'getExpressionSearchFacets').mockResolvedValue(mailingAddressCountryFacet)
-
     const onSearchExpressionChange = jest.fn()
     const { RoutedComponent } = setupRouterTest(
       <SearchQueryBuilder
@@ -57,20 +61,14 @@ describe('SearchQueryBuilder', () => {
   })
 
   it('should render advanced', async () => {
-    jest.clearAllMocks()
-    jest.spyOn(Api, 'getExpressionSearchFacets').mockResolvedValue(mailingAddressCountryFacet)
-
     const onSearchExpressionChange = jest.fn()
-    const { RoutedComponent } = setupRouterTest(
-      <SearchQueryBuilder
-        studyEnvContext={mockStudyEnvContext()}
-        onSearchExpressionChange={onSearchExpressionChange}
-        searchExpression={''}
-      />)
-    render(RoutedComponent)
+    renderWithRouter(<SearchQueryBuilder
+      studyEnvContext={mockStudyEnvContext()}
+      onSearchExpressionChange={onSearchExpressionChange}
+      searchExpression={''}
+    />)
 
     await waitFor(() => expect(screen.getByText('+Rule')).toBeInTheDocument())
-
 
     await waitFor(() => expect(screen.getByText('(switch to advanced view)')).not.toBeDisabled())
     await userEvent.click(screen.getByText('(switch to advanced view)'))
@@ -79,15 +77,12 @@ describe('SearchQueryBuilder', () => {
       screen.getByLabelText('Search expression'),
       '{{profile.mailingAddress.country} = \'US\'')
 
-
     await waitFor(() => {
       expect(onSearchExpressionChange).toHaveBeenLastCalledWith(`{profile.mailingAddress.country} = 'US'`)
     })
   })
 
   it('should render with a saved search', async () => {
-    jest.spyOn(Api, 'getExpressionSearchFacets').mockResolvedValue(mailingAddressCountryFacet)
-
     const onSearchExpressionChange = jest.fn()
     const { RoutedComponent } = setupRouterTest(
       <SearchQueryBuilder
@@ -104,8 +99,6 @@ describe('SearchQueryBuilder', () => {
   })
 
   it('should render advanced editor if error in search expression', async () => {
-    jest.spyOn(Api, 'getExpressionSearchFacets').mockResolvedValue(mailingAddressCountryFacet)
-
     const onSearchExpressionChange = jest.fn()
     const { RoutedComponent } = setupRouterTest(
       <SearchQueryBuilder
@@ -125,8 +118,6 @@ describe('SearchQueryBuilder', () => {
   })
 
   it('should render advanced editor if functions used', async () => {
-    jest.spyOn(Api, 'getExpressionSearchFacets').mockResolvedValue(mailingAddressCountryFacet)
-
     const onSearchExpressionChange = jest.fn()
     const { RoutedComponent } = setupRouterTest(
       <SearchQueryBuilder
@@ -146,9 +137,6 @@ describe('SearchQueryBuilder', () => {
   })
 
   it('should disable basic editor if error introduced in advanced editor', async () => {
-    jest.spyOn(Api, 'getExpressionSearchFacets').mockResolvedValue(mailingAddressCountryFacet)
-    jest.spyOn(Api, 'executeSearchExpression').mockResolvedValue([])
-
     const { RoutedComponent } = setupRouterTest(
       <TestFullQueryBuilderState/>)
     render(RoutedComponent)
@@ -176,9 +164,6 @@ describe('SearchQueryBuilder', () => {
   })
 
   it('should disable basic editor if function introduced in advanced editor', async () => {
-    jest.spyOn(Api, 'getExpressionSearchFacets').mockResolvedValue(mailingAddressCountryFacet)
-    jest.spyOn(Api, 'executeSearchExpression').mockResolvedValue([])
-
     const { RoutedComponent } = setupRouterTest(
       <TestFullQueryBuilderState/>)
     render(RoutedComponent)
@@ -205,9 +190,6 @@ describe('SearchQueryBuilder', () => {
   })
 
   it('should disable basic editor if not introduced in advanced editor', async () => {
-    jest.spyOn(Api, 'getExpressionSearchFacets').mockResolvedValue(mailingAddressCountryFacet)
-    jest.spyOn(Api, 'executeSearchExpression').mockResolvedValue([])
-
     const { RoutedComponent } = setupRouterTest(
       <TestFullQueryBuilderState/>)
     render(RoutedComponent)

@@ -8,7 +8,7 @@ import { screen } from '@testing-library/react'
 import { renderWithRouter, StudyEnvironmentSurveyNamed } from '@juniper/ui-core'
 import SurveyEnvironmentTable from './SurveyEnvironmentTable'
 import { getTableCell } from '../../test-utils/table-testing-utils'
-import userEvent from '@testing-library/user-event'
+import { userEvent } from '@testing-library/user-event'
 
 describe('SurveyEnvironmentTest', () => {
   test('shows survey name and versions', async () => {
@@ -71,11 +71,11 @@ describe('SurveyEnvironmentTest', () => {
     />)
 
     expect(screen.getByText(configuredSurveys[0].survey.name)).toBeInTheDocument()
-    const sandboxCell = getTableCell(screen.getByRole('table'), configuredSurveys[0].survey.name, 'sandbox')
+    const sandboxCell = getTableCell(screen.getByRole('table'), configuredSurveys[0].survey.name, 'sandbox', 1)
     await userEvent.click(sandboxCell.querySelector('button[aria-label="Configure survey menu"]')!)
     expect(screen.getByText('Publish to irb')).toBeVisible()
 
-    const irbCell = getTableCell(screen.getByRole('table'), configuredSurveys[0].survey.name, 'sandbox')
+    const irbCell = getTableCell(screen.getByRole('table'), configuredSurveys[0].survey.name, 'sandbox', 1)
     await userEvent.click(irbCell.querySelector('button[aria-label="Configure survey menu"]')!)
     expect(screen.getByText('Publish to live')).toBeVisible()
     await userEvent.click(screen.getByText('Publish to live'))

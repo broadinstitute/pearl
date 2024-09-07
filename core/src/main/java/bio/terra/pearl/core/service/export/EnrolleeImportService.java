@@ -3,11 +3,7 @@ package bio.terra.pearl.core.service.export;
 import bio.terra.pearl.core.dao.dataimport.TimeShiftPopulateDao;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
-import bio.terra.pearl.core.model.dataimport.Import;
-import bio.terra.pearl.core.model.dataimport.ImportItem;
-import bio.terra.pearl.core.model.dataimport.ImportItemStatus;
-import bio.terra.pearl.core.model.dataimport.ImportStatus;
-import bio.terra.pearl.core.model.dataimport.ImportType;
+import bio.terra.pearl.core.model.dataimport.*;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.model.participant.Enrollee;
@@ -22,12 +18,7 @@ import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.dataimport.ImportFileFormat;
 import bio.terra.pearl.core.service.dataimport.ImportItemService;
 import bio.terra.pearl.core.service.dataimport.ImportService;
-import bio.terra.pearl.core.service.exception.internal.InternalServerException;
-import bio.terra.pearl.core.service.export.formatters.module.EnrolleeFormatter;
-import bio.terra.pearl.core.service.export.formatters.module.KitRequestFormatter;
-import bio.terra.pearl.core.service.export.formatters.module.ParticipantUserFormatter;
-import bio.terra.pearl.core.service.export.formatters.module.ProfileFormatter;
-import bio.terra.pearl.core.service.export.formatters.module.SurveyFormatter;
+import bio.terra.pearl.core.service.export.formatters.module.*;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
@@ -41,12 +32,9 @@ import bio.terra.pearl.core.service.workflow.EnrollmentService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskAssignDto;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import bio.terra.pearl.core.service.workflow.RegistrationService;
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-import com.opencsv.exceptions.CsvValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,12 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -184,30 +167,37 @@ public class EnrolleeImportService {
      */
     public List<Map<String, String>> generateImportMaps(InputStream in, ImportFileFormat fileFormat) {
         List<Map<String, String>> importMaps = new ArrayList<>();
-        char separator = TSV_DELIMITER;
-        if (fileFormat == ImportFileFormat.CSV) {
-            separator = CSV_DELIMITER;
+        Iterable<CSVRecord> parser;
+
+        try {
+            CSVFormat format = fileFormat == ImportFileFormat.TSV ? CSVFormat.TDF : CSVFormat.DEFAULT;
+
+            parser = format.builder().setRecordSeparator('\n').build().parse(new InputStreamReader(in));
+        } catch (IOException e) {
+            throw new RuntimeException("Error parsing input stream", e);
         }
-        CSVParser parser = new CSVParserBuilder()
-                .withSeparator(separator).build();
-        try (CSVReader csvReader = new CSVReaderBuilder(new InputStreamReader(in)).withCSVParser(parser).build()) {
-            String[] headers = csvReader.readNext();
-            String[] line;
-            while ((line = csvReader.readNext()) != null) {
-                if (line[0].equalsIgnoreCase("shortcode")) {
-                    //skip this sub header line
-                    continue;
-                }
-                Map<String, String> enrolleeMap = new HashMap<>();
-                for (int i = 0; i < line.length; i++) {
-                    enrolleeMap.put(headers[i], line[i]);
-                }
-                importMaps.add(enrolleeMap);
+
+        List<String> header = new ArrayList<>();
+        for (CSVRecord record : parser) {
+            if (record.getRecordNumber() == 1) {
+                header = record.toList();
+                // skip the header row
+                continue;
             }
-            return importMaps;
-        } catch (IOException | CsvValidationException e) {
-            throw new InternalServerException("error reading input stream", e);
+
+            if (record.size() != 0 && record.get(0).equalsIgnoreCase("shortcode")) {
+                // skip subheader row
+                continue;
+            }
+
+            Map<String, String> enrolleeMap = new HashMap<>();
+            for (int i = 0; i < record.size(); i++) {
+                enrolleeMap.put(header.get(i), record.get(i));
+            }
+            importMaps.add(enrolleeMap);
         }
+
+        return importMaps;
     }
 
     public Enrollee importEnrollee(String portalShortcode, String studyShortcode, StudyEnvironment studyEnv, Map<String, String> enrolleeMap, ExportOptions exportOptions, UUID adminId) {
@@ -314,6 +304,10 @@ public class EnrolleeImportService {
         profile.setId(registrationProfile.getId());
         profile.setMailingAddressId(registrationProfile.getMailingAddressId());
         profile.getMailingAddress().setId(registrationProfile.getMailingAddressId());
+        // if there's no explicit contact email, default to the username
+        if (profile.getContactEmail() == null) {
+            profile.setContactEmail(registrationProfile.getContactEmail());
+        }
         return profileService.updateWithMailingAddress(profile, auditInfo);
     }
 
@@ -324,7 +318,7 @@ public class EnrolleeImportService {
                                                          PortalParticipantUser ppUser,
                                                          Enrollee enrollee,
                                                          DataAuditInfo auditInfo) {
-        List<SurveyFormatter> surveyModules = enrolleeExportService.generateSurveyModules(exportOptions, studyEnv.getId());
+        List<SurveyFormatter> surveyModules = enrolleeExportService.generateSurveyModules(exportOptions, studyEnv.getId(), List.of());
         List<SurveyResponse> responses = new ArrayList<>();
         UUID portalId = portalService.findOneByShortcode(portalShortcode).orElseThrow().getId();
         for (SurveyFormatter formatter : surveyModules) {
@@ -349,13 +343,13 @@ public class EnrolleeImportService {
                     TaskType.SURVEY,
                     formatter.getModuleName(),
                     1,
-                    null,
-                    true,
+                    List.of(enrollee.getId()),
+                    false,
                     true);
 
             List<ParticipantTask> tasks = surveyTaskDispatcher.assign(assignDto, studyEnv.getId(),
                     new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "handleSurveyPublished.assignToExistingEnrollees")));
-            relatedTask = tasks.get(0);
+            relatedTask = tasks.getFirst();
         }
         // we're not worrying about dating the response yet
         return surveyResponseService.updateResponse(response, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "importSurveyResponse")),

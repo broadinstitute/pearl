@@ -3,9 +3,7 @@ import React from 'react'
 import { HtmlQuestion, PortalEnvironmentLanguage, Question } from '@juniper/ui-core'
 
 import { BaseFields } from './questions/BaseFields'
-import { CheckboxFields } from './questions/CheckboxFields'
 import { ChoicesList } from './questions/ChoicesList'
-import { OtherOptionFields } from './questions/OtherOptionFields'
 import { questionTypeDescriptions, questionTypeLabels } from './questions/questionTypes'
 import { TextFields } from './questions/TextFields'
 import { VisibilityFields } from './questions/VisibilityFields'
@@ -21,6 +19,7 @@ export type QuestionDesignerProps = {
   isNewQuestion: boolean
   readOnly: boolean
   showName: boolean
+  showQuestionTypeHeader?: boolean
   currentLanguage: PortalEnvironmentLanguage
   supportedLanguages: PortalEnvironmentLanguage[]
   onChange: (newValue: Question) => void
@@ -30,7 +29,7 @@ export type QuestionDesignerProps = {
 /** UI for editing a question in a form. */
 export const QuestionDesigner = (props: QuestionDesignerProps) => {
   const {
-    question, isNewQuestion, readOnly, showName,
+    question, isNewQuestion, readOnly, showName, showQuestionTypeHeader = true,
     onChange, addNextQuestion, currentLanguage, supportedLanguages
   } = props
 
@@ -46,7 +45,7 @@ export const QuestionDesigner = (props: QuestionDesignerProps) => {
           </Button>
         </div>}
       </div>
-      {!isTemplated && (
+      {!isTemplated && showQuestionTypeHeader && (
         <>
           <p className="fs-4">{questionTypeLabels[question.type]} question
             <InfoPopup content={questionTypeDescriptions[question.type]}/>
@@ -76,28 +75,12 @@ export const QuestionDesigner = (props: QuestionDesignerProps) => {
         <>
           {
             (question.type === 'checkbox' || question.type === 'dropdown' || question.type === 'radiogroup') && (
-              <>
-                <ChoicesList
-                  question={question}
-                  isNewQuestion={isNewQuestion}
-                  currentLanguage={currentLanguage}
-                  supportedLanguages={supportedLanguages}
-                  readOnly={readOnly}
-                  onChange={onChange}
-                />
-                <OtherOptionFields
-                  disabled={readOnly}
-                  question={question}
-                  onChange={onChange}
-                />
-              </>
-            )
-          }
-          {
-            question.type === 'checkbox' && (
-              <CheckboxFields
-                disabled={readOnly}
+              <ChoicesList
                 question={question}
+                isNewQuestion={isNewQuestion}
+                currentLanguage={currentLanguage}
+                supportedLanguages={supportedLanguages}
+                readOnly={readOnly}
                 onChange={onChange}
               />
             )

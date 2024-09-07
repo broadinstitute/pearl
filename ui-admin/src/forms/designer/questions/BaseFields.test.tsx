@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { userEvent } from '@testing-library/user-event'
 import React from 'react'
 
 import { Question } from '@juniper/ui-core'
@@ -22,7 +22,7 @@ describe('BaseFields', () => {
       currentLanguage={MOCK_ENGLISH_LANGUAGE} supportedLanguages={[]}/>)
 
     // Assert
-    const input = screen.getByLabelText('Question text*')
+    const input = screen.getByLabelText('Text*')
     expect((input as HTMLInputElement).value).toBe('What?')
   })
 
@@ -33,7 +33,7 @@ describe('BaseFields', () => {
       currentLanguage={MOCK_ENGLISH_LANGUAGE} supportedLanguages={[]}/>)
 
     // Act
-    const input = screen.getByLabelText('Question text*')
+    const input = screen.getByLabelText('Text*')
     fireEvent.change(input, { target: { value: 'Why?' } })
 
     // Assert

@@ -7,6 +7,7 @@ import bio.terra.pearl.core.dao.workflow.ParticipantTaskDao;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.EnrolleeRelation;
 import bio.terra.pearl.core.model.participant.WithdrawnEnrollee;
+import bio.terra.pearl.core.model.survey.Survey;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
@@ -21,22 +22,34 @@ public class WithdrawnEnrolleeDao extends BaseJdbiDao<WithdrawnEnrollee> {
   private final ParticipantTaskDao participantTaskDao;
   private final PreEnrollmentResponseDao preEnrollmentResponseDao;
   private final EnrolleeRelationDao enrolleeRelationDao;
-  private final FamilyDao familyDao;
+  private final FamilyEnrolleeDao familyEnrolleeDao;
 
   public WithdrawnEnrolleeDao(Jdbi jdbi, ProfileDao profileDao, SurveyResponseDao surveyResponseDao, ParticipantTaskDao participantTaskDao,
-                              PreEnrollmentResponseDao preEnrollmentResponseDao, EnrolleeRelationDao enrolleeRelationDao, FamilyDao familyDao) {
+                              PreEnrollmentResponseDao preEnrollmentResponseDao, EnrolleeRelationDao enrolleeRelationDao, FamilyEnrolleeDao familyEnrolleeDao) {
     super(jdbi);
     this.profileDao = profileDao;
     this.surveyResponseDao = surveyResponseDao;
     this.participantTaskDao = participantTaskDao;
     this.preEnrollmentResponseDao = preEnrollmentResponseDao;
     this.enrolleeRelationDao = enrolleeRelationDao;
-    this.familyDao = familyDao;
+    this.familyEnrolleeDao = familyEnrolleeDao;
   }
 
   @Override
   protected Class<WithdrawnEnrollee> getClazz() {
     return WithdrawnEnrollee.class;
+  }
+
+  /** exclude the enrolleeData, as that could be multiple MB of data */
+  public List<WithdrawnEnrollee> findByStudyEnvironmentIdNoData(UUID studyEnvironmentId) {
+    return jdbi.withHandle(handle ->
+            handle.createQuery("""
+                    select id, created_at, last_updated_at, shortcode, user_data from %s where study_environment_id = :studyEnvironmentId;
+                    """.formatted(tableName))
+                    .bind("studyEnvironmentId", studyEnvironmentId)
+                    .mapTo(clazz)
+                    .list()
+    );
   }
 
   public void deleteByStudyEnvironmentId(UUID studyEnvironmentId) {
@@ -66,7 +79,7 @@ public class WithdrawnEnrolleeDao extends BaseJdbiDao<WithdrawnEnrollee> {
     if (enrollee.getPreEnrollmentResponseId() != null) {
       enrollee.setPreEnrollmentResponse(preEnrollmentResponseDao.find(enrollee.getPreEnrollmentResponseId()).get());
     }
-    enrollee.setFamilies(familyDao.findByEnrolleeId(enrollee.getId()));
+    enrollee.setFamilyEnrollees(familyEnrolleeDao.findByFamilyId(enrollee.getId()));
     List<EnrolleeRelation> relationsByEnrollee = enrolleeRelationDao.findAllByEnrolleeId(enrollee.getId());
     List<EnrolleeRelation> relationsByTargetEnrollee = enrolleeRelationDao.findByTargetEnrolleeId(enrollee.getId());
     enrollee.getRelations().addAll(relationsByEnrollee);

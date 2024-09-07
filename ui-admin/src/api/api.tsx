@@ -198,6 +198,15 @@ export type DataImportItem = {
   lastUpdatedAt?: number
 }
 
+export type PortalEnvironmentChangeRecord = {
+  createdAt: number
+  portalId?: string
+  environmentName: string
+  adminUserId: string
+  portalEnvironmentChange: string
+  parsedChange?: PortalEnvironmentChange
+}
+
 export type PortalEnvironmentChange = {
   siteContentChange: VersionedEntityChange
   configChanges: ConfigChange[]
@@ -214,6 +223,7 @@ export type StudyEnvironmentChange = {
   preEnrollSurveyChanges: VersionedEntityChange
   surveyChanges: ListChange<StudyEnvironmentSurvey, VersionedConfigChange>
   triggerChanges: ListChange<Trigger, VersionedConfigChange>
+  kitTypeChanges: ListChange<KitType, VersionedConfigChange>
 }
 
 export type VersionedEntityChange = {
@@ -345,6 +355,12 @@ export type SearchValueTypeDefinition = {
   choices?: { stableId: string, text: string }[]
   allowMultiple: boolean
   allowOtherDescription: boolean
+}
+
+export type WithdrawnEnrollee = {
+  createdAt: number
+  shortcode: string
+  userData: string
 }
 
 let bearerToken: string | null = null
@@ -527,6 +543,12 @@ export default {
     return await this.processJsonResponse(response)
   },
 
+  async getStudyEnvSurveys(portalShortcode: string, stableId: string, version: number): Promise<Survey> {
+    const url = `${API_ROOT}/portals/v1/${portalShortcode}/surveys/${stableId}/${version}/studyEnvSurveys`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
   async createNewSurvey(portalShortcode: string, survey: Survey): Promise<Survey> {
     const url = `${API_ROOT}/portals/v1/${portalShortcode}/surveys`
 
@@ -558,10 +580,10 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async replaceConfiguredSurvey(portalShortcode: string, studyShortcode: string, environmentName: string, oldId: string,
-    configuredSurvey: StudyEnvironmentSurvey): Promise<StudyEnvironmentSurvey> {
+  async replaceConfiguredSurvey(portalShortcode: string, studyShortcode: string, environmentName: string,
+    configuredSurvey: { surveyId: string, studyEnvironmentId: string }): Promise<StudyEnvironmentSurvey> {
     const url = `${baseStudyEnvUrl(portalShortcode, studyShortcode, environmentName)}`
-      + `/configuredSurveys/${oldId}/replace`
+      + `/configuredSurveys/replace`
     const response = await fetch(url, {
       method: 'POST',
       headers: this.getInitHeaders(),
@@ -646,14 +668,14 @@ export default {
     return await this.processResponse(response)
   },
 
-  async updateConfiguredSurvey(portalShortcode: string, studyShortcode: string, envName: string,
-    configuredSurvey: StudyEnvironmentSurvey): Promise<StudyEnvironmentSurvey> {
-    const url = `${baseStudyEnvUrl(portalShortcode, studyShortcode, envName)}/configuredSurveys/${configuredSurvey.id}`
+  async updateConfiguredSurveys(portalShortcode: string, studyShortcode: string, envName: string,
+    configuredSurveys: StudyEnvironmentSurvey[]): Promise<StudyEnvironmentSurvey[]> {
+    const url = `${baseStudyEnvUrl(portalShortcode, studyShortcode, envName)}/configuredSurveys`
 
     const response = await fetch(url, {
       method: 'PATCH',
       headers: this.getInitHeaders(),
-      body: JSON.stringify(configuredSurvey)
+      body: JSON.stringify(configuredSurveys)
     })
     return await this.processJsonResponse(response)
   },
@@ -774,6 +796,12 @@ export default {
     const url = `${baseStudyEnvUrl(portalShortcode, studyShortcode, envName)
     }/enrollees/${enrolleeShortcode}/withdraw`
     const response = await fetch(url, { method: 'POST', headers: this.getInitHeaders() })
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchWithdrawnEnrollees(studyEnvParams: StudyEnvParams): Promise<WithdrawnEnrollee[]> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/withdrawnEnrollees`
+    const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },
 
@@ -959,6 +987,22 @@ export default {
 
   async fetchKitTypes(studyEnvParams: StudyEnvParams): Promise<KitType[]> {
     const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/kitTypes`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async updateKitTypes(studyEnvParams: StudyEnvParams, kitTypes: string[]): Promise<string> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/kitTypes`
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: this.getInitHeaders(),
+      body: JSON.stringify(kitTypes)
+    })
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchAllowedKitTypes(studyEnvParams: StudyEnvParams): Promise<KitType[]> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/allowedKitTypes`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },
@@ -1290,9 +1334,9 @@ export default {
   },
 
   async getFamily(
-    portalShortcode: string, studyShortcode: string, environmentName: EnvironmentName, familyShortcode: string
+    portalShortcode: string, studyShortcode: string, environmentName: EnvironmentName, familyShortcodeOrId: string
   ): Promise<Family> {
-    const url = `${baseStudyEnvUrl(portalShortcode, studyShortcode, environmentName)}/families/${familyShortcode}`
+    const url = `${baseStudyEnvUrl(portalShortcode, studyShortcode, environmentName)}/families/${familyShortcodeOrId}`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },
@@ -1353,6 +1397,39 @@ export default {
     return await this.processJsonResponse(result)
   },
 
+  async createFamily(
+    portalShortcode: string, studyShortcode: string, environmentName: EnvironmentName,
+    family: Family, justification: string
+  ): Promise<Family> {
+    const params = queryString.stringify({ justification })
+    const url = `${
+      baseStudyEnvUrl(portalShortcode, studyShortcode, environmentName)
+    }/families?${params}`
+
+    const result = await fetch(url, {
+      method: 'POST',
+      headers: this.getInitHeaders(),
+      body: JSON.stringify(family)
+    })
+    return await this.processJsonResponse(result)
+  },
+
+  async deleteFamily(
+    portalShortcode: string, studyShortcode: string, environmentName: EnvironmentName,
+    familyShortcode: string, justification: string
+  ): Promise<Response> {
+    const params = queryString.stringify({ justification })
+    const url = `${
+      baseStudyEnvUrl(portalShortcode, studyShortcode, environmentName)
+    }/families/${familyShortcode}?${params}`
+
+    const result = await fetch(url, {
+      method: 'DELETE',
+      headers: this.getInitHeaders()
+    })
+    return await this.processResponse(result)
+  },
+
   async fetchFamilyChangeRecords(
     portalShortcode: string, studyShortcode: string, environmentName: EnvironmentName,
     familyShortcode: string, modelName?: string
@@ -1368,19 +1445,26 @@ export default {
 
   async fetchEnvDiff(portalShortcode: string, sourceEnvName: string, destEnvName: string):
     Promise<PortalEnvironmentChange> {
-    const url = `${basePortalEnvUrl(portalShortcode, destEnvName)}/diff?sourceEnv=${sourceEnvName}`
+    const url = `${basePortalUrl(portalShortcode)}/publish/diff/${sourceEnvName}/${destEnvName}`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },
 
   async applyEnvChanges(portalShortcode: string, destEnvName: string, changes: PortalEnvironmentChange):
     Promise<PortalEnvironment> {
-    const url = `${basePortalEnvUrl(portalShortcode, destEnvName)}/diff/apply`
+    const url = `${basePortalUrl(portalShortcode)}/publish/apply/${destEnvName}`
     const response = await fetch(url, {
       method: 'POST',
       headers: this.getInitHeaders(),
       body: JSON.stringify(changes)
     })
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchPortalEnvChangeRecords(portalShortcode: string):
+    Promise<PortalEnvironmentChangeRecord[]> {
+    const url = `${basePortalUrl(portalShortcode)}/publish/changeRecords`
+    const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },
 
@@ -1441,6 +1525,17 @@ export default {
     return await this.processJsonResponse(response)
   },
 
+  async populateEnrollee(studyEnvParams: StudyEnvParams, popType: string, username?: string) {
+    const paramString = queryString.stringify({ username, popType })
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/enrollee/populate?${paramString}`
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getInitHeaders()
+    })
+    return await this.processJsonResponse(response)
+  },
+
   async populateSiteContent(fileName: string, overwrite: boolean, portalShortcode: string) {
     const url = `${basePopulateUrl()}/siteContent/${portalShortcode}?filePathName=${fileName}&overwrite=${overwrite}`
     const response = await fetch(url, {
@@ -1466,6 +1561,13 @@ export default {
       headers: this.getInitHeaders(),
       body: JSON.stringify(params)
     })
+    return await this.processJsonResponse(response)
+  },
+
+  async loadLogEvents(eventTypes: string[], days: string, limit: number = 1000) {
+    const params = queryString.stringify({ eventTypes: eventTypes.join(','), days, limit })
+    const url = `${API_ROOT}/logEvents?${params}`
+    const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },
 

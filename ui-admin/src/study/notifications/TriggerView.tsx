@@ -1,21 +1,39 @@
 import React, { useState } from 'react'
-import { StudyEnvContextT, triggerPath } from '../StudyEnvironmentRouter'
-import { useNavigate, useParams } from 'react-router-dom'
+
+import {
+  StudyEnvContextT,
+  triggerPath
+} from '../StudyEnvironmentRouter'
+import {
+  useNavigate,
+  useParams
+} from 'react-router-dom'
 import Select from 'react-select'
 import TestEmailSender from './TestEmailSender'
 import Api, { Trigger } from 'api/api'
 import { successNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
-import { doApiLoad, useLoadingEffect } from 'api/api-utils'
+import {
+  doApiLoad,
+  useLoadingEffect
+} from 'api/api-utils'
 import { LoadedPortalContextT } from 'portal/PortalProvider'
 import LoadingSpinner from 'util/LoadingSpinner'
 import EmailTemplateEditor from './EmailTemplateEditor'
 import { Modal } from 'react-bootstrap'
-import { TriggerDeliveryType, TriggerScope, ParticipantTaskStatus } from '@juniper/ui-core'
+import {
+  ParticipantTaskStatus,
+  TriggerDeliveryType,
+  TriggerScope
+} from '@juniper/ui-core'
 import InfoPopup from 'components/forms/InfoPopup'
 import { TextInput } from 'components/forms/TextInput'
-import TriggerBaseForm, { isAction, isNotification, isTaskReminder } from './TriggerBaseForm'
-
+import TriggerBaseForm, {
+  isAction,
+  isAdminNotification,
+  isNotification,
+  isTaskReminder
+} from './TriggerBaseForm'
 
 const deliveryTypeOptions: { label: string, value: TriggerDeliveryType}[] = [
   { label: 'Email', value: 'EMAIL' }
@@ -113,7 +131,7 @@ export default function TriggerView({ studyEnvContext, portalContext }:
         </div>
       </div>
       }
-      { isNotification(workingTrigger) && <div>
+      {(isNotification(workingTrigger) || isAdminNotification(workingTrigger)) && <div>
         <div>
           <label className="form-label">Delivery
             <Select options={deliveryTypeOptions} isDisabled={true}
@@ -168,9 +186,38 @@ export default function TriggerView({ studyEnvContext, portalContext }:
         </div>
       </div> }
 
-      <div className="d-flex justify-content-center">
+      { isAction(workingTrigger) && <div className="mb-4">
+        <div>
+          <label className="form-label mt-3" htmlFor="triggerScope">Action scope</label> <InfoPopup content={
+            'Whether the action is confined to the study, or can impact tasks in the portal.'}/>
+          <Select options={scopeOptions} inputId="triggerScope"
+            value={scopeOptions.find(opt => opt.value === workingTrigger?.actionScope)}
+            onChange={opt =>
+              setWorkingTrigger({ ...workingTrigger, actionScope: opt?.value ?? scopeOptions[0].value })}
+          />
+        </div>
+        <div>
+          <label className="form-label mt-3" htmlFor="updateToStatus">Updated status</label> <InfoPopup content={
+            'The status the task will be updated to when the trigger is activated.'}/>
+          <Select options={statusOptions} inputId="updateToStatus"
+            value={statusOptions.find(opt => opt.value === workingTrigger?.statusToUpdateTo)}
+            onChange={opt =>
+              setWorkingTrigger({ ...workingTrigger, statusToUpdateTo: opt?.value ?? statusOptions[0].value })}
+          />
+        </div>
+        <div>
+          <label className="form-label mt-3" htmlFor="updateTaskTargetStableId">Target stable id </label>
+          <InfoPopup content={<span>
+            the stable id of the task to update. For survey tasks, this is the survey stable id.
+          </span>}/>
+          <TextInput value={workingTrigger.updateTaskTargetStableId} id="updateTaskTargetStableId"
+            onChange={v => setWorkingTrigger({ ...workingTrigger, updateTaskTargetStableId: v })}/>
+        </div>
+      </div> }
+
+      <div className="d-flex justify-content-center mt-2">
         <button type="button" className="btn btn-primary" onClick={saveConfig}>Save</button>
-        { isNotification(workingTrigger) &&
+        {(isNotification(workingTrigger) || isAdminNotification(workingTrigger)) &&
           <button type="button" className="btn btn-secondary ms-4"
             onClick={() => setShowSendModal(true)}>Send test email
           </button> }
@@ -197,7 +244,7 @@ export default function TriggerView({ studyEnvContext, portalContext }:
         </Modal>
       )}
     </form> }
-    { isNotification(workingTrigger) && <div>
+    {(isNotification(workingTrigger) || isAdminNotification(workingTrigger)) && <div>
       Note the preview above does not guarantee how the email will appear in all browsers and clients. To test this,
       use the &apos;Send test email&apos; button to send test emails to a given email address.
     </div> }

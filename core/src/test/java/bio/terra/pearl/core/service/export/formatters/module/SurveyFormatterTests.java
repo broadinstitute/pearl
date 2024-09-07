@@ -33,7 +33,7 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
                 .questionType("text")
                 .exportOrder(1)
                 .build();
-        SurveyFormatter moduleFormatter = new SurveyFormatter(new ExportOptions(), "oh_surveyA", List.of(testSurvey), List.of(questionDef), objectMapper);
+        SurveyFormatter moduleFormatter = new SurveyFormatter(new ExportOptions(), "oh_surveyA", List.of(testSurvey), List.of(questionDef), List.of(), objectMapper);
         SurveyResponse testResponse = SurveyResponse.builder()
                 .id(UUID.randomUUID())
                 .surveyId(testSurvey.getId()).build();
@@ -162,6 +162,7 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
         assertThat(SurveyFormatter.stripStudyAndSurveyPrefixes("oh_oh_famHx_someQuestion_suffix"), equalTo("someQuestion_suffix"));
         assertThat(SurveyFormatter.stripStudyAndSurveyPrefixes("nonStandardPrefix_someQuestion"), equalTo("nonStandardPrefix_someQuestion"));
         assertThat(SurveyFormatter.stripStudyAndSurveyPrefixes("someQuestion"), equalTo("someQuestion"));
+        assertThat(SurveyFormatter.stripStudyAndSurveyPrefixes("some_question_that_just_has_underscores"), equalTo("some_question_that_just_has_underscores"));
     }
 
     @Test
@@ -180,7 +181,7 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
                 .questionType("matrix")
                 .exportOrder(1)
                 .build();
-        SurveyFormatter moduleFormatter = new SurveyFormatter(new ExportOptions(), "oh_surveyA", List.of(testSurvey), List.of(questionDef), objectMapper);
+        SurveyFormatter moduleFormatter = new SurveyFormatter(new ExportOptions(), "oh_surveyA", List.of(testSurvey), List.of(questionDef), List.of(), objectMapper);
         String value = moduleFormatter.formatObjectValue(Answer.builder().objectValue("d[f}asdfja").build(), null, false, new ObjectMapper());
         assertThat(value, equalTo("d[f}asdfja"));
     }
@@ -195,7 +196,7 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
                 .stableId("oh_surveyA")
                 .version(1)
                 .build();
-        SurveyFormatter moduleFormatter = new SurveyFormatter(exportOptions, "oh_surveyA", List.of(testSurvey), List.of(question), objectMapper);
+        SurveyFormatter moduleFormatter = new SurveyFormatter(exportOptions, "oh_surveyA", List.of(testSurvey), List.of(question), List.of(), objectMapper);
         AnswerItemFormatter itemFormatter = (AnswerItemFormatter) moduleFormatter.getItemFormatters().stream().filter(
                         itemInfo -> itemInfo instanceof AnswerItemFormatter)
                 .findFirst().orElseThrow(() -> new IllegalStateException("formatter did not produce an AnswerItemFormatter"));

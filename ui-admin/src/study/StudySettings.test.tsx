@@ -1,20 +1,30 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 
 import { StudyEnvConfigView } from './StudySettings'
 import { mockPortalContext, mockStudyEnvContext } from 'test-utils/mocking-utils'
 import { MockSuperuserProvider } from 'test-utils/user-mocking-utils'
-import userEvent from '@testing-library/user-event'
+import { userEvent } from '@testing-library/user-event'
 import { EnvironmentName } from '@juniper/ui-core'
+
+jest.mock('api/api', () => ({
+  ...jest.requireActual('api/api'),
+  fetchAllowedKitTypes: jest.fn().mockResolvedValue([]),
+  fetchKitTypes: jest.fn().mockResolvedValue([])
+}))
 
 test('renders a study env. config', async () => {
   const portalContext = mockPortalContext()
   const studyEnvContext = mockStudyEnvContext()
   const expectedConfig = studyEnvContext.currentEnv.studyEnvironmentConfig
-  render(
-    <MockSuperuserProvider>
-      <StudyEnvConfigView portalContext={portalContext} studyEnvContext={studyEnvContext}/>
-    </MockSuperuserProvider>)
+
+  await act(async () => {
+    render(
+      <MockSuperuserProvider>
+        <StudyEnvConfigView portalContext={portalContext} studyEnvContext={studyEnvContext}/>
+      </MockSuperuserProvider>
+    )
+  })
 
   expect(screen.getByLabelText('password')).toHaveValue(expectedConfig.password)
   expect((screen.getByLabelText('password protected') as HTMLInputElement).checked)
@@ -60,4 +70,3 @@ test('updates a study env. config', async () => {
   expect(input).toHaveValue('newPass')
   expect(screen.getByText('Save study config')).toHaveAttribute('aria-disabled', 'false')
 })
-

@@ -4,6 +4,8 @@ import bio.terra.pearl.core.dao.publishing.PortalEnvironmentChangeRecordDao;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.dashboard.AlertTrigger;
 import bio.terra.pearl.core.model.dashboard.ParticipantDashboardAlert;
+import bio.terra.pearl.core.model.kit.KitType;
+import bio.terra.pearl.core.model.kit.StudyEnvironmentKitType;
 import bio.terra.pearl.core.model.notification.EmailTemplate;
 import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
@@ -14,6 +16,7 @@ import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
+import bio.terra.pearl.core.service.kit.StudyEnvironmentKitTypeService;
 import bio.terra.pearl.core.service.notification.TriggerService;
 import bio.terra.pearl.core.service.portal.PortalDashboardConfigService;
 import bio.terra.pearl.core.service.portal.PortalEnvironmentConfigService;
@@ -43,6 +46,7 @@ public class PortalDiffService {
     private final StudyEnvironmentService studyEnvironmentService;
     private final StudyService studyService;
     private final PortalEnvironmentLanguageService portalEnvironmentLanguageService;
+    private final StudyEnvironmentKitTypeService studyEnvironmentKitTypeService;
 
     public PortalDiffService(PortalEnvironmentService portalEnvService,
                              PortalEnvironmentConfigService portalEnvironmentConfigService,
@@ -52,7 +56,7 @@ public class PortalDiffService {
                              ObjectMapper objectMapper,
                              PortalEnvironmentChangeRecordDao portalEnvironmentChangeRecordDao,
                              StudyEnvironmentService studyEnvironmentService, StudyService studyService,
-                             PortalEnvironmentLanguageService portalEnvironmentLanguageService) {
+                             PortalEnvironmentLanguageService portalEnvironmentLanguageService, StudyEnvironmentKitTypeService studyEnvironmentKitTypeService) {
         this.portalEnvService = portalEnvService;
         this.portalEnvironmentConfigService = portalEnvironmentConfigService;
         this.siteContentService = siteContentService;
@@ -64,15 +68,16 @@ public class PortalDiffService {
         this.studyEnvironmentService = studyEnvironmentService;
         this.studyService = studyService;
         this.portalEnvironmentLanguageService = portalEnvironmentLanguageService;
+        this.studyEnvironmentKitTypeService = studyEnvironmentKitTypeService;
     }
 
-    public PortalEnvironmentChange diffPortalEnvs(String shortcode, EnvironmentName source, EnvironmentName dest) throws Exception {
+    public PortalEnvironmentChange diffPortalEnvs(String shortcode, EnvironmentName source, EnvironmentName dest) {
         PortalEnvironment sourceEnv = loadPortalEnvForProcessing(shortcode, source);
         PortalEnvironment destEnv = loadPortalEnvForProcessing(shortcode, dest);
         return diffPortalEnvs(sourceEnv, destEnv);
     }
 
-    public PortalEnvironmentChange diffPortalEnvs(PortalEnvironment sourceEnv, PortalEnvironment destEnv) throws Exception {
+    public PortalEnvironmentChange diffPortalEnvs(PortalEnvironment sourceEnv, PortalEnvironment destEnv) {
         VersionedEntityChange<Survey> preRegRecord = new VersionedEntityChange<Survey>(sourceEnv.getPreRegSurvey(), destEnv.getPreRegSurvey());
         VersionedEntityChange<SiteContent> siteContentRecord = new VersionedEntityChange<SiteContent>(sourceEnv.getSiteContent(), destEnv.getSiteContent());
         List<ConfigChange> envConfigChanges = ConfigChange.allChanges(sourceEnv.getPortalEnvironmentConfig(),
@@ -106,7 +111,7 @@ public class PortalDiffService {
 
     protected List<ParticipantDashboardAlertChange> diffAlertLists(
             List<ParticipantDashboardAlert> sourceAlerts,
-            List<ParticipantDashboardAlert> destAlerts) throws ReflectiveOperationException, IntrospectionException {
+            List<ParticipantDashboardAlert> destAlerts) {
         Map<AlertTrigger, ParticipantDashboardAlert> unmatchedDestAlerts = new HashMap<>();
         for (ParticipantDashboardAlert destAlert : destAlerts) {
             unmatchedDestAlerts.put(destAlert.getTrigger(), destAlert);
@@ -152,13 +157,13 @@ public class PortalDiffService {
     }
 
 
-    public StudyEnvironmentChange diffStudyEnvs(String studyShortcode, EnvironmentName source, EnvironmentName dest) throws Exception {
+    public StudyEnvironmentChange diffStudyEnvs(String studyShortcode, EnvironmentName source, EnvironmentName dest) {
         StudyEnvironment sourceEnv = loadStudyEnvForProcessing(studyShortcode, source);
         StudyEnvironment destEnv = loadStudyEnvForProcessing(studyShortcode, dest);
         return diffStudyEnvs(studyShortcode, sourceEnv, destEnv);
     }
 
-    public StudyEnvironmentChange diffStudyEnvs(String studyShortcode, StudyEnvironment sourceEnv, StudyEnvironment destEnv) throws Exception {
+    public StudyEnvironmentChange diffStudyEnvs(String studyShortcode, StudyEnvironment sourceEnv, StudyEnvironment destEnv) {
         List<ConfigChange> envConfigChanges = ConfigChange.allChanges(
                 sourceEnv.getStudyEnvironmentConfig(),
                 destEnv.getStudyEnvironmentConfig(),
@@ -168,12 +173,14 @@ public class PortalDiffService {
                 sourceEnv.getConfiguredSurveys(),
                 destEnv.getConfiguredSurveys(),
                 Publishable.CONFIG_IGNORE_PROPS);
+        ListChange<KitType, KitType> kitTypeChanges = diffKitTypes(sourceEnv.getKitTypes(), destEnv.getKitTypes());
 
 
         StudyEnvironmentChange change = StudyEnvironmentChange.builder()
                 .studyShortcode(studyShortcode)
                 .configChanges(envConfigChanges)
                 .preEnrollSurveyChanges(preEnrollChange)
+                .kitTypeChanges(kitTypeChanges)
                 .surveyChanges(surveyChanges).build();
         triggerService.updateDiff(sourceEnv, destEnv, change);
         return change;
@@ -196,8 +203,27 @@ public class PortalDiffService {
         return new ListChange<>(addedLangs, unmatchedDestLangs, Collections.emptyList());
     }
 
+    public ListChange<KitType, KitType> diffKitTypes(List<KitType> sourceKitTypes, List<KitType> destKitTypes) {
+        List<KitType> unmatchedDestKitTypes = new ArrayList<>(destKitTypes);
+        List<KitType> addedKitTypes = new ArrayList<>();
+        for (KitType sourceKitType : sourceKitTypes) {
+            KitType matchedKitType = unmatchedDestKitTypes.stream().filter(
+                    destKitType -> destKitType.getName().equals(sourceKitType.getName()))
+                    .findAny().orElse(null);
+            if (matchedKitType == null) {
+                addedKitTypes.add(sourceKitType);
+            } else {
+                unmatchedDestKitTypes.remove(matchedKitType);
+            }
+        }
+        return new ListChange<>(addedKitTypes, unmatchedDestKitTypes, Collections.emptyList());
+    }
+
     public StudyEnvironment loadStudyEnvForProcessing(String shortcode, EnvironmentName envName) {
         StudyEnvironment studyEnvironment = studyEnvironmentService.findByStudy(shortcode, envName).get();
+        List<KitType> kitTypes = studyEnvironmentKitTypeService.findKitTypesByStudyEnvironmentId(studyEnvironment.getId());
+
+        studyEnvironment.setKitTypes(kitTypes);
         return studyEnvironmentService.loadWithAllContent(studyEnvironment);
     }
 

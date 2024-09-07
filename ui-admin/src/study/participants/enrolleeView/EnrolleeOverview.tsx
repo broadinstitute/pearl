@@ -18,6 +18,7 @@ import {
 } from 'components/InfoCard'
 import { useLoadingEffect } from 'api/api-utils'
 import LoadingSpinner from 'util/LoadingSpinner'
+import Families from 'study/participants/Families'
 
 /** Shows minimal identifying information, and then kits and notes */
 export default function EnrolleeOverview({ enrollee, studyEnvContext, onUpdate }:
@@ -33,7 +34,9 @@ export default function EnrolleeOverview({ enrollee, studyEnvContext, onUpdate }
     setRelations(relations)
   })
 
-  return <div>
+  const familyLinkageEnabled = studyEnvContext.currentEnv.studyEnvironmentConfig.enableFamilyLinkage
+
+  return <>
     <InfoCard>
       <InfoCardHeader>
         <InfoCardTitle title={'Basic Information'}/>
@@ -55,7 +58,7 @@ export default function EnrolleeOverview({ enrollee, studyEnvContext, onUpdate }
       relations
         .filter(relation => relation.relationshipType === 'PROXY')
         .map(relation => {
-          return <InfoCard>
+          return <InfoCard key={relation.id}>
             <InfoCardHeader>
               <InfoCardTitle title={'Proxy'}/>
             </InfoCardHeader>
@@ -74,15 +77,20 @@ export default function EnrolleeOverview({ enrollee, studyEnvContext, onUpdate }
           </InfoCard>
         })}
 
-
     <div>
       <ParticipantNotesView notes={enrollee.participantNotes} enrollee={enrollee}
         studyEnvContext={studyEnvContext} onUpdate={onUpdate}/>
     </div>
 
+    {
+      familyLinkageEnabled && <div>
+        <Families enrollee={enrollee} studyEnvContext={studyEnvContext} onUpdate={onUpdate}/>
+      </div>
+    }
+
 
     <KitRequests enrollee={enrollee} studyEnvContext={studyEnvContext} onUpdate={onUpdate}/>
-  </div>
+  </>
 }
 
 const formatName = (profile: Profile | undefined) => {

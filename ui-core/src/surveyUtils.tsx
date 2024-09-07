@@ -1,11 +1,25 @@
 import './surveyjs'
 
-import { cloneDeep, get, set } from 'lodash'
+import {
+  cloneDeep,
+  get,
+  isNil,
+  set
+} from 'lodash'
 import { SurveyModel } from 'survey-core'
 
-import { Answer, FormContent, FormElement, Survey, VersionedForm } from './types/forms'
+import {
+  Answer,
+  FormContent,
+  FormElement,
+  Survey,
+  VersionedForm
+} from './types/forms'
 import { useSearchParams } from 'react-router-dom'
-import React, { useEffect, useState } from 'react'
+import React, {
+  useEffect,
+  useState
+} from 'react'
 import _union from 'lodash/union'
 import _keys from 'lodash/keys'
 import _isEqual from 'lodash/isEqual'
@@ -83,13 +97,24 @@ export const surveyJSModelFromForm = (form: VersionedForm): SurveyModel => {
 
 /** convert a list of answers and resumeData into the resume data format surveyJs expects */
 export function makeSurveyJsData(resumeData: string | undefined,
-  answers: Answer[] | undefined, userId: string | undefined):
+  answers: Answer[] | undefined, userId: string | undefined, alertFn?: (msg: React.ReactNode) => void):
   SurveyJsResumeData {
   answers = answers ?? []
   const answerHash = answers.reduce(
     (hash: Record<string, SurveyJsValueType>, answer: Answer) => {
       if (answer.objectValue) {
-        hash[answer.questionStableId] = JSON.parse(answer.objectValue)
+        try {
+          hash[answer.questionStableId] = JSON.parse(answer.objectValue)
+        } catch (e) {
+          if (alertFn) {
+            alertFn(<div className="text-danger">
+              Parse error <br/>
+              question {answer.questionStableId}<br/>
+              value: {answer.objectValue} <br/>
+              Saving this survey may overwrite this value.
+            </div>)
+          }
+        }
       } else {
         hash[answer.questionStableId] = answer.stringValue ?? answer.numberValue ?? null
       }
@@ -143,6 +168,8 @@ export function getSurveyJsAnswerList(surveyJSModel: SurveyModel, selectedLangua
   if (!surveyJSModel.data) {
     return []
   }
+
+
   return Object.entries(surveyJSModel.data)
     // don't make answers for the descriptive sections
     .filter(([key]) => {
@@ -152,8 +179,11 @@ export function getSurveyJsAnswerList(surveyJSModel: SurveyModel, selectedLangua
 }
 
 /** return an Answer for the given value.  This should be updated to take some sort of questionType/dataType param */
-export function makeAnswer(value: SurveyJsValueType, questionStableId: string,
-  surveyJsData: Record<string, SurveyJsValueType>, viewedLanguage?: string): Answer {
+export function makeAnswer(
+  value: SurveyJsValueType,
+  questionStableId: string,
+  surveyJsData: Record<string, SurveyJsValueType>,
+  viewedLanguage?: string): Answer {
   const answer: Answer = { questionStableId }
   if (viewedLanguage) {
     answer.viewedLanguage = viewedLanguage
@@ -197,6 +227,7 @@ export function getDataWithCalculatedValues(model: SurveyModel) {
       calculatedHash[val.name] = val.value
     }
   })
+
   return {
     ...model.data,
     ...calculatedHash
@@ -320,6 +351,7 @@ export function useSurveyJSModel(
     newSurveyModel.currentPageNo = pageNumber
     newSurveyModel.setVariable('profile', profile)
     newSurveyModel.setVariable('proxyProfile', proxyProfile)
+    newSurveyModel.setVariable('isGovernedUser', !isNil(proxyProfile))
     newSurveyModel.setVariable('portalEnvironmentName', envName)
     Object.keys(extraVariables).forEach(key => {
       newSurveyModel.setVariable(key, extraVariables[key])

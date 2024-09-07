@@ -1,13 +1,10 @@
 package bio.terra.pearl.core.service.notification.email;
 
-import bio.terra.pearl.core.model.notification.EmailTemplate;
-import bio.terra.pearl.core.model.notification.LocalizedEmailTemplate;
-import bio.terra.pearl.core.model.notification.Notification;
-import bio.terra.pearl.core.model.notification.NotificationDeliveryStatus;
-import bio.terra.pearl.core.model.notification.Trigger;
+import bio.terra.pearl.core.model.notification.*;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.Study;
+import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.notification.NotificationContextInfo;
 import bio.terra.pearl.core.service.notification.NotificationSender;
 import bio.terra.pearl.core.service.notification.NotificationService;
@@ -19,11 +16,14 @@ import bio.terra.pearl.core.service.study.StudyService;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
 import com.sendgrid.Mail;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
-import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -75,12 +75,15 @@ public class EnrolleeEmailService implements NotificationSender {
                         ruleData.getEnrollee().getShortcode(), ruleData.getProfile().getPreferredLanguage());
             }
         }
+        // now save/update the Notification object
         if (notification.getId() != null) {
             // the notification might have been saved, but in a transaction not-yet completed (if, for example,
             // study enrollment transaction is taking a long time). So retry the update if it fails
             RetryTemplate retryTemplate = RetryTemplate.defaultInstance();
-            FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
-            backOffPolicy.setBackOffPeriod(2000);  // this will retry once every two seconds for 3 tries
+            // exponential backoff with a max interval of 32 seconds, so we'll make retry attempts after 4, 8, 16, and 32 seconds
+            ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+            backOffPolicy.setInitialInterval(4000);
+            backOffPolicy.setMaxInterval(32000);
             retryTemplate.setBackOffPolicy(backOffPolicy);
             try {
                 retryTemplate.execute(arg -> notificationService.update(notification));
@@ -147,11 +150,19 @@ public class EnrolleeEmailService implements NotificationSender {
     }
 
     public boolean shouldSendEmail(Trigger config,
-                                   EnrolleeContext ruleData,
+                                   EnrolleeContext enrolleeContext,
                                    NotificationContextInfo contextInfo) {
-        if (ruleData.getProfile() != null && ruleData.getProfile().isDoNotEmail()) {
+        if (enrolleeContext.getProfile() == null || StringUtils.isBlank(enrolleeContext.getProfile().getContactEmail())) {
+            return false;  // no address to send email to
+        }
+        if (enrolleeContext.getProfile().isDoNotEmail()) {
             log.info("skipping email, enrollee {} is doNotEmail: triggerId: {}, portalEnv: {}",
-                    ruleData.getEnrollee().getShortcode(), config.getId(), config.getPortalEnvironmentId());
+                    enrolleeContext.getEnrollee().getShortcode(), config.getId(), config.getPortalEnvironmentId());
+            return false;
+        }
+        if (enrolleeContext.getProfile().isDoNotEmailSolicit() && Objects.nonNull(config.getTaskType()) && config.getTaskType().equals(TaskType.OUTREACH)) {
+            log.info("skipping email, enrollee {} is doNotEmailSolicit: triggerId: {}, portalEnv: {}",
+                    enrolleeContext.getEnrollee().getShortcode(), config.getId(), config.getPortalEnvironmentId());
             return false;
         }
         if (config.getEmailTemplateId() == null) {

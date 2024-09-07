@@ -118,6 +118,13 @@ export type FormContent = {
   title: I18nSurveyElement
   pages: FormContentPage[]
   questionTemplates?: Question[]
+  calculatedValues?: CalculatedValue[]
+}
+
+export type CalculatedValue = {
+  name: string,
+  expression: string,
+  includeIntoResult: boolean
 }
 
 type BaseElement = {
@@ -142,6 +149,7 @@ export type I18nSurveyElement = string | I18nMap
 export type FormElement = FormPanel | HtmlElement | Question
 
 export type FormPanel = BaseElement & {
+  title: string
   type: 'panel'
   elements: (HtmlElement | Question)[]
 }

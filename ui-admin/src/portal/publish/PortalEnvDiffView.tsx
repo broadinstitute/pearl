@@ -10,12 +10,17 @@ import {
   ConfigChangeListView,
   ConfigChanges,
   renderNotificationConfig,
-  renderPortalLanguage,
+  renderPortalLanguage, valuePresent,
   VersionChangeView
 } from './diffComponents'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import _cloneDeep from 'lodash/cloneDeep'
+import { userHasPermission, useUser } from 'user/UserProvider'
+import { Button } from 'components/forms/Button'
+import { isEmpty } from 'lodash'
+import Modal from 'react-bootstrap/Modal'
+import LoadingSpinner from 'util/LoadingSpinner'
 
 export const emptyChangeSet: PortalEnvironmentChange = {
   siteContentChange: { changed: false },
@@ -32,7 +37,8 @@ export const emptyStudyEnvChange: StudyEnvironmentChange = {
   configChanges: [],
   preEnrollSurveyChanges: { changed: false },
   surveyChanges: { addedItems: [], removedItems: [], changedItems: [] },
-  triggerChanges: { addedItems: [], removedItems: [], changedItems: [] }
+  triggerChanges: { addedItems: [], removedItems: [], changedItems: [] },
+  kitTypeChanges: { addedItems: [], removedItems: [], changedItems: [] }
 }
 
 const EXCLUDED_PROPS = ['participantHostname']
@@ -96,7 +102,8 @@ type EnvironmentDiffProps = {
 export default function PortalEnvDiffView(
   { changeSet, destEnvName, applyChanges, sourceEnvName, portal }: EnvironmentDiffProps) {
   const [selectedChanges, setSelectedChanges] = useState<PortalEnvironmentChange>(getDefaultPortalEnvChanges(changeSet))
-
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const { user } = useUser()
   const updateSelectedStudyEnvChanges = (update: StudyEnvironmentChange) => {
     const matchedIndex = selectedChanges.studyEnvChanges
       .findIndex(change => change.studyShortcode === update.studyShortcode)
@@ -114,7 +121,9 @@ export default function PortalEnvDiffView(
       <FontAwesomeIcon icon={faArrowRight} className="fa-sm mx-2"/>
       {destEnvName}
     </h1>
-    <span>Select changes to apply</span>
+    { userHasPermission(user, portal.id, 'publish') &&
+      <span>Select changes to publish</span>
+    }
 
     <div className="bg-white p-3">
       <div className="my-2">
@@ -224,13 +233,101 @@ export default function PortalEnvDiffView(
       </div>
     </div>
     <div className="d-flex justify-content-center mt-2 pb-5">
-      <button className="btn btn-primary" onClick={() => applyChanges(selectedChanges)}>Copy changes</button>
-      {
-        // eslint-disable-next-line
-        // @ts-ignore  Link to type also supports numbers for back operations
-        <Link className="btn btn-cancel" to={-1}>Cancel</Link>
+      { userHasPermission(user, portal.id, 'publish') && <>
+        <Button variant="primary" onClick={() => {
+          // check for portal env and study env config changes. if empty, immediately apply changes
+          if (isEmpty(selectedChanges.configChanges) &&
+              selectedChanges.studyEnvChanges.every(studyChange => isEmpty(studyChange.configChanges))) {
+            applyChanges(selectedChanges)
+          } else {
+            setShowConfirmModal(true)
+          }
+        }}>
+          Publish changes to {destEnvName}
+        </Button>
+        {
+          // eslint-disable-next-line
+          // @ts-ignore  Link to type also supports numbers for back operations
+          <Link className="btn btn-cancel" to={-1}>Back</Link>
+        }
+      </> }
+      { !userHasPermission(user, portal.id, 'publish') &&
+         <div>
+           To publish selected changes, you must have the &quot;publish&quot; permission, or contact support
+         </div>
+      }
+      { showConfirmModal &&
+        <ConfirmConfigChangesModal portal={portal} selectedChanges={selectedChanges} applyChanges={applyChanges}
+          onDismiss={() => setShowConfirmModal(false)}/>
       }
     </div>
   </div>
+}
+
+const ConfirmConfigChangesModal = ({ portal, selectedChanges, applyChanges, onDismiss }: {
+  portal: Portal
+  selectedChanges: PortalEnvironmentChange,
+  applyChanges: (changeSet: PortalEnvironmentChange) => void,
+  onDismiss: () => void
+}) => {
+  return <Modal className="modal-lg" show={true} onHide={onDismiss}>
+    <Modal.Header closeButton>
+      <Modal.Title>Confirm Publish</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <div className="mb-2">
+        Some of the changes that you are about to publish may significantly impact study operations.
+        Please review the following items and confirm that you want to proceed:
+      </div>
+
+      <SensitiveConfigChangeList configChanges={selectedChanges.configChanges} title="Portal Configuration"/>
+
+      <div className="mt-2">
+        {selectedChanges.studyEnvChanges.map(studyChanges => {
+          const studyName = portal.portalStudies.find(portalStudy =>
+            portalStudy.study.shortcode === studyChanges.studyShortcode)?.study.name || studyChanges.studyShortcode
+
+          return <SensitiveConfigChangeList
+            key={studyChanges.studyShortcode}
+            configChanges={studyChanges.configChanges}
+            title={`${studyName} Study Configuration`}/>
+        })}
+      </div>
+
+      <div className="mt-3">Are you sure that you want to proceed?</div>
+    </Modal.Body>
+    <Modal.Footer>
+      <LoadingSpinner isLoading={false}>
+        <button className="btn btn-primary" onClick={() => {
+          applyChanges(selectedChanges)
+        }}>Publish</button>
+        <button className="btn btn-secondary" onClick={() => {
+          onDismiss()
+        }}>Cancel</button>
+      </LoadingSpinner>
+    </Modal.Footer>
+  </Modal>
+}
+
+const SensitiveConfigChangeList = ({ configChanges, title }: {
+  configChanges: ConfigChange[],
+  title: string
+}) => {
+  const noVal = <span className="text-muted fst-italic">none</span>
+  return configChanges.length > 0 ? (
+    <>
+      <label className="d-flex h4 mt-1">{title}</label>
+      {configChanges.map(configChange => (
+        <div className="d-flex" key={configChange.propertyName}>
+          <div className="fw-semibold">{configChange.propertyName}:</div>
+          <div className="ms-2">
+            {valuePresent(configChange.oldValue) ? configChange.oldValue.toString() : noVal}
+            <FontAwesomeIcon icon={faArrowRight} className="mx-2 fa-sm"/>
+            {valuePresent(configChange.newValue) ? configChange.newValue.toString() : noVal}
+          </div>
+        </div>
+      ))}
+    </>
+  ) : null
 }
 

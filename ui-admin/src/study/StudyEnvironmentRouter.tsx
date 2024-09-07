@@ -33,7 +33,7 @@ import DatasetList from './participants/datarepo/DatasetList'
 import Select from 'react-select'
 import MailingListView from '../portal/MailingListView'
 import StudySettings from './StudySettings'
-import { ENVIRONMENT_ICON_MAP } from './publishing/StudyPublishingView'
+import { ENVIRONMENT_ICON_MAP } from './publishing/PortalPublishingView'
 import TriggerList from './notifications/TriggerList'
 import SiteContentLoader from '../portal/siteContent/SiteContentLoader'
 import AdminTaskList from './adminTasks/AdminTaskList'
@@ -51,6 +51,8 @@ import DataImportList from '../portal/DataImportList'
 import FamilyRouter from './families/FamilyRouter'
 import TriggerView from './notifications/TriggerView'
 import TriggerNotifications from './notifications/TriggerNotifications'
+import { KitCollection } from './kits/kitcollection/KitCollection'
+import WorkflowView from './workflow/WorkflowView'
 
 export type StudyEnvContextT = { study: Study, currentEnv: StudyEnvironment, currentEnvPath: string, portal: Portal }
 
@@ -118,10 +120,11 @@ function StudyEnvironmentRouter({ study }: { study: Study }) {
             <Route index element={<TriggerList studyEnvContext={studyEnvContext}
               portalContext={portalContext}/>}/>
           </Route>
-          <Route path="workflow" element={<TriggerList studyEnvContext={studyEnvContext}
+          <Route path="workflow" element={<WorkflowView studyEnvContext={studyEnvContext}
             portalContext={portalContext}/>}/>
           <Route path="participants/*" element={<ParticipantsRouter studyEnvContext={studyEnvContext}/>}/>
           <Route path="families/*" element={<FamilyRouter studyEnvContext={studyEnvContext}/>}/>
+          <Route path="kits/collectKit/*" element={<KitCollection studyEnvContext={studyEnvContext}/>}/>
           <Route path="kits/*" element={<KitsRouter studyEnvContext={studyEnvContext}/>}/>
           <Route path="siteContent" element={<SiteContentLoader portalEnvContext={portalEnvContext}/>}/>
           <Route path="media" element={<SiteMediaList portalContext={portalContext} portalEnv={portalEnv}/>}/>
@@ -226,6 +229,11 @@ export const studyEnvWorkflowPath = (studyEnvParams: StudyEnvParams) => {
 }
 
 /** helper for path to configure study workflow and triggers */
+export const studyEnvTriggersPath = (studyEnvParams: StudyEnvParams) => {
+  return `${studyEnvPathFromParams(studyEnvParams)}/triggers`
+}
+
+/** helper for path to configure study workflow and triggers */
 export const studyEnvTriggerPath = (studyEnvParams: StudyEnvParams, trigger: Trigger) => {
   return `${studyEnvPathFromParams(studyEnvParams)}/triggers/${trigger.id}`
 }
@@ -293,9 +301,7 @@ export const studyEnvDatasetListViewPath = (portalShortcode: string, studyShortc
 
 /** helper for pre registration survey path */
 export const studyEnvPreRegPath = (studyEnvParams: StudyEnvParams) => {
-  return `${studyEnvPath(studyEnvParams.portalShortcode,
-    studyEnvParams.studyShortcode,
-    studyEnvParams.envName)}/forms/preReg`
+  return `${baseStudyEnvPath(studyEnvParams)}/forms/preReg`
 }
 
 /** helper for path for particular dataset route */
@@ -313,4 +319,17 @@ export const adminTasksPath = (portalShortcode: string, studyShortcode: string, 
  */
 export const familyPath = (portalShortcode: string, studyShortcode: string, envName: string) => {
   return `${studyEnvPath(portalShortcode, studyShortcode, envName)}/families`
+}
+
+/**
+ * viewing publishing history
+ */
+export const portalPublishHistoryPath = (portalShortcode: string, studyShortcode: string) => {
+  return `/${portalShortcode}/studies/${studyShortcode}/publishing/history`
+}
+
+const baseStudyEnvPath = (params: StudyEnvParams) => {
+  return `${studyEnvPath(params.portalShortcode,
+    params.studyShortcode,
+    params.envName)}`
 }

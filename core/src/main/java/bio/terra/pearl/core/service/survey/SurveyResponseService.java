@@ -5,7 +5,6 @@ import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.audit.DataChangeRecord;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.participant.Enrollee;
-import bio.terra.pearl.core.model.participant.ParticipantUser;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.model.workflow.HubResponse;
@@ -105,7 +104,8 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
             }
         }
         StudyEnvironmentSurvey configSurvey = studyEnvironmentSurveyService
-                .findActiveBySurvey(studyEnvId, stableId).get();
+                .findActiveBySurvey(studyEnvId, stableId)
+                .stream().findFirst().orElseThrow(() -> new NotFoundException("no active survey found"));
         configSurvey.setSurvey(form);
         return new SurveyWithResponse(
                 configSurvey, lastResponse
@@ -121,8 +121,8 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
                                                       PortalParticipantUser ppUser,
                                                       Enrollee enrollee, UUID taskId, UUID portalId) {
 
-        ParticipantTask task = participantTaskService.authTaskToEnrolleeId(taskId, enrollee.getId()).orElseThrow(() ->
-                new NotFoundException("Task not found or not authorized for enrollee %s and task %s".formatted(enrollee.getId(), taskId)));
+
+        ParticipantTask task = participantTaskService.authTaskToEnrolleeId(taskId, enrollee.getId()).orElseThrow(() -> new NotFoundException("Task not found or not authorized for enrollee %s and task %s".formatted(enrollee.getId(), taskId)));
 
         Survey survey = surveyService.findByStableIdWithMappings(task.getTargetStableId(),
                 task.getTargetAssignedVersion(), portalId).get();

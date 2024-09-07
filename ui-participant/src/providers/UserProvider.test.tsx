@@ -13,7 +13,7 @@ import {
   screen,
   waitFor
 } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { userEvent } from '@testing-library/user-event'
 import { AuthProvider } from 'react-oidc-context'
 import { setupRouterTest } from '@juniper/ui-core'
 
@@ -52,6 +52,8 @@ jest.mock('react-oidc-context', () => {
     AuthProvider: ({ children }: React.PropsWithChildren) => { return children }
   }
 })
+
+jest.mock('mixpanel-browser')
 
 describe('UserProvider', () => {
   it('updates an enrollee and calls the afterFn', async () => {

@@ -8,6 +8,7 @@ import bio.terra.pearl.api.admin.service.forms.SurveyExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -59,31 +60,23 @@ public class ConfiguredSurveyController implements ConfiguredSurveyApi {
 
   @Override
   public ResponseEntity<Object> patch(
-      String portalShortcode,
-      String studyShortcode,
-      String envName,
-      UUID configuredSurveyId,
-      Object body) {
+      String portalShortcode, String studyShortcode, String envName, Object body) {
     AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
-    StudyEnvironmentSurvey configuredSurvey =
-        objectMapper.convertValue(body, StudyEnvironmentSurvey.class);
+    List<StudyEnvironmentSurvey> configuredSurveys =
+        objectMapper.convertValue(body, new TypeReference<List<StudyEnvironmentSurvey>>() {});
 
-    StudyEnvironmentSurvey savedSes =
-        surveyExtService.updateConfiguredSurvey(
+    List<StudyEnvironmentSurvey> savedSes =
+        surveyExtService.updateConfiguredSurveys(
             PortalStudyEnvAuthContext.of(
                 operator, portalShortcode, studyShortcode, environmentName),
-            configuredSurvey);
+            configuredSurveys);
     return ResponseEntity.ok(savedSes);
   }
 
   @Override
   public ResponseEntity<Object> replace(
-      String portalShortcode,
-      String studyShortcode,
-      String envName,
-      UUID studyEnvSurveyId,
-      Object body) {
+      String portalShortcode, String studyShortcode, String envName, Object body) {
     AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     StudyEnvironmentSurvey newStudyEnvSurvey =
@@ -92,7 +85,6 @@ public class ConfiguredSurveyController implements ConfiguredSurveyApi {
         surveyExtService.replace(
             PortalStudyEnvAuthContext.of(
                 operator, portalShortcode, studyShortcode, environmentName),
-            studyEnvSurveyId,
             newStudyEnvSurvey);
     return ResponseEntity.ok(newStudyEnvSurvey);
   }

@@ -10,18 +10,19 @@ import {
 import { useLoadingEffect } from 'api/api-utils'
 import { renderPageHeader } from 'util/pageUtils'
 import ParticipantSearch from './search/ParticipantSearch'
+
 import { useParticipantSearchState } from 'util/participantSearchUtils'
 import { concatSearchExpressions } from 'util/searchExpressionUtils'
 import ParticipantListTableGroupedByFamily from 'study/participants/participantList/ParticipantListTableGroupedByFamily'
 import ParticipantListTable from 'study/participants/participantList/ParticipantListTable'
 import { Button } from 'components/forms/Button'
 import { useSingleSearchParam } from 'util/searchParamsUtils'
+import { Link } from 'react-router-dom'
 
 /** Shows a list of (for now) enrollees */
 function ParticipantList({ studyEnvContext }: {studyEnvContext: StudyEnvContextT}) {
   const { portal, study, currentEnv } = studyEnvContext
   const [participantList, setParticipantList] = useState<EnrolleeSearchExpressionResult[]>([])
-
   const [groupByFamilyString, setGroupByFamily] = useSingleSearchParam('groupByFamily')
   const groupByFamily = groupByFamilyString === 'true'
 
@@ -42,7 +43,7 @@ function ParticipantList({ studyEnvContext }: {studyEnvContext: StudyEnvContextT
     return concatSearchExpressions(expressions)
   }
 
-  const { isLoading } = useLoadingEffect(async () => {
+  const { isLoading, reload } = useLoadingEffect(async () => {
     const results = await Api.executeSearchExpression(
       portal.shortcode,
       study.shortcode,
@@ -52,10 +53,9 @@ function ParticipantList({ studyEnvContext }: {studyEnvContext: StudyEnvContextT
     setParticipantList(results)
   }, [portal.shortcode, study.shortcode, currentEnv.environmentName, searchExpression])
 
-
   return <div className="ParticipantList container-fluid px-4 py-2">
     {renderPageHeader('Participant List')}
-    <div className="d-flex align-content-center">
+    <div className="d-flex align-content-center align-items-center">
       <ParticipantSearch
         key={currentEnv.environmentName}
         studyEnvContext={studyEnvContext}
@@ -63,6 +63,7 @@ function ParticipantList({ studyEnvContext }: {studyEnvContext: StudyEnvContextT
         updateSearchState={updateSearchState}
         setSearchState={setSearchState}
       />
+
       {
         familyLinkageEnabled && <div className="d-flex align-content-center p-2">
           <Button
@@ -75,17 +76,16 @@ function ParticipantList({ studyEnvContext }: {studyEnvContext: StudyEnvContextT
           </Button>
         </div>
       }
-
+      <div><Link to={`withdrawn`}>Withdrawn</Link></div>
     </div>
 
 
     <LoadingSpinner isLoading={isLoading}>
       {groupByFamily
         ? <ParticipantListTableGroupedByFamily participantList={participantList} studyEnvContext={studyEnvContext}/>
-        : <ParticipantListTable participantList={participantList} studyEnvContext={studyEnvContext}/>}
+        : <ParticipantListTable participantList={participantList} studyEnvContext={studyEnvContext} reload={reload}/>}
     </LoadingSpinner>
   </div>
 }
-
 
 export default ParticipantList
