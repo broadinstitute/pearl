@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
-import TriggerTypeDisplay, { deliveryTypeDisplayMap } from './TriggerTypeDisplay'
+import { deliveryTypeDisplayMap } from './TriggerTypeDisplay'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { paramsFromContext, StudyEnvContextT, triggerPath } from '../StudyEnvironmentRouter'
@@ -15,6 +15,8 @@ import CreateTriggerModal from './CreateTriggerModal'
 import { navDivStyle, navLinkStyleFunc, navListItemStyle } from 'util/subNavStyles'
 import CollapsableMenu from 'navbar/CollapsableMenu'
 import TriggerNotifications from './TriggerNotifications'
+import { Button } from '../../components/forms/Button'
+import { triggerName } from '../workflow/WorkflowView'
 
 const TRIGGER_GROUPS = [
   { title: 'Events', type: 'EVENT' },
@@ -70,7 +72,7 @@ export default function TriggerList({ studyEnvContext, portalContext }:
                   .map(trigger => <li key={trigger.id} className="mb-2">
                     <div className="d-flex">
                       <NavLink to={trigger.id} style={navLinkStyleFunc}>
-                        <TriggerTypeDisplay config={trigger}/>
+                        { triggerName(trigger) }
                         <span
                           className="text-muted fst-italic"> ({deliveryTypeDisplayMap[trigger.deliveryType]})</span>
                       </NavLink>
@@ -80,14 +82,14 @@ export default function TriggerList({ studyEnvContext, portalContext }:
               </ul>}
             />
           </li>)}
-          { currentEnv.environmentName == 'sandbox' && <li style={navListItemStyle} className="ps-3">
-            <button className="btn btn-secondary" onClick={() => setShowCreateModal(true)}>
-              <FontAwesomeIcon icon={faPlus}/> Add
-            </button>
-          </li> }
         </ul>
       </div> }
-      <div className="flex-grow-1 bg-white p-3">
+      <div className="flex-grow-1 bg-white">
+        { currentEnv.environmentName == 'sandbox' && <div className="ps-4">
+          <Button variant="secondary" onClick={() => setShowCreateModal(true)}>
+            <FontAwesomeIcon icon={faPlus}/> Create new trigger
+          </Button>
+        </div> }
         <Routes>
           <Route path="triggers/:triggerId"
             element={<TriggerView studyEnvContext={studyEnvContext}

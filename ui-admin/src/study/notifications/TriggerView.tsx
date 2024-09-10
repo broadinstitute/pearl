@@ -34,6 +34,8 @@ import TriggerBaseForm, {
   isNotification,
   isTaskReminder
 } from './TriggerBaseForm'
+import { triggerName } from '../workflow/WorkflowView'
+import { Button, EllipsisDropdownButton } from '../../components/forms/Button'
 
 const deliveryTypeOptions: { label: string, value: TriggerDeliveryType}[] = [
   { label: 'Email', value: 'EMAIL' }
@@ -94,10 +96,39 @@ export default function TriggerView({ studyEnvContext, portalContext }:
     }
   }
 
+  // const triggerName = eventTypeOptions.find(opt => workingTrigger?.eventType +
+  //   workingTrigger?.triggerType === 'TASK_REMINDER' ? 'Reminder' : 'Notification'
+
   return <div className="container row">
-    <h2 className="h3">Trigger configuration</h2>
     {!isLoading && !!workingTrigger && <form className="bg-white my-2">
-      <TriggerBaseForm trigger={workingTrigger} setTrigger={setWorkingTrigger}/>
+      <div className="d-flex justify-content-between">
+        <h2 className="h3">{triggerName(workingTrigger)}</h2>
+        <div className="d-flex">
+          <Button variant="primary" onClick={saveConfig}>Save</Button>
+          <EllipsisDropdownButton aria-label="form options menu" className="ms-3"/>
+          <div className="dropdown-menu">
+            <ul className="list-unstyled pt-3">
+              { (isNotification(workingTrigger) || isAdminNotification(workingTrigger)) && <li>
+                <button className="dropdown-item" type="button"
+                  onClick={() => setShowSendModal(true)}>Send test email
+                </button>
+              </li> }
+              { (isNotification(workingTrigger) && workingTrigger.id) && <li>
+                <button className="dropdown-item"
+                  onClick={() => navigate('notifications')}>
+                  View sent notifications
+                </button>
+              </li> }
+              <li>
+                <button className="dropdown-item" type="button" onClick={() => setShowDeleteModal(true)}>
+                  Delete
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <TriggerBaseForm trigger={workingTrigger} setTrigger={setWorkingTrigger} readOnly={!!workingTrigger.id}/>
       { isTaskReminder(workingTrigger) && <div>
         <div>
           <label className="form-label mt-3">Remind after
@@ -138,7 +169,6 @@ export default function TriggerView({ studyEnvContext, portalContext }:
               value={deliveryTypeOptions.find(opt => opt.value === workingTrigger.deliveryType)}/>
           </label>
         </div>
-
         {hasTemplate &&
             <EmailTemplateEditor emailTemplate={workingTrigger.emailTemplate}
               portalShortcode={portal.shortcode}
@@ -214,15 +244,6 @@ export default function TriggerView({ studyEnvContext, portalContext }:
             onChange={v => setWorkingTrigger({ ...workingTrigger, updateTaskTargetStableId: v })}/>
         </div>
       </div> }
-
-      <div className="d-flex justify-content-center mt-2">
-        <button type="button" className="btn btn-primary" onClick={saveConfig}>Save</button>
-        {(isNotification(workingTrigger) || isAdminNotification(workingTrigger)) &&
-          <button type="button" className="btn btn-secondary ms-4"
-            onClick={() => setShowSendModal(true)}>Send test email
-          </button> }
-        <button type="button" className="btn btn-danger ms-4" onClick={() => setShowDeleteModal(true)}>Delete</button>
-      </div>
       {showSendModal && <TestEmailSender studyEnvParams={{
         portalShortcode: portal.shortcode,
         envName: currentEnv.environmentName, studyShortcode: study.shortcode
@@ -230,10 +251,10 @@ export default function TriggerView({ studyEnvContext, portalContext }:
       onDismiss={() => setShowSendModal(false)} trigger={workingTrigger}/> }
       {showDeleteModal && (
         <Modal show className="modal" onHide={() => setShowDeleteModal(false)}>
-          <Modal.Header closeButton className="danger"><strong>Delete Notification Config</strong></Modal.Header>
+          <Modal.Header closeButton className="danger"><strong>Delete trigger</strong></Modal.Header>
           <Modal.Body>
             <p className="fst-italic">
-              Are you sure you want to delete this notification configuration? This cannot be undone.
+              Are you sure you want to delete this {triggerName(workingTrigger)}? This cannot be undone.
             </p>
           </Modal.Body>
           <Modal.Footer>

@@ -207,17 +207,18 @@ const SurveyListItem = ({ studyEnvSurvey, studyEnvParams }:
 const TriggerListItem = ({ trigger, studyEnvParams }:
   { trigger: Trigger, studyEnvParams: StudyEnvParams }) => {
   return <li className={itemClasses}>
-    { trigger.actionType === 'NOTIFICATION' && <Link to={studyEnvTriggerPath(studyEnvParams, trigger)}>
-      <FontAwesomeIcon icon={faEnvelope} className="me-2"/>
-      {trigger.emailTemplate.name}
-      <span className="text-muted fst-italic ms-3">
-        ({trigger.emailTemplate.localizedEmailTemplates[0].subject})
-      </span>
-    </Link>
+    { (trigger.actionType === 'NOTIFICATION' || trigger.actionType === 'ADMIN_NOTIFICATION') &&
+      <Link to={studyEnvTriggerPath(studyEnvParams, trigger)}>
+        <FontAwesomeIcon icon={faEnvelope} className="me-2"/>
+        {triggerName(trigger)}
+        <span className="text-muted fst-italic ms-3">
+          ({trigger.emailTemplate.localizedEmailTemplates[0].subject})
+        </span>
+      </Link>
     }
     { trigger.actionType === 'TASK_STATUS_CHANGE' && <Link to={studyEnvTriggerPath(studyEnvParams, trigger)}>
       <FontAwesomeIcon icon={faTasks} className="me-2"/>
-      Mark {trigger.updateTaskTargetStableId} as {trigger.statusToUpdateTo}
+      {triggerName(trigger)}
     </Link>
     }
     { trigger.triggerType === 'TASK_REMINDER' &&
@@ -228,8 +229,17 @@ const TriggerListItem = ({ trigger, studyEnvParams }:
         </span>
       </span>
     }
-
   </li>
+}
+
+export const triggerName = ( trigger: Trigger) => {
+  if (trigger.actionType === 'NOTIFICATION' || trigger.actionType === 'ADMIN_NOTIFICATION') {
+    return trigger.emailTemplate.name
+  } else if (trigger.actionType === 'TASK_STATUS_CHANGE') {
+    return `Mark ${trigger.updateTaskTargetStableId} as ${trigger.statusToUpdateTo}`
+  } else if (trigger.triggerType === 'TASK_REMINDER') {
+    return `Remind after ${minutesToDayString(trigger.afterMinutesIncomplete)}`
+  }
 }
 
 const minutesToDayString = (minutes: number) => {

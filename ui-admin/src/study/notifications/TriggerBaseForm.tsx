@@ -7,14 +7,14 @@ import { NavLink } from 'react-router-dom'
 import Select from 'react-select'
 import React from 'react'
 
-const eventTypeOptions = [
+export const eventTypeOptions = [
   { label: 'Study Enrollment', value: 'STUDY_ENROLLMENT' },
   { label: 'Study Consent', value: 'STUDY_CONSENT' },
   { label: 'Survey Response', value: 'SURVEY_RESPONSE' },
   { label: 'Kit Sent', value: 'KIT_SENT' },
   { label: 'Kit Returned', value: 'KIT_RECEIVED' }
 ]
-const taskTypeOptions = [
+export const taskTypeOptions = [
   { label: 'Survey', value: 'SURVEY' },
   { label: 'Outreach', value: 'OUTREACH' },
   { label: 'Consent', value: 'CONSENT' },
@@ -34,15 +34,12 @@ const configTypeOptions: { label: string, value: TriggerType}[] = [
 ]
 
 /** configures the notification type and event/task type */
-export default function TriggerBaseForm({ trigger, setTrigger }:
-  {trigger: Trigger, setTrigger: (trigger: Trigger) => void}) {
+export default function TriggerBaseForm({ trigger, setTrigger, readOnly}:
+  {trigger: Trigger, setTrigger: (trigger: Trigger) => void, readOnly: boolean}) {
   return <>
     <div>
-      { (trigger.id && isNotification(trigger)) && <div className="float-end">
-        <NavLink to='notifications'>View sent emails</NavLink>
-      </div> }
       <label className="form-label" htmlFor="triggerType">Trigger</label>
-      <Select options={configTypeOptions} inputId="triggerType"
+      <Select options={configTypeOptions} inputId="triggerType" isDisabled={readOnly}
         value={configTypeOptions.find(opt => opt.value === trigger.triggerType)}
         onChange={opt =>
           setTrigger({ ...trigger, triggerType: opt?.value ?? configTypeOptions[0].value })}
@@ -50,7 +47,7 @@ export default function TriggerBaseForm({ trigger, setTrigger }:
     </div>
     <div>
       <label className="form-label mt-3" htmlFor="triggerAction">Action</label>
-      <Select options={actionTypeOptions} inputId="triggerAction"
+      <Select options={actionTypeOptions} inputId="triggerAction" isDisabled={readOnly}
         value={actionTypeOptions.find(opt => opt.value === trigger.actionType)}
         onChange={opt =>
           setTrigger({ ...trigger, actionType: opt?.value ?? actionTypeOptions[0].value })}
@@ -58,7 +55,7 @@ export default function TriggerBaseForm({ trigger, setTrigger }:
     </div>
     { isEventConfig(trigger) && <div>
       <label className="form-label mt-3" htmlFor="eventName">Event name</label>
-      <Select options={eventTypeOptions} inputId="eventName"
+      <Select options={eventTypeOptions} inputId="eventName" isDisabled={readOnly}
         value={eventTypeOptions.find(opt => opt.value === trigger.eventType)}
         onChange={opt =>
           setTrigger({ ...trigger, eventType: opt?.value ?? eventTypeOptions[0].value })}
@@ -66,7 +63,7 @@ export default function TriggerBaseForm({ trigger, setTrigger }:
     </div> }
     { isTaskReminder(trigger) && <div>
       <label className="form-label mt-3" htmlFor="taskType">Task type</label>
-      <Select options={taskTypeOptions} inputId="taskType"
+      <Select options={taskTypeOptions} inputId="taskType" isDisabled={readOnly}
         value={taskTypeOptions.find(opt => opt.value === trigger.taskType)}
         onChange={opt => setTrigger({
           ...trigger, taskType: opt?.value ??
