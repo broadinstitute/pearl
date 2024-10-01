@@ -7,8 +7,17 @@ import bio.terra.pearl.core.model.export.ExportDestinationType;
 import bio.terra.pearl.core.model.export.ExportIntegration;
 import bio.terra.pearl.core.model.export.ExportIntegrationJob;
 import bio.terra.pearl.core.model.export.ExportOptions;
+import bio.terra.pearl.core.model.notification.EmailTemplate;
+import bio.terra.pearl.core.model.notification.Trigger;
+import bio.terra.pearl.core.model.portal.PortalEnvironment;
+import bio.terra.pearl.core.model.publishing.ListChange;
+import bio.terra.pearl.core.model.publishing.StudyEnvironmentChange;
+import bio.terra.pearl.core.model.publishing.VersionedConfigChange;
+import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
+import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
+import bio.terra.pearl.core.service.publishing.StudyEnvPublishable;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +28,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class ExportIntegrationService extends CrudService<ExportIntegration, ExportIntegrationDao> {
+public class ExportIntegrationService extends CrudService<ExportIntegration, ExportIntegrationDao> implements
+        StudyEnvPublishable {
     private final ExportIntegrationJobService exportIntegrationJobService;
     private final ExportOptionsDao exportOptionsDao;
     private final EnrolleeSearchExpressionParser enrolleeSearchExpressionParser;
@@ -78,9 +88,16 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
     public Optional<ExportIntegration> findWithOptions(UUID id) {
         Optional<ExportIntegration> integrationOpt = dao.find(id);
         integrationOpt.ifPresent(integration -> {
-            integration.setExportOptions(exportOptionsDao.find(integration.getExportOptionsId()).orElse(null));
+            attachOptions(List.of(integration));
         });
         return integrationOpt;
+    }
+
+    public void attachOptions(List<ExportIntegration> integrations) {
+        List<ExportOptions> options = exportOptionsDao.findAllPreserveOrder(integrations.stream().map(ExportIntegration::getExportOptionsId).toList());
+        for (int i = 0; i < integrations.size(); i++) {
+            integrations.get(i).setExportOptions(options.get(i));
+        }
     }
 
     public void deleteByStudyEnvironmentId(UUID studyEnvId) {
@@ -89,6 +106,27 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
         exportIntegrationJobService.deleteByExportIntegrationIds(integrationIds);
         dao.deleteByStudyEnvironmentId(studyEnvId);
         exportOptionsDao.deleteAll(integrations.stream().map(ExportIntegration::getExportOptionsId).toList());
+
+    }
+
+    @Override
+    public void loadForDiffing(StudyEnvironment studyEnv) {
+        List<ExportIntegration> integrations = findByStudyEnvironmentId(studyEnv.getId());
+        attachOptions(integrations);
+        studyEnv.setExportIntegrations(integrations);
+    }
+
+    @Override
+    public void updateDiff(StudyEnvironmentChange change, StudyEnvironment sourceEnv, StudyEnvironment destEnv) {
+        ListChange<ExportIntegration, Object> triggerChanges = PortalEnvPublishable.diffConfigLists(
+                sourceEnv.getTriggers(),
+                destEnv.getTriggers(),
+                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
+        change.setTriggerChanges(triggerChanges);
+    }
+
+    @Override
+    public void applyDiff(StudyEnvironmentChange change, StudyEnvironment destEnv, PortalEnvironment destPortalEnv) {
 
     }
 }

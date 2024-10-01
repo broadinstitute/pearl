@@ -10,16 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public interface Publishable {
-    public static final List<String> CONFIG_IGNORE_PROPS = List.of("id", "createdAt", "lastUpdatedAt", "class",
+/** For service classes handling object attached to a PortalEnvironment that can be published across environments */
+public interface PortalEnvPublishable {
+     List<String> CONFIG_IGNORE_PROPS = List.of("id", "createdAt", "lastUpdatedAt", "class",
             "studyEnvironmentId", "portalEnvironmentId", "emailTemplateId", "emailTemplate",
             "consentFormId", "consentForm", "surveyId", "survey", "versionedEntity", "trigger");
-    public void loadForDiffing(PortalEnvironment portalEnv);
-    public void loadForDiffing(StudyEnvironment studyEnv);
-    public void updateDiff(PortalEnvironment sourceEnv, PortalEnvironment destEnv, PortalEnvironmentChange change);
-    public void updateDiff(StudyEnvironment sourceEnv, StudyEnvironment destEnv, StudyEnvironmentChange change);
-    public void applyDiff(PortalEnvironment sourceEnv, PortalEnvironment destEnv, PortalEnvironmentChange change);
-    public void applyDiff( StudyEnvironmentChange change, StudyEnvironment destEnv, PortalEnvironment destPortalEnv);
+     void loadForDiffing(PortalEnvironment portalEnv);
+     void updateDiff(PortalEnvironmentChange change, PortalEnvironment sourceEnv, PortalEnvironment destEnv);
+     void applyDiff(PortalEnvironmentChange change, PortalEnvironment destEnv);
 
     public static <C extends VersionedEntityConfig, T extends BaseEntity & Versioned> ListChange<C, VersionedConfigChange<T>> diffConfigLists(
             List<C> sourceConfigs,

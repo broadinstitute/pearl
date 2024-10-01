@@ -5,7 +5,6 @@ import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.dashboard.AlertTrigger;
 import bio.terra.pearl.core.model.dashboard.ParticipantDashboardAlert;
 import bio.terra.pearl.core.model.kit.KitType;
-import bio.terra.pearl.core.model.kit.StudyEnvironmentKitType;
 import bio.terra.pearl.core.model.notification.EmailTemplate;
 import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
@@ -28,7 +27,6 @@ import bio.terra.pearl.core.service.study.StudyService;
 import bio.terra.pearl.core.service.survey.SurveyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.beans.IntrospectionException;
 import java.util.*;
 
 import org.springframework.stereotype.Service;
@@ -81,10 +79,10 @@ public class PortalDiffService {
         VersionedEntityChange<Survey> preRegRecord = new VersionedEntityChange<Survey>(sourceEnv.getPreRegSurvey(), destEnv.getPreRegSurvey());
         VersionedEntityChange<SiteContent> siteContentRecord = new VersionedEntityChange<SiteContent>(sourceEnv.getSiteContent(), destEnv.getSiteContent());
         List<ConfigChange> envConfigChanges = ConfigChange.allChanges(sourceEnv.getPortalEnvironmentConfig(),
-                destEnv.getPortalEnvironmentConfig(), Publishable.CONFIG_IGNORE_PROPS);
-        ListChange<Trigger, VersionedConfigChange<EmailTemplate>> triggerChanges = Publishable.diffConfigLists(sourceEnv.getTriggers(),
+                destEnv.getPortalEnvironmentConfig(), PortalEnvPublishable.CONFIG_IGNORE_PROPS);
+        ListChange<Trigger, VersionedConfigChange<EmailTemplate>> triggerChanges = PortalEnvPublishable.diffConfigLists(sourceEnv.getTriggers(),
                 destEnv.getTriggers(),
-                Publishable.CONFIG_IGNORE_PROPS);
+                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
 
         List<StudyEnvironmentChange> studyEnvChanges = new ArrayList<>();
         List<Study> studies = studyService.findByPortalId(sourceEnv.getPortalId());
@@ -121,11 +119,11 @@ public class PortalDiffService {
         for (ParticipantDashboardAlert sourceAlert : sourceAlerts) {
             ParticipantDashboardAlert matchedAlert = unmatchedDestAlerts.get(sourceAlert.getTrigger());
             if (matchedAlert == null) {
-                List<ConfigChange> newAlert = ConfigChange.allChanges(sourceAlert, null, Publishable.CONFIG_IGNORE_PROPS);
+                List<ConfigChange> newAlert = ConfigChange.allChanges(sourceAlert, null, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
                 alertChangeLists.add(new ParticipantDashboardAlertChange(sourceAlert.getTrigger(), newAlert));
             } else {
                 unmatchedDestAlerts.remove(matchedAlert.getTrigger());
-                List<ConfigChange> alertChanges = ConfigChange.allChanges(sourceAlert, matchedAlert, Publishable.CONFIG_IGNORE_PROPS);
+                List<ConfigChange> alertChanges = ConfigChange.allChanges(sourceAlert, matchedAlert, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
                 if(!alertChanges.isEmpty()) {
                     alertChangeLists.add(new ParticipantDashboardAlertChange(sourceAlert.getTrigger(), alertChanges));
                 }
@@ -167,12 +165,12 @@ public class PortalDiffService {
         List<ConfigChange> envConfigChanges = ConfigChange.allChanges(
                 sourceEnv.getStudyEnvironmentConfig(),
                 destEnv.getStudyEnvironmentConfig(),
-                Publishable.CONFIG_IGNORE_PROPS);
+                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
         VersionedEntityChange<Survey> preEnrollChange = new VersionedEntityChange<Survey>(sourceEnv.getPreEnrollSurvey(), destEnv.getPreEnrollSurvey());
-        ListChange<StudyEnvironmentSurvey, VersionedConfigChange<Survey>> surveyChanges = Publishable.diffConfigLists(
+        ListChange<StudyEnvironmentSurvey, VersionedConfigChange<Survey>> surveyChanges = PortalEnvPublishable.diffConfigLists(
                 sourceEnv.getConfiguredSurveys(),
                 destEnv.getConfiguredSurveys(),
-                Publishable.CONFIG_IGNORE_PROPS);
+                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
         ListChange<KitType, KitType> kitTypeChanges = diffKitTypes(sourceEnv.getKitTypes(), destEnv.getKitTypes());
 
 
@@ -182,7 +180,7 @@ public class PortalDiffService {
                 .preEnrollSurveyChanges(preEnrollChange)
                 .kitTypeChanges(kitTypeChanges)
                 .surveyChanges(surveyChanges).build();
-        triggerService.updateDiff(sourceEnv, destEnv, change);
+        triggerService.updateDiff(change, sourceEnv, destEnv);
         return change;
     }
 

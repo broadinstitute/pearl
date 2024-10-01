@@ -101,7 +101,7 @@ public class PortalPublishingService {
 
         applyChangesToPreRegSurvey(destEnv, envChanges.getPreRegSurveyChanges());
         applyChangesToSiteContent(destEnv, envChanges.getSiteContentChange());
-        applyChangesToTriggers(destEnv, envChanges.getTriggerChanges());
+        triggerService.applyDiff(envChanges, destEnv);
         applyChangesToParticipantDashboardAlerts(destEnv, envChanges.getParticipantDashboardAlertChanges());
         applyChangesToLanguages(destEnv, envChanges.getLanguageChanges());
         for (StudyEnvironmentChange studyEnvChange : envChanges.getStudyEnvChanges()) {
@@ -167,22 +167,6 @@ public class PortalPublishingService {
         return portalEnvironmentService.update(destEnv);
     }
 
-    protected void applyChangesToTriggers(PortalEnvironment destEnv, ListChange<Trigger,
-            VersionedConfigChange<EmailTemplate>> listChange) {
-        for (Trigger config : listChange.addedItems()) {
-            config.setPortalEnvironmentId(destEnv.getId());
-            triggerService.create(config.cleanForCopying());
-            destEnv.getTriggers().add(config);
-            PublishingUtils.assignPublishedVersionIfNeeded(destEnv.getEnvironmentName(), config, emailTemplateService);
-        }
-        for (Trigger config : listChange.removedItems()) {
-            triggerService.delete(config.getId(), CascadeProperty.EMPTY_SET);
-            destEnv.getTriggers().remove(config);
-        }
-        for (VersionedConfigChange<EmailTemplate> change : listChange.changedItems()) {
-            PublishingUtils.applyChangesToVersionedConfig(change, triggerService, emailTemplateService, destEnv.getEnvironmentName(), destEnv.getPortalId());
-        }
-    }
 
     protected void applyChangesToParticipantDashboardAlerts(PortalEnvironment destEnv, List<ParticipantDashboardAlertChange> changes) {
         for (ParticipantDashboardAlertChange change : changes) {

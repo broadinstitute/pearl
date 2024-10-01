@@ -14,7 +14,7 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class PublishableTests {
+public class PortalEnvPublishableTests {
     @Test
     public void testIsVersionedConfigMatch() {
         // configs match if stableID of template is the same
@@ -27,7 +27,7 @@ public class PublishableTests {
                 .triggerType(TriggerType.EVENT)
                 .eventType(TriggerEventType.STUDY_ENROLLMENT)
                 .emailTemplate(EmailTemplate.builder().stableId("foo").build()).build();
-        assertThat(Publishable.isVersionedConfigMatch(config, configWithDifferentTemplate), equalTo(true));
+        assertThat(PortalEnvPublishable.isVersionedConfigMatch(config, configWithDifferentTemplate), equalTo(true));
     }
 
     @Test
@@ -41,15 +41,15 @@ public class PublishableTests {
                 .triggerType(TriggerType.EVENT)
                 .eventType(TriggerEventType.STUDY_CONSENT)
                 .emailTemplate(EmailTemplate.builder().stableId("bar").build()).build();
-        assertThat(Publishable.isVersionedConfigMatch(config, configWithDifferentTemplate), equalTo(false));
+        assertThat(PortalEnvPublishable.isVersionedConfigMatch(config, configWithDifferentTemplate), equalTo(false));
     }
 
     @Test
     public void testDiffNotificationsNoEvents() throws Exception {
         List<Trigger> sourceList = List.of();
         List<Trigger> destList = List.of();
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
         assertThat(diffs.addedItems(), hasSize(0));
         assertThat(diffs.changedItems(), hasSize(0));
         assertThat(diffs.removedItems(), hasSize(0));
@@ -69,8 +69,8 @@ public class PublishableTests {
                         .eventType(TriggerEventType.STUDY_CONSENT)
                         .emailTemplate(EmailTemplate.builder().stableId("t1").build())
                         .build());
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
         assertThat(diffs.addedItems(), hasSize(0));
         assertThat(diffs.changedItems(), hasSize(0));
         assertThat(diffs.removedItems(), hasSize(0));
@@ -92,8 +92,8 @@ public class PublishableTests {
                         .emailTemplate(EmailTemplate.builder().stableId("t1").build())
                         .afterMinutesIncomplete(2000)
                         .build());
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
         assertThat(diffs.addedItems(), hasSize(0));
         assertThat(diffs.changedItems(), hasSize(1));
         assertThat(diffs.changedItems().get(0).configChanges(), hasSize(1));
@@ -112,8 +112,8 @@ public class PublishableTests {
                 .build();
         List<Trigger> sourceList = List.of(addedConfig);
         List<Trigger> destList = List.of();
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
         assertThat(diffs.addedItems(), hasSize(1));
         assertThat(diffs.addedItems().get(0), samePropertyValuesAs(addedConfig));
         assertThat(diffs.changedItems(), hasSize(0));
@@ -129,8 +129,8 @@ public class PublishableTests {
                 .build();
         List<Trigger> sourceList = List.of();
         List<Trigger> destList = List.of(removedConfig);
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
         assertThat(diffs.addedItems(), hasSize(0));
         assertThat(diffs.changedItems(), hasSize(0));
         assertThat(diffs.removedItems(), hasSize(1));

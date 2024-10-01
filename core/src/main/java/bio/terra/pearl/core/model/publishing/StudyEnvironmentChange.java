@@ -1,5 +1,6 @@
 package bio.terra.pearl.core.model.publishing;
 
+import bio.terra.pearl.core.model.export.ExportIntegration;
 import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.model.kit.StudyEnvironmentKitType;
 import bio.terra.pearl.core.model.notification.EmailTemplate;
@@ -22,4 +23,5 @@ public class StudyEnvironmentChange {
     ListChange<StudyEnvironmentSurvey, VersionedConfigChange<Survey>> surveyChanges;
     ListChange<Trigger, VersionedConfigChange<EmailTemplate>> triggerChanges;
     ListChange<KitType, KitType> kitTypeChanges;
+    ListChange<ExportIntegration, Object> exportIntegrationChanges;
 }
