@@ -14,7 +14,8 @@ import java.util.Objects;
 public interface PortalEnvPublishable {
      List<String> CONFIG_IGNORE_PROPS = List.of("id", "createdAt", "lastUpdatedAt", "class",
             "studyEnvironmentId", "portalEnvironmentId", "emailTemplateId", "emailTemplate",
-            "consentFormId", "consentForm", "surveyId", "survey", "versionedEntity", "trigger");
+            "consentFormId", "consentForm", "surveyId", "survey", "versionedEntity", "trigger",
+             "exportOptionsId", "exportOptions");
      void loadForDiffing(PortalEnvironment portalEnv);
      void updateDiff(PortalEnvironmentChange change, PortalEnvironment sourceEnv, PortalEnvironment destEnv);
      void applyDiff(PortalEnvironmentChange change, PortalEnvironment destEnv);

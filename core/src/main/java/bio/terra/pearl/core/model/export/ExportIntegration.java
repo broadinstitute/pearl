@@ -20,4 +20,12 @@ public class ExportIntegration extends BaseEntity {
     private String destinationUrl;
     private UUID exportOptionsId;
     private ExportOptions exportOptions;
+
+    @Override
+    public ExportIntegration cleanForCopying() {
+        super.cleanForCopying();
+        setExportOptionsId(null);
+        exportOptions.cleanForCopying();
+        return this;
+    }
 }

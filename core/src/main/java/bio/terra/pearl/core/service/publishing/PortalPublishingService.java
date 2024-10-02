@@ -6,8 +6,6 @@ import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.dashboard.AlertTrigger;
 import bio.terra.pearl.core.model.dashboard.AlertType;
 import bio.terra.pearl.core.model.dashboard.ParticipantDashboardAlert;
-import bio.terra.pearl.core.model.notification.EmailTemplate;
-import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.portal.PortalEnvironmentConfig;
 import bio.terra.pearl.core.model.portal.PortalEnvironmentLanguage;
@@ -17,13 +15,13 @@ import bio.terra.pearl.core.model.publishing.ParticipantDashboardAlertChange;
 import bio.terra.pearl.core.model.publishing.PortalEnvironmentChange;
 import bio.terra.pearl.core.model.publishing.PortalEnvironmentChangeRecord;
 import bio.terra.pearl.core.model.publishing.StudyEnvironmentChange;
-import bio.terra.pearl.core.model.publishing.VersionedConfigChange;
 import bio.terra.pearl.core.model.publishing.VersionedEntityChange;
 import bio.terra.pearl.core.model.site.SiteContent;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
+import bio.terra.pearl.core.service.export.integration.ExportIntegrationService;
 import bio.terra.pearl.core.service.notification.TriggerService;
 import bio.terra.pearl.core.service.notification.email.EmailTemplateService;
 import bio.terra.pearl.core.service.portal.PortalDashboardConfigService;
@@ -53,7 +51,6 @@ public class PortalPublishingService {
     private final PortalDashboardConfigService portalDashboardConfigService;
     private final TriggerService triggerService;
     private final SurveyService surveyService;
-    private final EmailTemplateService emailTemplateService;
     private final SiteContentService siteContentService;
     private final StudyPublishingService studyPublishingService;
     private final PortalEnvironmentLanguageService portalEnvironmentLanguageService;
@@ -66,9 +63,10 @@ public class PortalPublishingService {
                                    PortalEnvironmentChangeRecordDao portalEnvironmentChangeRecordDao,
                                    PortalDashboardConfigService portalDashboardConfigService,
                                    TriggerService triggerService, SurveyService surveyService,
-                                   EmailTemplateService emailTemplateService, SiteContentService siteContentService,
+                                    SiteContentService siteContentService,
                                    StudyPublishingService studyPublishingService,
-                                   PortalEnvironmentLanguageService portalEnvironmentLanguageService, ObjectMapper objectMapper) {
+                                   PortalEnvironmentLanguageService portalEnvironmentLanguageService,
+                                   ObjectMapper objectMapper) {
         this.portalDiffService = portalDiffService;
         this.portalEnvironmentService = portalEnvironmentService;
         this.portalEnvironmentConfigService = portalEnvironmentConfigService;
@@ -76,7 +74,6 @@ public class PortalPublishingService {
         this.portalDashboardConfigService = portalDashboardConfigService;
         this.triggerService = triggerService;
         this.surveyService = surveyService;
-        this.emailTemplateService = emailTemplateService;
         this.siteContentService = siteContentService;
         this.studyPublishingService = studyPublishingService;
         this.portalEnvironmentLanguageService = portalEnvironmentLanguageService;
@@ -102,6 +99,7 @@ public class PortalPublishingService {
         applyChangesToPreRegSurvey(destEnv, envChanges.getPreRegSurveyChanges());
         applyChangesToSiteContent(destEnv, envChanges.getSiteContentChange());
         triggerService.applyDiff(envChanges, destEnv);
+
         applyChangesToParticipantDashboardAlerts(destEnv, envChanges.getParticipantDashboardAlertChanges());
         applyChangesToLanguages(destEnv, envChanges.getLanguageChanges());
         for (StudyEnvironmentChange studyEnvChange : envChanges.getStudyEnvChanges()) {

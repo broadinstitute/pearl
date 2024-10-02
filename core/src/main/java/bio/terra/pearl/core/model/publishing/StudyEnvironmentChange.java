@@ -23,5 +23,5 @@ public class StudyEnvironmentChange {
     ListChange<StudyEnvironmentSurvey, VersionedConfigChange<Survey>> surveyChanges;
     ListChange<Trigger, VersionedConfigChange<EmailTemplate>> triggerChanges;
     ListChange<KitType, KitType> kitTypeChanges;
-    ListChange<ExportIntegration, Object> exportIntegrationChanges;
+    ListChange<ExportIntegration, ConfigChangeList<ExportIntegration>> exportIntegrationChanges;
 }

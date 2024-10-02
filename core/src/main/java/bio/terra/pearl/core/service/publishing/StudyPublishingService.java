@@ -13,10 +13,9 @@ import bio.terra.pearl.core.model.study.StudyEnvironmentConfig;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
+import bio.terra.pearl.core.service.export.integration.ExportIntegrationService;
 import bio.terra.pearl.core.service.kit.StudyEnvironmentKitTypeService;
 import bio.terra.pearl.core.service.notification.TriggerService;
-import bio.terra.pearl.core.service.notification.email.EmailTemplateService;
-import bio.terra.pearl.core.service.portal.PortalEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentConfigService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
@@ -32,29 +31,27 @@ import java.util.UUID;
 @Service
 public class StudyPublishingService {
     private final StudyEnvironmentKitTypeService studyEnvironmentKitTypeService;
-    private StudyEnvironmentConfigService studyEnvironmentConfigService;
-    private StudyEnvironmentService studyEnvironmentService;
-    private SurveyService surveyService;
-    private StudyEnvironmentSurveyService studyEnvironmentSurveyService;
-    private TriggerService triggerService;
-    private EmailTemplateService emailTemplateService;
-    private EventService eventService;
-    private PortalEnvironmentService portalEnvironmentService;
+    private final StudyEnvironmentConfigService studyEnvironmentConfigService;
+    private final StudyEnvironmentService studyEnvironmentService;
+    private final SurveyService surveyService;
+    private final StudyEnvironmentSurveyService studyEnvironmentSurveyService;
+    private final TriggerService triggerService;
+    private final EventService eventService;
+    private final ExportIntegrationService exportIntegrationService;
 
     public StudyPublishingService(StudyEnvironmentConfigService studyEnvironmentConfigService,
                                   StudyEnvironmentService studyEnvironmentService, SurveyService surveyService,
                                   StudyEnvironmentSurveyService studyEnvironmentSurveyService,
-                                  TriggerService triggerService,
-                                  EmailTemplateService emailTemplateService, EventService eventService, PortalEnvironmentService portalEnvironmentService, StudyEnvironmentKitTypeService studyEnvironmentKitTypeService) {
+                                  TriggerService triggerService, EventService eventService,
+                                  StudyEnvironmentKitTypeService studyEnvironmentKitTypeService, ExportIntegrationService exportIntegrationService) {
         this.studyEnvironmentConfigService = studyEnvironmentConfigService;
         this.studyEnvironmentService = studyEnvironmentService;
         this.surveyService = surveyService;
         this.studyEnvironmentSurveyService = studyEnvironmentSurveyService;
         this.triggerService = triggerService;
-        this.emailTemplateService = emailTemplateService;
         this.eventService = eventService;
-        this.portalEnvironmentService = portalEnvironmentService;
         this.studyEnvironmentKitTypeService = studyEnvironmentKitTypeService;
+        this.exportIntegrationService = exportIntegrationService;
     }
 
     /**
@@ -68,6 +65,7 @@ public class StudyPublishingService {
         applyChangesToSurveys(destEnv, envChange.getSurveyChanges(), destPortalEnv.getId(), destPortalEnv.getPortalId());
         applyChangesToKitTypes(destEnv, envChange.getKitTypeChanges());
         triggerService.applyDiff(envChange, destEnv, destPortalEnv);
+        exportIntegrationService.applyDiff(envChange, destEnv, destPortalEnv);
         return destEnv;
     }
 

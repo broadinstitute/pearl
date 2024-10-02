@@ -18,11 +18,15 @@ public record ConfigChange(String propertyName, Object oldValue, Object newValue
                 source != null ? PropertyUtils.getProperty(source, propertyName) : null);
     }
 
+    public static <T> List<ConfigChange> allChanges(T source, T dest, List<String> ignoreProperties) {
+        return allChanges(source, dest, ignoreProperties, null);
+    }
+
     /**
      * gets a list of change records for each property that has changed between source and dest.  If one of source
      * or dest is null, all properties will be returned.  If both are null, an empty list will be returned
      */
-    public static <T> List<ConfigChange> allChanges(T source, T dest, List<String> ignoreProperties) {
+    public static <T> List<ConfigChange> allChanges(T source, T dest, List<String> ignoreProperties, String prefix) {
         if (source == null && dest == null) {
             return List.of();
         }
@@ -34,7 +38,8 @@ public record ConfigChange(String propertyName, Object oldValue, Object newValue
                     .filter(name -> !ignoreProperties.contains(name)).toList();
             List<ConfigChange> records = new ArrayList<>();
             for (String propertyName : propertyNames) {
-                ConfigChange record = new ConfigChange(source, dest, propertyName);
+                String recordedName = prefix != null ? prefix + "." + propertyName : propertyName;
+                ConfigChange record = new ConfigChange(source, dest, recordedName);
                 // if the new value is different than the old, add the record
                 if (!Objects.equals(record.newValue, record.oldValue)) {
                     records.add(record);
@@ -44,7 +49,14 @@ public record ConfigChange(String propertyName, Object oldValue, Object newValue
         } catch (Exception e) {
             throw new InternalServerException("Error introspecting bean", e);
         }
+    }
 
+    public void apply(Object target) {
+        try {
+            PropertyUtils.setProperty(target, propertyName, newValue);
+        } catch (Exception e) {
+            throw new InternalServerException("Error setting property during config apply " + propertyName, e);
+        }
     }
 }
 

@@ -1,6 +1,5 @@
 package bio.terra.pearl.core.service.publishing;
 
-import bio.terra.pearl.core.dao.publishing.PortalEnvironmentChangeRecordDao;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.dashboard.AlertTrigger;
 import bio.terra.pearl.core.model.dashboard.ParticipantDashboardAlert;
@@ -15,6 +14,7 @@ import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
+import bio.terra.pearl.core.service.export.integration.ExportIntegrationService;
 import bio.terra.pearl.core.service.kit.StudyEnvironmentKitTypeService;
 import bio.terra.pearl.core.service.notification.TriggerService;
 import bio.terra.pearl.core.service.portal.PortalDashboardConfigService;
@@ -25,7 +25,6 @@ import bio.terra.pearl.core.service.site.SiteContentService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyService;
 import bio.terra.pearl.core.service.survey.SurveyService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
@@ -39,34 +38,32 @@ public class PortalDiffService {
     private final SurveyService surveyService;
     private final TriggerService triggerService;
     private final PortalDashboardConfigService portalDashboardConfigService;
-    private final ObjectMapper objectMapper;
-    private final PortalEnvironmentChangeRecordDao portalEnvironmentChangeRecordDao;
     private final StudyEnvironmentService studyEnvironmentService;
     private final StudyService studyService;
     private final PortalEnvironmentLanguageService portalEnvironmentLanguageService;
     private final StudyEnvironmentKitTypeService studyEnvironmentKitTypeService;
+    private final ExportIntegrationService exportIntegrationService;
 
     public PortalDiffService(PortalEnvironmentService portalEnvService,
                              PortalEnvironmentConfigService portalEnvironmentConfigService,
                              SiteContentService siteContentService, SurveyService surveyService,
                              TriggerService triggerService,
                              PortalDashboardConfigService portalDashboardConfigService,
-                             ObjectMapper objectMapper,
-                             PortalEnvironmentChangeRecordDao portalEnvironmentChangeRecordDao,
                              StudyEnvironmentService studyEnvironmentService, StudyService studyService,
-                             PortalEnvironmentLanguageService portalEnvironmentLanguageService, StudyEnvironmentKitTypeService studyEnvironmentKitTypeService) {
+                             PortalEnvironmentLanguageService portalEnvironmentLanguageService,
+                             StudyEnvironmentKitTypeService studyEnvironmentKitTypeService,
+                             ExportIntegrationService exportIntegrationService) {
         this.portalEnvService = portalEnvService;
         this.portalEnvironmentConfigService = portalEnvironmentConfigService;
         this.siteContentService = siteContentService;
         this.surveyService = surveyService;
         this.triggerService = triggerService;
         this.portalDashboardConfigService = portalDashboardConfigService;
-        this.objectMapper = objectMapper;
-        this.portalEnvironmentChangeRecordDao = portalEnvironmentChangeRecordDao;
         this.studyEnvironmentService = studyEnvironmentService;
         this.studyService = studyService;
         this.portalEnvironmentLanguageService = portalEnvironmentLanguageService;
         this.studyEnvironmentKitTypeService = studyEnvironmentKitTypeService;
+        this.exportIntegrationService = exportIntegrationService;
     }
 
     public PortalEnvironmentChange diffPortalEnvs(String shortcode, EnvironmentName source, EnvironmentName dest) {
@@ -181,6 +178,7 @@ public class PortalDiffService {
                 .kitTypeChanges(kitTypeChanges)
                 .surveyChanges(surveyChanges).build();
         triggerService.updateDiff(change, sourceEnv, destEnv);
+        exportIntegrationService.updateDiff(change, sourceEnv, destEnv);
         return change;
     }
 

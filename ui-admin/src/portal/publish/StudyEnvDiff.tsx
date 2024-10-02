@@ -71,6 +71,18 @@ const StudyEnvDiff = ({ studyName, studyEnvChange, selectedChanges, setSelectedC
           renderItemSummary={renderKitType}/>
       </div>
     </div>
+    <div className="my-1">
+      <h3 className="h6">Kit Types</h3>
+      <div className="ms-4">
+        <ConfigChangeListView configChangeList={studyEnvChange.exportIntegrationChanges}
+                                selectedChanges={selectedChanges.exportIntegrationChanges}
+                                setSelectedChanges={kitTypeChanges =>
+                                  setSelectedChanges({ ...selectedChanges, kitTypeChanges })}
+                                renderItemSummary={renderExportIntegration}/>
+        })}
+
+      </div>
+    </div>
   </div>
 }
 

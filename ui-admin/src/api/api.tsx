@@ -224,6 +224,12 @@ export type StudyEnvironmentChange = {
   surveyChanges: ListChange<StudyEnvironmentSurvey, VersionedConfigChange>
   triggerChanges: ListChange<Trigger, VersionedConfigChange>
   kitTypeChanges: ListChange<KitType, VersionedConfigChange>
+  exportIntegrationChanges: ListChange<ExportIntegration, ConfigChangeList>
+}
+
+export type ConfigChangeList = {
+  entity: object
+  changes: ConfigChange[]
 }
 
 export type VersionedEntityChange = {

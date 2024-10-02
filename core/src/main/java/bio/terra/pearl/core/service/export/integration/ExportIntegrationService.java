@@ -10,22 +10,21 @@ import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.model.notification.EmailTemplate;
 import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
-import bio.terra.pearl.core.model.publishing.ListChange;
-import bio.terra.pearl.core.model.publishing.StudyEnvironmentChange;
-import bio.terra.pearl.core.model.publishing.VersionedConfigChange;
+import bio.terra.pearl.core.model.portal.PortalEnvironmentLanguage;
+import bio.terra.pearl.core.model.publishing.*;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
+import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
 import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
 import bio.terra.pearl.core.service.publishing.StudyEnvPublishable;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ExportIntegrationService extends CrudService<ExportIntegration, ExportIntegrationDao> implements
@@ -118,15 +117,44 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
 
     @Override
     public void updateDiff(StudyEnvironmentChange change, StudyEnvironment sourceEnv, StudyEnvironment destEnv) {
-        ListChange<ExportIntegration, Object> triggerChanges = PortalEnvPublishable.diffConfigLists(
-                sourceEnv.getTriggers(),
-                destEnv.getTriggers(),
-                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
-        change.setTriggerChanges(triggerChanges);
+        List<ExportIntegration> unmatchedIntegrations = new ArrayList<>(destEnv.getExportIntegrations());
+        List<ExportIntegration> addedIntegrations = new ArrayList<>();
+        List<ConfigChangeList<ExportIntegration>> changedIntegrations = new ArrayList<>();
+        for (ExportIntegration sourceIntegration : sourceEnv.getExportIntegrations()) {
+            ExportIntegration matchedIntegration = unmatchedIntegrations.stream().filter(
+                            destIntegration -> Objects.equals(destIntegration.getName(), sourceIntegration.getName()))
+                    .findAny().orElse(null);
+            if (matchedIntegration == null) {
+                addedIntegrations.add(sourceIntegration);
+            } else {
+                unmatchedIntegrations.remove(matchedIntegration);
+                List<ConfigChange> changes = ConfigChange.allChanges(sourceIntegration, matchedIntegration, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
+                changes.addAll(ConfigChange.allChanges(sourceIntegration.getExportOptions(), matchedIntegration.getExportOptions(),
+                        PortalEnvPublishable.CONFIG_IGNORE_PROPS, "exportOptions"));
+                if (!changes.isEmpty()) {
+                    changedIntegrations.add(new ConfigChangeList<>(matchedIntegration, changes));
+                }
+            }
+        }
+        change.setExportIntegrationChanges(new ListChange<>(addedIntegrations, unmatchedIntegrations, changedIntegrations));
     }
 
     @Override
     public void applyDiff(StudyEnvironmentChange change, StudyEnvironment destEnv, PortalEnvironment destPortalEnv) {
-
+        for (ExportIntegration integration : change.getExportIntegrationChanges().addedItems()) {
+            integration.cleanForCopying();
+            integration.setStudyEnvironmentId(destEnv.getId());
+            create(integration);
+        }
+        for (ExportIntegration integration : change.getExportIntegrationChanges().removedItems()) {
+            delete(integration.getId(), CascadeProperty.EMPTY_SET);
+        }
+        for (ConfigChangeList<ExportIntegration> changedIntegration : change.getExportIntegrationChanges().changedItems()) {
+            ExportIntegration destIntegration = changedIntegration.entity();
+            for (ConfigChange configChange : changedIntegration.changes()) {
+                configChange.apply(destIntegration);
+            }
+            update(destIntegration);
+        }
     }
 }
