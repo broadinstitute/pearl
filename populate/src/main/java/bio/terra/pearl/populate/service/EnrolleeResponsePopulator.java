@@ -30,6 +30,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -90,8 +92,9 @@ public class EnrolleeResponsePopulator {
 
         SurveyResponse savedResponse;
         if (simulateSubmissions) {
+            Instant taskCutoff = responsePopDto.shiftedInstant().plus(1, ChronoUnit.MINUTES);
             ParticipantTask task = participantTaskService
-                    .findTaskForActivity(ppUser.getId(), enrollee.getStudyEnvironmentId(), survey.getStableId()).get();
+                    .findTaskForActivity(ppUser.getId(), enrollee.getStudyEnvironmentId(), survey.getStableId(), taskCutoff).get();
 
             if (responsePopDto.getSurveyVersion() != task.getTargetAssignedVersion()) {
                 /**
