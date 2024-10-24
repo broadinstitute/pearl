@@ -1,21 +1,52 @@
 package bio.terra.pearl.core.service.participant;
 
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 @Service
+@Slf4j
 public class ShortcodeService {
     public static final String SHORTCODE_ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static final int SHORTCODE_LENGTH = 6;
+    public static final String BANNED_WORDS_FILE = "core/src/main/resources/profanity/bannedWords.txt";
 
     private final RandomUtilService randomUtilService;
+    private Set<String> bannedWords;
 
     public ShortcodeService(RandomUtilService randomUtilService) {
+
         this.randomUtilService = randomUtilService;
+        this.bannedWords = loadBannedWords();
+    }
+
+    public Set<String> loadBannedWords() {
+        bannedWords = new HashSet<>();
+        Path filePath = Path.of(BANNED_WORDS_FILE);
+        try {
+            InputStream bannedWordsStream = Files.newInputStream(filePath);
+            String bannedWordsString = new String(bannedWordsStream.readAllBytes());
+            bannedWords = Set.of(bannedWordsString.split("\n"));
+        } catch (Exception e) {
+            // Log this as an error, but don't treat it as fatal.
+            // return an empty set so that we can continue generating shortcodes
+            log.error("Unable to load banned words file", e);
+            return Set.of();
+        }
+        return bannedWords;
+    }
+
+    public boolean isShortcodeBanned(String possibleShortcode) {
+        return bannedWords.contains(possibleShortcode.toLowerCase());
     }
 
     /**
@@ -29,7 +60,19 @@ public class ShortcodeService {
         int MAX_TRIES = 10;
         String shortcode = null;
         for (int tryNum = 0; tryNum < MAX_TRIES; tryNum++) {
-            String possibleShortcode = randomUtilService.generateSecureRandomString(SHORTCODE_LENGTH, SHORTCODE_ALLOWED_CHARS);
+//            String possibleShortcode = randomUtilService.generateSecureRandomString(SHORTCODE_LENGTH, SHORTCODE_ALLOWED_CHARS);
+            String possibleShortcode;
+            if(tryNum == 0){
+                possibleShortcode = "BLOODY";
+            } else {
+                possibleShortcode = randomUtilService.generateSecureRandomString(SHORTCODE_LENGTH, SHORTCODE_ALLOWED_CHARS);
+            }
+
+            if(isShortcodeBanned(possibleShortcode)){
+                System.out.println("Banned word found: " + possibleShortcode);
+                continue;
+            }
+
             if (prefix != null && !prefix.isEmpty()) {
                 possibleShortcode = prefix + "_" + possibleShortcode;
             }

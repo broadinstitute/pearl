@@ -2,10 +2,13 @@ package bio.terra.pearl.core.service.participant;
 
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 
 class ShortcodeServiceTest {
 
@@ -35,5 +38,15 @@ class ShortcodeServiceTest {
         assertThrows(InternalServerException.class,
                 () -> shortcodeService.generateShortcode(null, (s) -> Optional.of(true)));
 
+    }
+
+    @Test
+    void testFailsToGenerateProfanityShortcode() {
+        ShortcodeService shortcodeService = new ShortcodeService(new RandomUtilService());
+
+        Mockito.when(shortcodeService.isShortcodeBanned(anyString())).thenReturn(Set.of("BANNED"));
+
+        assertThrows(InternalServerException.class,
+                () -> shortcodeService.generateShortcode(null, (s) -> Optional.of(true)));
     }
 }
