@@ -127,6 +127,7 @@ public abstract class BaseJdbiDao<T extends BaseEntity> implements JdbiDao<T> {
         if (modelObj.getId() != null) {
             throw new IllegalArgumentException("object passed to create already has id - " + modelObj.getId());
         }
+        modelObj.setCreatedAt(Instant.now());
         return jdbi.withHandle(handle ->
                 handle.createUpdate(createQuerySql)
                         .bindBean(modelObj)
