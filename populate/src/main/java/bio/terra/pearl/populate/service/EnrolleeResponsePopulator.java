@@ -94,7 +94,8 @@ public class EnrolleeResponsePopulator {
         if (simulateSubmissions) {
             Instant taskCutoff = responsePopDto.shiftedInstant().plus(1, ChronoUnit.MINUTES);
             ParticipantTask task = participantTaskService
-                    .findTaskForActivity(ppUser.getId(), enrollee.getStudyEnvironmentId(), survey.getStableId(), taskCutoff).get();
+                    .findTaskForActivity(ppUser.getId(), enrollee.getStudyEnvironmentId(), survey.getStableId(), taskCutoff)
+                    .orElseThrow(() -> new NotFoundException("No task found. enrollee: %s, survey: %s".formatted(enrollee.getShortcode(), survey.getStableId())));
 
             if (responsePopDto.getSurveyVersion() != task.getTargetAssignedVersion()) {
                 /**
@@ -105,6 +106,7 @@ public class EnrolleeResponsePopulator {
                 task.setTargetAssignedVersion(responsePopDto.getSurveyVersion());
                 participantTaskService.update(task, auditInfo);
             }
+            List<ParticipantTask> pastTasks = participantTaskService.findByEnrolleeId(enrollee.getId());
             HubResponse<SurveyResponse> hubResponse = surveyResponseService
                     .updateResponse(response, responsibleUser, responsePopDto.getJustification(), ppUser, enrollee, task.getId(), survey.getPortalId());
             savedResponse = hubResponse.getResponse();
@@ -112,6 +114,14 @@ public class EnrolleeResponsePopulator {
                 timeShiftDao.changeSurveyResponseTime(savedResponse.getId(), responsePopDto.shiftedInstant());
                 if (responsePopDto.isComplete()) {
                     timeShiftDao.changeTaskCompleteTime(task.getId(), responsePopDto.shiftedInstant());
+                }
+
+                // if this response created new tasks, update their creation times
+                List<ParticipantTask> newTasks = hubResponse.getTasks().stream().filter(
+                        t -> !pastTasks.stream().anyMatch(pt -> pt.getId().equals(t.getId()))
+                ).toList();
+                for (ParticipantTask newTask : newTasks) {
+                    timeShiftDao.changeTaskCreationTime(newTask.getId(), responsePopDto.shiftedInstant());
                 }
             }
         } else {

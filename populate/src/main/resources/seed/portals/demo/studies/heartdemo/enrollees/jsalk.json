@@ -50,6 +50,26 @@
       "complete": true,
       "submittedHoursAgo": 247
     }, {
+      "surveyStableId": "hd_hd_lifestyle",
+      "surveyVersion": 1,
+      "answerPopDtos": [
+        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "2days"},
+        { "questionStableId": "hd_hd_lifestyle_vigorousActivityMinutes", "stringValue": "30"}
+      ],
+      "currentPageNo": 1,
+      "complete": true,
+      "submittedHoursAgo": 247
+    }, {
+      "surveyStableId": "hd_hd_lifestyle",
+      "surveyVersion": 1,
+      "answerPopDtos": [
+        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "3days"},
+        { "questionStableId": "hd_hd_lifestyle_vigorousActivityMinutes", "stringValue": "35"}
+      ],
+      "currentPageNo": 1,
+      "complete": true,
+      "submittedHoursAgo": 47
+    }, {
       "surveyStableId": "hd_hd_basicInfo",
       "surveyVersion": 1,
       "answerPopDtos": [

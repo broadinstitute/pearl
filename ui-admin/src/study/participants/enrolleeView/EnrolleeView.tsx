@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { ParticipantTask, StudyEnvironmentSurvey, SurveyResponse } from 'api/api'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import { Link, NavLink, Route, Routes } from 'react-router-dom'
@@ -16,7 +16,7 @@ import { NavBreadcrumb } from 'navbar/AdminNavbar'
 import useRoutedEnrollee from './useRoutedEnrollee'
 import LoadingSpinner from 'util/LoadingSpinner'
 import CollapsableMenu from 'navbar/CollapsableMenu'
-import { faCircleCheck, faCircleHalfStroke } from '@fortawesome/free-solid-svg-icons'
+import { faCircleCheck, faCircleHalfStroke, faMinus } from '@fortawesome/free-solid-svg-icons'
 import { faCircle as faEmptyCircle, faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { Enrollee, ParticipantTaskStatus } from '@juniper/ui-core'
 import EnrolleeOverview from './EnrolleeOverview'
@@ -25,8 +25,8 @@ import { navDivStyle, navListItemStyle } from 'util/subNavStyles'
 
 export type SurveyWithResponsesT = {
   survey: StudyEnvironmentSurvey
-  response?: SurveyResponse
-  task: ParticipantTask
+  responses: SurveyResponse[]
+  tasks: ParticipantTask[]
 }
 export type ResponseMapT = { [stableId: string]: SurveyWithResponsesT }
 
@@ -45,7 +45,6 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
   enrollee: Enrollee, studyEnvContext: StudyEnvContextT, onUpdate: () => void
 }) {
   const { currentEnv, currentEnvPath } = studyEnvContext
-  const [responseMap, setResponseMap] = useState<ResponseMapT>({})
 
   const surveys: StudyEnvironmentSurvey[] = currentEnv.configuredSurveys
 
@@ -58,36 +57,24 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
   const adminSurveys = surveys
     .filter(survey => survey.survey.surveyType === 'ADMIN')
 
-  const updateResponseMap = (stableId: string, response: SurveyResponse) => {
-    setResponseMap({
-      ...responseMap,
-      [stableId]: {
-        ...responseMap[stableId],
-        response
-      }
-    })
-  }
 
-  useEffect(() => {
-    const updatedResponseMap: ResponseMapT = {}
-    surveys.forEach(configSurvey => {
-      // to match responses to surveys, filter using the tasks, since those have the stableIds
-      // this is valid since it's currently enforced that all survey responses are done as part of a task,
-      const matchedTask = enrollee.participantTasks
-        .find(task => task.targetStableId === configSurvey.survey.stableId)
-      if (!matchedTask) {
-        return
-      }
-      const matchedResponse = enrollee.surveyResponses
-        .find(response => matchedTask.surveyResponseId === response.id)
-      updatedResponseMap[configSurvey.survey.stableId] = {
-        survey: configSurvey,
-        response: matchedResponse,
-        task: matchedTask
-      }
-    })
-    setResponseMap(updatedResponseMap)
-  }, [enrollee])
+  const responseMap: ResponseMapT = {}
+  surveys.forEach(configSurvey => {
+    // to match responses to surveys, filter using the tasks, since those have the stableIds
+    // this is valid since it's currently enforced that all survey responses are done as part of a task,
+    const matchedTasks = enrollee.participantTasks
+      .filter(task => task.targetStableId === configSurvey.survey.stableId)
+      .sort((a, b) => b.createdAt! - a.createdAt!)
+    const matchedTaskResponseIds = matchedTasks.map(task => task.surveyResponseId)
+    const matchedResponses = enrollee.surveyResponses
+      .filter(response => matchedTaskResponseIds.includes(response.id))
+      .sort((a, b) => b.createdAt! - a.createdAt!)
+    responseMap[configSurvey.survey.stableId] = {
+      survey: configSurvey,
+      responses: matchedResponses,
+      tasks: matchedTasks
+    }
+  })
 
   return <div className="ParticipantView mt-3 ps-4">
     <NavBreadcrumb value={enrollee?.shortcode || ''}>
@@ -126,7 +113,7 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                       return <li className="mb-2 d-flex justify-content-between
                         align-items-center" key={stableId}>
                         {createSurveyNavLink(stableId, responseMap, survey)}
-                        {badgeForResponses(responseMap[stableId]?.response)}
+                        {badgeForResponses(responseMap[stableId]?.responses, responseMap[stableId]?.tasks)}
                       </li>
                     })}
                   </ul>}/>
@@ -139,7 +126,7 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                       return <li className="mb-2 d-flex justify-content-between
                         align-items-center" key={stableId}>
                         {createSurveyNavLink(stableId, responseMap, survey)}
-                        {badgeForResponses(responseMap[stableId]?.response)}
+                        {badgeForResponses(responseMap[stableId]?.responses, responseMap[stableId]?.tasks)}
                       </li>
                     })}
                   </ul>}
@@ -156,7 +143,7 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                       return <li className="mb-2 d-flex justify-content-between
                         align-items-center" key={stableId}>
                         {createSurveyNavLink(stableId, responseMap, survey)}
-                        {badgeForResponses(responseMap[stableId]?.response)}
+                        {badgeForResponses(responseMap[stableId]?.responses, responseMap[stableId]?.tasks)}
                       </li>
                     })}
                   </ul>}
@@ -173,7 +160,7 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                       return <li className="mb-2 d-flex justify-content-between
                         align-items-center" key={stableId}>
                         {createSurveyNavLink(stableId, responseMap, survey)}
-                        {badgeForResponses(responseMap[stableId]?.response)}
+                        {badgeForResponses(responseMap[stableId]?.responses, responseMap[stableId]?.tasks)}
                       </li>
                     })}
                   </ul>}
@@ -223,7 +210,7 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                 <Route path="surveys">
                   <Route path=":surveyStableId/*" element={<SurveyResponseView enrollee={enrollee}
                     responseMap={responseMap}
-                    updateResponseMap={updateResponseMap}
+                    updateResponseMap={onUpdate}
                     studyEnvContext={studyEnvContext}
                     onUpdate={onUpdate}/>}/>
                   <Route path="*" element={<div>Unknown participant survey page</div>}/>
@@ -254,13 +241,17 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
 }
 
 /** returns an icon based on the enrollee's responses.  Note this does not handle multi-responses yet */
-const badgeForResponses = (response?: SurveyResponse) => {
-  if (!response) {
+const badgeForResponses = (responses: SurveyResponse[], tasks: ParticipantTask[]) => {
+  if (!tasks.length) {
+    return statusDisplayMap['UNASSIGNED']
+  }
+  const lastResponse = responses.sort((a, b) => b.createdAt! - a.createdAt!)[0]
+  if (!lastResponse) {
     return statusDisplayMap['NEW']
   } else {
-    if (response.complete) {
+    if (lastResponse.complete) {
       return statusDisplayMap['COMPLETE']
-    } else if (response.answers.length === 0) {
+    } else if (lastResponse.answers.length === 0) {
       return statusDisplayMap['VIEWED']
     } else {
       return statusDisplayMap['IN_PROGRESS']
@@ -274,7 +265,7 @@ function getLinkCssClasses({ isActive }: { isActive: boolean }) {
 }
 
 function createSurveyNavLink(stableId: string, responseMap: ResponseMapT, survey: StudyEnvironmentSurvey) {
-  const taskId = responseMap[stableId]?.task?.id
+  const taskId = responseMap[stableId]?.tasks[0]?.id
   const surveyPath = `surveys/${stableId}${taskId ? `?taskId=${taskId}` : ''}`
 
   return (
@@ -290,11 +281,12 @@ export const enrolleeKitRequestPath = (currentEnvPath: string, enrolleeShortcode
 }
 
 
-export const statusDisplayMap: Record<ParticipantTaskStatus, React.ReactNode> = {
+export const statusDisplayMap: Record<ParticipantTaskStatus | 'UNASSIGNED', React.ReactNode> = {
   'COMPLETE': <FontAwesomeIcon icon={faCircleCheck} style={{ color: '#888' }} title="Complete"/>,
   'IN_PROGRESS': <FontAwesomeIcon icon={faCircleHalfStroke} style={{ color: '#888' }} title="In Progress"/>,
   'NEW': <FontAwesomeIcon icon={faEmptyCircle} style={{ color: '#888' }} title="No response"/>,
   'VIEWED': <FontAwesomeIcon icon={faEmptyCircle} style={{ color: '#888' }} title="Viewed"/>,
-  'REJECTED': <FontAwesomeIcon icon={faCircleXmark} style={{ color: '#888' }} title="Rejected"/>
+  'REJECTED': <FontAwesomeIcon icon={faCircleXmark} style={{ color: '#888' }} title="Rejected"/>,
+  'UNASSIGNED': <FontAwesomeIcon icon={faMinus} style={{ color: '#888' }} title="Not assigned"/>
 }
 

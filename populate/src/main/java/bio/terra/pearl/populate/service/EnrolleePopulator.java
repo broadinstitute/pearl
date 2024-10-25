@@ -343,6 +343,9 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         Enrollee proxyEnrollee = hubResponse.getEnrollee();
         proxyEnrollee.setShortcode(proxyPopDto.getShortcode());
         enrolleeService.update(proxyEnrollee);
+        if (popDto.isTimeShifted()) {
+            timeShiftEnrollee(proxyEnrollee, portalParticipantUser, hubResponse.getTasks(), popDto.shiftedInstant(), context);
+        }
         hubResponse.setEnrollee(proxyEnrollee);
 
         Enrollee governedEnrollee = hubResponse.getResponse();
@@ -355,7 +358,9 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         PortalParticipantUser governedPPUser = portalParticipantUserService.findForEnrollee(governedEnrollee);
         // restore the proxy's email settings
         updateDoNotEmail(portalParticipantUser, prevEmailSetting, "createNewGovernedEnrollee");
-
+        if (popDto.isTimeShifted()) {
+            timeShiftEnrollee(governedEnrollee, governedPPUser, participantTaskService.findByEnrolleeId(governedEnrollee.getId()), popDto.shiftedInstant(), context);
+        }
         return new EnrolleePopulationData(popDto, governedEnrollee, governedPPUser, hubResponse.getTasks(), proxyEnrollee, prevEmailSetting);
     }
 
