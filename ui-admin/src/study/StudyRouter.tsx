@@ -5,7 +5,7 @@ import { Study } from 'api/api'
 import { LoadedPortalContextT } from 'portal/PortalProvider'
 import StudyEnvironmentRouter from './StudyEnvironmentRouter'
 import PortalEnvDiffProvider from '../portal/publish/PortalEnvDiffProvider'
-import PortalPublishingView from './publishing/PortalPublishingView'
+import PortalPublishingView from '../portal/publish/PortalPublishingView'
 import LoadingSpinner from 'util/LoadingSpinner'
 import { PortalAdminUserRouter } from 'user/AdminUserRouter'
 import PortalChangeHistoryView from '../portal/publish/PortalChangeHistoryView'
@@ -69,7 +69,7 @@ function StudyRouterFromShortcode({ shortcode, portalContext }:
       <Route path="users/*" element={<PortalAdminUserRouter portal={portalContext.portal}
         study={study}/>}/>
       <Route index element={<PortalPublishingView portal={portalContext.portal}
-                                                  studyShortcode={study.shortcode}/>}/>
+        studyShortcode={study.shortcode}/>}/>
     </Routes>
   </>
 }

@@ -1,15 +1,16 @@
 import React from 'react'
 import { Portal, PortalEnvironment } from '@juniper/ui-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowRight, faHistory } from '@fortawesome/free-solid-svg-icons'
+import { faHistory } from '@fortawesome/free-solid-svg-icons'
 import { Link } from 'react-router-dom'
-import Api from 'api/api'
+import Api from '../../api/api'
 import { faExternalLink } from '@fortawesome/free-solid-svg-icons/faExternalLink'
-import { useConfig } from 'providers/ConfigProvider'
-import { portalPublishHistoryPath, studyEnvSiteContentPath } from '../StudyEnvironmentRouter'
-import { ENVIRONMENT_ICON_MAP } from 'util/publishUtils'
-import { studyDiffPath } from '../StudyRouter'
-import { renderPageHeader } from 'util/pageUtils'
+import { useConfig } from '../../providers/ConfigProvider'
+import { portalPublishHistoryPath, studyEnvSiteContentPath } from '../../study/StudyEnvironmentRouter'
+import { ENVIRONMENT_ICON_MAP } from '../../util/publishUtils'
+import { studyDiffPath } from '../../study/StudyRouter'
+import { renderPageHeader } from '../../util/pageUtils'
+import { navListItemStyle } from '../../util/subNavStyles'
 
 
 const ENV_SORT_ORDER = ['sandbox', 'irb', 'live']
@@ -24,11 +25,26 @@ export default function PortalPublishingView({ portal, studyShortcode }: {portal
         <FontAwesomeIcon icon={faHistory}/> Publishing history
       </Link>
     </div>
+    <div>
+      <p>
+        Juniper manages three environments for each study: sandbox, irb, and live.
+        The sandbox environment is for testing, the irb environment is for IRB review,
+        and the live environment is for real participant use.
+      </p>
+      <p>
+       Once you have made changes to your study in the sandbox, you can publish those changes to the irb environment.
+       If these changes require IRB review, you can then continue to make other changes in the sandbox while
+       you wait for approval.  Once the changes are approved (or if they do not require IRB review), you can publish
+       from the IRB environment to the live environment.
+      </p>
+
+    </div>
     <div className="row">
       { sortedEnvs.map(portalEnv =>
         <PortalEnvPublishingView portalEnv={portalEnv} portal={portal}
           studyShortcode={studyShortcode} key={portalEnv.environmentName}/>)}
     </div>
+
   </div>
 }
 
@@ -40,18 +56,9 @@ function PortalEnvPublishingView({ portal, portalEnv, studyShortcode }:
   const zoneConfig = useConfig()
   const isInitialized = portalEnv.portalEnvironmentConfig.initialized
   const destName = portalEnv.environmentName === 'sandbox' ? 'irb' : 'live'
-  let publishControl = null
-
-  if (isInitialized && portalEnv.environmentName !== 'live') {
-    publishControl =  <Link to={
-      studyDiffPath(portal.shortcode, studyShortcode, portalEnv.environmentName, destName)}
-    className="btn btn-primary me-2 px-5">
-      Publish <FontAwesomeIcon icon={faArrowRight}/>
-    </Link>
-  }
 
   return <>
-    <div className="col-md-2 p-3 border border-dark rounded-3">
+    <div className="p-3 rounded-3 mb-3" style={navListItemStyle}>
       <div>
         <h3 className="h5 text-capitalize me-4">{envIcon} {portalEnv.environmentName}</h3>
         { isInitialized && <a href={Api.getParticipantLink(portalEnv.portalEnvironmentConfig,
@@ -75,9 +82,15 @@ function PortalEnvPublishingView({ portal, portalEnv, studyShortcode }:
           }
         </div>}
       </div>
-    </div>
-    <div className="col-md-2 d-flex align-items-center justify-content-center ">
-      {publishControl}
+      <div className="mt-2">
+        {(isInitialized && portalEnv.environmentName !== 'live') &&
+          <Link to={
+            studyDiffPath(portal.shortcode, studyShortcode, portalEnv.environmentName, destName)}
+          className="btn btn-primary me-2 px-5">
+            Publish {portalEnv.environmentName} to {destName}
+          </Link>
+        }
+      </div>
     </div>
   </>
 }
