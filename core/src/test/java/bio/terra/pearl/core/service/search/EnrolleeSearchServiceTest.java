@@ -198,7 +198,7 @@ class EnrolleeSearchServiceTest extends BaseSpringBootTest {
                 .map(val -> new QuestionChoice(val.name(), val.name()))
                 .collect(Collectors.toList());
 
-        Assertions.assertEquals(30, results.size());
+        Assertions.assertEquals(32, results.size());
         Map.ofEntries(
                 Map.entry("profile.givenName", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.familyName", SearchValueTypeDefinition.builder().type(STRING).build()),
@@ -207,6 +207,8 @@ class EnrolleeSearchServiceTest extends BaseSpringBootTest {
                 Map.entry("profile.phoneNumber", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.birthDate", SearchValueTypeDefinition.builder().type(DATE).build()),
                 Map.entry("profile.sexAtBirth", SearchValueTypeDefinition.builder().type(STRING).build()),
+                Map.entry("profile.doNotEmail", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
+                Map.entry("profile.doNotEmailSolicit", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
                 Map.entry("profile.mailingAddress.street1", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.mailingAddress.street2", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.mailingAddress.city", SearchValueTypeDefinition.builder().type(STRING).build()),
