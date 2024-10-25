@@ -36,7 +36,7 @@ export const TriggerDesignerEditor = (
     sendTestEmail?: () => void
   }) => {
   return <div>
-    <TriggerWhenEditor
+    <TriggerTypeEditor
       baseFieldsOnly={baseFieldsOnly}
       trigger={trigger}
       updateTrigger={updateTrigger}
@@ -58,7 +58,7 @@ const triggerTypeLabels = {
   AD_HOC: 'Ad hoc'
 }
 
-const TriggerWhenEditor = (
+const TriggerTypeEditor = (
   {
     baseFieldsOnly,
     trigger,
@@ -96,9 +96,9 @@ const TriggerWhenEditor = (
     <InfoCardBody>
       <div className='w-100'>
         <div className='d-flex align-items-baseline w-100'>
-          <span className={'me-1'}>
+          <label className={'me-1'} htmlFor={triggerTypeSelectInputId}>
             Trigger on
-          </span>
+          </label>
           <Select
             options={triggerTypeOptions}
             value={triggerType}
@@ -153,7 +153,7 @@ const EventTriggerEditor = (
     <Select
       options={eventTypeOptions}
       inputId="eventName"
-      aria-label='Event'
+      aria-label='Event type'
       value={eventTypeOptions.find(opt => opt.value === trigger.eventType)}
       onChange={opt =>
         updateTrigger('eventType', opt?.value ?? eventTypeOptions[0].value)}
@@ -178,9 +178,10 @@ const TaskReminderTypeEditor = (
   }
 ) => {
   return <>
-    <label className="form-label mx-2" htmlFor="taskType">for</label>
+    <span className="mx-2">for</span>
     <Select options={taskTypeOptions} inputId="taskType"
       value={taskTypeOptions.find(opt => opt.value === trigger.taskType)}
+      aria-label={'Task type'}
       onChange={opt => updateTrigger(
         'taskType',
         opt?.value ??
