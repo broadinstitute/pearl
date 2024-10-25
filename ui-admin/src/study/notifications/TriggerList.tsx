@@ -1,10 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import { NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
+import React, {
+  useEffect,
+  useState
+} from 'react'
+import {
+  NavLink,
+  Outlet,
+  Route,
+  Routes,
+  useNavigate
+} from 'react-router-dom'
 import TriggerTypeDisplay, { deliveryTypeDisplayMap } from './TriggerTypeDisplay'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
-import { paramsFromContext, StudyEnvContextT, triggerPath } from '../StudyEnvironmentRouter'
-import TriggerView from './TriggerView'
+import {
+  StudyEnvContextT,
+  triggerPath
+} from '../StudyEnvironmentRouter'
 import { renderPageHeader } from 'util/pageUtils'
 import { LoadedPortalContextT } from '../../portal/PortalProvider'
 import { Trigger } from '@juniper/ui-core'
@@ -12,9 +23,14 @@ import Api from 'api/api'
 import { useLoadingEffect } from 'api/api-utils'
 import LoadingSpinner from 'util/LoadingSpinner'
 import CreateTriggerModal from './CreateTriggerModal'
-import { navDivStyle, navLinkStyleFunc, navListItemStyle } from 'util/subNavStyles'
+import {
+  navDivStyle,
+  navLinkStyleFunc,
+  navListItemStyle
+} from 'util/subNavStyles'
 import CollapsableMenu from 'navbar/CollapsableMenu'
 import TriggerNotifications from './TriggerNotifications'
+import { TriggerDesigner } from 'study/notifications/TriggerDesigner'
 
 const TRIGGER_GROUPS = [
   { title: 'Events', type: 'EVENT' },
@@ -90,14 +106,14 @@ export default function TriggerList({ studyEnvContext, portalContext }:
       <div className="flex-grow-1 bg-white p-3">
         <Routes>
           <Route path="triggers/:triggerId"
-            element={<TriggerView studyEnvContext={studyEnvContext}
+            element={<TriggerDesigner studyEnvContext={studyEnvContext}
               portalContext={portalContext} onDelete={onDelete}/>}/>
           <Route path="triggers/:triggerId/notifications" element={
             <TriggerNotifications studyEnvContext={studyEnvContext}/>}/>
         </Routes>
         <Outlet/>
       </div>
-      { showCreateModal && <CreateTriggerModal studyEnvParams={paramsFromContext(studyEnvContext)}
+      {showCreateModal && <CreateTriggerModal studyEnvContext={studyEnvContext}
         onDismiss={() => setShowCreateModal(false)} onCreate={onCreate}
       /> }
     </div>
