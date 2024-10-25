@@ -19,6 +19,7 @@ import EmailTemplateEditor from 'study/notifications/EmailTemplateEditor'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import InfoPopup from 'components/forms/InfoPopup'
 import { TextInput } from 'components/forms/TextInput'
+import { NavLink } from 'react-router-dom'
 
 
 export const TriggerDesignerEditor = (
@@ -334,7 +335,10 @@ const NotificationEditor = (
   const hasEmailTemplate = !!trigger?.emailTemplate
 
   return <>
-    <label className="form-label mt-2">
+    <div className="float-end position-relative">
+      <NavLink to='notifications'>View sent notifications</NavLink>
+    </div>
+    <label className="form-label">
       Notification Type <InfoPopup content={'Juniper only supports reminders via email.'}/>
       <Select options={deliveryTypeOptions} isDisabled={true}
         value={deliveryTypeOptions.find(opt => opt.value === trigger.deliveryType)}/>
@@ -363,7 +367,7 @@ const NotificationEditor = (
   </>
 }
 
-const statusOptions: {label: string, value: ParticipantTaskStatus}[] = [
+const statusOptions: { label: string, value: ParticipantTaskStatus }[] = [
   { label: 'New', value: 'NEW' },
   { label: 'In progress', value: 'IN_PROGRESS' },
   { label: 'Completed', value: 'COMPLETE' },
