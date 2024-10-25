@@ -1,5 +1,8 @@
 import React from 'react'
-import { renderWithRouter, setupRouterTest } from '@juniper/ui-core'
+import {
+  renderWithRouter,
+  setupRouterTest
+} from '@juniper/ui-core'
 import { mockStudyEnvContext } from '../test-utils/mocking-utils'
 import {
   render,
@@ -18,7 +21,18 @@ const mailingAddressCountryFacet: { [index: string]: SearchValueTypeDefinition }
     ],
     allowMultiple: false,
     allowOtherDescription: false
+  },
+  'age': {
+    type: 'NUMBER',
+    allowMultiple: false,
+    allowOtherDescription: false
+  },
+  'profile.doNotEmail': {
+    type: 'BOOLEAN',
+    allowMultiple: false,
+    allowOtherDescription: false
   }
+
 }
 
 jest.mock('../api/api', () => ({
@@ -214,11 +228,61 @@ describe('SearchQueryBuilder', () => {
 
     expect(screen.getByText('(switch to basic view)').className).toContain('disabled')
   })
+
+  it('can parse numbers', async () => {
+    const { RoutedComponent } = setupRouterTest(
+      <TestFullQueryBuilderState initialExp='{age} = 10'/>)
+    render(RoutedComponent)
+
+    await waitFor(() => expect(screen.getByText('(switch to advanced view)').className).not.toContain('disabled'))
+
+    await waitFor(() => {
+      expect(screen.getByText('age')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('10')).toBeInTheDocument()
+    })
+
+    await userEvent.click(screen.getByText('(switch to advanced view)'))
+
+    await waitFor(() => {
+      expect(screen.getByText('{age} = 10')).toBeInTheDocument()
+    })
+  })
+
+  it('can parse booleans', async () => {
+    const { RoutedComponent } = setupRouterTest(
+      <TestFullQueryBuilderState initialExp='{profile.doNotEmail} = true'/>)
+    render(RoutedComponent)
+
+    await waitFor(() => expect(screen.getByText('(switch to advanced view)').className).not.toContain('disabled'))
+
+    await waitFor(() => {
+      expect(screen.getByText('profile.doNotEmail')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('true')).toBeInTheDocument()
+    })
+
+    await userEvent.click(screen.getByText('(switch to advanced view)'))
+
+    await waitFor(() => {
+      expect(screen.getByText('{profile.doNotEmail} = true')).toBeInTheDocument()
+    })
+
+    await waitFor(() => expect(screen.getByText('(switch to basic view)').className).not.toContain('disabled'))
+
+    await userEvent.click(screen.getByText('(switch to basic view)'))
+
+    await userEvent.type(screen.getByDisplayValue('true'), 'asdlkfjasdl')
+
+    await userEvent.click(screen.getByText('(switch to advanced view)'))
+
+    await waitFor(() => {
+      expect(screen.getByText('{profile.doNotEmail} = false')).toBeInTheDocument()
+    })
+  })
 })
 
 
-const TestFullQueryBuilderState = () => {
-  const [searchExpression, setSearchExpression] = React.useState('')
+const TestFullQueryBuilderState = ({ initialExp = '' }: { initialExp?: string }) => {
+  const [searchExpression, setSearchExpression] = React.useState(initialExp)
   return <SearchQueryBuilder
     studyEnvContext={mockStudyEnvContext()}
     onSearchExpressionChange={setSearchExpression}

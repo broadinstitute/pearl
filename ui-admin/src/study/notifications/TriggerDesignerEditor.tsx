@@ -20,6 +20,8 @@ import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import InfoPopup from 'components/forms/InfoPopup'
 import { TextInput } from 'components/forms/TextInput'
 import { NavLink } from 'react-router-dom'
+import { Checkbox } from 'components/forms/Checkbox'
+import { LazySearchQueryBuilder } from 'search/LazySearchQueryBuilder'
 
 
 export const TriggerDesignerEditor = (
@@ -38,6 +40,7 @@ export const TriggerDesignerEditor = (
   }) => {
   return <div>
     <TriggerTypeEditor
+      studyEnvContext={studyEnvContext}
       baseFieldsOnly={baseFieldsOnly}
       trigger={trigger}
       updateTrigger={updateTrigger}
@@ -62,10 +65,12 @@ const triggerTypeLabels = {
 const TriggerTypeEditor = (
   {
     baseFieldsOnly,
+    studyEnvContext,
     trigger,
     updateTrigger
   }: {
     baseFieldsOnly: boolean
+    studyEnvContext: StudyEnvContextT,
     trigger: Trigger;
     updateTrigger: (string: keyof Trigger, value: unknown) => void;
   }
@@ -115,11 +120,19 @@ const TriggerTypeEditor = (
 
 
         {!baseFieldsOnly && <>
+
+          {trigger.triggerType !== 'AD_HOC' &&
+              <HorizontalBar/>}
+
           {trigger.triggerType === 'TASK_REMINDER'
             && <>
-              <HorizontalBar/>
               <TaskReminderEditor trigger={trigger} updateTrigger={updateTrigger}/>
             </>}
+
+          {trigger.triggerType !== 'AD_HOC' && <TriggerRuleEditor
+            studyEnvContext={studyEnvContext}
+            trigger={trigger}
+            updateTrigger={updateTrigger}/>}
         </>
         }
 
@@ -229,6 +242,33 @@ const TaskReminderEditor = (
       </label>
     </div>
   </div>
+}
+
+const TriggerRuleEditor = (
+  {
+    studyEnvContext,
+    trigger,
+    updateTrigger
+  }: {
+    studyEnvContext: StudyEnvContextT,
+    trigger: Trigger;
+    updateTrigger: (string: keyof Trigger, value: unknown) => void;
+  }
+) => {
+  console.log(trigger.rule)
+  return <>
+    <Checkbox
+      checked={trigger.rule !== undefined}
+      onChange={checked => updateTrigger('rule', checked ? '' : undefined)}
+      label={'Only trigger if enrollee meets certain conditions'}
+    />
+    {trigger.rule !== undefined && <>
+      <LazySearchQueryBuilder
+        studyEnvContext={studyEnvContext}
+        onSearchExpressionChange={exp => updateTrigger('rule', exp)}
+        searchExpression={trigger.rule}/>
+    </>}
+  </>
 }
 
 const actionTypeLabels = {
