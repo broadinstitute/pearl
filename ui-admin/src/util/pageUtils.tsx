@@ -1,8 +1,4 @@
 import React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faWrench } from '@fortawesome/free-solid-svg-icons'
-import { faClipboardCheck } from '@fortawesome/free-solid-svg-icons/faClipboardCheck'
-import { faUsers } from '@fortawesome/free-solid-svg-icons/faUsers'
 
 /** renders a page header with the appropriate styling and spacing */
 export const renderPageHeader = (content: React.ReactNode) => {

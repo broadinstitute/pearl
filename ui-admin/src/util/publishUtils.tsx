@@ -27,6 +27,6 @@ export const emptyStudyEnvChange: StudyEnvironmentChange = {
 
 export const ENVIRONMENT_ICON_MAP: Record<string, React.ReactNode> = {
   sandbox: <FontAwesomeIcon className="fa-sm text-gray text-muted" icon={faWrench}/>,
-irb: <FontAwesomeIcon className="fa-sm text-gray text-muted" icon={faClipboardCheck}/>,
-live: <FontAwesomeIcon className="fa-sm text-gray text-muted" icon={faUsers}/>
+  irb: <FontAwesomeIcon className="fa-sm text-gray text-muted" icon={faClipboardCheck}/>,
+  live: <FontAwesomeIcon className="fa-sm text-gray text-muted" icon={faUsers}/>
 }
