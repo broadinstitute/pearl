@@ -38,6 +38,17 @@ public class AnswerTermParser extends SearchTermParser<AnswerTerm> {
     }
 
     @Override
+    public AnswerTerm parse(String studyStableId, String variables) {
+        List<String> arguments = splitArguments(variables, 2);
+
+        if (arguments.size() != 2) {
+            throw new IllegalArgumentException("Answer terms must be in the format {answer.surveyStableId.questionStableId}. Instead, got: " + variables);
+        }
+
+        return new AnswerTerm(answerDao, studyStableId, arguments.get(0), arguments.get(1));
+    }
+
+    @Override
     public String getTermName() {
         return "answer";
     }

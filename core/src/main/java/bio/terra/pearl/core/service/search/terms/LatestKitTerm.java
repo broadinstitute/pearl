@@ -20,7 +20,7 @@ import static org.jooq.impl.DSL.condition;
 /**
  * This term fetches information about the latest kit request for an enrollee.
  */
-public class LatestKitTerm implements SearchTerm {
+public class LatestKitTerm extends SearchTerm {
     private final String field;
     private final KitRequestDao kitRequestDao;
 

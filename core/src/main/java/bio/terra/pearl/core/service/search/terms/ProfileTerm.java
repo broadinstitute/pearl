@@ -16,7 +16,7 @@ import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueT
 /**
  * This term can be used to search for any of the profile or mailing address fields within a search expression.
  */
-public class ProfileTerm implements SearchTerm {
+public class ProfileTerm extends SearchTerm {
     private final String field;
     private final ProfileDao profileDao;
     private final MailingAddressDao mailingAddressDao;

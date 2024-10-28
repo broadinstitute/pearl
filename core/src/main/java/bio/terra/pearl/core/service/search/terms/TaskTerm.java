@@ -22,7 +22,7 @@ import static org.jooq.impl.DSL.condition;
 /**
  * Allows searching on an enrollee's task status.
  */
-public class TaskTerm implements SearchTerm {
+public class TaskTerm extends SearchTerm {
     private final String targetStableId;
     private final String field;
     private final ParticipantTaskDao participantTaskDao;

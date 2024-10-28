@@ -13,7 +13,7 @@ import java.util.Optional;
  * Helper class for search functions that can take a variable number of arguments.
  * This class ensures that all arguments are of the same type. Examples: max, min
  */
-public abstract class VarArgFunction implements SearchTerm {
+public abstract class VarArgFunction extends SearchTerm {
 
     protected final List<SearchTerm> terms;
 
