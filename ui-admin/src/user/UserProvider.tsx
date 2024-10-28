@@ -65,11 +65,11 @@ export default function UserProvider({ children }: { children: React.ReactNode }
   }
 
   const toggleSuperuserOverride = () => {
-    if (!userState) {
-      return
+    if (!userState) { return }
+    const newUser = {
+      ...userState,
+      superuser: !userState.superuser
     }
-    const newUser = { ...userState }
-    newUser.superuser = !newUser.superuser
     setUserState(newUser)
   }
 

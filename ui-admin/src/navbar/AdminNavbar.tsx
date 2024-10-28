@@ -65,9 +65,11 @@ function AdminNavbar() {
             </a>
             <div className="dropdown-menu dropdown-menu-end p-3">
               <h3 className="h6">{user.username}</h3>
-              { user.superuser && <Checkbox label={'Enable superuser view'}
-                checked={user.superuser}
-                onChange={() => toggleSuperuserOverride()}/> }
+              { user.superuser &&
+                <Checkbox label={'Enable superuser view'} onClick={e => e.preventDefault()}
+                  checked={user.superuser}
+                  onChange={() => toggleSuperuserOverride()}/>
+              }
               <hr/>
               <ul className="list-unstyled">
                 <li>
