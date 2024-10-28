@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { UserContextT, useUser } from 'user/UserProvider'
+import { useUser } from 'user/UserProvider'
 
 import { Link } from 'react-router-dom'
 import { useNavContext } from './NavContextProvider'
 import { faChevronRight, faQuestionCircle, faUserCircle } from '@fortawesome/free-solid-svg-icons'
 import ContactSupportInfoModal from '../help/ContactSupportInfoModal'
+import { Checkbox } from '../components/forms/Checkbox'
 
 /** note we name this adminNavbar to avoid naming conflicts with bootstrap navbar */
 function AdminNavbar() {
   const { breadCrumbs } = useNavContext()
-  const currentUser: UserContextT = useUser()
+  const { user, logoutUser, toggleSuperuserOverride } = useUser()
   const [showContactModal, setShowContactModal] = useState(false)
 
-  if (!currentUser.user) {
+  if (!user) {
     return <div></div>
   }
   return <>
@@ -56,18 +57,21 @@ function AdminNavbar() {
               </ul>
             </div>
           </li>
-          {currentUser.user && <li className="nav-item dropdown">
+          {user && <li className="nav-item dropdown">
             <a className="d-flex nav-link dropdown-toggle align-items-center"
               href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <FontAwesomeIcon icon={faUserCircle} className="d-none d-lg-inline fa-2x nav-icon" title="user menu"/>
-              <span className="d-lg-none ms-2">{currentUser.user.username}</span>
+              <span className="d-lg-none ms-2">{user.username}</span>
             </a>
             <div className="dropdown-menu dropdown-menu-end p-3">
-              <h3 className="h6">{currentUser.user.username}</h3>
+              <h3 className="h6">{user.username}</h3>
+              { user.superuser && <Checkbox label={'Enable superuser view'}
+                checked={user.superuser}
+                onChange={() => toggleSuperuserOverride()}/> }
               <hr/>
               <ul className="list-unstyled">
                 <li>
-                  <a className="dropdown-item" onClick={currentUser.logoutUser}>Logout</a>
+                  <a className="dropdown-item" onClick={logoutUser}>Logout</a>
                 </li>
               </ul>
             </div>
