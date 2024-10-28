@@ -10,7 +10,7 @@ import java.util.UUID;
 import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.NUMBER;
 
 @Service
-public class AgeTermParser implements SearchTermParser<AgeTerm> {
+public class AgeTermParser extends SearchTermParser<AgeTerm> {
     private final ProfileDao profileDao;
 
     public AgeTermParser(ProfileDao profileDao) {

@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class UserTermParser implements SearchTermParser<UserTerm> {
+public class UserTermParser extends SearchTermParser<UserTerm> {
     private final ParticipantUserDao participantUserDao;
 
     public UserTermParser(ParticipantUserDao participantUserDao) {
@@ -16,8 +16,8 @@ public class UserTermParser implements SearchTermParser<UserTerm> {
     }
 
     @Override
-    public UserTerm parse(String term) {
-        return new UserTerm(participantUserDao, getArgument(term));
+    public UserTerm parse(String field) {
+        return new UserTerm(participantUserDao, field);
     }
 
     @Override

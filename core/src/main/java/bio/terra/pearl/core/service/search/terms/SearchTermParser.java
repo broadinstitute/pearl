@@ -10,59 +10,63 @@ import java.util.UUID;
 /**
  * Interface for parsing search terms.
  */
-public interface SearchTermParser<T extends SearchTerm> {
+public abstract class SearchTermParser<T extends SearchTerm> {
+    public T parseVariable(String variable) {
+        String variableNoBraces = stripBraces(variable);
+
+        List<String> splitModelName = List.of(variableNoBraces.split("\\.", 2));
+
+        if (!splitModelName.getFirst().equals(this.getTermName())) {
+            throw new IllegalArgumentException("Variable does not match term parser: " + variable);
+        }
+
+        if (splitModelName.size() == 1) {
+            return this.parse("");
+        } else {
+            return this.parse(splitModelName.get(1));
+        }
+    }
+
     /**
      * Parse the term string into a search term.
      */
-    T parse(String variable);
+    protected abstract T parse(String arguments);
 
     /**
      * Get the facets that can be used in a search expression for the given study environment.
      */
-    Map<String, SearchValueTypeDefinition> getFacets(UUID studyEnvId);
+    public abstract Map<String, SearchValueTypeDefinition> getFacets(UUID studyEnvId);
 
     /**
      * The name of the term. E.g., AgeTermParser would return "age".
      */
-    String getTermName();
+    public abstract String getTermName();
 
     /**
      * Check if the variable matches this term parser.
      */
-    default Boolean match(String variable) {
+    public Boolean match(String variable) {
         variable = stripBraces(variable);
-        return variable.equals(this.getTermName()) || variable.startsWith(this.getTermName() + ".");
+        return variable.equals(this.getTermName())
+                || variable.startsWith(this.getTermName() + ".");
     };
 
     /**
      * Splits variable into arguments, e.g. "answer.surveyStableId.questionStableId" -> ["surveyStableId", "questionStableId"]
      */
-    default List<String> getArguments(String variable) {
-        return List.of(getArgument(variable).split("\\."));
+    protected List<String> splitArguments(String arguments) {
+        return List.of(arguments.split("\\."));
     }
 
     /**
      * Splits variable into arguments based on limit
      * e.g. with limit 2 "answer.arg1.arg2.arg3" -> ["arg1", "arg2.arg3"]
      */
-    default List<String> getArguments(String variable, int limit) {
-        return List.of(getArgument(variable).split("\\.", limit + 1));
+    protected List<String> splitArguments(String arguments, int numArguments) {
+        return List.of(arguments.split("\\.", numArguments + 1));
     }
 
-    /**
-     * Get the argument portion of the variable, e.g. "answer.surveyStableId.questionStableId" -> "surveyStableId.questionStableId"
-     */
-    default String getArgument(String variable) {
-        variable = stripBraces(variable);
-
-        List<String> split = List.of(variable.split("\\.", 2));
-        if (split.getFirst().equals(this.getTermName())) {
-            return split.get(1);
-        }
-        return variable;
-    }
-
-    default String stripBraces(String variable) {
+    protected String stripBraces(String variable) {
         if (variable.startsWith("{") && variable.endsWith("}")) {
             return variable.substring(1, variable.length() - 1);
         }
@@ -72,7 +76,7 @@ public interface SearchTermParser<T extends SearchTerm> {
     /**
      * Add the term prefix to the facets. E.g., "givenName" -> "profile.givenName"
      */
-    default Map<String, SearchValueTypeDefinition> addTermPrefix(Map<String, SearchValueTypeDefinition> facets) {
+    protected Map<String, SearchValueTypeDefinition> addTermPrefix(Map<String, SearchValueTypeDefinition> facets) {
         Map<String, SearchValueTypeDefinition> newFacets = new HashMap<>();
         for (Map.Entry<String, SearchValueTypeDefinition> entry : facets.entrySet()) {
             newFacets.put(this.getTermName() + "." + entry.getKey(), entry.getValue());

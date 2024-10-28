@@ -8,15 +8,15 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class PortalUserTermParser implements SearchTermParser<PortalUserTerm> {
+public class PortalUserTermParser extends SearchTermParser<PortalUserTerm> {
     private final PortalParticipantUserDao portalParticipantUserDao;
     public PortalUserTermParser(PortalParticipantUserDao portalParticipantUserDao) {
         this.portalParticipantUserDao = portalParticipantUserDao;
     }
 
     @Override
-    public PortalUserTerm parse(String term) {
-        return new PortalUserTerm(portalParticipantUserDao, getArgument(term));
+    public PortalUserTerm parse(String field) {
+        return new PortalUserTerm(portalParticipantUserDao, field);
     }
 
     @Override

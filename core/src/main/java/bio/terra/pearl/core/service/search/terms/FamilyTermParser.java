@@ -8,15 +8,15 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class FamilyTermParser implements SearchTermParser<FamilyTerm> {
+public class FamilyTermParser extends SearchTermParser<FamilyTerm> {
     private final FamilyDao familyDao;
     public FamilyTermParser(FamilyDao familyDao) {
         this.familyDao = familyDao;
     }
 
     @Override
-    public FamilyTerm parse(String term) {
-        return new FamilyTerm(familyDao, getArgument(term));
+    public FamilyTerm parse(String field) {
+        return new FamilyTerm(familyDao, field);
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class ProfileTermParser implements SearchTermParser<ProfileTerm> {
+public class ProfileTermParser extends SearchTermParser<ProfileTerm> {
     private final ProfileDao profileDao;
     private final MailingAddressDao mailingAddressDao;
 
@@ -19,8 +19,8 @@ public class ProfileTermParser implements SearchTermParser<ProfileTerm> {
     }
 
     @Override
-    public ProfileTerm parse(String term) {
-        return new ProfileTerm(profileDao, mailingAddressDao, getArgument(term));
+    public ProfileTerm parse(String field) {
+        return new ProfileTerm(profileDao, mailingAddressDao, field);
     }
 
     @Override

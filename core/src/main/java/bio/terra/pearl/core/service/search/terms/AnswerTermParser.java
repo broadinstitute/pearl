@@ -15,7 +15,7 @@ import java.util.*;
 import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.STRING;
 
 @Service
-public class AnswerTermParser implements SearchTermParser<AnswerTerm> {
+public class AnswerTermParser extends SearchTermParser<AnswerTerm> {
     private final AnswerDao answerDao;
     private final SurveyService surveyService;
     private final ObjectMapper objectMapper;
@@ -28,7 +28,7 @@ public class AnswerTermParser implements SearchTermParser<AnswerTerm> {
 
     @Override
     public AnswerTerm parse(String term) {
-        List<String> arguments = getArguments(term, 2);
+        List<String> arguments = splitArguments(term, 2);
 
         if (arguments.size() != 2) {
             throw new IllegalArgumentException("Answer terms must be in the format {answer.surveyStableId.questionStableId}. Instead, got: " + term);

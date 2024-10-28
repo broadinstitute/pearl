@@ -8,15 +8,15 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class LatestKitTermParser implements SearchTermParser<LatestKitTerm> {
+public class LatestKitTermParser extends SearchTermParser<LatestKitTerm> {
     private final KitRequestDao kitRequestDao;
     public LatestKitTermParser(KitRequestDao kitRequestDao) {
         this.kitRequestDao = kitRequestDao;
     }
 
     @Override
-    public LatestKitTerm parse(String term) {
-        return new LatestKitTerm(kitRequestDao, getArgument(term));
+    public LatestKitTerm parse(String field) {
+        return new LatestKitTerm(kitRequestDao, field);
     }
 
     @Override

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class TaskTermParser implements SearchTermParser<TaskTerm> {
+public class TaskTermParser extends SearchTermParser<TaskTerm> {
     private final ParticipantTaskDao participantTaskDao;
     private final SurveyService surveyService;
 
@@ -23,7 +23,11 @@ public class TaskTermParser implements SearchTermParser<TaskTerm> {
 
     @Override
     public TaskTerm parse(String term) {
-        List<String> arguments = getArguments(term, 2);
+        List<String> arguments = splitArguments(term, 2);
+
+        if (arguments.size() != 2) {
+            throw new IllegalArgumentException("Task term must have two arguments: {task.taskStableId.field}. Instead, got: " + term);
+        }
 
         return new TaskTerm(participantTaskDao, arguments.get(0), arguments.get(1));
     }

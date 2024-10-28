@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-public class EnrolleeTermParser implements SearchTermParser<EnrolleeTerm> {
+public class EnrolleeTermParser extends SearchTermParser<EnrolleeTerm> {
     @Override
-    public EnrolleeTerm parse(String term) {
-        return new EnrolleeTerm(getArgument(term));
+    public EnrolleeTerm parse(String field) {
+        return new EnrolleeTerm(field);
     }
 
     @Override

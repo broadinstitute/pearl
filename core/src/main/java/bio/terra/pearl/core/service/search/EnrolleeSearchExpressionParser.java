@@ -196,7 +196,7 @@ public class EnrolleeSearchExpressionParser {
     }
 
     private SearchTerm parseVariableTerm(String variable) {
-        return getTermParser(variable).parse(variable);
+        return getTermParser(variable).parseVariable(variable);
     }
 
     private SearchTermParser getTermParser(String variable) {
