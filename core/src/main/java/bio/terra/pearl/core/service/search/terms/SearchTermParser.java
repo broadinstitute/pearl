@@ -56,8 +56,6 @@ public interface SearchTermParser<T extends SearchTerm> {
         variable = stripBraces(variable);
 
         List<String> split = List.of(variable.split("\\.", 2));
-        System.out.println(split);
-        System.out.println(this.getTermName());
         if (split.getFirst().equals(this.getTermName())) {
             return split.get(1);
         }
@@ -71,6 +69,9 @@ public interface SearchTermParser<T extends SearchTerm> {
         return variable;
     }
 
+    /**
+     * Add the term prefix to the facets. E.g., "givenName" -> "profile.givenName"
+     */
     default Map<String, SearchValueTypeDefinition> addTermPrefix(Map<String, SearchValueTypeDefinition> facets) {
         Map<String, SearchValueTypeDefinition> newFacets = new HashMap<>();
         for (Map.Entry<String, SearchValueTypeDefinition> entry : facets.entrySet()) {

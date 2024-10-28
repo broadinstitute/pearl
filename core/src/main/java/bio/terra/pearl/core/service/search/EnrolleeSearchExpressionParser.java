@@ -53,7 +53,6 @@ public class EnrolleeSearchExpressionParser {
                 profileTermParser,
                 taskTermParser,
                 userTermParser
-
         );
     }
 
@@ -197,8 +196,7 @@ public class EnrolleeSearchExpressionParser {
     }
 
     private SearchTerm parseVariableTerm(String variable) {
-        SearchTermParser termParser = getTermParser(variable);
-        return termParser.parse(variable);
+        return getTermParser(variable).parse(variable);
     }
 
     private SearchTermParser getTermParser(String variable) {

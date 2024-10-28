@@ -48,9 +48,6 @@ public class AnswerTermParser implements SearchTermParser<AnswerTerm> {
 
         List<Survey> surveys = surveyService.findByStudyEnvironmentIdWithContent(studyEnvId);
         for (Survey survey : surveys) {
-            // task fields
-            TaskTerm.FIELDS.forEach((term, type) -> fields.put("task." + survey.getStableId() + "." + term, type));
-            // answer fields
             surveyService
                     .getSurveyQuestionDefinitions(survey)
                     .forEach(def -> {

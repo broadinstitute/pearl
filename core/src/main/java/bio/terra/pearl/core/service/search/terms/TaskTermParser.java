@@ -38,7 +38,6 @@ public class TaskTermParser implements SearchTermParser<TaskTerm> {
         Map<String, SearchValueTypeDefinition> fields = new HashMap<>();
         List<Survey> surveys = surveyService.findByStudyEnvironmentIdWithContent(studyEnvId);
         for (Survey survey : surveys) {
-            // task fields
             TaskTerm.FIELDS.forEach((term, type) -> fields.put("task." + survey.getStableId() + "." + term, type));
         }
 
