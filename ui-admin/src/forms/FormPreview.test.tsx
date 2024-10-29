@@ -47,8 +47,6 @@ describe('FormPreview', () => {
         <FormPreview formContent={formContent} currentLanguage={MOCK_ENGLISH_LANGUAGE}/>
       </MockI18nProvider>)
 
-
-    screen.debug()
     // Assert
     screen.getAllByText('First name')
     screen.getAllByText('Last name')
