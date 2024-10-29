@@ -1,12 +1,22 @@
-import { Portal, Study } from '@juniper/ui-core'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { studyKitsPath, studyParticipantsPath } from 'portal/PortalRouter'
+import {
+  Portal,
+  Study
+} from '@juniper/ui-core'
+import {
+  NavLink,
+  useNavigate
+} from 'react-router-dom'
+import {
+  studyKitsPath,
+  studyParticipantsPath
+} from 'portal/PortalRouter'
 import StudySelector from './StudySelector'
 import React from 'react'
 import {
   adminTasksPath,
   studyEnvDataBrowserPath,
-  studyEnvDatasetListViewPath, studyEnvExportIntegrationsPath,
+  studyEnvDatasetListViewPath,
+  studyEnvExportIntegrationsPath,
   studyEnvFormsPath,
   studyEnvImportPath,
   studyEnvMailingListPath,
@@ -16,8 +26,14 @@ import {
   studyEnvSiteSettingsPath
 } from '../study/StudyEnvironmentRouter'
 import CollapsableMenu from './CollapsableMenu'
-import { userHasPermission, useUser } from 'user/UserProvider'
-import { studyPublishingPath, studyUsersPath } from '../study/StudyRouter'
+import {
+  userHasPermission,
+  useUser
+} from 'user/UserProvider'
+import {
+  studyPublishingPath,
+  studyUsersPath
+} from '../study/StudyRouter'
 import { sidebarNavLinkClasses } from './AdminSidebar'
 
 
@@ -97,7 +113,7 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
         </li>
         <li className="mb-2">
           <NavLink to={studyEnvNotificationsPath(portalShortcode, study.shortcode, 'sandbox')}
-            className={sidebarNavLinkClasses} style={navStyleFunc}>Emails &amp; Notifications</NavLink>
+            className={sidebarNavLinkClasses} style={navStyleFunc}>Emails &amp; Triggers</NavLink>
         </li>
       </ul>}/>
       <CollapsableMenu header={'Publish'} content={<ul className="list-unstyled">
