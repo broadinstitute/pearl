@@ -32,7 +32,8 @@ export default function PortalPublishingView({ portal, studyShortcode }: {portal
         and the live environment is for real participant use.
       </p>
       <p>
-       Once you have made changes to your study in the sandbox environment, you can publish those changes to the irb environment.
+       Once you have made changes to your study in the sandbox environment,
+        you can publish those changes to the irb environment.
        If these changes require IRB review, you can then continue to make other changes in the sandbox environment while
        you wait for approval.  Once the changes are approved (or if they do not require IRB review), you can publish
        from the IRB environment to the live environment.
