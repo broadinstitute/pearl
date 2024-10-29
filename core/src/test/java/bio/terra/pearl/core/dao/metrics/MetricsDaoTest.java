@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.dao.metrics;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
+import bio.terra.pearl.core.dao.dataimport.TimeShiftDao;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.factory.participant.PortalParticipantUserFactory;
@@ -41,10 +42,8 @@ public class MetricsDaoTest extends BaseSpringBootTest {
   public void testStudyEnrollmentMetrics(TestInfo info) {
     StudyEnvironment studyEnvironment = studyEnvironmentFactory.buildPersisted(getTestName(info));
     enrolleeFactory.buildPersisted(getTestName(info), studyEnvironment);
-      BaseEntity.BaseEntityBuilder builder = enrolleeFactory.builderWithDependencies(getTestName(info), studyEnvironment)
-        .createdAt(Instant.now().minus(Duration.ofDays(4)));
-    // The superBuilder 'createdAt' method returns the type of builder the property is contained in, so we have to recast
-    enrolleeFactory.buildPersisted((Enrollee.EnrolleeBuilder) builder);
+    Enrollee pastEnrollee = enrolleeFactory.buildPersisted(getTestName(info), studyEnvironment);
+    timeShiftDao.changeEnrolleeCreationTime(pastEnrollee.getId(), Instant.now().minus(Duration.ofDays(4)));
     List<BasicMetricDatum> metrics = metricsDao.studyEnrollments(studyEnvironment.getId(), new TimeRange(null, null));
     assertThat(metrics, hasSize(2));
 
@@ -137,4 +136,6 @@ public class MetricsDaoTest extends BaseSpringBootTest {
   private PortalParticipantUserFactory portalParticipantUserFactory;
   @Autowired
   private ParticipantTaskService participantTaskService;
+  @Autowired
+  private TimeShiftDao timeShiftDao;
 }

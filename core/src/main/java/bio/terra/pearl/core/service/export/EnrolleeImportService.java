@@ -371,8 +371,11 @@ public class EnrolleeImportService {
     }
 
     private void importKitRequests(Map<String, String> enrolleeMap, UUID adminId, Enrollee enrollee) {
-        new KitRequestFormatter(new ExportOptions()).listFromStringMap(enrolleeMap).stream().map(
-                kitRequestDto -> kitRequestService.create(convertKitRequestDto(adminId, enrollee, kitRequestDto))).toList();
+        KitRequestFormatter formatter = new KitRequestFormatter(new ExportOptions());
+        formatter.listFromStringMap(enrolleeMap).stream().forEach(kitRequestDto -> {
+            KitRequest kitRequest = kitRequestService.create(convertKitRequestDto(adminId, enrollee, kitRequestDto));
+            timeShiftDao.changeKitCreationTime(kitRequest.getId(), kitRequestDto.getCreatedAt());
+        });
     }
 
     private KitRequest convertKitRequestDto(
