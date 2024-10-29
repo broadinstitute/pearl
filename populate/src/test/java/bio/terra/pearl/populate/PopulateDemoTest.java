@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,6 +62,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
         checkProxyWithOneGovernedEnrollee(enrollees);
         checkProxyWithTwoGovernedEnrollee(enrollees);
         checkLostInterestEnrollee(enrollees);
+        checkRecurringSurveyTasks(enrollees);
         checkExportContent(sandboxEnvironmentId);
         checkFamilies(sandboxEnvironmentId);
         checkPortalChangeRecords(portal);
@@ -246,6 +248,18 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
         emailTemplates.forEach(emailTemplate -> {
             assertThat(emailTemplate.getStableId(), Matchers.startsWith(newShortcode));
         });
+    }
+
+    private void checkRecurringSurveyTasks(List<Enrollee> sandboxEnrollees) {
+        Enrollee jonasSalk = sandboxEnrollees.stream().filter(sandboxEnrollee -> "HDSALK".equals(sandboxEnrollee.getShortcode()))
+                .findFirst().orElseThrow();
+        List<ParticipantTask> tasks = participantTaskService.findByEnrolleeId(jonasSalk.getId());
+        // confirm they have two lifestyle survey tasks, both with responses that aren't the same
+        List<ParticipantTask> lifestyleTasks = tasks.stream().filter(task -> Objects.equals(task.getTargetStableId(),"hd_hd_lifestyle")).toList();
+        assertThat(lifestyleTasks, hasSize(2));
+        assertThat(lifestyleTasks.get(0).getSurveyResponseId() != null &&
+                lifestyleTasks.get(1).getSurveyResponseId() != null &&
+                lifestyleTasks.get(0).getSurveyResponseId() != lifestyleTasks.get(1).getSurveyResponseId(), equalTo(true));
     }
 
     @Autowired
