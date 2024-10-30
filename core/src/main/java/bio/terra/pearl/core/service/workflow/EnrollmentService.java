@@ -25,8 +25,8 @@ import bio.terra.pearl.core.service.survey.SurveyService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import liquibase.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -196,7 +196,7 @@ public class EnrollmentService {
     }
 
     private void backfillPreEnrollResponse(PortalParticipantUser operator, Enrollee enrollee, PreEnrollmentResponse preEnrollResponse) {
-        if (Objects.isNull(preEnrollResponse) || StringUtil.isEmpty(preEnrollResponse.getFullData())) {
+        if (Objects.isNull(preEnrollResponse) || StringUtils.isEmpty(preEnrollResponse.getFullData())) {
             return;
         }
 
