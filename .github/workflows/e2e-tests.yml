@@ -45,6 +45,22 @@ jobs:
       run: |
         ./scripts/run_dockerized.sh participant
         ./scripts/run_dockerized.sh admin
+    - name: Wait for applications to start
+      run: |
+        for i in {1..30}; do
+          participant_status=$(curl -s http://localhost:8080/status | jq -r '.ok')
+          admin_status=$(curl -s http://localhost:8081/status | jq -r '.ok')
+          if [ "$participant_status" == "true" ] && [ "$admin_status" == "true" ]; then
+            echo "Applications are ready"
+            break
+          fi
+          echo "Waiting for applications to start..."
+          sleep 10
+        done
+        if [ "$participant_status" != "true" ] || [ "$admin_status" != "true" ]; then
+          echo "Application start timed out after 5 minutes"
+          exit 1
+        fi
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
