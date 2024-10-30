@@ -63,49 +63,6 @@ export function PagedSurveyView({
   const prevSave = useRef(resumableData?.data ?? {})
   const lastAutoSaveErrored = useRef(false)
 
-  /** Submit the response to the server */
-  const onComplete = async () => {
-    if (!surveyModel || !refreshSurvey) {
-      return
-    }
-    const currentModelValues = getDataWithCalculatedValues(surveyModel)
-    const responseDto = {
-      resumeData: getResumeData(surveyModel, adminUserId || enrollee.participantUserId, true),
-      enrolleeId: enrollee.id,
-      answers: getUpdatedAnswers(prevSave.current as Record<string, object>, currentModelValues, selectedLanguage),
-      creatingParticipantId: adminUserId ? null : enrollee.participantUserId,
-      creatingAdminUserId: adminUserId,
-      surveyId: form.id,
-      complete: true
-    } as SurveyResponse
-
-    try {
-      const response = await Api.updateSurveyResponse({
-        studyEnvParams, stableId: form.stableId, enrolleeShortcode: enrollee.shortcode,
-        version: form.version,
-        response: {
-          ...responseDto,
-          justification
-        },
-        taskId
-      })
-      response.enrollee.participantTasks = response.tasks
-      updateEnrollee(response.enrollee)
-      updateProfile(response.profile)
-      refreshSurvey(surveyModel, null)
-      onSuccess()
-    } catch {
-      onFailure()
-      refreshSurvey(surveyModel, null)
-    }
-  }
-
-  const { surveyModel, refreshSurvey } = useSurveyJSModel(
-    form, resumableData, onComplete, pager, studyEnvParams.envName, enrollee.profile, proxyProfile, referencedAnswers
-  )
-
-  surveyModel.locale = selectedLanguage
-
   const saveDiff = () => {
     const currentModelValues = getDataWithCalculatedValues(surveyModel)
     const updatedAnswers = getUpdatedAnswers(
@@ -165,7 +122,52 @@ export function PagedSurveyView({
     })
   }
 
-  useAutosaveEffect(saveDiff, AUTO_SAVE_INTERVAL)
+  const cancelAutosave = useAutosaveEffect(saveDiff, AUTO_SAVE_INTERVAL)
+
+  /** Submit the response to the server */
+  const onComplete = async () => {
+    cancelAutosave()
+    if (!surveyModel || !refreshSurvey) {
+      return
+    }
+    const currentModelValues = getDataWithCalculatedValues(surveyModel)
+    const responseDto = {
+      resumeData: getResumeData(surveyModel, adminUserId || enrollee.participantUserId, true),
+      enrolleeId: enrollee.id,
+      answers: getUpdatedAnswers(prevSave.current as Record<string, object>, currentModelValues, selectedLanguage),
+      creatingParticipantId: adminUserId ? null : enrollee.participantUserId,
+      creatingAdminUserId: adminUserId,
+      surveyId: form.id,
+      complete: true
+    } as SurveyResponse
+
+    try {
+      const response = await Api.updateSurveyResponse({
+        studyEnvParams, stableId: form.stableId, enrolleeShortcode: enrollee.shortcode,
+        version: form.version,
+        response: {
+          ...responseDto,
+          justification
+        },
+        taskId
+      })
+      response.enrollee.participantTasks = response.tasks
+      updateEnrollee(response.enrollee)
+      updateProfile(response.profile)
+      refreshSurvey(surveyModel, null)
+      onSuccess()
+    } catch {
+      onFailure()
+      refreshSurvey(surveyModel, null)
+    }
+  }
+
+  const { surveyModel, refreshSurvey } = useSurveyJSModel(
+    form, resumableData, onComplete, pager, studyEnvParams.envName, enrollee.profile, proxyProfile, referencedAnswers
+  )
+
+  surveyModel.locale = selectedLanguage
+
   const isOutreach = form.surveyType === 'OUTREACH'
   return (
     <>
