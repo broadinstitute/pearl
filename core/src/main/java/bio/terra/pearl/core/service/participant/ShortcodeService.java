@@ -40,13 +40,14 @@ public class ShortcodeService {
         } catch (Exception e) {
             // Log this as an error, but don't treat it as fatal.
             // return an empty set so that we can continue generating shortcodes
-            log.error("Unable to load banned words file. Shortcodes will still be generated, but may contain profanity.", e);
+            log.error("Unable to load profanity list. Shortcodes will still be generated, but may contain profanity.", e);
             return Set.of();
         }
         return profanityList;
     }
 
-    //this is pretty naively implemented, but it's fine for now
+    //this is pretty naively implemented. if performance ends up being an issue, we can
+    //look into more efficient means of string matching
     public boolean isShortcodeBanned(String possibleShortcode) {
         for (String word : profanityList) {
             if (possibleShortcode.toLowerCase().contains(word.toLowerCase())) {
@@ -69,7 +70,7 @@ public class ShortcodeService {
             String possibleShortcode = randomUtilService.generateSecureRandomString(SHORTCODE_LENGTH, SHORTCODE_ALLOWED_CHARS);
 
             if (isShortcodeBanned(possibleShortcode)) {
-                log.info("Attempted to generate banned shortcode {} on retry attempt {}", possibleShortcode, tryNum);
+                log.info("Attempted to generate shortcode with profanity: {} (retry attempt {})", possibleShortcode, tryNum);
                 continue;
             }
 

@@ -47,7 +47,3 @@ terra.common:
   kubernetes:
     inKubernetes: false
 
-profanityFilter:
-  profanityListPath: core/src/main/resources/profanity/bannedWords.txt
-
-
