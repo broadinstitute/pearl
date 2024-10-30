@@ -1,0 +1,4 @@
+version: 2
+updates:
+  - commit-message:
+      prefix: "[JN-1457]"
