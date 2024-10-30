@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,17 +39,48 @@ class ShortcodeServiceTest {
     }
 
     @Test
+    void testIsShortcodeBanned() {
+        RandomUtilService randomUtilService = Mockito.mock(RandomUtilService.class);
+        ShortcodeService shortcodeService = Mockito.spy(new ShortcodeService(randomUtilService));
+
+        assertTrue(shortcodeService.isShortcodeBanned("BANNED"));
+    }
+
+    @Test
+    void testIsShortcodeAllowed() {
+        RandomUtilService randomUtilService = Mockito.mock(RandomUtilService.class);
+        ShortcodeService shortcodeService = Mockito.spy(new ShortcodeService(randomUtilService));
+
+        assertFalse(shortcodeService.isShortcodeBanned("ALLOWED"));
+    }
+
+    @Test
     void testFailsToGenerateProfanityShortcode() {
         RandomUtilService randomUtilService = Mockito.mock(RandomUtilService.class);
         Mockito.when(
-                randomUtilService.generateSecureRandomString(
-                        ShortcodeService.SHORTCODE_LENGTH,
-                        ShortcodeService.SHORTCODE_ALLOWED_CHARS))
+                        randomUtilService.generateSecureRandomString(
+                                ShortcodeService.SHORTCODE_LENGTH,
+                                ShortcodeService.SHORTCODE_ALLOWED_CHARS))
                 .thenReturn("BANNED");
         ShortcodeService shortcodeService = Mockito.spy(new ShortcodeService(randomUtilService));
-        Mockito.doReturn(Set.of("BANNED")).when(shortcodeService).loadProfanityList();
 
         assertThrows(InternalServerException.class,
                 () -> shortcodeService.generateShortcode(null, (s) -> Optional.of(true)));
+    }
+
+    @Test
+    void testRetriesAfterProfanityShortcode() {
+        RandomUtilService randomUtilService = Mockito.mock(RandomUtilService.class);
+        Mockito.when(
+                        randomUtilService.generateSecureRandomString(
+                                ShortcodeService.SHORTCODE_LENGTH,
+                                ShortcodeService.SHORTCODE_ALLOWED_CHARS))
+                .thenReturn("BANNED")
+                .thenReturn("ALLOWED");
+        ShortcodeService shortcodeService = Mockito.spy(new ShortcodeService(randomUtilService));
+
+        String shortcode = shortcodeService.generateShortcode(null, (s) -> Optional.empty());
+        assertNotNull(shortcode);
+        assertEquals("ALLOWED", shortcode);
     }
 }
