@@ -2,14 +2,15 @@ package bio.terra.pearl.core.service.participant;
 
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -18,37 +19,37 @@ import java.util.function.Function;
 public class ShortcodeService {
     public static final String SHORTCODE_ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static final int SHORTCODE_LENGTH = 6;
-    public static final String BANNED_WORDS_FILE = "core/src/main/resources/profanity/bannedWords.txt";
+    public static final String PROFANITY_LIST_PATH = "profanity/bannedWords.txt";
 
     private final RandomUtilService randomUtilService;
-    private Set<String> bannedWords;
+    private Set<String> profanityList;
 
     public ShortcodeService(RandomUtilService randomUtilService) {
-
         this.randomUtilService = randomUtilService;
-        this.bannedWords = loadBannedWords();
+        this.profanityList = loadProfanityList();
     }
 
-    public Set<String> loadBannedWords() {
-        bannedWords = new HashSet<>();
-        Path filePath = Path.of(BANNED_WORDS_FILE);
-        try {
-            InputStream bannedWordsStream = Files.newInputStream(filePath);
-            String bannedWordsString = new String(bannedWordsStream.readAllBytes());
-            bannedWords = Set.of(bannedWordsString.split("\n"));
+    public Set<String> loadProfanityList() {
+        ClassPathResource resource = new ClassPathResource(PROFANITY_LIST_PATH);
+        profanityList = new HashSet<>();
+        try (InputStream bannedWordsStream = resource.getInputStream();
+             Scanner scanner = new Scanner(bannedWordsStream)) {
+            while (scanner.hasNextLine()) {
+                profanityList.add(scanner.nextLine().trim());
+            }
         } catch (Exception e) {
             // Log this as an error, but don't treat it as fatal.
             // return an empty set so that we can continue generating shortcodes
-            log.error("Unable to load banned words file", e);
+            log.error("Unable to load banned words file. Shortcodes will still be generated, but may contain profanity.", e);
             return Set.of();
         }
-        return bannedWords;
+        return profanityList;
     }
 
     //this is pretty naively implemented, but it's fine for now
     public boolean isShortcodeBanned(String possibleShortcode) {
-        for (String bannedWord : bannedWords) {
-            if (possibleShortcode.toLowerCase().contains(bannedWord.toLowerCase())) {
+        for (String word : profanityList) {
+            if (possibleShortcode.toLowerCase().contains(word.toLowerCase())) {
                 return true;
             }
         }

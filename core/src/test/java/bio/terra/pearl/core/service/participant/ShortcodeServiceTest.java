@@ -42,11 +42,14 @@ class ShortcodeServiceTest {
 
     @Test
     void testFailsToGenerateProfanityShortcode() {
-        ShortcodeService shortcodeService = new ShortcodeService(new RandomUtilService());
-//        Mockito.doReturn(Set.of("BANNED")).when(shortcodeService).loadBannedWords();
-        Mockito.when(shortcodeService.loadBannedWords()).thenReturn(Set.of("BANNED"));
-
-        Mockito.when(shortcodeService.isShortcodeBanned(anyString())).thenReturn(true);
+        RandomUtilService randomUtilService = Mockito.mock(RandomUtilService.class);
+        Mockito.when(
+                randomUtilService.generateSecureRandomString(
+                        ShortcodeService.SHORTCODE_LENGTH,
+                        ShortcodeService.SHORTCODE_ALLOWED_CHARS))
+                .thenReturn("BANNED");
+        ShortcodeService shortcodeService = Mockito.spy(new ShortcodeService(randomUtilService));
+        Mockito.doReturn(Set.of("BANNED")).when(shortcodeService).loadProfanityList();
 
         assertThrows(InternalServerException.class,
                 () -> shortcodeService.generateShortcode(null, (s) -> Optional.of(true)));
