@@ -54,7 +54,7 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
   studyEnvContext: StudyEnvContextT, onUpdate: () => void
 }) {
   const params = useParams<EnrolleeParams>()
-  const { taskId } = useTaskIdParam()
+  let { taskId } = useTaskIdParam()
 
   const surveyStableId: string | undefined = params.surveyStableId
 
@@ -64,6 +64,10 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
   const surveyAndResponses = responseMap[surveyStableId]
   if (!surveyAndResponses.tasks.length) {
     return <div>This survey has not been assigned to this participant</div>
+  }
+  /** default to the most recent (tasks are already sorted by creation date) */
+  if (!taskId) {
+    taskId = surveyAndResponses.tasks[0].id
   }
   const task = surveyAndResponses.tasks.find(t => t.id === taskId)
   const response = surveyAndResponses.responses.find(r => task?.surveyResponseId === r.id)
