@@ -45,8 +45,14 @@ public class ShortcodeService {
         return bannedWords;
     }
 
+    //this is pretty naively implemented, but it's fine for now
     public boolean isShortcodeBanned(String possibleShortcode) {
-        return bannedWords.contains(possibleShortcode.toLowerCase());
+        for (String bannedWord : bannedWords) {
+            if (possibleShortcode.toLowerCase().contains(bannedWord.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -57,34 +63,24 @@ public class ShortcodeService {
      */
     @Transactional
     public <T> String generateShortcode(String prefix, Function<String, Optional<T>> findOneByShortcode) {
-        int MAX_TRIES = 10;
-        String shortcode = null;
+        final int MAX_TRIES = 10;
         for (int tryNum = 0; tryNum < MAX_TRIES; tryNum++) {
-//            String possibleShortcode = randomUtilService.generateSecureRandomString(SHORTCODE_LENGTH, SHORTCODE_ALLOWED_CHARS);
-            String possibleShortcode;
-            if(tryNum == 0){
-                possibleShortcode = "BLOODY";
-            } else {
-                possibleShortcode = randomUtilService.generateSecureRandomString(SHORTCODE_LENGTH, SHORTCODE_ALLOWED_CHARS);
-            }
+            String possibleShortcode = randomUtilService.generateSecureRandomString(SHORTCODE_LENGTH, SHORTCODE_ALLOWED_CHARS);
 
-            if(isShortcodeBanned(possibleShortcode)){
-                System.out.println("Banned word found: " + possibleShortcode);
+            if (isShortcodeBanned(possibleShortcode)) {
+                log.info("Attempted to generate banned shortcode {} on retry attempt {}", possibleShortcode, tryNum);
                 continue;
             }
 
             if (prefix != null && !prefix.isEmpty()) {
                 possibleShortcode = prefix + "_" + possibleShortcode;
             }
+
             if (findOneByShortcode.apply(possibleShortcode).isEmpty()) {
-                shortcode = possibleShortcode;
-                break;
+                return possibleShortcode;
             }
         }
-        if (shortcode == null) {
-            throw new InternalServerException("Unable to generate unique shortcode");
-        }
-        return shortcode;
+        throw new InternalServerException("Unable to generate unique shortcode");
     }
 }
 
