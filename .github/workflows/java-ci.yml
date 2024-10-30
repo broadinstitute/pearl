@@ -70,6 +70,7 @@ jobs:
         uses: dorny/test-reporter@v1
         with:
           name: JUnit Tests
+          token: ${{ secrets.BROADBOT_TOKEN }}
           path: >
             api-admin/build/test-results/test/*.xml,
             api-participant/build/test-results/test/*.xml,
