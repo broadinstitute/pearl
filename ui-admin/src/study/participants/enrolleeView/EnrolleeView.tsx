@@ -238,12 +238,13 @@ const SurveyList = ({ surveys, responseMap, emptyText }: { emptyText: string,
   </ul>
 }
 
-/** returns an icon based on the enrollee's responses.  Note this does not handle multi-responses yet */
+/** returns an icon based on the enrollee's response to the most recent task */
 const badgeForResponses = (responses: SurveyResponse[], tasks: ParticipantTask[]) => {
   if (!tasks?.length) {
     return statusDisplayMap['UNASSIGNED']
   }
-  const lastResponse = responses.sort((a, b) => b.createdAt! - a.createdAt!)[0]
+  const lastTask = tasks.sort((a, b) => b.createdAt! - a.createdAt!)[0]
+  const lastResponse = responses.find(r => r.id === lastTask.surveyResponseId)
   if (!lastResponse) {
     return statusDisplayMap['NEW']
   } else {
