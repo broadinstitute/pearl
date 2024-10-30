@@ -750,6 +750,7 @@ public class EnrolleeSearchExpressionDaoTests extends BaseSpringBootTest {
     }
 
     @Test
+    @Transactional
     public void testCrossStudyAnswerReferencing(TestInfo info) {
         StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
         PortalEnvironment portalEnv = studyEnvBundle.getPortalEnv();
@@ -757,7 +758,6 @@ public class EnrolleeSearchExpressionDaoTests extends BaseSpringBootTest {
 
         StudyEnvironmentBundle studyEnvBundle2 = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox, studyEnvBundle.getPortal(), studyEnvBundle.getPortalEnv());
         StudyEnvironment studyEnv2 = studyEnvBundle2.getStudyEnv();
-
 
         Survey surveyInEnv1 = surveyFactory.buildPersisted(getTestName(info), portalEnv.getPortalId());
 
@@ -790,6 +790,13 @@ public class EnrolleeSearchExpressionDaoTests extends BaseSpringBootTest {
                 "{answer." + survey1StableId + ".question_env_1} = 'answer1' and {answer[\"" + study2StableId + "\"]." + survey2StableId + ".question_env_2} = 'wrongEnrollee'"
         );
 
+        EnrolleeSearchExpression wrongOtherStudyName = enrolleeSearchExpressionParser.parseRule(
+                "{answer." + survey1StableId + ".question_env_1} = 'answer1' and {answer[\"notastudy\"]." + survey2StableId + ".question_env_2} = 'differentAnswer'"
+        );
+
+        EnrolleeSearchExpression wrongQuestion = enrolleeSearchExpressionParser.parseRule(
+                "{answer." + survey1StableId + ".question_env_1} = 'answer1' and {answer[\"" + study2StableId + "\"]." + survey2StableId + ".wrong_question} = 'differentAnswer'"
+        );
 
         List<EnrolleeSearchExpressionResult> results = enrolleeSearchExpressionDao.executeSearch(crossStudyAnswer, studyEnv.getId());
         assertEquals(1, results.size());
@@ -797,6 +804,12 @@ public class EnrolleeSearchExpressionDaoTests extends BaseSpringBootTest {
         assertEquals(enrollee1.getId(), result.getEnrollee().getId());
 
         results = enrolleeSearchExpressionDao.executeSearch(wrongOtherStudyAnswer, studyEnv.getId());
+        assertEquals(0, results.size());
+
+        results = enrolleeSearchExpressionDao.executeSearch(wrongOtherStudyName, studyEnv.getId());
+        assertEquals(0, results.size());
+
+        results = enrolleeSearchExpressionDao.executeSearch(wrongQuestion, studyEnv.getId());
         assertEquals(0, results.size());
     }
 }

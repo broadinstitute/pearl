@@ -30,7 +30,6 @@ public abstract class SearchTermParser<T extends SearchTerm> {
             throw new IllegalArgumentException("Variable does not match term parser: " + variable);
         }
 
-
         String arguments = splitModelName.size() == 1 ? "" : splitModelName.get(1);
 
         if (studyName == null) {
@@ -59,6 +58,7 @@ public abstract class SearchTermParser<T extends SearchTerm> {
 
     /**
      * The name of the term. E.g., AgeTermParser would return "age".
+     * Any variable that starts with this name will be parsed by this parser.
      */
     public abstract String getTermName();
 
