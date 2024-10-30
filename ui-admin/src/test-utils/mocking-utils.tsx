@@ -383,7 +383,7 @@ export const taskForForm = (form: Survey, enrolleeId: string, taskType: Particip
   return {
     id: randomString(10),
     blocksHub: false,
-    createdAt: createdAt,
+    createdAt,
     enrolleeId,
     portalParticipantUserId: randomString(10),
     status: 'NEW',
