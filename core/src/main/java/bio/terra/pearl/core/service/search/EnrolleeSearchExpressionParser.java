@@ -10,7 +10,10 @@ import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
 import bio.terra.pearl.core.service.rule.RuleParsingErrorListener;
 import bio.terra.pearl.core.service.rule.RuleParsingException;
 import bio.terra.pearl.core.service.search.expressions.*;
-import bio.terra.pearl.core.service.search.terms.*;
+import bio.terra.pearl.core.service.search.terms.SearchTerm;
+import bio.terra.pearl.core.service.search.terms.SearchTermParser;
+import bio.terra.pearl.core.service.search.terms.SearchValue;
+import bio.terra.pearl.core.service.search.terms.UserInputTerm;
 import bio.terra.pearl.core.service.search.terms.functions.LowerFunction;
 import bio.terra.pearl.core.service.search.terms.functions.MaxFunction;
 import bio.terra.pearl.core.service.search.terms.functions.MinFunction;
@@ -39,21 +42,15 @@ public class EnrolleeSearchExpressionParser {
 
     private final List<SearchTermParser> searchTermParsers;
 
-    public EnrolleeSearchExpressionParser(EnrolleeDao enrolleeDao, ProfileDao profileDao, AgeTermParser ageTermParser, AnswerTermParser answerTermParser, EnrolleeTermParser enrolleeTermParser, FamilyTermParser familyTermParser, LatestKitTermParser latestKitTermParser, PortalUserTermParser portalUserTermParser, ProfileTermParser profileTermParser, TaskTermParser taskTermParser, UserTermParser userTermParser) {
+    public EnrolleeSearchExpressionParser(EnrolleeDao enrolleeDao,
+                                          ProfileDao profileDao,
+                                          // any subclass of SearchTermParser with @Service annotation
+                                          // will be included
+                                          List<SearchTermParser> parsers) {
         this.enrolleeDao = enrolleeDao;
         this.profileDao = profileDao;
 
-        searchTermParsers = List.of(
-                ageTermParser,
-                answerTermParser,
-                enrolleeTermParser,
-                familyTermParser,
-                latestKitTermParser,
-                portalUserTermParser,
-                profileTermParser,
-                taskTermParser,
-                userTermParser
-        );
+        searchTermParsers = parsers;
     }
 
     public Map<String, SearchValueTypeDefinition> getFacets(UUID studyEnvId) {
