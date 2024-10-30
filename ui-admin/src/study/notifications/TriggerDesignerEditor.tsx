@@ -255,7 +255,6 @@ const TriggerRuleEditor = (
     updateTrigger: (string: keyof Trigger, value: unknown) => void;
   }
 ) => {
-  console.log(trigger.rule)
   return <>
     <Checkbox
       checked={trigger.rule !== undefined}
@@ -374,6 +373,8 @@ const NotificationEditor = (
   }) => {
   const hasEmailTemplate = !!trigger?.emailTemplate
 
+  const [hasChangedTemplate, setHasChangedTemplate] = React.useState(false)
+
   return <>
     <div className="float-end position-relative">
       <NavLink to='notifications'>View sent notifications</NavLink>
@@ -388,12 +389,16 @@ const NotificationEditor = (
           <EmailTemplateEditor
             emailTemplate={trigger.emailTemplate}
             portalShortcode={studyEnvContext.portal.shortcode}
-            updateEmailTemplate={updatedTemplate => updateTrigger('emailTemplate', {
-              ...updatedTemplate,
-              id: undefined,
-              publishedVersion: undefined,
-              version: trigger ? trigger.emailTemplate.version + 1 : 1
-            })
+            updateEmailTemplate={updatedTemplate => {
+              const version = trigger?.emailTemplate?.version || 1
+              updateTrigger('emailTemplate', {
+                ...updatedTemplate,
+                id: undefined,
+                publishedVersion: undefined,
+                version: !hasChangedTemplate ? version + 1 : version
+              })
+              setHasChangedTemplate(true)
+            }
             }
           />
           {sendTestEmail && <div className="d-flex justify-content-center mt-2">

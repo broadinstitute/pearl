@@ -38,15 +38,12 @@ export const TriggerDesigner = (
   const navigate = useNavigate()
 
   const triggerId = useParams().triggerId
-  // const [trigger, setTrigger] = useState<Trigger>()
   const [workingTrigger, setWorkingTrigger] = useState<Trigger>()
-  // const hasTemplate = !!workingTrigger?.emailTemplate
 
   const { isLoading, setIsLoading } = useLoadingEffect(async () => {
     if (!triggerId) { return }
     const loadedConfig = await Api.findTrigger(portal.shortcode, study.shortcode, currentEnv.environmentName,
       triggerId)
-    // setTrigger(loadedConfig)
     setWorkingTrigger(loadedConfig)
   }, [triggerId])
 
