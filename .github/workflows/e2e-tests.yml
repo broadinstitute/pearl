@@ -74,7 +74,7 @@ jobs:
           e2e-tests/playwright-report/**
           e2e-tests/test-results/**
     - name: Notify slack on failure
-      uses: broadinstitute/action-slack@v3.8.0
+      uses: broadinstitute/action-slack@v3.15.0
       if: failure() && github.ref == 'refs/heads/development'
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
