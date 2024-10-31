@@ -21,8 +21,8 @@ import bio.terra.pearl.core.model.workflow.HubResponse;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.CascadeProperty;
-import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import bio.terra.pearl.core.service.exception.NotFoundException;
+import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.kit.pepper.PepperKit;
@@ -47,12 +47,15 @@ import bio.terra.pearl.populate.dto.survey.SurveyResponsePopDto;
 import bio.terra.pearl.populate.service.contexts.StudyPopulateContext;
 import bio.terra.pearl.populate.util.PopulateUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -593,13 +596,7 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         UUID portalId = portalService.findByPortalEnvironmentId(ppUser.getPortalEnvironmentId()).get().getId();
         Survey survey = surveyService.findByStableId(task.getTargetStableId(), task.getTargetAssignedVersion(), portalId).get();
         List<SurveyQuestionDefinition> questionDefs = surveyQuestionDefinitionDao.findAllBySurveyId(survey.getId());
-        List<AnswerPopDto> answers = questionDefs.stream().map(questionDef -> {
-            AnswerPopDto answer = AnswerPopDto.builder()
-                    .questionStableId(questionDef.getQuestionStableId())
-                    .stringValue("blah")
-                    .build();
-            return answer;
-        }).toList();
+        List<AnswerPopDto> answers = questionDefs.stream().map(this::createAnswerFromQuestionDef).toList();
         SurveyResponsePopDto responsePopDto = SurveyResponsePopDto.builder()
                 .surveyStableId(survey.getStableId())
                 .surveyVersion(survey.getVersion())
@@ -611,6 +608,40 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         } catch (JsonProcessingException e) {
             throw new InternalServerException("Unable to complete survey enrollee due to error: " + e.getMessage());
         }
+    }
+
+    private AnswerPopDto createAnswerFromQuestionDef(SurveyQuestionDefinition questionDef) {
+        AnswerPopDto answer = AnswerPopDto.builder()
+                .questionStableId(questionDef.getQuestionStableId())
+                .build();
+
+        if (!StringUtils.isBlank(questionDef.getChoices())) {
+            answer.setStringValue(parseAndSelectRandomChoice(questionDef.getChoices(), RandomStringUtils.randomAlphabetic(RandomUtils.nextInt(5, 30))));
+        } else {
+            answer.setStringValue(RandomStringUtils.randomAlphabetic(RandomUtils.nextInt(5, 30)));
+        }
+        return answer;
+    }
+
+    private String parseAndSelectRandomChoice(String choicesString, String defaultChoice) {
+        // parse choices and select random one
+        List<QuestionChoice> choices;
+        try {
+            choices = objectMapper.readValue(choicesString, new TypeReference<List<QuestionChoice>>() {
+            });
+        } catch (IllegalArgumentException | JsonProcessingException e) {
+            log.warn("Unable to parse choices for question", e);
+            choices = new ArrayList<>();
+        }
+
+        if (!choices.isEmpty()) {
+            int valueIdx = RandomUtils.nextInt(0, choices.size());
+            QuestionChoice choiceJson = choices.get(valueIdx);
+
+            return choiceJson.stableId();
+        }
+        return defaultChoice;
+
     }
 
     private final EnrolleeService enrolleeService;
