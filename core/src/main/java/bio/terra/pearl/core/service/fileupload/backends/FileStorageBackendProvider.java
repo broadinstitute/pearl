@@ -1,10 +1,12 @@
 package bio.terra.pearl.core.service.fileupload.backends;
 
 import bio.terra.pearl.core.service.fileupload.FileStorageConfig;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Service
 public class FileStorageBackendProvider {
 
     private final Map<String, FileStorageBackend> backendMap = new HashMap<>();

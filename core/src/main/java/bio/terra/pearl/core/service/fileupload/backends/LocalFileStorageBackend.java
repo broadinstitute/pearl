@@ -2,11 +2,13 @@ package bio.terra.pearl.core.service.fileupload.backends;
 
 import bio.terra.pearl.core.service.fileupload.FileStorageConfig;
 import org.apache.commons.io.FileUtils;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.UUID;
 
+@Service
 public class LocalFileStorageBackend implements FileStorageBackend {
     private final String localFileStoragePath;
 
@@ -18,7 +20,7 @@ public class LocalFileStorageBackend implements FileStorageBackend {
     public UUID uploadFile(InputStream data) {
         UUID fileId = UUID.randomUUID();
 
-        File file = new File(localFileStoragePath + "/" + fileId);
+        File file = getFile(fileId);
 
         try {
             FileUtils.copyInputStreamToFile(data, file);
@@ -31,11 +33,29 @@ public class LocalFileStorageBackend implements FileStorageBackend {
 
     @Override
     public InputStream downloadFile(UUID uploadedFileId) {
+        File file = getFile(uploadedFileId);
+
+        if (file.exists()) {
+            try {
+                return FileUtils.openInputStream(file);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to download file from local storage", e);
+            }
+        }
         return null;
     }
 
     @Override
     public void deleteFile(UUID uploadedFileId) {
+        File file = getFile(uploadedFileId);
 
+        if (file.exists()) {
+            file.delete();
+        }
+
+    }
+
+    private File getFile(UUID uploadedFileId) {
+        return new File(localFileStoragePath + "/" + uploadedFileId);
     }
 }

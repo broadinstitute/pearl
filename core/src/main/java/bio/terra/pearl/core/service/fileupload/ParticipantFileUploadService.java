@@ -3,23 +3,26 @@ package bio.terra.pearl.core.service.fileupload;
 import bio.terra.pearl.core.dao.fileupload.ParticipantFileUploadDao;
 import bio.terra.pearl.core.model.fileupload.ParticipantFileUpload;
 import bio.terra.pearl.core.service.ImmutableEntityService;
+import bio.terra.pearl.core.service.fileupload.backends.FileStorageBackend;
+import bio.terra.pearl.core.service.fileupload.backends.FileStorageBackendProvider;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.Optional;
-import java.util.UUID;
 
+@Service
+@Slf4j
 public class ParticipantFileUploadService extends ImmutableEntityService<ParticipantFileUpload, ParticipantFileUploadDao> {
-    public ParticipantFileUploadService(ParticipantFileUploadDao dao) {
+    private final FileStorageBackend fileStorageBackend;
+
+    public ParticipantFileUploadService(ParticipantFileUploadDao dao, FileStorageBackendProvider fileStorageBackendProvider) {
         super(dao);
+
+        this.fileStorageBackend = fileStorageBackendProvider.get();
     }
 
-    public Optional<ParticipantFileUpload> findForParticipantNoFileData(UUID portalParticipantUser, String fileName, Integer version) {
-        return dao.findForParticipantNoFileData(portalParticipantUser, fileName, version);
-    }
-
-    public InputStream downloadFileContent(UUID portalParticipantUser, String fileName, Integer version) {
-        // for now, fetch from database. in the future, we'll
-        // fetch from a GCP bucket
-        return dao.fetchFileContent(portalParticipantUser, fileName, version);
+    public ParticipantFileUpload uploadFileAndCreate(ParticipantFileUpload participantFileUpload, InputStream file) {
+        participantFileUpload.setUploadedFileId(fileStorageBackend.uploadFile(file));
+        return dao.create(participantFileUpload);
     }
 }

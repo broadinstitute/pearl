@@ -15,8 +15,6 @@ databaseChangeLog:
               - column:
                   { name: file_name, type: text, constraints: { nullable: false } }
               - column:
-                  { name: file_size, type: bigint, constraints: { nullable: false } }
-              - column:
                   { name: file_type, type: text, constraints: { nullable: false } }
               - column:
                   { name: uploaded_file_id, type: uuid, constraints: { nullable: false } }
