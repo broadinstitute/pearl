@@ -54,6 +54,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -615,9 +616,9 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                 .build();
 
         if (!StringUtils.isBlank(questionDef.getChoices())) {
-            answer.setStringValue(parseAndSelectRandomChoice(questionDef.getChoices(), "blah"));
+            answer.setStringValue(parseAndSelectRandomChoice(questionDef.getChoices(), RandomStringUtils.randomAlphabetic(RandomUtils.nextInt(5, 30))));
         } else {
-            answer.setStringValue("blah");
+            answer.setStringValue(RandomStringUtils.randomAlphabetic(RandomUtils.nextInt(5, 30)));
         }
         return answer;
     }
