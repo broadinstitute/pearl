@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react'
-import { StudyEnvParams, Trigger } from '@juniper/ui-core'
+import { Trigger } from '@juniper/ui-core'
 import Modal from 'react-bootstrap/Modal'
 import LoadingSpinner from 'util/LoadingSpinner'
 import { Button } from 'components/forms/Button'
@@ -9,7 +8,11 @@ import { doApiLoad } from 'api/api-utils'
 import Api from 'api/api'
 import { successNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
-import TriggerBaseForm from './TriggerBaseForm'
+import { TriggerDesignerEditor } from 'study/notifications/TriggerDesignerEditor'
+import {
+  paramsFromContext,
+  StudyEnvContextT
+} from 'study/StudyEnvironmentRouter'
 
 /** gets a default config -- eventually we'll want this to load from a template study instead of being in source code */
 const getDefaultConfig = (): Trigger => {
@@ -37,15 +40,19 @@ const getDefaultConfig = (): Trigger => {
 }
 
 /** Modal for a new notification config -- only specifies the basic attributes */
-export default function CreateTriggerModal({ studyEnvParams, onDismiss, onCreate }:
-{studyEnvParams: StudyEnvParams, onDismiss: () => void, onCreate: (config: Trigger) => void}) {
+export default function CreateTriggerModal({ studyEnvContext, onDismiss, onCreate }:
+                                             {
+                                               studyEnvContext: StudyEnvContextT,
+                                               onDismiss: () => void,
+                                               onCreate: (config: Trigger) => void
+                                             }) {
   const [config, setConfig] = React.useState<Trigger>(getDefaultConfig())
   const [isLoading, setIsLoading] = useState(false)
   const localizedEmailTemplate = config.emailTemplate.localizedEmailTemplates[0]
 
   const createConfig = async () => {
     doApiLoad(async () => {
-      const savedConfig = await Api.createTrigger(studyEnvParams, config)
+      const savedConfig = await Api.createTrigger(paramsFromContext(studyEnvContext), config)
       Store.addNotification(successNotification('Notification created'))
       onCreate(savedConfig)
     }, { setIsLoading })
@@ -53,7 +60,19 @@ export default function CreateTriggerModal({ studyEnvParams, onDismiss, onCreate
 
   // the email template stableId is the portalShortcode plus sanitized name
   const generateTemplateStableId = (name: string) => {
-    return `${studyEnvParams.portalShortcode  }_${  generateStableId(name)}`
+    return `${studyEnvContext.portal.shortcode}_${generateStableId(name)}`
+  }
+
+  const updateTrigger = (key: keyof Trigger, value: unknown) => {
+    setConfig(old => {
+      if (!old) {
+        return old
+      }
+      return {
+        ...old,
+        [key]: value
+      }
+    })
   }
 
   return <Modal show={true} className="modal-lg" onHide={onDismiss}>
@@ -76,7 +95,12 @@ export default function CreateTriggerModal({ studyEnvParams, onDismiss, onCreate
               localizedEmailTemplates: [{ ...localizedEmailTemplate }]
             }
           })}/>
-        <TriggerBaseForm trigger={config} setTrigger={setConfig}/>
+        <TriggerDesignerEditor
+          studyEnvContext={studyEnvContext}
+          trigger={config}
+          updateTrigger={updateTrigger}
+          baseFieldsOnly={true}/>
+
       </form>
     </Modal.Body>
     <Modal.Footer>
