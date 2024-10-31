@@ -15,11 +15,11 @@ describe('CreateTriggerModal', () => {
       onDismiss={jest.fn()} onCreate={jest.fn()}/>)
     render(RoutedComponent)
     // confirm options are branched based on the config type
-    await select(screen.getByLabelText('Trigger on'), 'Event')
+    await select(screen.getByLabelText('Trigger action on'), 'Event')
     expect(screen.queryByLabelText('Task type')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Event type')).toBeInTheDocument()
 
-    await select(screen.getByLabelText('Trigger on'), 'Task Reminder')
+    await select(screen.getByLabelText('Trigger action on'), 'Task Reminder')
     expect(screen.getByLabelText('Task type')).toBeInTheDocument()
     expect(screen.queryByLabelText('Event type')).not.toBeInTheDocument()
   })

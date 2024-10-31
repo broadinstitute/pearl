@@ -197,9 +197,8 @@ class EnrolleeSearchServiceTest extends BaseSpringBootTest {
         List<QuestionChoice> kitStatusChoices = Arrays.stream(KitRequestStatus.values())
                 .map(val -> new QuestionChoice(val.name(), val.name()))
                 .collect(Collectors.toList());
-
-        Assertions.assertEquals(32, results.size());
-        Map.ofEntries(
+        
+        Map<String, SearchValueTypeDefinition> expected = Map.ofEntries(
                 Map.entry("profile.givenName", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.familyName", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.name", SearchValueTypeDefinition.builder().type(STRING).build()),
@@ -236,8 +235,17 @@ class EnrolleeSearchServiceTest extends BaseSpringBootTest {
                 Map.entry("portalUser.createdAt", SearchValueTypeDefinition.builder().type(INSTANT).build()),
                 Map.entry("portalUser.lastLogin", SearchValueTypeDefinition.builder().type(INSTANT).build()),
                 Map.entry("age", SearchValueTypeDefinition.builder().type(NUMBER).build()),
-                Map.entry("latestKit.status", SearchValueTypeDefinition.builder().type(STRING).choices(kitStatusChoices).build())
-        ).forEach((key, value) -> {
+                Map.entry("latestKit.status", SearchValueTypeDefinition.builder().type(STRING).choices(kitStatusChoices).build()),
+                Map.entry("user.username", SearchValueTypeDefinition.builder().type(STRING).build()),
+                Map.entry("user.createdAt", SearchValueTypeDefinition.builder().type(INSTANT).build()),
+                Map.entry("user.lastLogin", SearchValueTypeDefinition.builder().type(INSTANT).build()),
+                Map.entry("family.shortcode", SearchValueTypeDefinition.builder().type(STRING).build())
+        );
+
+        Assertions.assertEquals(expected.keySet(), results.keySet());
+
+        Assertions.assertEquals(expected.size(), results.size());
+        expected.forEach((key, value) -> {
             Assertions.assertTrue(results.containsKey(key), "Key not found: " + key);
             Assertions.assertEquals(value, results.get(key), "Wrong value for key: " + key + ", expected: " + value + " got: " + results.get(key));
         });

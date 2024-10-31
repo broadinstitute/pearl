@@ -50,7 +50,7 @@ test('renders routable trigger list', async () => {
         <TriggerList studyEnvContext={studyEnvContext} portalContext={mockPortalContext()}/>
       </>)
   render(RoutedComponent)
-  expect(screen.getByText('Trigger configuration')).toBeInTheDocument()
+  expect(screen.getByText('Study Automation')).toBeInTheDocument()
   await waitFor(() => expect(screen.getByText('Study enrollment')).toBeInTheDocument())
   expect(screen.getByText('Reminder: CONSENT')).toBeInTheDocument()
   expect(screen.getByText('Reminder: SURVEY')).toBeInTheDocument()

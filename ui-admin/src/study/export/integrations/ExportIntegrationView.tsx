@@ -82,7 +82,7 @@ export const ExportIntegrationForm = ({ integration, setIntegration }: {
       </dd>
       <dt>Destination:</dt><dd>{integration.destinationType}</dd>
       <dt>Runs:</dt><dd>On manual trigger</dd>
-      <dt>Created:</dt><dd>{instantToDefaultString(integration.createdAt)}</dd>
+      {integration.createdAt && <><dt>Created:</dt><dd>{instantToDefaultString(integration.createdAt)}</dd></>}
       <dt>Enabled:</dt><dd>
         <label className="form-control border-0">
           <input type="checkbox" name="includeProxiesAsRows" checked={integration.enabled}
