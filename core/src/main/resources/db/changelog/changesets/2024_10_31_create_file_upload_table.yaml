@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: "create_participant_file_upload_table"
+      author: connorlbark
+      changes:
+        - createTable:
+            tableName: participant_file_upload
+            columns:
+              - column:
+                  { name: id, type: uuid, defaultValueComputed: gen_random_uuid(), constraints: { nullable: false, primaryKey: true } }
+              - column:
+                  { name: created_at, type: datetime, constraints: { nullable: false } }
+              - column:
+                  { name: last_updated_at, type: datetime, constraints: { nullable: false } }
+              - column:
+                  { name: file_name, type: text, constraints: { nullable: false } }
+              - column:
+                  { name: file_size, type: bigint, constraints: { nullable: false } }
+              - column:
+                  { name: file_type, type: text, constraints: { nullable: false } }
+              - column:
+                  { name: uploaded_file_id, type: uuid, constraints: { nullable: false } }
+              - column:
+                  { name: creating_portal_participant_user_id, type: uuid }
+              - column:
+                  { name: creating_admin_user_id, type: uuid }
+              - column:
+                  { name: portal_participant_user_id, type: uuid, constraints: { nullable: false } }
+              - column:
+                  { name: notes, type: text }
+
