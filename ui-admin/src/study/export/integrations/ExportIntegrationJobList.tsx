@@ -60,6 +60,9 @@ export default function ExportIntegrationJobList({ studyEnvContext }:
   }, {
     header: 'Status',
     accessorKey: 'status'
+  }, {
+    header: 'Result',
+    accessorKey: 'result'
   }]
 
   const table = useReactTable({
