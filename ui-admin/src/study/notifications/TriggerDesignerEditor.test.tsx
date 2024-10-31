@@ -19,7 +19,7 @@ describe('TriggerDesignerEditor', () => {
 
     expect(screen.getByLabelText('Event type')).toBeInTheDocument()
 
-    expect(screen.queryByLabelText('Only trigger if enrollee meets certain conditions')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Only trigger if enrollee meets certain criteria')).not.toBeInTheDocument()
   })
 
   it('can edit all fields', () => {
@@ -33,6 +33,6 @@ describe('TriggerDesignerEditor', () => {
 
     expect(screen.getByLabelText('Event type')).toBeInTheDocument()
 
-    expect(screen.getByLabelText('Only trigger if enrollee meets certain conditions')).toBeInTheDocument()
+    expect(screen.getByLabelText('Only trigger if enrollee meets certain criteria')).toBeInTheDocument()
   })
 })

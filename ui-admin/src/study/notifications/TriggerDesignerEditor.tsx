@@ -259,7 +259,7 @@ const TriggerRuleEditor = (
     <Checkbox
       checked={trigger.rule !== undefined}
       onChange={checked => updateTrigger('rule', checked ? '' : undefined)}
-      label={'Only trigger if enrollee meets certain conditions'}
+      label={'Only trigger if enrollee meets certain criteria'}
     />
     {trigger.rule !== undefined && <>
       <LazySearchQueryBuilder
