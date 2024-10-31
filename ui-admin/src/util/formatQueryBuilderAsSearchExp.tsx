@@ -11,7 +11,8 @@ import {
 import {
   get,
   has,
-  isEmpty,
+  isBoolean,
+  isNumber,
   isString
 } from 'lodash'
 
@@ -50,10 +51,18 @@ export const createEnrolleeSearchExpressionRuleProcessor = (facets: ExpressionSe
         if (valueIsField) {
           processedValue = `{${trimIfString(value)}}`
         } else if (useBareValue) {
-          if (isEmpty(value) && typeDefinition.type === 'NUMBER') {
-            processedValue = 0
+          if (typeDefinition.type === 'NUMBER') {
+            if (isNumber(value)) {
+              processedValue = value
+            } else {
+              processedValue = parseNumber(value, { parseNumbers: true })
+            }
           } else if (typeDefinition.type === 'BOOLEAN') {
-            processedValue = isString(value) ? value.toLowerCase() === 'true' : false
+            if (isBoolean(value)) {
+              processedValue = value
+            } else {
+              processedValue = isString(value) ? value.toLowerCase() === 'true' : false
+            }
           } else {
             processedValue = trimIfString(value)
           }
