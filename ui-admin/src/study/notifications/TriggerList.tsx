@@ -73,7 +73,8 @@ export default function TriggerList({ studyEnvContext, portalContext }:
   }
 
   return <div className="container-fluid px-4 py-2">
-    {renderPageHeader('Trigger configuration')}
+    {renderPageHeader('Study Automation')}
+
     <div className="d-flex">
       {isLoading && <LoadingSpinner/>}
       {!isLoading && <div style={navDivStyle}>

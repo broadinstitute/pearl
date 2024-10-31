@@ -97,13 +97,13 @@ const TriggerTypeEditor = (
 
   return <InfoCard>
     <InfoCardHeader>
-      <InfoCardTitle title={'Trigger'}/>
+      <InfoCardTitle title={'Condition'}/>
     </InfoCardHeader>
     <InfoCardBody>
       <div className='w-100'>
         <div className='d-flex align-items-baseline w-100'>
           <label className={'me-1'} htmlFor={triggerTypeSelectInputId}>
-            Trigger on
+            Trigger action on
           </label>
           <Select
             options={triggerTypeOptions}

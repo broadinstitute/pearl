@@ -113,7 +113,7 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
         </li>
         <li className="mb-2">
           <NavLink to={studyEnvNotificationsPath(portalShortcode, study.shortcode, 'sandbox')}
-            className={sidebarNavLinkClasses} style={navStyleFunc}>Emails &amp; Triggers</NavLink>
+            className={sidebarNavLinkClasses} style={navStyleFunc}>Emails &amp; Automation</NavLink>
         </li>
       </ul>}/>
       <CollapsableMenu header={'Publish'} content={<ul className="list-unstyled">
