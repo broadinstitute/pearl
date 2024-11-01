@@ -212,6 +212,8 @@ public class ParticipantMergeService {
                 surveyResponseService.update(response);
             }
         }
+        // we need to reassign the participantUserIds, even though the enrolleeId will not change
+        mergeDao.reassignEnrolleeNotifications(enrollee.getId(), enrollee.getId(), targetPpUser.getParticipantUserId());
         reassignDataChanges(enrollee, enrollee, targetPpUser);
     }
 
