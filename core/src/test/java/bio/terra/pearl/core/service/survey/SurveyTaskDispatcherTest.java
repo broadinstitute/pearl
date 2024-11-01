@@ -77,7 +77,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                 .taskType(TaskType.KIT_REQUEST)
                 .build();
         List<ParticipantTask> existingTasks = List.of(surveyTask1, surveyTask2, kitTask);
-        boolean isDuplicate = SurveyTaskDispatcher.isDuplicateTask(studyEnvironmentSurvey, surveyTask1,
+        boolean isDuplicate = surveyTaskDispatcher.isDuplicateTask(studyEnvironmentSurvey, surveyTask1,
                 existingTasks);
         assertTrue(isDuplicate);
 
@@ -85,7 +85,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                 .targetStableId("TASK_3")
                 .taskType(TaskType.SURVEY)
                 .build();
-        isDuplicate = SurveyTaskDispatcher.isDuplicateTask(studyEnvironmentSurvey, surveyTask3,
+        isDuplicate = surveyTaskDispatcher.isDuplicateTask(studyEnvironmentSurvey, surveyTask3,
                 existingTasks);
         assertFalse(isDuplicate);
     }
@@ -105,7 +105,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                     .targetStableId("TASK_1")
                     .taskType(taskType)
                     .build();
-            boolean isDuplicate = SurveyTaskDispatcher.isDuplicateTask(studyEnvironmentSurvey, surveyTask2,
+            boolean isDuplicate = surveyTaskDispatcher.isDuplicateTask(studyEnvironmentSurvey, surveyTask2,
                     List.of(surveyTask1));
             assertTrue(isDuplicate);
         });
@@ -309,14 +309,14 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
         timeShiftDao.changeEnrolleeCreationTime(sandbox1.enrollee().getId(), Instant.now().minus(3, ChronoUnit.DAYS));
 
         // should assign to sandbox1 since it was created more than 1 day ago
-        surveyTaskDispatcher.assignScheduledSurveys();
+        surveyTaskDispatcher.assignScheduledTasks();
         tasks = participantTaskService.findByStudyEnvironmentId(sandboxBundle.getStudyEnv().getId());
         assertThat(tasks, hasSize(1));
         assertThat(tasks.get(0).getEnrolleeId(), equalTo(sandbox1.enrollee().getId()));
         assertThat(tasks.get(0).getTargetStableId(), equalTo(survey.getStableId()));
 
         // task will not get assigned twice to the same enrollee
-        surveyTaskDispatcher.assignScheduledSurveys();
+        surveyTaskDispatcher.assignScheduledTasks();
         tasks = participantTaskService.findByStudyEnvironmentId(sandboxBundle.getStudyEnv().getId());
         assertThat(tasks, hasSize(1));
     }
@@ -348,7 +348,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                 task.getEnrolleeId().equals(sandbox2.enrollee().getId())).findFirst().get().getId(), Instant.now().minus(8, ChronoUnit.DAYS));
 
         // this should not assign to 1 (since it has no prior task) or 3 (since its task was assigned recently)
-        surveyTaskDispatcher.assignScheduledSurveys();
+        surveyTaskDispatcher.assignScheduledTasks();
         tasks = participantTaskService.findByStudyEnvironmentId(sandboxBundle.getStudyEnv().getId());
         assertThat(tasks, hasSize(3));
         assertThat(participantTaskService.findByEnrolleeId(sandbox1.enrollee().getId()), hasSize(0));

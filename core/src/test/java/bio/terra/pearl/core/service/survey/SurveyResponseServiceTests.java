@@ -3,8 +3,8 @@ package bio.terra.pearl.core.service.survey;
 import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.DaoTestUtils;
 import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
-import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
+import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.factory.participant.PortalParticipantUserFactory;
 import bio.terra.pearl.core.factory.survey.AnswerFactory;
@@ -208,8 +208,9 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
         EnrolleeBundle enrolleeBundle = enrolleeFactory.buildWithPortalUser(testName);
         Survey survey = surveyFactory.buildPersisted(testName);
         StudyEnvironmentSurvey configuredSurvey = surveyFactory.attachToEnv(survey, enrolleeBundle.enrollee().getStudyEnvironmentId(), true);
+        configuredSurvey.setSurvey(survey);
 
-        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), configuredSurvey, survey);
+        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), configuredSurvey);
         task = participantTaskService.create(task, getAuditInfo(testInfo));
         assertThat(task.getStatus(), equalTo(TaskStatus.NEW));
 
@@ -258,8 +259,9 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
         EnrolleeBundle enrolleeBundle = enrolleeFactory.buildWithPortalUser(testName);
         Survey survey = surveyFactory.buildPersisted(testName);
         StudyEnvironmentSurvey configuredSurvey = surveyFactory.attachToEnv(survey, enrolleeBundle.enrollee().getStudyEnvironmentId(), true);
+        configuredSurvey.setSurvey(survey);
 
-        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), configuredSurvey, survey);
+        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), configuredSurvey);
         task = participantTaskService.create(task, getAuditInfo(testInfo));
         assertThat(task.getStatus(), equalTo(TaskStatus.NEW));
 

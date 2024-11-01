@@ -7,7 +7,6 @@ import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.factory.participant.PortalParticipantUserFactory;
 import bio.terra.pearl.core.factory.portal.PortalEnvironmentFactory;
 import bio.terra.pearl.core.factory.survey.SurveyFactory;
-import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.metrics.BasicMetricDatum;
 import bio.terra.pearl.core.model.metrics.TimeRange;
@@ -101,12 +100,12 @@ public class MetricsDaoTest extends BaseSpringBootTest {
       PortalParticipantUser ppUser2 = portalParticipantUserFactory.buildPersisted(getTestName(info), enrollee2, portalEnv);
     Enrollee enrollee3 = enrolleeFactory.buildPersisted(getTestName(info), studyEnv);
       PortalParticipantUser ppUser3 = portalParticipantUserFactory.buildPersisted(getTestName(info), enrollee3, portalEnv);
-      ParticipantTask task = surveyTaskDispatcher.buildTask( enrollee1, ppUser1, studyEnvSurvey, studyEnvSurvey.getSurvey());
+    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee1, ppUser1, studyEnvSurvey);
     task.setStatus(TaskStatus.COMPLETE);
       DataAuditInfo auditInfo = getAuditInfo(info);
     participantTaskService.create(task, auditInfo);
-    participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee2, ppUser2, studyEnvSurvey, studyEnvSurvey.getSurvey()), auditInfo);
-    ParticipantTask taskToUpdate = participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee3, ppUser3, studyEnvSurvey, studyEnvSurvey.getSurvey()), auditInfo);
+    participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee2, ppUser2, studyEnvSurvey), auditInfo);
+    ParticipantTask taskToUpdate = participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee3, ppUser3, studyEnvSurvey), auditInfo);
 
       List<BasicMetricDatum> rangeMetrics = metricsDao.studyRequiredSurveyCompletions(studyEnv.getId(), new TimeRange(null, null));
     assertThat(rangeMetrics, hasSize(1));
