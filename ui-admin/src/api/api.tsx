@@ -379,14 +379,14 @@ export type WithdrawnEnrollee = {
 }
 
 export type ExportIntegration = {
-    id: string,
+  id: string,
   name: string,
-    createdAt: number,
-    lastUpdatedAt: number,
-    destinationType: string,
-    enabled: boolean,
-    exportOptions: ExportOptions,
-    destinationUrl: string
+  createdAt?: number,
+  lastUpdatedAt?: number,
+  destinationType: string,
+  enabled: boolean,
+  exportOptions: ExportOptions,
+  destinationUrl: string
 }
 
 export type ExportIntegrationJob = {
@@ -409,7 +409,7 @@ export type ParticipantUserMerge = {
 export type MergeAction<T, MP> = {
   pair: MergePair<T>
   action: MergeActionAction
-  mergePlan: MP
+  mergePlan?: MP
 }
 
 export type EnrolleeMergePlan = {

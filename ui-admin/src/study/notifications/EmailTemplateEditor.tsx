@@ -96,9 +96,9 @@ export default function EmailTemplateEditor({ emailTemplate, updateEmailTemplate
   }
 
   const templateVersionString = `v${emailTemplate.version}`
-  return <div className="mt-3">
+  return <div>
     <div className="d-flex align-items-baseline">
-      <h3 className="h6">{emailTemplate.name}</h3>
+      <h3 className="h6">{emailTemplate.name} template</h3>
       <div className="ms-2 text-muted fst-italic">
                 ({emailTemplate.stableId} {templateVersionString})
       </div>

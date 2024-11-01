@@ -19,17 +19,15 @@ import { renderPageHeader } from 'util/pageUtils'
 import { paramsFromContext, StudyEnvContextT } from '../../StudyEnvironmentRouter'
 import { faCheck, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { Link } from 'react-router-dom'
-import { Button } from '../../../components/forms/Button'
+import { Button } from 'components/forms/Button'
 import Modal from 'react-bootstrap/Modal'
 import { ExportIntegrationForm } from './ExportIntegrationView'
-import { buildFilter } from '../../../util/exportUtils'
+import { buildFilter } from 'util/exportUtils'
 
 const DEFAULT_EXPORT_INTEGRATION: ExportIntegration = {
   name: 'new',
   destinationType: 'AIRTABLE',
   enabled: true,
-  createdAt: new Date().getTime(),
-  lastUpdatedAt: new Date().getTime(),
   id: '',
   destinationUrl: '',
   exportOptions: {
@@ -39,7 +37,8 @@ const DEFAULT_EXPORT_INTEGRATION: ExportIntegration = {
     includeSubHeaders: false,
     onlyIncludeMostRecent: true,
     filterString: buildFilter({ includeProxiesAsRows: false, includeUnconsented: false }),
-    excludeModules: ['surveys']
+    excludeModules: ['surveys'],
+    includeFields: []
   }
 }
 

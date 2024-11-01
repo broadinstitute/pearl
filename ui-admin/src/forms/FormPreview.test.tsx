@@ -1,9 +1,18 @@
 /* eslint-disable jest/expect-expect */
-import { act, render, screen, waitFor, within } from '@testing-library/react'
+import {
+  act,
+  render,
+  screen,
+  waitFor,
+  within
+} from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import React from 'react'
 
-import { FormContent, MockI18nProvider } from '@juniper/ui-core'
+import {
+  FormContent,
+  MockI18nProvider
+} from '@juniper/ui-core'
 
 import { FormPreview } from './FormPreview'
 import { MOCK_ENGLISH_LANGUAGE } from '../test-utils/mocking-utils'
@@ -39,8 +48,8 @@ describe('FormPreview', () => {
       </MockI18nProvider>)
 
     // Assert
-    screen.getAllByLabelText('First name')
-    screen.getAllByLabelText('Last name')
+    screen.getAllByText('First name')
+    screen.getAllByText('Last name')
   })
 
   describe('options', () => {

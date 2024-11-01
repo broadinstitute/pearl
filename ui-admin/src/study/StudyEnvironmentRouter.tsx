@@ -32,7 +32,6 @@ import DatasetDashboard from './export/datarepo/DatasetDashboard'
 import DatasetList from './export/datarepo/DatasetList'
 import Select from 'react-select'
 import MailingListView from '../portal/MailingListView'
-import { ENVIRONMENT_ICON_MAP } from './publishing/PortalPublishingView'
 import TriggerList from './notifications/TriggerList'
 import SiteContentLoader from '../portal/siteContent/SiteContentLoader'
 import AdminTaskList from './adminTasks/AdminTaskList'
@@ -53,6 +52,7 @@ import ExportIntegrationList from './export/integrations/ExportIntegrationList'
 import ExportIntegrationView from './export/integrations/ExportIntegrationView'
 import ExportIntegrationJobList from './export/integrations/ExportIntegrationJobList'
 import LoadedSettingsView from './settings/SettingsView'
+import { ENVIRONMENT_ICON_MAP } from 'util/publishUtils'
 
 export type StudyEnvContextT = { study: Study, currentEnv: StudyEnvironment, currentEnvPath: string, portal: Portal }
 

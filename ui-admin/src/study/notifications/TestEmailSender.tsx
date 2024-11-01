@@ -8,7 +8,6 @@ import { doApiLoad } from 'api/api-utils'
 import { Button } from '../../components/forms/Button'
 import LoadingSpinner from '../../util/LoadingSpinner'
 import { StudyEnvParams } from '@juniper/ui-core'
-import { isNotification } from 'study/notifications/TriggerBaseForm'
 
 
 export const EXAMPLE_RULE_DATA = {
@@ -75,3 +74,4 @@ export default function TestEmailSender({ studyEnvParams, trigger, onDismiss }:
   </Modal>
 }
 
+const isNotification = (config?: Trigger) => config?.actionType === 'NOTIFICATION'
