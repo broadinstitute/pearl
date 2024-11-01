@@ -224,7 +224,7 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
                 "question1", "source2", true, sourceBundle)
                 .getResponse();
         SurveyResponse response_Tt3 = surveyResponseFactory.submitStringAnswer(
-               survey2.getStableId(),
+               survey3.getStableId(),
                 "question1", "target3", true, targetBundle)
                 .getResponse();
 
