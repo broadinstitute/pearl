@@ -3,6 +3,7 @@ import LoadingSpinner from '../util/LoadingSpinner'
 import Api from 'api/api'
 import { AdminUser } from 'api/adminUser'
 import { useAuth } from 'react-oidc-context'
+import { emptyContextAlertFunction } from 'util/contextUtils'
 
 
 export type UserContextT = {
@@ -16,10 +17,10 @@ export type UserContextT = {
 /** current user object context */
 export const UserContext = React.createContext<UserContextT>({
   user: null,
-  loginUser: () => { throw new Error('context not yet initialized') },
-  loginUserUnauthed: () => { throw new Error('context not yet initialized') },
-  logoutUser: () =>  { throw new Error('context not yet initialized') },
-  toggleSuperuserOverride: () => { throw new Error('context not yet initialized') }
+  loginUser: emptyContextAlertFunction,
+  loginUserUnauthed: emptyContextAlertFunction,
+  logoutUser: emptyContextAlertFunction,
+  toggleSuperuserOverride: emptyContextAlertFunction
 })
 const INTERNAL_LOGIN_TOKEN_KEY = 'internalLoginToken'
 const OAUTH_ACCRESS_TOKEN_KEY = 'oauthAccessToken'
