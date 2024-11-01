@@ -3,7 +3,7 @@ package bio.terra.pearl.core.service.fileupload;
 import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
-import bio.terra.pearl.core.model.fileupload.ParticipantFileUpload;
+import bio.terra.pearl.core.model.fileupload.ParticipantFile;
 import bio.terra.pearl.core.service.fileupload.backends.LocalFileStorageBackend;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-class ParticipantFileUploadServiceTest extends BaseSpringBootTest {
+class ParticipantFileServiceTest extends BaseSpringBootTest {
 
 
     @MockBean
     private LocalFileStorageBackend localFileStorageBackend;
 
     @Autowired
-    private ParticipantFileUploadService participantFileUploadService;
+    private ParticipantFileService participantFileService;
 
     @Autowired
     private EnrolleeFactory enrolleeFactory;
@@ -41,23 +41,23 @@ class ParticipantFileUploadServiceTest extends BaseSpringBootTest {
         // Mocking the uploadFile method of LocalFileStorageBackend
         when(localFileStorageBackend.uploadFile(any())).thenReturn(uuid);
 
-        ParticipantFileUpload pfu = participantFileUploadService.uploadFileAndCreate(
-                ParticipantFileUpload
+        ParticipantFile pfu = participantFileService.uploadFileAndCreate(
+                ParticipantFile
                         .builder()
                         .fileName("my_file.txt")
                         .fileType("txt")
-                        .creatingPortalParticipantUserId(enrolleeBundle.portalParticipantUser().getId())
-                        .portalParticipantUserId(enrolleeBundle.portalParticipantUser().getId())
+                        .creatingParticipantUserId(enrolleeBundle.participantUser().getId())
+                        .enrolleeId(enrolleeBundle.enrollee().getId())
                         .build(),
                 new ByteArrayInputStream("my file".getBytes()));
 
-        pfu =  participantFileUploadService.find(pfu.getId()).get();
+        pfu = participantFileService.find(pfu.getId()).get();
 
         assertEquals("my_file.txt", pfu.getFileName());
         assertEquals("txt", pfu.getFileType());
-        assertEquals(enrolleeBundle.portalParticipantUser().getId(), pfu.getCreatingPortalParticipantUserId());
-        assertEquals(enrolleeBundle.portalParticipantUser().getId(), pfu.getPortalParticipantUserId());
-        assertEquals(uuid, pfu.getUploadedFileId());
+        assertEquals(enrolleeBundle.participantUser().getId(), pfu.getCreatingParticipantUserId());
+        assertEquals(enrolleeBundle.enrollee().getId(), pfu.getEnrolleeId());
+        assertEquals(uuid, pfu.getExternalFileId());
     }
 
 }

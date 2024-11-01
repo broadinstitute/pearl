@@ -4,7 +4,7 @@ databaseChangeLog:
       author: connorlbark
       changes:
         - createTable:
-            tableName: participant_file_upload
+            tableName: participant_file
             columns:
               - column:
                   { name: id, type: uuid, defaultValueComputed: gen_random_uuid(), constraints: { nullable: false, primaryKey: true } }
@@ -17,13 +17,13 @@ databaseChangeLog:
               - column:
                   { name: file_type, type: text, constraints: { nullable: false } }
               - column:
-                  { name: uploaded_file_id, type: uuid, constraints: { nullable: false } }
+                  { name: external_file_id, type: uuid, constraints: { nullable: false } }
               - column:
-                  { name: creating_portal_participant_user_id, type: uuid }
+                  { name: creating_participant_user_id, type: uuid, constraints: { foreignKeyName: fk_creating_participant_participant_file, references: participant_user(id) } }
               - column:
-                  { name: creating_admin_user_id, type: uuid }
+                  { name: creating_admin_user_id, type: uuid, constraints: { foreignKeyName: fk_creating_admin_participant_file, references: admin_user(id) } }
               - column:
-                  { name: portal_participant_user_id, type: uuid, constraints: { nullable: false } }
+                  { name: enrollee_id, type: uuid, constraints: { nullable: false, foreignKeyName: fk_enrollee_participant_file, references: enrollee(id) } }
               - column:
                   { name: notes, type: text }
 

@@ -351,7 +351,7 @@ databaseChangeLog:
       file: changesets/2024_10_21_recurrence_type.yaml
       relativeToChangelogFile: true
   - include:
-      file: changesets/2024_10_31_create_file_upload_table.yaml
+      file: changesets/2024_10_31_create_participant_file_table.yaml
       relativeToChangelogFile: true
 
 

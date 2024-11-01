@@ -2,12 +2,12 @@ package bio.terra.pearl.core.service.fileupload;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
-@Component
+@Configuration
 public class FileStorageConfig {
     private String defaultBackend;
     private String localFileStoragePath;
