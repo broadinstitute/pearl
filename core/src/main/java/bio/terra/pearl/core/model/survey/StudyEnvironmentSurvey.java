@@ -4,7 +4,7 @@ import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.Versioned;
 import bio.terra.pearl.core.model.publishing.VersionedEntityConfig;
 import bio.terra.pearl.core.model.study.StudyEnvAttached;
-import bio.terra.pearl.core.service.workflow.TaskAssignable;
+import bio.terra.pearl.core.service.workflow.TaskDispatchConfig;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.UUID;
 /** Includes a survey in an environment and configures scheduling and who can take it */
 @Getter
 @Setter @SuperBuilder @NoArgsConstructor
-public class StudyEnvironmentSurvey extends BaseEntity implements VersionedEntityConfig, StudyEnvAttached, TaskAssignable {
+public class StudyEnvironmentSurvey extends BaseEntity implements VersionedEntityConfig, StudyEnvAttached, TaskDispatchConfig {
     private UUID studyEnvironmentId;
     private UUID surveyId;
     @Builder.Default
