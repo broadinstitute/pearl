@@ -69,7 +69,7 @@ module "cloud-nat" {
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 
-// cloud armor policies copied directly over from Pepper's DSP AppSec blessed policies
+# cloud armor policies copied directly over from Pepper's DSP AppSec blessed policies
 resource "google_compute_security_policy" "juniper-cloud-armor-policy" {
   name = "juniper-cloud-armor-policy"
 
