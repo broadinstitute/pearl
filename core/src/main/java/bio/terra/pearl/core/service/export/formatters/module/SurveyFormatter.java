@@ -189,8 +189,8 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
             if (Objects.nonNull(answerItemFormatter.getRepeatIndex())) {
                 cleanStableId += ExportFormatUtils.formatIndex(answerItemFormatter.getRepeatIndex());
             }
-
-            columnHeader = moduleName + ExportFormatUtils.COLUMN_NAME_DELIMITER + cleanStableId;
+            String moduleRepeatString = moduleRepeatNum > 1 ? ExportFormatUtils.formatIndex(moduleRepeatNum) : "";
+            columnHeader = moduleName + moduleRepeatString + ExportFormatUtils.COLUMN_NAME_DELIMITER + cleanStableId;
             if (isOtherDescription) {
                 columnHeader += OTHER_DESCRIPTION_KEY_SUFFIX;
             } else if (answerItemFormatter.isSplitOptionsIntoColumns() && choice != null) {
@@ -200,7 +200,7 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
                 columnHeader += ExportFormatUtils.COLUMN_NAME_DELIMITER + choice.stableId();
             }
         }
-        return columnHeader;
+            return columnHeader;
     }
 
     /**

@@ -71,6 +71,7 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
                 .build();
         SurveyResponse testResponse2 = SurveyResponse.builder()
                 .id(UUID.randomUUID())
+                .complete(true)
                 .surveyId(testSurvey.getId()).build();
         Answer answer2 = Answer.builder()
                 .surveyStableId(testSurvey.getStableId())
@@ -85,8 +86,8 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
 
         assertThat(valueMap.get("oh_surveyA.oh_surveyA_q1"), equalTo("value1"));
         assertThat(valueMap.get("oh_surveyA.complete"), equalTo("false"));
-        assertThat(valueMap.get("oh_surveyA.2.oh_surveyA_q1"), equalTo("value2"));
-        assertThat(valueMap.get("oh_surveyA.2.complete"), equalTo("false"));
+        assertThat(valueMap.get("oh_surveyA[2].oh_surveyA_q1"), equalTo("value2"));
+        assertThat(valueMap.get("oh_surveyA[2].complete"), equalTo("true"));
     }
 
     @Test
