@@ -34,6 +34,7 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
     public static String SPLIT_OPTION_SELECTED_VALUE = "1";
     public static String SPLIT_OPTION_UNSELECTED_VALUE = "0";
     private ObjectMapper objectMapper;
+    private final List<UUID> surveyIds; // the list of surveyIds that are included in this module -- used for filtering responses
 
     public SurveyFormatter(ExportOptions exportOptions,
                            String stableId,
@@ -46,6 +47,7 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
                 // get the most recent survey by sorting in descending version order
                 surveys.stream().sorted(Comparator.comparingInt(Survey::getVersion).reversed()).findFirst().get().getName());
         this.objectMapper = objectMapper;
+        this.surveyIds = surveys.stream().map(Survey::getId).toList();
         generateAnswerItemFormatters(exportOptions, questionDefs, data);
         filterItemFormatters(exportOptions);
     }
@@ -250,39 +252,40 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
     @Override
     public Map<String, String> toStringMap(EnrolleeExportData exportData) {
         Map<String, String> valueMap = new HashMap<>();
-        String surveyStableId = moduleName;
+        List<SurveyResponse> responses = exportData.getResponses().stream()
+                .filter(response -> surveyIds.contains(response.getSurveyId()))
+                .toList();
+        for (int i = 0; i < responses.size(); i++) {
+            addResponseToMap(responses.get(i), exportData, valueMap, i + 1);
+        }
+        maxNumRepeats = Math.max(maxNumRepeats, responses.size());
+        return valueMap;
+    }
+
+    // note that responseNum is 1-indexed, not zero-index since it goes to moduleRepeatNum
+    protected void addResponseToMap(SurveyResponse surveyResponse, EnrolleeExportData exportData, Map<String, String> valueMap, int responseNum) {
         List<Answer> answers = exportData.getAnswers().stream().filter(ans ->
-                Objects.equals(ans.getSurveyStableId(), surveyStableId)
+                Objects.equals(ans.getSurveyResponseId(), surveyResponse.getId())
         ).toList();
 
         // map the answers by question stable id for easier access
         Map<String, List<Answer>> answerMap = answers.stream().collect(groupingBy(Answer::getQuestionStableId));
-        List<UUID> responseIds = answers.stream().map(Answer::getSurveyResponseId).distinct().toList();
-        if (responseIds.isEmpty()) {
-            return valueMap;
-        }
-        // for now, we only support exporting a single response per survey, so just grab the one that matches the first id
-        SurveyResponse matchedResponse = exportData.getResponses().stream().filter(response ->
-                response.getId().equals(responseIds.get(0))).findAny().orElse(null);
-        if (matchedResponse == null) {
-            return valueMap;
-        }
+
         for (ItemFormatter itemFormatter : getItemFormatters()) {
             if (itemFormatter instanceof PropertyItemFormatter) {
                 // it's a property of the SurveyResponse
-                valueMap.put(getColumnKey(itemFormatter, false, null, 1),
-                        ((PropertyItemFormatter) itemFormatter).getExportString(matchedResponse));
+                valueMap.put(getColumnKey(itemFormatter, false, null, responseNum),
+                        ((PropertyItemFormatter) itemFormatter).getExportString(surveyResponse));
             } else {
                 // it's an answer value
-                addAnswersToMap((AnswerItemFormatter) itemFormatter, answerMap, valueMap);
+                addAnswersToMap((AnswerItemFormatter) itemFormatter, answerMap, valueMap, responseNum);
             }
         }
-        return valueMap;
     }
 
 
     public void addAnswersToMap(AnswerItemFormatter itemFormatter,
-                                Map<String, List<Answer>> answerMap, Map<String, String> valueMap) {
+                                Map<String, List<Answer>> answerMap, Map<String, String> valueMap, int responseNum) {
         String valueStableId = itemFormatter.getQuestionStableId();
 
         // if the question is a child of another question, then we need to get the parent question's value
@@ -304,22 +307,22 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
             // just use the current version
             matchedItemFormatter = itemFormatter;
         }
-        addAnswerToMap(matchedItemFormatter, matchedAnswer, valueMap, objectMapper);
+        addAnswerToMap(matchedItemFormatter, matchedAnswer, valueMap, objectMapper, responseNum);
     }
 
     protected void addAnswerToMap(AnswerItemFormatter itemFormatter,
-                                  Answer answer, Map<String, String> valueMap, ObjectMapper objectMapper) {
+                                  Answer answer, Map<String, String> valueMap, ObjectMapper objectMapper, int responseNum) {
         if (itemFormatter.isSplitOptionsIntoColumns()) {
-            addSplitOptionSelectionsToMap(itemFormatter, answer, valueMap, objectMapper);
+            addSplitOptionSelectionsToMap(itemFormatter, answer, valueMap, objectMapper, responseNum);
         } else {
             valueMap.put(
-                    getColumnKey(itemFormatter, false, null, 1),
+                    getColumnKey(itemFormatter, false, null, responseNum),
                     valueAsString(itemFormatter, answer, itemFormatter.getChoices(), itemFormatter.isStableIdsForOptions(), objectMapper)
             );
         }
         if (itemFormatter.isHasOtherDescription() && answer.getOtherDescription() != null) {
             valueMap.put(
-                    getColumnKey(itemFormatter, true, null, 1),
+                    getColumnKey(itemFormatter, true, null, responseNum),
                     answer.getOtherDescription()
             );
         }
@@ -392,11 +395,11 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
      * adds an entry to the valueMap for each selected option of a 'splitOptionsIntoColumns' question
      */
     protected void addSplitOptionSelectionsToMap(ItemFormatter itemFormatter,
-                                                 Answer answer, Map<String, String> valueMap, ObjectMapper objectMapper) {
+                                                 Answer answer, Map<String, String> valueMap, ObjectMapper objectMapper, int responseNum) {
         if (answer.getStringValue() != null) {
             // this was a single-select question, so we only need to add the selected option
             valueMap.put(
-                    getColumnKeyChoiceStableId(itemFormatter, false, answer.getStringValue(), 1),
+                    getColumnKeyChoiceStableId(itemFormatter, false, answer.getStringValue(), responseNum),
                     SPLIT_OPTION_SELECTED_VALUE
             );
         } else if (answer.getObjectValue() != null) {
@@ -406,7 +409,7 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
                 });
                 for (String answerValue : answerValues) {
                     valueMap.put(
-                            getColumnKeyChoiceStableId(itemFormatter, false, answerValue, 1),
+                            getColumnKeyChoiceStableId(itemFormatter, false, answerValue, responseNum),
                             SPLIT_OPTION_SELECTED_VALUE
                     );
                 }
