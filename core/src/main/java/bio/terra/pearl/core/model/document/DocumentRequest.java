@@ -39,5 +39,10 @@ public class DocumentRequest extends BaseEntity implements TaskConfig {
     private boolean autoAssign;
     private boolean autoUpdateTaskAssignments;
     private boolean assignToExistingEnrollees;
+
+    @Override
+    public String getName() {
+        return documentName;
+    }
 }
 
