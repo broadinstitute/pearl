@@ -9,8 +9,6 @@ import bio.terra.pearl.core.service.participant.PortalParticipantUserService;
 import bio.terra.pearl.core.service.rule.EnrolleeContextService;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
-import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
-import bio.terra.pearl.core.service.survey.SurveyService;
 import bio.terra.pearl.core.service.survey.event.EnrolleeSurveyEvent;
 import bio.terra.pearl.core.service.workflow.DispatcherOrder;
 import bio.terra.pearl.core.service.workflow.EnrolleeCreationEvent;
@@ -28,19 +26,17 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class DocumentRequestTaskDispatcher extends TaskConfigDispatcher<DocumentRequest, DocumentRequestPublished> {
-    private final StudyEnvironmentSurveyService studyEnvironmentSurveyService;
-    private final SurveyService surveyService;
 
 
-    public DocumentRequestTaskDispatcher(StudyEnvironmentSurveyService studyEnvironmentSurveyService,
-                                         StudyEnvironmentService studyEnvironmentService, ParticipantTaskService participantTaskService,
+    public DocumentRequestTaskDispatcher(StudyEnvironmentService studyEnvironmentService,
+                                         ParticipantTaskService participantTaskService,
                                          EnrolleeService enrolleeService,
                                          PortalParticipantUserService portalParticipantUserService,
                                          EnrolleeContextService enrolleeContextService,
-                                         EnrolleeSearchExpressionParser enrolleeSearchExpressionParser, SurveyService surveyService) {
+                                         EnrolleeSearchExpressionParser enrolleeSearchExpressionParser) {
         super(studyEnvironmentService, participantTaskService, enrolleeService, enrolleeSearchExpressionParser, enrolleeContextService, portalParticipantUserService);
-        this.studyEnvironmentSurveyService = studyEnvironmentSurveyService;
-        this.surveyService = surveyService;
+
+
     }
 
     @EventListener

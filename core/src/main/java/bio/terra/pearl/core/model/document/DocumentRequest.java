@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.model.document;
 
 import bio.terra.pearl.core.model.BaseEntity;
+import bio.terra.pearl.core.model.Versioned;
 import bio.terra.pearl.core.model.workflow.RecurrenceType;
 import bio.terra.pearl.core.service.workflow.TaskConfig;
 import lombok.Getter;
@@ -10,11 +11,11 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class DocumentRequest extends BaseEntity implements TaskConfig {
+public class DocumentRequest extends BaseEntity implements TaskConfig, Versioned {
     private String stableId;
     private Integer version;
 
-    private UUID studyEnvironmentId;
+    private UUID portalId;
 
     // document config
     private String documentName;
