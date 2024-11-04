@@ -2,7 +2,7 @@
   "linkedUsername": "jsalk@test.com",
   "shortcode": "HDSALK",
   "simulateSubmissions": true,
-  "submittedHoursAgo": 52,
+  "submittedHoursAgo": 252,
   "preEnrollmentResponseDto": {
     "qualified": true,
     "surveyStableId": "hd_hd_preenroll",
@@ -25,7 +25,7 @@
       ],
       "currentPageNo": 2,
       "complete": true,
-      "submittedHoursAgo": 48
+      "submittedHoursAgo": 248
     },
     {
       "surveyStableId": "hd_hd_socialHealth",
@@ -37,7 +37,7 @@
       ],
       "currentPageNo": 1,
       "complete": true,
-      "submittedHoursAgo": 46
+      "submittedHoursAgo": 246
     },
     {
       "surveyStableId": "hd_hd_mental",
@@ -45,6 +45,26 @@
       "answerPopDtos": [
         { "questionStableId": "hd_hd_mental_phq9Depressed", "stringValue": "0"},
         { "questionStableId": "hd_hd_mental_phq9LostInterest", "stringValue": "1"}
+      ],
+      "currentPageNo": 1,
+      "complete": true,
+      "submittedHoursAgo": 247
+    }, {
+      "surveyStableId": "hd_hd_lifestyle",
+      "surveyVersion": 1,
+      "answerPopDtos": [
+        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "2days"},
+        { "questionStableId": "hd_hd_lifestyle_vigorousActivityMinutes", "stringValue": "30"}
+      ],
+      "currentPageNo": 1,
+      "complete": true,
+      "submittedHoursAgo": 247
+    }, {
+      "surveyStableId": "hd_hd_lifestyle",
+      "surveyVersion": 1,
+      "answerPopDtos": [
+        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "3days"},
+        { "questionStableId": "hd_hd_lifestyle_vigorousActivityMinutes", "stringValue": "35"}
       ],
       "currentPageNo": 1,
       "complete": true,
@@ -61,7 +81,7 @@
       ],
       "currentPageNo": 1,
       "complete": true,
-      "submittedHoursAgo": 48
+      "submittedHoursAgo": 248
     }, {
       "surveyStableId": "hd_hd_basicInfo",
       "surveyVersion": 1,
@@ -72,7 +92,7 @@
       "creatingAdminUsername":  "heartdemostaff@gmail.com",
       "currentPageNo": 1,
       "complete": true,
-      "submittedHoursAgo": 48
+      "submittedHoursAgo": 248
     },
     {
       "surveyStableId": "hd_hd_consent",
@@ -124,11 +144,11 @@
     "creatingAdminUsername": "heartdemostaff@gmail.com",
     "text": "Phone call: asked to delay kit shipment as they are travelling for next two months",
     "kitRequestIndex": 0,
-    "submittedHoursAgo": 3
+    "submittedHoursAgo": 203
   },{
     "creatingAdminUsername": "power_user@heartdemo.org",
     "text": "Reviewed survey responses, many are incomplete, send additional reminder email",
-    "submittedHoursAgo": 20,
+    "submittedHoursAgo": 220,
     "task": {
       "assignedToUsername": "heartdemostaff@gmail.com",
       "status": "NEW"
@@ -136,7 +156,7 @@
   },{
     "creatingAdminUsername": "heartdemostaff@gmail.com",
     "text": "Needs address change, call to confirm",
-    "submittedHoursAgo": 25,
+    "submittedHoursAgo": 225,
     "task": {
       "assignedToUsername": "heartdemostaff@gmail.com",
       "status": "NEW"

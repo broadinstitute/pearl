@@ -8,8 +8,7 @@ import { Enrollee } from '@juniper/ui-core'
 
 export type EnrolleeParams = StudyParams & {
   enrolleeShortcodeOrId: string,
-  surveyStableId: string,
-  consentStableId: string
+  surveyStableId: string
 }
 
 /** Handles loading a specific enrollee from the server, based on URL params */
