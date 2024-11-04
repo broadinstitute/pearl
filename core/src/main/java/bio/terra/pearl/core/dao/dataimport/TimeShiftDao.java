@@ -39,13 +39,13 @@ public class TimeShiftDao {
      */
     public void changeSurveyResponseTime(UUID surveyResponseId, Instant responseTime) {
         jdbi.withHandle(handle ->
-                handle.createUpdate("update survey_response set created_at = :responseTime, last_updated_at = :response_time where id = :surveyResponseId;")
+                handle.createUpdate("update survey_response set created_at = :responseTime, last_updated_at = :responseTime where id = :surveyResponseId;")
                         .bind("surveyResponseId", surveyResponseId)
                         .bind("responseTime", responseTime)
                         .execute()
         );
         jdbi.withHandle(handle ->
-                handle.createUpdate("update answer set created_at = :responseTime, last_updated_at = :response_time where survey_response_id = :surveyResponseId;")
+                handle.createUpdate("update answer set created_at = :responseTime, last_updated_at = :responseTime where survey_response_id = :surveyResponseId;")
                         .bind("surveyResponseId", surveyResponseId)
                         .bind("responseTime", responseTime)
                         .execute()

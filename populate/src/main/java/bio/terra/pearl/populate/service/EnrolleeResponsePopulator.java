@@ -28,15 +28,25 @@ import bio.terra.pearl.populate.dto.survey.SurveyResponsePopDto;
 import bio.terra.pearl.populate.service.contexts.StudyPopulateContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class EnrolleeResponsePopulator {
 
     public EnrolleeResponsePopulator(PreEnrollmentResponseDao preEnrollmentResponseDao, ObjectMapper objectMapper, SurveyService surveyService, SurveyResponseService surveyResponseService, ParticipantTaskService participantTaskService, TimeShiftDao timeShiftDao, AdminUserDao adminUserDao, PortalService portalService, SurveyQuestionDefinitionDao surveyQuestionDefinitionDao) {
@@ -159,17 +169,13 @@ public class EnrolleeResponsePopulator {
         surveyTasks.forEach(task -> autoCompleteSurvey(task, enrollee, user, ppUser, popType, popContext));
         return enrollee;
     }
+
     public void autoCompleteSurvey(ParticipantTask task, Enrollee enrollee, ParticipantUser user, PortalParticipantUser ppUser, EnrolleePopulateType popType, StudyPopulateContext popContext) {
         UUID portalId = portalService.findByPortalEnvironmentId(ppUser.getPortalEnvironmentId()).get().getId();
         Survey survey = surveyService.findByStableId(task.getTargetStableId(), task.getTargetAssignedVersion(), portalId).get();
         List<SurveyQuestionDefinition> questionDefs = surveyQuestionDefinitionDao.findAllBySurveyId(survey.getId());
-        List<AnswerPopDto> answers = questionDefs.stream().map(questionDef -> {
-            AnswerPopDto answer = AnswerPopDto.builder()
-                    .questionStableId(questionDef.getQuestionStableId())
-                    .stringValue("blah")
-                    .build();
-            return answer;
-        }).toList();
+
+        List<AnswerPopDto> answers = questionDefs.stream().map(this::createAnswerFromQuestionDef).toList();
         SurveyResponsePopDto responsePopDto = SurveyResponsePopDto.builder()
                 .surveyStableId(survey.getStableId())
                 .surveyVersion(survey.getVersion())
@@ -183,6 +189,39 @@ public class EnrolleeResponsePopulator {
         }
     }
 
+    private AnswerPopDto createAnswerFromQuestionDef(SurveyQuestionDefinition questionDef) {
+        AnswerPopDto answer = AnswerPopDto.builder()
+                .questionStableId(questionDef.getQuestionStableId())
+                .build();
+
+        if (!StringUtils.isBlank(questionDef.getChoices())) {
+            answer.setStringValue(parseAndSelectRandomChoice(questionDef.getChoices(), RandomStringUtils.randomAlphabetic(RandomUtils.nextInt(5, 30))));
+        } else {
+            answer.setStringValue(RandomStringUtils.randomAlphabetic(RandomUtils.nextInt(5, 30)));
+        }
+        return answer;
+    }
+
+    private String parseAndSelectRandomChoice(String choicesString, String defaultChoice) {
+        // parse choices and select random one
+        List<QuestionChoice> choices;
+        try {
+            choices = objectMapper.readValue(choicesString, new TypeReference<List<QuestionChoice>>() {
+            });
+        } catch (IllegalArgumentException | JsonProcessingException e) {
+            log.warn("Unable to parse choices for question", e);
+            choices = new ArrayList<>();
+        }
+
+        if (!choices.isEmpty()) {
+            int valueIdx = RandomUtils.nextInt(0, choices.size());
+            QuestionChoice choiceJson = choices.get(valueIdx);
+
+            return choiceJson.stableId();
+        }
+        return defaultChoice;
+
+    }
 
     /**
      * persists any preEnrollmentResponse, and then attaches it to the enrollee

@@ -4,7 +4,6 @@ import bio.terra.pearl.core.dao.admin.AdminUserDao;
 import bio.terra.pearl.core.dao.dataimport.TimeShiftDao;
 import bio.terra.pearl.core.dao.kit.KitTypeDao;
 import bio.terra.pearl.core.dao.survey.PreEnrollmentResponseDao;
-import bio.terra.pearl.core.dao.survey.SurveyQuestionDefinitionDao;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
@@ -56,7 +55,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -497,21 +495,21 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         for (StudyEnvironmentSurvey studyEnvSurvey : studyEnvSurveys) {
             Survey survey = studyEnvSurvey.getSurvey();
             if (RecurrenceType.LONGITUDINAL.equals(survey.getRecurrenceType())) {
-               for (int i = 0; i < createdDaysAgo / survey.getRecurrenceIntervalDays(); i++) {
-                   Instant taskTime = enrollee.getCreatedAt().plus((i + 1) * survey.getRecurrenceIntervalDays(), DAYS);
-                   ParticipantTask task = ParticipantTask.builder()
-                           .taskType(TaskType.SURVEY)
-                           .enrolleeId(enrollee.getId())
-                           .studyEnvironmentId(enrollee.getStudyEnvironmentId())
-                           .portalParticipantUserId(ppUser.getId())
-                           .targetStableId(survey.getStableId())
-                           .targetAssignedVersion(survey.getVersion())
-                           .targetName(survey.getName())
-                           .status(TaskStatus.NEW)
-                           .build();
-                   task = participantTaskService.create(task, auditInfo);
-                   timeShiftDao.changeTaskCreationTime(task.getId(), taskTime);
-               }
+                for (int i = 0; i < createdDaysAgo / survey.getRecurrenceIntervalDays(); i++) {
+                    Instant taskTime = enrollee.getCreatedAt().plus((i + 1) * survey.getRecurrenceIntervalDays(), DAYS);
+                    ParticipantTask task = ParticipantTask.builder()
+                            .taskType(TaskType.SURVEY)
+                            .enrolleeId(enrollee.getId())
+                            .studyEnvironmentId(enrollee.getStudyEnvironmentId())
+                            .portalParticipantUserId(ppUser.getId())
+                            .targetStableId(survey.getStableId())
+                            .targetAssignedVersion(survey.getVersion())
+                            .targetName(survey.getName())
+                            .status(TaskStatus.NEW)
+                            .build();
+                    task = participantTaskService.create(task, auditInfo);
+                    timeShiftDao.changeTaskCreationTime(task.getId(), taskTime);
+                }
             } else if (RecurrenceType.LONGITUDINAL.equals(survey.getRecurrenceType())) {
                 if (enrollee.getCreatedAt().plus(survey.getDaysAfterEligible(), ChronoUnit.DAYS).isBefore(Instant.now())) {
                     Instant taskTime = enrollee.getCreatedAt().plus(survey.getDaysAfterEligible(), DAYS);
@@ -531,6 +529,7 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
             }
         }
     }
+
 
     private final EnrolleeService enrolleeService;
     private final StudyEnvironmentService studyEnvironmentService;

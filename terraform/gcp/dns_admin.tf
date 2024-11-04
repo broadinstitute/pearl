@@ -12,7 +12,7 @@ resource "google_dns_managed_zone" "juniper_admin_dns_zone" {
   dnssec_config {
     kind          = "dns#managedZoneDnsSecConfig"
     non_existence = "nsec3"
-    state         = "on"
+    state         = var.admin_dnssec
   }
   name       = "juniper-admin-dns-zone"
   visibility = "public"
@@ -28,6 +28,14 @@ resource "google_dns_record_set" "a_juniper_admin" {
   rrdatas      = [google_compute_global_address.admin_ip_address.address]
   ttl          = var.dns_ttl
   type         = "A"
+}
+
+resource "google_dns_record_set" "caa_admin" {
+  name = google_dns_managed_zone.juniper_admin_dns_zone.dns_name
+  type = "CAA"
+  ttl  = 300
+  managed_zone = google_dns_managed_zone.juniper_admin_dns_zone.name
+  rrdatas = ["0 issue \"letsencrypt.org\"", "0 issue \"pki.goog\""]
 }
 
 resource "google_dns_record_set" "www_juniper_admin" {
