@@ -3,12 +3,18 @@ package bio.terra.pearl.core.service.participant.merge;
 import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
+import bio.terra.pearl.core.factory.notification.EmailTemplateFactory;
+import bio.terra.pearl.core.factory.notification.TriggerFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.factory.survey.SurveyFactory;
 import bio.terra.pearl.core.factory.survey.SurveyResponseFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
+import bio.terra.pearl.core.model.notification.NotificationDeliveryType;
+import bio.terra.pearl.core.model.notification.Trigger;
+import bio.terra.pearl.core.model.notification.TriggerEventType;
+import bio.terra.pearl.core.model.notification.TriggerType;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.EnrolleeWithdrawalReason;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
@@ -63,6 +69,10 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
     private RegistrationService registrationService;
     @Autowired
     private SurveyResponseService surveyResponseService;
+    @Autowired
+    private TriggerFactory triggerFactory;
+    @Autowired
+    private EmailTemplateFactory emailTemplateFactory;
 
     /** merge two enrollees who each have a single not-started survey task */
     @Test
@@ -101,17 +111,33 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
         assertThat(withdrawnUsers, hasSize(1));
         assertThat(withdrawnUsers.get(0).getShortcode(), equalTo(sourceBundle.enrollee().getShortcode()));
         assertThat(withdrawnUsers.get(0).getReason(), equalTo(EnrolleeWithdrawalReason.DUPLICATE));
+    }
 
+    private Survey addTriggerAndSurvey(String testName, StudyEnvironmentBundle studyEnvBundle) {
+        triggerFactory.buildPersisted(Trigger.builder()
+                        .deliveryType(NotificationDeliveryType.EMAIL)
+                        .triggerType(TriggerType.EVENT)
+                        .eventType(TriggerEventType.STUDY_ENROLLMENT)
+                        .emailTemplate(emailTemplateFactory.buildPersisted(testName, studyEnvBundle.getPortal().getId())),
+                studyEnvBundle.getStudyEnv().getId(), studyEnvBundle.getPortalEnv().getId());
+        Survey survey1 = surveyFactory.buildPersisted(testName, studyEnvBundle.getPortal().getId());
+        surveyFactory.attachToEnv(survey1, studyEnvBundle.getStudyEnv().getId(), true);
+        return survey1;
     }
 
     /** test merge of two participants who have enrolled in a combination of studies within a portal */
     @Test
     @Transactional
     public void testMultiStudyMerge(TestInfo info) {
-        // build 3 studies in the same portal
+        // build 3 studies in the same portal, each with an enrollment email
         StudyEnvironmentBundle studyEnvBundle1 = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
+        Survey survey1 = addTriggerAndSurvey(getTestName(info), studyEnvBundle1);
+
         StudyEnvironmentBundle studyEnvBundle2 = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox, studyEnvBundle1.getPortal(), studyEnvBundle1.getPortalEnv());
+        Survey survey2 = addTriggerAndSurvey(getTestName(info), studyEnvBundle2);
+
         StudyEnvironmentBundle studyEnvBundle3 = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox, studyEnvBundle1.getPortal(), studyEnvBundle1.getPortalEnv());
+        Survey survey3 = addTriggerAndSurvey(getTestName(info), studyEnvBundle3);
 
         // a person created two accounts.  They enrolled in study 1 under both, but only one in study 2 and the other one in study 3
         RegistrationService.RegistrationResult sourceUser = registrationService.register(studyEnvBundle1.getPortal().getShortcode(), studyEnvBundle1.getStudyEnv().getEnvironmentName(),
@@ -120,9 +146,14 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
                 "username2", null, null);
 
         HubResponse sourceEnrollee1 = enrollmentService.enroll(studyEnvBundle1.getStudyEnv().getEnvironmentName(), studyEnvBundle1.getStudy().getShortcode(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), null);
-        HubResponse targetEnrollee1 = enrollmentService.enroll(studyEnvBundle2.getStudyEnv().getEnvironmentName(), studyEnvBundle1.getStudy().getShortcode(), targetUser.participantUser(), targetUser.portalParticipantUser(), null);
-        HubResponse sourceEnrollee2 = enrollmentService.enroll(studyEnvBundle1.getStudyEnv().getEnvironmentName(), studyEnvBundle2.getStudy().getShortcode(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), null);
+        surveyResponseFactory.submitStringAnswer(survey1.getStableId(), "question1", "value1", true, new EnrolleeBundle(sourceEnrollee1.getEnrollee(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), studyEnvBundle1.getPortal().getId()));
+        HubResponse targetEnrollee1 = enrollmentService.enroll(studyEnvBundle1.getStudyEnv().getEnvironmentName(), studyEnvBundle1.getStudy().getShortcode(), targetUser.participantUser(), targetUser.portalParticipantUser(), null);
+        surveyResponseFactory.submitStringAnswer(survey1.getStableId(), "question1", "value2", true, new EnrolleeBundle(targetEnrollee1.getEnrollee(), targetUser.participantUser(), targetUser.portalParticipantUser(), studyEnvBundle1.getPortal().getId()));
+        HubResponse sourceEnrollee2 = enrollmentService.enroll(studyEnvBundle2.getStudyEnv().getEnvironmentName(), studyEnvBundle2.getStudy().getShortcode(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), null);
+        surveyResponseFactory.submitStringAnswer(survey2.getStableId(), "question1", "value3", true, new EnrolleeBundle(sourceEnrollee2.getEnrollee(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), studyEnvBundle1.getPortal().getId()));
         HubResponse targetEnrollee3 = enrollmentService.enroll(studyEnvBundle3.getStudyEnv().getEnvironmentName(), studyEnvBundle3.getStudy().getShortcode(), targetUser.participantUser(), targetUser.portalParticipantUser(), null);
+        surveyResponseFactory.submitStringAnswer(survey3.getStableId(), "question1", "value4", true, new EnrolleeBundle(targetEnrollee3.getEnrollee(), targetUser.participantUser(), targetUser.portalParticipantUser(), studyEnvBundle1.getPortal().getId()));
+
 
         ParticipantUserMerge merge = participantMergePlanService.planMerge(sourceUser.participantUser(), targetUser.participantUser(),
                 studyEnvBundle1.getPortal());
@@ -179,25 +210,22 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
         EnrolleeBundle targetBundle = enrolleeFactory.enroll("target@test.com", studyEnvBundle.getPortal().getShortcode(),
                 studyEnvBundle.getStudy().getShortcode(), studyEnvBundle.getStudyEnv().getEnvironmentName());
 
-        List<ParticipantTask> sourceTasks = participantTaskService.findByEnrolleeId(sourceBundle.enrollee().getId());
-        List<ParticipantTask> targetTasks = participantTaskService.findByEnrolleeId(targetBundle.enrollee().getId());
-
         // survey1 has a response from both, survey2 has a response from the source, survey 3 has a response from the target
         SurveyResponse responseSt1 = surveyResponseFactory.submitStringAnswer(
-                sourceTasks.stream().filter(t -> t.getTargetStableId().equals(survey1.getStableId())).findFirst().orElseThrow(),
-                "question1", "source1", true, sourceBundle, studyEnvBundle.getPortal())
+                survey1.getStableId(),
+                "question1", "source1", true, sourceBundle)
                 .getResponse();
         SurveyResponse responseTt1 = surveyResponseFactory.submitStringAnswer(
-                targetTasks.stream().filter(t -> t.getTargetStableId().equals(survey1.getStableId())).findFirst().orElseThrow(),
-                "question1", "target1", true, targetBundle, studyEnvBundle.getPortal())
+                survey1.getStableId(),
+                "question1", "target1", true, targetBundle)
                 .getResponse();
         SurveyResponse responseSt2 = surveyResponseFactory.submitStringAnswer(
-                sourceTasks.stream().filter(t -> t.getTargetStableId().equals(survey2.getStableId())).findFirst().orElseThrow(),
-                "question1", "source2", true, sourceBundle, studyEnvBundle.getPortal())
+                survey2.getStableId(),
+                "question1", "source2", true, sourceBundle)
                 .getResponse();
         SurveyResponse response_Tt3 = surveyResponseFactory.submitStringAnswer(
-                targetTasks.stream().filter(t -> t.getTargetStableId().equals(survey3.getStableId())).findFirst().orElseThrow(),
-                "question1", "target3", true, targetBundle, studyEnvBundle.getPortal())
+               survey3.getStableId(),
+                "question1", "target3", true, targetBundle)
                 .getResponse();
 
         ParticipantUserMerge merge = participantMergePlanService.planMerge(sourceBundle.participantUser(), targetBundle.participantUser(),
