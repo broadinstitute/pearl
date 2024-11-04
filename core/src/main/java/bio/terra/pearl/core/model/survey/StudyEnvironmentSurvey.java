@@ -108,4 +108,25 @@ public class StudyEnvironmentSurvey extends BaseEntity implements VersionedEntit
         }
         return survey.isAssignToExistingEnrollees();
     }
+
+    @Override
+    public Boolean isRequired() {
+        if (survey == null) {
+            return null;
+        }
+        return survey.isRequired();
+    }
+
+    @Override
+    public String getName() {
+        if (survey == null) {
+            return null;
+        }
+        return survey.getName();
+    }
+
+    @Override
+    public Integer getTaskOrder() {
+        return surveyOrder;
+    }
 }

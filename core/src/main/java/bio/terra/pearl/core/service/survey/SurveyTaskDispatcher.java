@@ -1,12 +1,9 @@
 package bio.terra.pearl.core.service.survey;
 
-import bio.terra.pearl.core.model.participant.Enrollee;
-import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyType;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
-import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
@@ -97,38 +94,14 @@ public class SurveyTaskDispatcher extends TaskConfigDispatcher<StudyEnvironmentS
     }
 
     @Override
-    protected TaskType getTaskType(StudyEnvironmentSurvey ses) {
-        return taskTypeForSurveyType.get(ses.getSurvey().getSurveyType());
-    }
-
-    @Override
     protected void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, StudyEnvironmentSurvey ses) {
         newTask.setSurveyResponseId(oldTask.getSurveyResponseId());
     }
 
-    /** builds a task for the given survey -- does NOT evaluate the rule or check duplicates */
+
     @Override
-    public ParticipantTask buildTask(Enrollee enrollee,
-                                     PortalParticipantUser portalParticipantUser,
-                                     StudyEnvironmentSurvey studyEnvSurvey) {
-        if (!studyEnvSurvey.getSurveyId().equals(studyEnvSurvey.getSurvey().getId())) {
-            throw new IllegalArgumentException("Survey does not match StudyEnvironmentSurvey");
-        }
-        Survey survey = studyEnvSurvey.getSurvey();
-        TaskType taskType = taskTypeForSurveyType.get(survey.getSurveyType());
-        ParticipantTask task = ParticipantTask.builder()
-                .enrolleeId(enrollee.getId())
-                .portalParticipantUserId(portalParticipantUser.getId())
-                .studyEnvironmentId(enrollee.getStudyEnvironmentId())
-                .blocksHub(survey.isRequired())
-                .taskOrder(studyEnvSurvey.getSurveyOrder())
-                .targetStableId(survey.getStableId())
-                .targetAssignedVersion(survey.getVersion())
-                .taskType(taskType)
-                .targetName(survey.getName())
-                .status(TaskStatus.NEW)
-                .build();
-        return task;
+    protected TaskType getTaskType(StudyEnvironmentSurvey ses) {
+        return taskTypeForSurveyType.get(ses.getSurvey().getSurveyType());
     }
 
     private final Map<SurveyType, TaskType> taskTypeForSurveyType = Map.of(

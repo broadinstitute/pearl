@@ -7,6 +7,7 @@ import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.RecurrenceType;
+import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
 import bio.terra.pearl.core.service.participant.PortalParticipantUserService;
@@ -81,11 +82,6 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
         }
         updateTasksFromEnrolleeEvent(enrolleeEvent);
     }
-
-    /**
-     * builds a task for the given survey -- does NOT evaluate the rule or check duplicates
-     */
-    public abstract ParticipantTask buildTask(Enrollee enrollee, PortalParticipantUser portalParticipantUser, T taskDispatchConfig);
 
     protected abstract List<T> findTaskConfigsByStudyEnvironment(UUID studyEnvId);
 
@@ -271,6 +267,28 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * builds a task for the given survey -- does NOT evaluate the rule or check duplicates
+     */
+    public ParticipantTask buildTask(Enrollee enrollee,
+                                     PortalParticipantUser portalParticipantUser,
+                                     T taskConfig) {
+        TaskType taskType = getTaskType(taskConfig);
+        ParticipantTask task = ParticipantTask.builder()
+                .enrolleeId(enrollee.getId())
+                .portalParticipantUserId(portalParticipantUser.getId())
+                .studyEnvironmentId(enrollee.getStudyEnvironmentId())
+                .blocksHub(taskConfig.isRequired())
+                .taskOrder(taskConfig.getTaskOrder())
+                .targetStableId(taskConfig.getStableId())
+                .targetAssignedVersion(taskConfig.getVersion())
+                .taskType(taskType)
+                .targetName(taskConfig.getName())
+                .status(TaskStatus.NEW)
+                .build();
+        return task;
     }
 
     public boolean isEligible(T taskDispatchConfig, EnrolleeContext enrolleeContext) {
