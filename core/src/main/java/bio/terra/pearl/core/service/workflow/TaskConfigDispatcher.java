@@ -94,13 +94,13 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
         assign(enrollees, taskConfig, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignDelayedSurvey")));
     }
 
-    protected abstract T findTaskConfigByStableId(UUID studyEnvironmentId, String stableId);
+    protected abstract T findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version);
 
     public List<ParticipantTask> assign(ParticipantTaskAssignDto assignDto,
                                         UUID studyEnvironmentId,
                                         ResponsibleEntity operator) {
         List<Enrollee> enrollees = findMatchingEnrollees(assignDto, studyEnvironmentId);
-        T taskDispatchConfig = findTaskConfigByStableId(studyEnvironmentId, assignDto.targetStableId());
+        T taskDispatchConfig = findTaskConfigByStableId(studyEnvironmentId, assignDto.targetStableId(), assignDto.targetAssignedVersion());
         return assign(enrollees, taskDispatchConfig, assignDto.overrideEligibility(), operator);
     }
 
@@ -161,8 +161,8 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
     @EventListener
     @Order(DispatcherOrder.SURVEY_TASK)
     public void handleNewTaskConfigEvent(E newEvent) {
-        T taskDispatchConfig = findTaskConfigByStableId(newEvent.getStudyEnvironmentId(), newEvent.getStableId());
-        handleNewTask(taskDispatchConfig);
+        T newTaskConfig = findTaskConfigByStableId(newEvent.getStudyEnvironmentId(), newEvent.getStableId(), newEvent.getVersion());
+        handleNewTaskConfig(newTaskConfig);
     }
 
     protected List<Enrollee> findMatchingEnrollees(ParticipantTaskAssignDto assignDto,
@@ -226,7 +226,7 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
         }
     }
 
-    public void handleNewTask(T newTaskConfig) {
+    public void handleNewTaskConfig(T newTaskConfig) {
         if (newTaskConfig.isAutoUpdateTaskAssignments()) {
             ParticipantTaskUpdateDto updateDto = new ParticipantTaskUpdateDto(
                     List.of(new ParticipantTaskUpdateDto.TaskUpdateSpec(

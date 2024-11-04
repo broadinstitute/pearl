@@ -56,8 +56,8 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
         return dao.findByStudyEnvironmentIdWithContent(studyId);
     }
 
-    public Optional<Survey> findByStudyEnvironmentIdAndStableIdNoContent(UUID studyEnvId, String stableId) {
-        return dao.findByStudyEnvironmentIdAndStableIdNoContent(studyEnvId, stableId);
+    public Optional<Survey> findActiveByStudyEnvironmentIdAndStableIdNoContent(UUID studyEnvId, String stableId, Integer version) {
+        return dao.findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvId, stableId, version);
     }
 
 

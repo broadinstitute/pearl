@@ -5,4 +5,5 @@ import java.util.UUID;
 public interface TaskConfigCreatedEvent {
     String getStableId();
     UUID getStudyEnvironmentId();
+    Integer getVersion();
 }

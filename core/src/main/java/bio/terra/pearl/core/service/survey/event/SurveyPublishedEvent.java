@@ -20,4 +20,8 @@ public class SurveyPublishedEvent extends Event implements BaseEvent, TaskConfig
     public String getStableId() {
         return survey.getStableId();
     }
+
+    public Integer getVersion() {
+        return survey.getVersion();
+    }
 }

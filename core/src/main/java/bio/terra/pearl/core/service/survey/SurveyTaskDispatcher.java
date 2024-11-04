@@ -61,9 +61,12 @@ public class SurveyTaskDispatcher extends TaskConfigDispatcher<StudyEnvironmentS
     }
 
     @Override
-    protected StudyEnvironmentSurvey findTaskConfigByStableId(UUID studyEnvironmentId, String stableId) {
+    protected StudyEnvironmentSurvey findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {
+        System.out.println("stableId: " + stableId);
+        System.out.println("version: " + version);
+        System.out.println("studyEnvironmentId: " + studyEnvironmentId);
         Survey survey = surveyService
-                .findByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId)
+                .findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId, version)
                 .orElseThrow(() -> new NotFoundException("Could not find survey"));
 
         StudyEnvironmentSurvey ses = studyEnvironmentSurveyService.findActiveBySurvey(studyEnvironmentId, survey.getId())
