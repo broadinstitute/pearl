@@ -18,6 +18,7 @@ import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.participant.Profile;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
+import bio.terra.pearl.core.model.survey.SurveyTaskConfigDto;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.RecurrenceType;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -61,9 +63,15 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
 
     @Test
     void testIsDuplicateTask() {
-        Survey survey = Survey.builder().recurrenceType(RecurrenceType.NONE).build();
+        UUID surveyId = UUID.randomUUID();
+        Survey survey = Survey
+                .builder()
+                .id(surveyId)
+                .recurrenceType(RecurrenceType.NONE)
+                .build();
         StudyEnvironmentSurvey studyEnvironmentSurvey = StudyEnvironmentSurvey.builder()
                 .survey(survey)
+                .surveyId(surveyId)
                 .build();
         ParticipantTask surveyTask1 = ParticipantTask.builder()
                 .targetStableId("TASK_1")
@@ -77,7 +85,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                 .taskType(TaskType.KIT_REQUEST)
                 .build();
         List<ParticipantTask> existingTasks = List.of(surveyTask1, surveyTask2, kitTask);
-        boolean isDuplicate = surveyTaskDispatcher.isDuplicateTask(studyEnvironmentSurvey, surveyTask1,
+        boolean isDuplicate = surveyTaskDispatcher.isDuplicateTask(new SurveyTaskConfigDto(studyEnvironmentSurvey), surveyTask1,
                 existingTasks);
         assertTrue(isDuplicate);
 
@@ -85,16 +93,22 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                 .targetStableId("TASK_3")
                 .taskType(TaskType.SURVEY)
                 .build();
-        isDuplicate = surveyTaskDispatcher.isDuplicateTask(studyEnvironmentSurvey, surveyTask3,
+        isDuplicate = surveyTaskDispatcher.isDuplicateTask(new SurveyTaskConfigDto(studyEnvironmentSurvey), surveyTask3,
                 existingTasks);
         assertFalse(isDuplicate);
     }
 
     @Test
     void testIsDuplicateForTaskTypes() {
-        Survey survey = Survey.builder().recurrenceType(RecurrenceType.NONE).build();
+        UUID surveyId = UUID.randomUUID();
+        Survey survey = Survey
+                .builder()
+                .id(surveyId)
+                .recurrenceType(RecurrenceType.NONE)
+                .build();
         StudyEnvironmentSurvey studyEnvironmentSurvey = StudyEnvironmentSurvey.builder()
                 .survey(survey)
+                .surveyId(surveyId)
                 .build();
         List.of(TaskType.SURVEY, TaskType.CONSENT, TaskType.OUTREACH, TaskType.ADMIN_FORM).stream().forEach(taskType -> {
             ParticipantTask surveyTask1 = ParticipantTask.builder()
@@ -105,7 +119,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                     .targetStableId("TASK_1")
                     .taskType(taskType)
                     .build();
-            boolean isDuplicate = surveyTaskDispatcher.isDuplicateTask(studyEnvironmentSurvey, surveyTask2,
+            boolean isDuplicate = surveyTaskDispatcher.isDuplicateTask(new SurveyTaskConfigDto(studyEnvironmentSurvey), surveyTask2,
                     List.of(surveyTask1));
             assertTrue(isDuplicate);
         });

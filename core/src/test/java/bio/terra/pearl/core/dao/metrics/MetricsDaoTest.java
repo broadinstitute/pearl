@@ -16,6 +16,7 @@ import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
+import bio.terra.pearl.core.model.survey.SurveyTaskConfigDto;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
@@ -100,12 +101,12 @@ public class MetricsDaoTest extends BaseSpringBootTest {
       PortalParticipantUser ppUser2 = portalParticipantUserFactory.buildPersisted(getTestName(info), enrollee2, portalEnv);
     Enrollee enrollee3 = enrolleeFactory.buildPersisted(getTestName(info), studyEnv);
       PortalParticipantUser ppUser3 = portalParticipantUserFactory.buildPersisted(getTestName(info), enrollee3, portalEnv);
-    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee1, ppUser1, studyEnvSurvey);
+    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee1, ppUser1, new SurveyTaskConfigDto(studyEnvSurvey));
     task.setStatus(TaskStatus.COMPLETE);
       DataAuditInfo auditInfo = getAuditInfo(info);
     participantTaskService.create(task, auditInfo);
-    participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee2, ppUser2, studyEnvSurvey), auditInfo);
-    ParticipantTask taskToUpdate = participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee3, ppUser3, studyEnvSurvey), auditInfo);
+    participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee2, ppUser2, new SurveyTaskConfigDto(studyEnvSurvey)), auditInfo);
+    ParticipantTask taskToUpdate = participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee3, ppUser3, new SurveyTaskConfigDto(studyEnvSurvey)), auditInfo);
 
       List<BasicMetricDatum> rangeMetrics = metricsDao.studyRequiredSurveyCompletions(studyEnv.getId(), new TimeRange(null, null));
     assertThat(rangeMetrics, hasSize(1));

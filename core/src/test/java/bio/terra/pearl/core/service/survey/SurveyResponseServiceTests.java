@@ -210,7 +210,7 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
         StudyEnvironmentSurvey configuredSurvey = surveyFactory.attachToEnv(survey, enrolleeBundle.enrollee().getStudyEnvironmentId(), true);
         configuredSurvey.setSurvey(survey);
 
-        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), configuredSurvey);
+        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), new SurveyTaskConfigDto(configuredSurvey));
         task = participantTaskService.create(task, getAuditInfo(testInfo));
         assertThat(task.getStatus(), equalTo(TaskStatus.NEW));
 
@@ -261,7 +261,7 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
         StudyEnvironmentSurvey configuredSurvey = surveyFactory.attachToEnv(survey, enrolleeBundle.enrollee().getStudyEnvironmentId(), true);
         configuredSurvey.setSurvey(survey);
 
-        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), configuredSurvey);
+        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), new SurveyTaskConfigDto(configuredSurvey));
         task = participantTaskService.create(task, getAuditInfo(testInfo));
         assertThat(task.getStatus(), equalTo(TaskStatus.NEW));
 
