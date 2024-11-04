@@ -149,7 +149,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
         assertThat(participantTasks.get(0).getTargetStableId(), equalTo("main"));
 
         // confirm that even after a survey submit event with a completion, the followup task is still not assigned
-        surveyResponseFactory.submitStringAnswer(participantTasks.get(0), "diagnosis", "sick", true, sandbox1, sandboxBundle.getPortal());
+        surveyResponseFactory.submitStringAnswer(participantTasks.get(0), "diagnosis", "sick", true, sandbox1);
         participantTasks = participantTaskService.findByEnrolleeId(sandbox1.enrollee().getId());
         assertThat(participantTasks, hasSize(1));
         assertThat(participantTasks.get(0).getStatus(), equalTo(TaskStatus.COMPLETE));
@@ -276,8 +276,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                 "diagnosis",
                 "sick",
                 false,
-                bundle,
-                sandboxBundle.getPortal());
+                bundle);
         // survey not complete, so no new task should be assigned
         assertThat(participantTaskService.findByEnrolleeId(bundle.enrollee().getId()), hasSize(1));
 
@@ -286,8 +285,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                 "diagnosis",
                 "fine",
                 true,
-                bundle,
-                sandboxBundle.getPortal());
+                bundle);
         // survey answer not a match -- no new task should be assigned
         assertThat(participantTaskService.findByEnrolleeId(bundle.enrollee().getId()), hasSize(1));
 
@@ -296,8 +294,7 @@ class SurveyTaskDispatcherTest extends BaseSpringBootTest {
                 "diagnosis",
                 "sick",
                 true,
-                bundle,
-                sandboxBundle.getPortal());
+                bundle);
         // survey answer matches and is complete -- should assign new task
         assertThat(participantTaskService.findByEnrolleeId(bundle.enrollee().getId()), hasSize(2));
         tasks = participantTaskService.findByEnrolleeId(bundle.enrollee().getId());

@@ -9,11 +9,13 @@ import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.model.workflow.HubResponse;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.service.survey.SurveyResponseService;
+import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class SurveyResponseFactory {
@@ -25,6 +27,8 @@ public class SurveyResponseFactory {
     private SurveyResponseService surveyResponseService;
     @Autowired
     private AnswerFactory answerFactory;
+    @Autowired
+    private ParticipantTaskService participantTaskService;
 
     public SurveyResponse.SurveyResponseBuilder builder(String testName) {
         return SurveyResponse.builder().complete(false);
@@ -59,8 +63,7 @@ public class SurveyResponseFactory {
                                                           String questionStableId,
                                                           String answerValue,
                                                           boolean complete,
-                                                          EnrolleeBundle bundle,
-                                                          Portal portal) {
+                                                          EnrolleeBundle bundle) {
         SurveyResponse response = SurveyResponse.builder()
                 .answers(List.of(
                         Answer.builder()
@@ -77,6 +80,17 @@ public class SurveyResponseFactory {
                 bundle.portalParticipantUser(),
                 bundle.enrollee(),
                 task.getId(),
-                portal.getId());
+                bundle.portalId());
+    }
+
+    /** submit a string answer to a survey question, will auto-lookup the correct task, so don't use this for multi-response scenarios */
+    public HubResponse<SurveyResponse> submitStringAnswer(String surveyStableId,
+                                                          String questionStableId,
+                                                          String answerValue,
+                                                          boolean complete,
+                                                          EnrolleeBundle bundle) {
+        ParticipantTask task =  participantTaskService.findTaskForActivity(bundle.portalParticipantUser().getId(),
+                bundle.enrollee().getStudyEnvironmentId(), surveyStableId).orElseThrow();
+        return submitStringAnswer(task, questionStableId, answerValue, complete, bundle);
     }
 }
