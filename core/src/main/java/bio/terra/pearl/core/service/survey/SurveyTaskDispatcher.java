@@ -4,7 +4,6 @@ import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyTaskConfigDto;
 import bio.terra.pearl.core.model.survey.SurveyType;
-import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
@@ -15,10 +14,7 @@ import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
 import bio.terra.pearl.core.service.survey.event.EnrolleeSurveyEvent;
 import bio.terra.pearl.core.service.survey.event.SurveyPublishedEvent;
-import bio.terra.pearl.core.service.workflow.DispatcherOrder;
-import bio.terra.pearl.core.service.workflow.EnrolleeCreationEvent;
-import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
-import bio.terra.pearl.core.service.workflow.TaskConfigDispatcher;
+import bio.terra.pearl.core.service.workflow.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -26,12 +22,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /** listens for events and updates enrollee survey tasks accordingly */
 @Service
 @Slf4j
-public class SurveyTaskDispatcher extends TaskConfigDispatcher<SurveyTaskConfigDto, SurveyPublishedEvent> {
+public class SurveyTaskDispatcher extends TaskConfigDispatcher<SurveyTaskConfigDto> {
     private final StudyEnvironmentSurveyService studyEnvironmentSurveyService;
     private final SurveyService surveyService;
 
@@ -49,20 +46,37 @@ public class SurveyTaskDispatcher extends TaskConfigDispatcher<SurveyTaskConfigD
 
     @EventListener
     @Order(DispatcherOrder.SURVEY_TASK)
-    public void handleNewTaskConfigEvent(SurveyPublishedEvent newEvent) {
-        super.handleNewTaskConfigEvent(newEvent);
+    public void handleSurveyPublishedEvent(SurveyPublishedEvent newEvent) {
+        SurveyTaskConfigDto surveyTaskConfigDto = findTaskConfigByStableId(newEvent.getStudyEnvironmentId(),
+                newEvent.getStableId(),
+                newEvent.getVersion())
+                .orElseThrow(() -> new IllegalStateException("Could not find new survey task config"));
+
+        updateTasksForNewTaskConfig(surveyTaskConfigDto);
     }
 
+    /**
+     * create the survey tasks for an enrollee's initial creation
+     */
     @EventListener
     @Order(DispatcherOrder.SURVEY_TASK)
     public void handleNewEnrolleeEvent(EnrolleeCreationEvent enrolleeEvent) {
-        super.handleNewEnrolleeEvent(enrolleeEvent);
+        syncTasksForEnrollee(enrolleeEvent.getEnrolleeContext());
     }
 
+    /**
+     * survey responses can update what surveys a person is eligible for -- recompute as needed
+     */
     @EventListener
     @Order(DispatcherOrder.SURVEY_TASK)
     public void handleSurveyEvent(EnrolleeSurveyEvent enrolleeEvent) {
-        super.handleSurveyEvent(enrolleeEvent);
+        /** for now, only recompute on updates involving a completed survey.  This will
+         * avoid assigning surveys based on an answer that was quickly changed, since we don't
+         * yet have functions for unassigning surveys */
+        if (!enrolleeEvent.getSurveyResponse().isComplete()) {
+            return;
+        }
+        syncTasksForEnrollee(enrolleeEvent.getEnrolleeContext());
     }
 
 
@@ -81,22 +95,12 @@ public class SurveyTaskDispatcher extends TaskConfigDispatcher<SurveyTaskConfigD
     }
 
     @Override
-    protected SurveyTaskConfigDto findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {
-        Survey survey = surveyService
-                .findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId, version)
-                .orElseThrow(() -> new NotFoundException("Could not find survey"));
-
-        StudyEnvironmentSurvey ses = studyEnvironmentSurveyService.findActiveBySurvey(studyEnvironmentId, survey.getId())
-                .orElseThrow(() -> new NotFoundException("Could not find StudyEnvironmentSurvey"));
-
-        return new SurveyTaskConfigDto(ses, survey);
+    protected Optional<SurveyTaskConfigDto> findTaskConfigForAssignDto(UUID studyEnvironmentId, ParticipantTaskAssignDto participantTaskAssignDto) {
+        return findTaskConfigByStableId(
+                studyEnvironmentId,
+                participantTaskAssignDto.targetStableId(),
+                participantTaskAssignDto.targetAssignedVersion());
     }
-
-    @Override
-    protected void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, SurveyTaskConfigDto taskDto) {
-        newTask.setSurveyResponseId(oldTask.getSurveyResponseId());
-    }
-
 
     @Override
     protected TaskType getTaskType(SurveyTaskConfigDto taskDto) {
@@ -109,4 +113,20 @@ public class SurveyTaskDispatcher extends TaskConfigDispatcher<SurveyTaskConfigD
             SurveyType.OUTREACH, TaskType.OUTREACH,
             SurveyType.ADMIN, TaskType.ADMIN_FORM
     );
+
+    protected Optional<SurveyTaskConfigDto> findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {
+        Optional<Survey> surveyOpt = surveyService
+                .findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId, version);
+        if (surveyOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Optional<StudyEnvironmentSurvey> sesOpt = studyEnvironmentSurveyService
+                .findActiveBySurvey(studyEnvironmentId, surveyOpt.get().getId());
+        if (sesOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new SurveyTaskConfigDto(sesOpt.get(), surveyOpt.get()));
+    }
 }
