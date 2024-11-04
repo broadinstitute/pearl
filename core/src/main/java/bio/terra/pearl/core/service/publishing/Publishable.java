@@ -13,7 +13,7 @@ import java.util.Objects;
 public interface Publishable {
     public static final List<String> CONFIG_IGNORE_PROPS = List.of("id", "createdAt", "lastUpdatedAt", "class",
             "studyEnvironmentId", "portalEnvironmentId", "emailTemplateId", "emailTemplate",
-            "consentFormId", "consentForm", "surveyId", "survey", "versionedEntity", "trigger");
+            "consentFormId", "consentForm", "surveyId", "survey", "versionedEntity", "trigger", "version");
     public void loadForDiffing(PortalEnvironment portalEnv);
     public void loadForDiffing(StudyEnvironment studyEnv);
     public void updateDiff(PortalEnvironment sourceEnv, PortalEnvironment destEnv, PortalEnvironmentChange change);
