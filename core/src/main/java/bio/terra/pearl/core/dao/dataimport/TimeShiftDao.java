@@ -4,6 +4,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -64,6 +65,15 @@ public class TimeShiftDao {
         jdbi.withHandle(handle ->
                 handle.createUpdate("update participant_task set created_at = :creationTime where id = :taskId;")
                         .bind("taskId", taskId)
+                        .bind("creationTime", creationTime)
+                        .execute()
+        );
+    }
+
+    public void changeTasksCreationTime(List<UUID> taskIds, Instant creationTime) {
+        jdbi.withHandle(handle ->
+                handle.createUpdate("update participant_task set created_at = :creationTime where id IN (<taskIds>);")
+                        .bindList("taskIds", taskIds)
                         .bind("creationTime", creationTime)
                         .execute()
         );

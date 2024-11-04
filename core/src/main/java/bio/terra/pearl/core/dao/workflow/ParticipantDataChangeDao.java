@@ -40,10 +40,12 @@ public class ParticipantDataChangeDao extends BaseJdbiDao<ParticipantDataChange>
     public List<ParticipantDataChange> findAllRecordsForEnrolleeAndModelName(UUID enrolleeId, UUID portalParticipantUserId, String modelName) {
         return jdbi.withHandle(handle ->
                 handle
-                        .createQuery("SELECT * FROM " + tableName +
-                                "    WHERE enrollee_id = :enrolleeId" +
-                                "    AND model_name = :modelName" +
-                                "    OR portal_participant_user_id = :portalParticipantUserId;")
+                        .createQuery("""
+                                SELECT * FROM %s
+                                WHERE (enrollee_id = :enrolleeId
+                                OR portal_participant_user_id = :portalParticipantUserId)
+                                AND model_name = :modelName;
+                                """.formatted(tableName))
                         .bind("enrolleeId", enrolleeId)
                         .bind("modelName", modelName)
                         .bind("portalParticipantUserId", portalParticipantUserId)

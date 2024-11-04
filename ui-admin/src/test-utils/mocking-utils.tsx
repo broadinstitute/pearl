@@ -377,12 +377,13 @@ export const mockFamily = (): Family => {
 }
 
 /** helper function to generate a ParticipantTask object for a survey and enrollee */
-export const taskForForm = (form: Survey, enrolleeId: string, taskType: ParticipantTaskType):
+export const taskForForm = (form: Survey, enrolleeId: string, taskType: ParticipantTaskType
+  , createdAt = 0, surveyResponseId?: string):
     ParticipantTask => {
   return {
     id: randomString(10),
     blocksHub: false,
-    createdAt: 0,
+    createdAt,
     enrolleeId,
     portalParticipantUserId: randomString(10),
     status: 'NEW',
@@ -391,6 +392,7 @@ export const taskForForm = (form: Survey, enrolleeId: string, taskType: Particip
     targetName: form.name,
     targetStableId: form.stableId,
     targetAssignedVersion: form.version,
+    surveyResponseId,
     taskOrder: 1
   }
 }

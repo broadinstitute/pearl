@@ -35,7 +35,7 @@ const usePrintableSurvey = (args: UsePrintableConsentArgs) => {
   const [loading, setLoading] = useState(true)
   const [surveyModel, setSurveyModel] = useState<Model | null>(null)
   const navigate = useNavigate()
-  const taskId = useTaskIdParam()
+  const { taskId } = useTaskIdParam()
 
   useEffect(() => {
     const loadForm = async () => {

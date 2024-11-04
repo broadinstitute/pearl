@@ -130,15 +130,16 @@ export type Event = {
 }
 
 export type DataChangeRecord = {
-  id: string,
-  createdAt: number,
-  modelName: string,
-  fieldName?: string,
-  oldValue: string,
-  newValue: string,
-  responsibleUserId?: string,
-  enrolleeId?: string,
-  responsibleAdminUserId?: string,
+  id: string
+  createdAt: number
+  modelName: string
+  fieldName?: string
+  oldValue: string
+  newValue: string
+  responsibleUserId?: string
+  enrolleeId?: string
+  modelId?: string
+  responsibleAdminUserId?: string
   justification?: string
 }
 

@@ -56,7 +56,10 @@ export default function SurveyFullDataView({
           studyEnvContext.currentEnv.environmentName,
           enrollee.shortcode,
           survey.stableId)
-        setChangeRecords(changeRecords)
+        const responseRecords = changeRecords
+          // limit the record to this response or to records that are not tied to a specific response
+          .filter(record => record.modelId === responseId || !record.modelId)
+        setChangeRecords(responseRecords)
       })
     }
   }, [responseId])
