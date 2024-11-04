@@ -47,4 +47,3 @@ terra.common:
   kubernetes:
     inKubernetes: false
 
-

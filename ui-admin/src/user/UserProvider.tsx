@@ -3,21 +3,24 @@ import LoadingSpinner from '../util/LoadingSpinner'
 import Api from 'api/api'
 import { AdminUser } from 'api/adminUser'
 import { useAuth } from 'react-oidc-context'
+import { emptyContextAlertFunction } from 'util/contextUtils'
 
 
 export type UserContextT = {
   user: AdminUser | null,
   loginUser: (adminUser: AdminUser) => void,
   loginUserUnauthed: (adminUser: AdminUser) => void,
-  logoutUser: () => void
+  logoutUser: () => void,
+  toggleSuperuserOverride: () => void
 }
 
 /** current user object context */
 export const UserContext = React.createContext<UserContextT>({
   user: null,
-  loginUser: () => { throw new Error('context not yet initialized') },
-  loginUserUnauthed: () => { throw new Error('context not yet initialized') },
-  logoutUser: () =>  { throw new Error('context not yet initialized') }
+  loginUser: emptyContextAlertFunction,
+  loginUserUnauthed: emptyContextAlertFunction,
+  logoutUser: emptyContextAlertFunction,
+  toggleSuperuserOverride: emptyContextAlertFunction
 })
 const INTERNAL_LOGIN_TOKEN_KEY = 'internalLoginToken'
 const OAUTH_ACCRESS_TOKEN_KEY = 'oauthAccessToken'
@@ -62,11 +65,21 @@ export default function UserProvider({ children }: { children: React.ReactNode }
     }
   }
 
+  const toggleSuperuserOverride = () => {
+    if (!userState) { return }
+    const newUser = {
+      ...userState,
+      superuser: !userState.superuser
+    }
+    setUserState(newUser)
+  }
+
   const userContext: UserContextT = {
     user: userState,
     loginUser,
     loginUserUnauthed,
-    logoutUser
+    logoutUser,
+    toggleSuperuserOverride
   }
 
   useEffect(() => {

@@ -186,6 +186,7 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
                         .portalParticipantUserId(ppUser.getId())
                         .operationId(savedResponse.getId())
                         .modelName(survey.getStableId())
+                        .modelId(savedResponse.getId())
                         .fieldName("foo")
                         .oldValue("bar")
                         .newValue("baz").build(),

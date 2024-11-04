@@ -10,8 +10,7 @@ import org.jooq.Condition;
 import java.util.*;
 
 import static bio.terra.pearl.core.dao.BaseJdbiDao.toSnakeCase;
-import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.DATE;
-import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.STRING;
+import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.*;
 
 /**
  * This term can be used to search for any of the profile or mailing address fields within a search expression.
@@ -102,6 +101,8 @@ public class ProfileTerm implements SearchTerm {
             Map.entry("phoneNumber", SearchValueTypeDefinition.builder().type(STRING).build()),
             Map.entry("birthDate", SearchValueTypeDefinition.builder().type(DATE).build()),
             Map.entry("sexAtBirth", SearchValueTypeDefinition.builder().type(STRING).build()),
+            Map.entry("doNotEmail", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
+            Map.entry("doNotEmailSolicit", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
             Map.entry("mailingAddress.state", SearchValueTypeDefinition.builder().type(STRING).build()),
             Map.entry("mailingAddress.city", SearchValueTypeDefinition.builder().type(STRING).build()),
             Map.entry("mailingAddress.postalCode", SearchValueTypeDefinition.builder().type(STRING).build()),

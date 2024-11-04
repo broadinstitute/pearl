@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import React from 'react'
 import { mockExpressionApis, mockStudyEnvContext, mockSurvey } from 'test-utils/mocking-utils'
 import FormOptionsModal from './FormOptionsModal'
@@ -47,13 +47,14 @@ describe('FormOptions', () => {
   test('admin forms should be admin-editable by default', async () => {
     mockExpressionApis()
     const updateWorkingForm = jest.fn()
-    render(<FormOptionsModal
-      studyEnvContext={studyEnvContext}
-      workingForm={mockSurvey('ADMIN')}
-      updateWorkingForm={updateWorkingForm}
-      onDismiss={jest.fn()}
-    />)
-
+    await act(() => {
+      render(<FormOptionsModal
+        studyEnvContext={studyEnvContext}
+        workingForm={mockSurvey('ADMIN')}
+        updateWorkingForm={updateWorkingForm}
+        onDismiss={jest.fn()}
+      />)
+    })
     //we don't display this option, because it's assumed to be true for admin forms
     expect(screen.queryByText('Allow study staff to edit participant responses')).not.toBeInTheDocument()
   })
