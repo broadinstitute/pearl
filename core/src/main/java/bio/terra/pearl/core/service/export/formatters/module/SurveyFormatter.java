@@ -28,7 +28,7 @@ import static java.util.stream.Collectors.reducing;
  * for information on the export format of survey questions
  */
 @Slf4j
-public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatter<SurveyResponse>> {
+public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatter<SurveyResponse>> {
     public static String OTHER_DESCRIPTION_KEY_SUFFIX = "_description";
     public static String OTHER_DESCRIPTION_HEADER = "other description";
     public static String SPLIT_OPTION_SELECTED_VALUE = "1";

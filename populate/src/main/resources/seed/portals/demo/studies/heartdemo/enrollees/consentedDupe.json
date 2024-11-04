@@ -2,7 +2,7 @@
   "linkedUsername": "consentedOtherEmail@test.com",
   "shortcode": "HDCOND",
   "consented": true,
-  "submittedHoursAgo": 180,
+  "submittedHoursAgo": 500,
   "preEnrollmentResponseDto": {
     "qualified": true,
     "surveyStableId": "hd_hd_preenroll",

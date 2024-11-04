@@ -298,6 +298,7 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
         ParticipantDataChange change = ParticipantDataChange.fromAuditInfo(auditInfo)
                 .operationId(response.getId())
                 .modelName(survey.getStableId())
+                .modelId(response.getId())
                 .fieldName(existing.getQuestionStableId())
                 .oldValue(existing.valueAsString())
                 .newValue(updated.valueAsString())
