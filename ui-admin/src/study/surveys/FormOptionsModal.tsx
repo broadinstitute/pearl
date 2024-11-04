@@ -78,15 +78,14 @@ export const FormOptions = ({ studyEnvContext, initialWorkingForm, updateWorking
     onChange: onRecurrenceTypeChange,
     options: recurrenceOpts,
     selectedOption: selectedRecurrenceType, selectInputId: recurrenceSelectInputId
-  } =
-    useNonNullReactSingleSelect(RECURRENCE_OPTS.map(opt => opt.value),
-      val => RECURRENCE_OPTS.find(opt => opt.value === val)!,
-      (val: string) => updateWorkingForm({
-        ...workingForm,
-        recurrenceType: val,
-        recurrenceIntervalDays: val === 'NONE' ? undefined : workingForm.recurrenceIntervalDays || 365
-      }),
-      workingForm.recurrenceType || 'NONE')
+  } = useNonNullReactSingleSelect(RECURRENCE_OPTS.map(opt => opt.value),
+    val => RECURRENCE_OPTS.find(opt => opt.value === val)!,
+    (val: string) => updateWorkingForm({
+      ...workingForm,
+      recurrenceType: val,
+      recurrenceIntervalDays: val === 'NONE' ? undefined : workingForm.recurrenceIntervalDays || 365
+    }),
+    workingForm.recurrenceType || 'NONE')
   return <>
     {(workingForm && !!workingForm.surveyType) &&
         <div>

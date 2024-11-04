@@ -2,6 +2,7 @@ package bio.terra.pearl.core.service.survey;
 
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
+import bio.terra.pearl.core.model.survey.SurveyTaskConfigDto;
 import bio.terra.pearl.core.model.survey.SurveyType;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
@@ -30,7 +31,7 @@ import java.util.UUID;
 /** listens for events and updates enrollee survey tasks accordingly */
 @Service
 @Slf4j
-public class SurveyTaskDispatcher extends TaskConfigDispatcher<StudyEnvironmentSurvey, SurveyPublishedEvent> {
+public class SurveyTaskDispatcher extends TaskConfigDispatcher<SurveyTaskConfigDto, SurveyPublishedEvent> {
     private final StudyEnvironmentSurveyService studyEnvironmentSurveyService;
     private final SurveyService surveyService;
 
@@ -66,42 +67,40 @@ public class SurveyTaskDispatcher extends TaskConfigDispatcher<StudyEnvironmentS
 
 
     @Override
-    protected List<StudyEnvironmentSurvey> findTaskConfigsByStudyEnvironment(UUID studyEnvId) {
+    protected List<SurveyTaskConfigDto> findTaskConfigsByStudyEnvironment(UUID studyEnvId) {
         List<StudyEnvironmentSurvey> studyEnvironmentSurveys = studyEnvironmentSurveyService.findAllByStudyEnvId(studyEnvId, true);
         // load surveys
-        studyEnvironmentSurveys
-                .stream()
-                .forEach(ses ->
-                        ses.setSurvey(
-                                surveyService
-                                        .find(ses.getSurveyId())
-                                        .orElseThrow(() -> new IllegalStateException("Could not find survey for StudyEnvironmentSurvey"))));
-        return studyEnvironmentSurveys;
+        return studyEnvironmentSurveys.stream()
+                .map(ses -> {
+                    Survey survey = surveyService.find(ses.getSurveyId())
+                            .orElseThrow(() -> new NotFoundException("Could not find survey"));
+                    return new SurveyTaskConfigDto(ses, survey);
+                })
+                .toList();
 
     }
 
     @Override
-    protected StudyEnvironmentSurvey findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {
+    protected SurveyTaskConfigDto findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {
         Survey survey = surveyService
                 .findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId, version)
                 .orElseThrow(() -> new NotFoundException("Could not find survey"));
 
         StudyEnvironmentSurvey ses = studyEnvironmentSurveyService.findActiveBySurvey(studyEnvironmentId, survey.getId())
                 .orElseThrow(() -> new NotFoundException("Could not find StudyEnvironmentSurvey"));
-        ses.setSurvey(survey);
 
-        return ses;
+        return new SurveyTaskConfigDto(ses, survey);
     }
 
     @Override
-    protected void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, StudyEnvironmentSurvey ses) {
+    protected void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, SurveyTaskConfigDto taskDto) {
         newTask.setSurveyResponseId(oldTask.getSurveyResponseId());
     }
 
 
     @Override
-    protected TaskType getTaskType(StudyEnvironmentSurvey ses) {
-        return taskTypeForSurveyType.get(ses.getSurvey().getSurveyType());
+    protected TaskType getTaskType(SurveyTaskConfigDto taskDto) {
+        return taskTypeForSurveyType.get(taskDto.getSurvey().getSurveyType());
     }
 
     private final Map<SurveyType, TaskType> taskTypeForSurveyType = Map.of(

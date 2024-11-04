@@ -2,7 +2,7 @@
   "linkedUsername": "lostInterestNo@test.com",
   "shortcode": "HDLOSZ",
   "simulateSubmissions": true,
-  "submittedHoursAgo": 140,
+  "submittedHoursAgo": 360,
   "preEnrollmentResponseDto": {
     "qualified": true,
     "surveyStableId": "hd_hd_preenroll",
@@ -27,7 +27,7 @@
       ],
       "currentPageNo": 1,
       "complete": true,
-      "submittedHoursAgo": 47
+      "submittedHoursAgo": 347
     },
     {
       "surveyStableId": "hd_hd_mental",
@@ -40,7 +40,7 @@
       ],
       "currentPageNo": 1,
       "complete": true,
-      "submittedHoursAgo": 46
+      "submittedHoursAgo": 346
     },
     {
       "surveyStableId": "hd_hd_consent",
@@ -62,7 +62,7 @@
       "answerPopDtos": [],
       "currentPageNo": 1,
       "complete": true,
-      "submittedHoursAgo": 43
+      "submittedHoursAgo": 343
     }
   ]
 }

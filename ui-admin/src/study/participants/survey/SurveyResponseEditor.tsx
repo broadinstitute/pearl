@@ -19,7 +19,7 @@ export default function SurveyResponseEditor({
   updateResponseMap: (stableId: string, response: SurveyResponse) => void, justification?: string
 }) {
   const { defaultLanguage } = usePortalLanguage()
-  const taskId = useTaskIdParam()
+  const { taskId } = useTaskIdParam()
   if (!taskId) {
     return <span>Task Id must be specified</span>
   }
