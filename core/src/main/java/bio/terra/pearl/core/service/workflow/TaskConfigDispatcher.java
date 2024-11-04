@@ -32,7 +32,7 @@ import java.util.*;
 /** listens for events and updates enrollee survey tasks accordingly */
 @Service
 @Slf4j
-public abstract class TaskDispatcher<T extends TaskDispatchConfig, E extends TaskDispatchConfigCreatedEvent> {
+public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskConfigCreatedEvent> {
     private final StudyEnvironmentService studyEnvironmentService;
     private final ParticipantTaskService participantTaskService;
     private final EnrolleeService enrolleeService;
@@ -41,12 +41,12 @@ public abstract class TaskDispatcher<T extends TaskDispatchConfig, E extends Tas
     private final PortalParticipantUserService portalParticipantUserService;
 
 
-    public TaskDispatcher(StudyEnvironmentService studyEnvironmentService,
-                          ParticipantTaskService participantTaskService,
-                          EnrolleeService enrolleeService,
-                          EnrolleeSearchExpressionParser enrolleeSearchExpressionParser,
-                          EnrolleeContextService enrolleeContextService,
-                          PortalParticipantUserService portalParticipantUserService) {
+    public TaskConfigDispatcher(StudyEnvironmentService studyEnvironmentService,
+                                ParticipantTaskService participantTaskService,
+                                EnrolleeService enrolleeService,
+                                EnrolleeSearchExpressionParser enrolleeSearchExpressionParser,
+                                EnrolleeContextService enrolleeContextService,
+                                PortalParticipantUserService portalParticipantUserService) {
         this.studyEnvironmentService = studyEnvironmentService;
         this.participantTaskService = participantTaskService;
         this.enrolleeService = enrolleeService;
@@ -62,10 +62,10 @@ public abstract class TaskDispatcher<T extends TaskDispatchConfig, E extends Tas
         }
     }
 
-    protected abstract List<T> findByStudyEnvironment(UUID studyEnvId);
+    protected abstract List<T> findTaskConfigsByStudyEnvironment(UUID studyEnvId);
 
     public void assignScheduledTasks(StudyEnvironment studyEnv) {
-        List<T> assignableTasks = findByStudyEnvironment(studyEnv.getId());
+        List<T> assignableTasks = findTaskConfigsByStudyEnvironment(studyEnv.getId());
         for (T assignableTask : assignableTasks) {
             if (assignableTask.getRecurrenceType() != RecurrenceType.NONE && assignableTask.getRecurrenceIntervalDays() != null) {
                 assignRecurring(assignableTask);
@@ -77,30 +77,30 @@ public abstract class TaskDispatcher<T extends TaskDispatchConfig, E extends Tas
     }
 
     /** will assign a recurringsurvey to enrollees who have already taken it at least once, but are due to take it again */
-    public void assignRecurring(T assignableTask) {
+    public void assignRecurring(T taskConfig) {
         List<Enrollee> enrollees = enrolleeService.findWithTaskInPast(
-                assignableTask.getStudyEnvironmentId(),
-                assignableTask.getStableId(),
-                Duration.of(assignableTask.getRecurrenceIntervalDays(), ChronoUnit.DAYS));
-        assign(enrollees, assignableTask, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignRecurringSurvey")));
+                taskConfig.getStudyEnvironmentId(),
+                taskConfig.getStableId(),
+                Duration.of(taskConfig.getRecurrenceIntervalDays(), ChronoUnit.DAYS));
+        assign(enrollees, taskConfig, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignRecurringSurvey")));
     }
 
     /** will assign a delayed survey to enrollees who have never taken it, but are due to take it now */
-    public void assignDelayedSurvey(T assignableTask) {
-        List<Enrollee> enrollees = enrolleeService.findUnassignedToTask(assignableTask.getStudyEnvironmentId(), assignableTask.getStableId(), null);
+    public void assignDelayedSurvey(T taskConfig) {
+        List<Enrollee> enrollees = enrolleeService.findUnassignedToTask(taskConfig.getStudyEnvironmentId(), taskConfig.getStableId(), null);
         enrollees = enrollees.stream().filter(enrollee ->
-                enrollee.getCreatedAt().plus(assignableTask.getDaysAfterEligible(), ChronoUnit.DAYS)
+                enrollee.getCreatedAt().plus(taskConfig.getDaysAfterEligible(), ChronoUnit.DAYS)
                         .isBefore(Instant.now())).toList();
-        assign(enrollees, assignableTask, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignDelayedSurvey")));
+        assign(enrollees, taskConfig, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignDelayedSurvey")));
     }
 
-    protected abstract T findByStableId(UUID studyEnvironmentId, String stableId);
+    protected abstract T findTaskConfigByStableId(UUID studyEnvironmentId, String stableId);
 
     public List<ParticipantTask> assign(ParticipantTaskAssignDto assignDto,
                                         UUID studyEnvironmentId,
                                         ResponsibleEntity operator) {
         List<Enrollee> enrollees = findMatchingEnrollees(assignDto, studyEnvironmentId);
-        T taskDispatchConfig = findByStableId(studyEnvironmentId, assignDto.targetStableId());
+        T taskDispatchConfig = findTaskConfigByStableId(studyEnvironmentId, assignDto.targetStableId());
         return assign(enrollees, taskDispatchConfig, assignDto.overrideEligibility(), operator);
     }
 
@@ -150,19 +150,19 @@ public abstract class TaskDispatcher<T extends TaskDispatchConfig, E extends Tas
             Optional<ParticipantTask> existingTask = existingTasks.stream()
                     .filter(t -> t.getTargetStableId().equals(task.getTargetStableId()))
                     .max(Comparator.comparing(ParticipantTask::getCreatedAt));
-            existingTask.ifPresent(participantTask -> copyForwardDataOnUpdateRecurrence(task, participantTask, taskDispatchConfig));
+            existingTask.ifPresent(participantTask -> copyTaskData(task, participantTask, taskDispatchConfig));
         }
     }
 
 
-    protected abstract void copyForwardDataOnUpdateRecurrence(ParticipantTask newTask, ParticipantTask oldTask, T taskDispatchConfig);
+    protected abstract void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, T taskDispatchConfig);
 
 
     @EventListener
     @Order(DispatcherOrder.SURVEY_TASK)
-    public void handleNewAssignableTaskCreationEvent(E newEvent) {
-        T taskDispatchConfig = findByStableId(newEvent.getStudyEnvironmentId(), newEvent.getStableId());
-        handleNewAssignableTask(taskDispatchConfig);
+    public void handleNewTaskConfigEvent(E newEvent) {
+        T taskDispatchConfig = findTaskConfigByStableId(newEvent.getStudyEnvironmentId(), newEvent.getStableId());
+        handleNewTask(taskDispatchConfig);
     }
 
     protected List<Enrollee> findMatchingEnrollees(ParticipantTaskAssignDto assignDto,
@@ -202,7 +202,7 @@ public abstract class TaskDispatcher<T extends TaskDispatchConfig, E extends Tas
                 .portalParticipantUserId(enrolleeEvent.getPortalParticipantUser().getId())
                 .enrolleeId(enrolleeEvent.getEnrollee().getId()).build();
 
-        List<T> taskAssignables = findByStudyEnvironment(enrolleeEvent.getEnrolleeContext().getEnrollee().getStudyEnvironmentId());
+        List<T> taskAssignables = findTaskConfigsByStudyEnvironment(enrolleeEvent.getEnrolleeContext().getEnrollee().getStudyEnvironmentId());
 
         for (T taskDispatchConfig : taskAssignables) {
             if (taskDispatchConfig.isAutoAssign()) {
@@ -226,33 +226,33 @@ public abstract class TaskDispatcher<T extends TaskDispatchConfig, E extends Tas
         }
     }
 
-    public void handleNewAssignableTask(T newAssignableTask) {
-        if (newAssignableTask.isAutoUpdateTaskAssignments()) {
+    public void handleNewTask(T newTaskConfig) {
+        if (newTaskConfig.isAutoUpdateTaskAssignments()) {
             ParticipantTaskUpdateDto updateDto = new ParticipantTaskUpdateDto(
                     List.of(new ParticipantTaskUpdateDto.TaskUpdateSpec(
-                            newAssignableTask.getStableId(),
-                            newAssignableTask.getVersion(),
+                            newTaskConfig.getStableId(),
+                            newTaskConfig.getVersion(),
                             null,
                             null)),
                     null,
                     true
                     );
             participantTaskService.updateTasks(
-                    newAssignableTask.getStudyEnvironmentId(),
+                    newTaskConfig.getStudyEnvironmentId(),
                     updateDto,
                     new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "handleSurveyPublished.autoUpdateTaskAssignments"))
             );
         }
-        if (newAssignableTask.isAssignToExistingEnrollees()) {
+        if (newTaskConfig.isAssignToExistingEnrollees()) {
             ParticipantTaskAssignDto assignDto = new ParticipantTaskAssignDto(
-                    getTaskType(newAssignableTask),
-                    newAssignableTask.getStableId(),
-                    newAssignableTask.getVersion(),
+                    getTaskType(newTaskConfig),
+                    newTaskConfig.getStableId(),
+                    newTaskConfig.getVersion(),
                 null,
                     true,
                     false);
 
-            assign(assignDto, newAssignableTask.getStudyEnvironmentId(),
+            assign(assignDto, newTaskConfig.getStudyEnvironmentId(),
                     new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "handleNewAssignableTask.assignToExistingEnrollees")));
 
         }
@@ -289,7 +289,7 @@ public abstract class TaskDispatcher<T extends TaskDispatchConfig, E extends Tas
                         enrolleeContext.getEnrollee().getCreatedAt().plus(taskDispatchConfig.getDaysAfterEligible(), ChronoUnit.DAYS).isBefore(Instant.now())) &&
                 enrolleeSearchExpressionParser
                         .parseRule(taskDispatchConfig.getEligibilityRule())
-                .evaluate(new EnrolleeSearchContext(enrolleeContext.getEnrollee(), enrolleeContext.getProfile()));
+                        .evaluate(new EnrolleeSearchContext(enrolleeContext.getEnrollee(), enrolleeContext.getProfile()));
     }
 
     /** builds a task for the given survey -- does NOT evaluate the rule or check duplicates */

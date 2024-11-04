@@ -17,7 +17,7 @@ import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
 import bio.terra.pearl.core.service.survey.event.SurveyPublishedEvent;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
-import bio.terra.pearl.core.service.workflow.TaskDispatcher;
+import bio.terra.pearl.core.service.workflow.TaskConfigDispatcher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +28,7 @@ import java.util.UUID;
 /** listens for events and updates enrollee survey tasks accordingly */
 @Service
 @Slf4j
-public class SurveyTaskDispatcher extends TaskDispatcher<StudyEnvironmentSurvey, SurveyPublishedEvent> {
+public class SurveyTaskDispatcher extends TaskConfigDispatcher<StudyEnvironmentSurvey, SurveyPublishedEvent> {
     private final StudyEnvironmentSurveyService studyEnvironmentSurveyService;
     private final SurveyService surveyService;
 
@@ -46,7 +46,7 @@ public class SurveyTaskDispatcher extends TaskDispatcher<StudyEnvironmentSurvey,
 
 
     @Override
-    protected List<StudyEnvironmentSurvey> findByStudyEnvironment(UUID studyEnvId) {
+    protected List<StudyEnvironmentSurvey> findTaskConfigsByStudyEnvironment(UUID studyEnvId) {
         List<StudyEnvironmentSurvey> studyEnvironmentSurveys = studyEnvironmentSurveyService.findAllByStudyEnvId(studyEnvId, true);
         // load surveys
         studyEnvironmentSurveys
@@ -61,7 +61,7 @@ public class SurveyTaskDispatcher extends TaskDispatcher<StudyEnvironmentSurvey,
     }
 
     @Override
-    protected StudyEnvironmentSurvey findByStableId(UUID studyEnvironmentId, String stableId) {
+    protected StudyEnvironmentSurvey findTaskConfigByStableId(UUID studyEnvironmentId, String stableId) {
         Survey survey = surveyService
                 .findByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId)
                 .orElseThrow(() -> new NotFoundException("Could not find survey"));
@@ -79,7 +79,7 @@ public class SurveyTaskDispatcher extends TaskDispatcher<StudyEnvironmentSurvey,
     }
 
     @Override
-    protected void copyForwardDataOnUpdateRecurrence(ParticipantTask newTask, ParticipantTask oldTask, StudyEnvironmentSurvey ses) {
+    protected void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, StudyEnvironmentSurvey ses) {
         newTask.setSurveyResponseId(oldTask.getSurveyResponseId());
     }
 

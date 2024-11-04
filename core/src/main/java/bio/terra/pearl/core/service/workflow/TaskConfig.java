@@ -4,7 +4,7 @@ import bio.terra.pearl.core.model.survey.RecurrenceType;
 
 import java.util.UUID;
 
-public interface TaskDispatchConfig {
+public interface TaskConfig {
     String getStableId();
     Integer getVersion();
 

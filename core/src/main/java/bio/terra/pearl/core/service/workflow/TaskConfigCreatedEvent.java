@@ -2,7 +2,7 @@ package bio.terra.pearl.core.service.workflow;
 
 import java.util.UUID;
 
-public interface TaskDispatchConfigCreatedEvent {
+public interface TaskConfigCreatedEvent {
     String getStableId();
     UUID getStudyEnvironmentId();
 }

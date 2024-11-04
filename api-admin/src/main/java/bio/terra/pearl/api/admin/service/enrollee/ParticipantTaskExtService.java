@@ -15,10 +15,9 @@ import bio.terra.pearl.core.service.survey.SurveyTaskDispatcher;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskAssignDto;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskUpdateDto;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ParticipantTaskExtService {

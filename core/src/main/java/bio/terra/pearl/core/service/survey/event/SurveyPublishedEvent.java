@@ -3,7 +3,7 @@ package bio.terra.pearl.core.service.survey.event;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.workflow.Event;
 import bio.terra.pearl.core.service.workflow.BaseEvent;
-import bio.terra.pearl.core.service.workflow.TaskDispatchConfigCreatedEvent;
+import bio.terra.pearl.core.service.workflow.TaskConfigCreatedEvent;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Getter @Setter
 @SuperBuilder
-public class SurveyPublishedEvent extends Event implements BaseEvent, TaskDispatchConfigCreatedEvent {
+public class SurveyPublishedEvent extends Event implements BaseEvent, TaskConfigCreatedEvent {
     private Survey survey;  // the survey that is being published -- the content does not need to be attached
 
     public String getStableId() {
