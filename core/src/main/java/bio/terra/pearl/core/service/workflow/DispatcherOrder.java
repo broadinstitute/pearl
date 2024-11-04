@@ -13,6 +13,7 @@ package bio.terra.pearl.core.service.workflow;
 public class DispatcherOrder {
     public static final int CONSENT_PROCESSOR = 5;
     public static final int SURVEY_TASK = 10;
+    public static final int DOCUMENT_REQUEST_TASK = 15;
     public static final int KIT_TASK = 20;
     // actions should be processed last so they can include all previous processing
     public static final int ACTION = 100;

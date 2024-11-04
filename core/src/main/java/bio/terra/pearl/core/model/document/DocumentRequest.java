@@ -3,17 +3,24 @@ package bio.terra.pearl.core.model.document;
 import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.Versioned;
 import bio.terra.pearl.core.model.workflow.RecurrenceType;
-import bio.terra.pearl.core.service.workflow.TaskConfig;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
 @Getter
 @Setter
-public class DocumentRequest extends BaseEntity implements TaskConfig, Versioned {
+@NoArgsConstructor
+@SuperBuilder
+public class DocumentRequest extends BaseEntity implements Versioned {
     private String stableId;
-    private Integer version;
+
+    @Builder.Default
+    private int version = 1;
+    private Integer publishedVersion;
 
     private UUID portalId;
 
@@ -27,9 +34,6 @@ public class DocumentRequest extends BaseEntity implements TaskConfig, Versioned
     private Boolean multipleFilesAllowed;
 
     // task assignment config
-    private Integer taskOrder;
-    private boolean required;
-
     private RecurrenceType recurrenceType;
 
     private Integer daysAfterEligible;
@@ -40,10 +44,5 @@ public class DocumentRequest extends BaseEntity implements TaskConfig, Versioned
     private boolean autoAssign;
     private boolean autoUpdateTaskAssignments;
     private boolean assignToExistingEnrollees;
-
-    @Override
-    public String getName() {
-        return documentName;
-    }
 }
 

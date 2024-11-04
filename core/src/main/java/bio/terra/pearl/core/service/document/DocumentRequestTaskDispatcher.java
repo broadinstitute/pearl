@@ -1,6 +1,6 @@
 package bio.terra.pearl.core.service.document;
 
-import bio.terra.pearl.core.model.document.DocumentRequest;
+import bio.terra.pearl.core.model.document.DocumentRequestTaskConfigDto;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.document.event.DocumentRequestPublished;
@@ -25,7 +25,7 @@ import java.util.UUID;
 /** listens for events and updates enrollee survey tasks accordingly */
 @Service
 @Slf4j
-public class DocumentRequestTaskDispatcher extends TaskConfigDispatcher<DocumentRequest, DocumentRequestPublished> {
+public class DocumentRequestTaskDispatcher extends TaskConfigDispatcher<DocumentRequestTaskConfigDto, DocumentRequestPublished> {
 
 
     public DocumentRequestTaskDispatcher(StudyEnvironmentService studyEnvironmentService,
@@ -35,47 +35,45 @@ public class DocumentRequestTaskDispatcher extends TaskConfigDispatcher<Document
                                          EnrolleeContextService enrolleeContextService,
                                          EnrolleeSearchExpressionParser enrolleeSearchExpressionParser) {
         super(studyEnvironmentService, participantTaskService, enrolleeService, enrolleeSearchExpressionParser, enrolleeContextService, portalParticipantUserService);
-
-
     }
 
     @EventListener
-    @Order(DispatcherOrder.SURVEY_TASK)
+    @Order(DispatcherOrder.DOCUMENT_REQUEST_TASK)
     public void handleNewTaskConfigEvent(DocumentRequestPublished newEvent) {
         super.handleNewTaskConfigEvent(newEvent);
     }
 
     @EventListener
-    @Order(DispatcherOrder.SURVEY_TASK)
+    @Order(DispatcherOrder.DOCUMENT_REQUEST_TASK)
     public void handleNewEnrolleeEvent(EnrolleeCreationEvent enrolleeEvent) {
         super.handleNewEnrolleeEvent(enrolleeEvent);
     }
 
     @EventListener
-    @Order(DispatcherOrder.SURVEY_TASK)
+    @Order(DispatcherOrder.DOCUMENT_REQUEST_TASK)
     public void handleSurveyEvent(EnrolleeSurveyEvent enrolleeEvent) {
         super.handleSurveyEvent(enrolleeEvent);
     }
 
 
     @Override
-    protected List<DocumentRequest> findTaskConfigsByStudyEnvironment(UUID studyEnvId) {
+    protected List<DocumentRequestTaskConfigDto> findTaskConfigsByStudyEnvironment(UUID studyEnvId) {
         // todo
         return List.of();
     }
 
     @Override
-    protected DocumentRequest findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {
+    protected DocumentRequestTaskConfigDto findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {
         return null;
     }
 
     @Override
-    protected TaskType getTaskType(DocumentRequest request) {
+    protected TaskType getTaskType(DocumentRequestTaskConfigDto request) {
         return TaskType.DOCUMENT_REQUEST;
     }
 
     @Override
-    protected void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, DocumentRequest documentRequest) {
+    protected void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, DocumentRequestTaskConfigDto documentRequest) {
         newTask.setParticipantFileId(oldTask.getParticipantFileId());
     }
 }
