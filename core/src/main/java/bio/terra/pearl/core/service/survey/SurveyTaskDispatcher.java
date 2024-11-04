@@ -15,10 +15,15 @@ import bio.terra.pearl.core.service.rule.EnrolleeContextService;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
+import bio.terra.pearl.core.service.survey.event.EnrolleeSurveyEvent;
 import bio.terra.pearl.core.service.survey.event.SurveyPublishedEvent;
+import bio.terra.pearl.core.service.workflow.DispatcherOrder;
+import bio.terra.pearl.core.service.workflow.EnrolleeCreationEvent;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import bio.terra.pearl.core.service.workflow.TaskConfigDispatcher;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,6 +49,24 @@ public class SurveyTaskDispatcher extends TaskConfigDispatcher<StudyEnvironmentS
         this.surveyService = surveyService;
     }
 
+    @EventListener
+    @Order(DispatcherOrder.SURVEY_TASK)
+    public void handleNewTaskConfigEvent(SurveyPublishedEvent newEvent) {
+        super.handleNewTaskConfigEvent(newEvent);
+    }
+
+    @EventListener
+    @Order(DispatcherOrder.SURVEY_TASK)
+    public void handleNewEnrolleeEvent(EnrolleeCreationEvent enrolleeEvent) {
+        super.handleNewEnrolleeEvent(enrolleeEvent);
+    }
+
+    @EventListener
+    @Order(DispatcherOrder.SURVEY_TASK)
+    public void handleSurveyEvent(EnrolleeSurveyEvent enrolleeEvent) {
+        super.handleSurveyEvent(enrolleeEvent);
+    }
+
 
     @Override
     protected List<StudyEnvironmentSurvey> findTaskConfigsByStudyEnvironment(UUID studyEnvId) {
@@ -62,9 +85,6 @@ public class SurveyTaskDispatcher extends TaskConfigDispatcher<StudyEnvironmentS
 
     @Override
     protected StudyEnvironmentSurvey findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {
-        System.out.println("stableId: " + stableId);
-        System.out.println("version: " + version);
-        System.out.println("studyEnvironmentId: " + studyEnvironmentId);
         Survey survey = surveyService
                 .findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId, version)
                 .orElseThrow(() -> new NotFoundException("Could not find survey"));

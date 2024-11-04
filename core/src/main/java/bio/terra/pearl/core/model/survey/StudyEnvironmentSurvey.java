@@ -4,6 +4,7 @@ import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.Versioned;
 import bio.terra.pearl.core.model.publishing.VersionedEntityConfig;
 import bio.terra.pearl.core.model.study.StudyEnvAttached;
+import bio.terra.pearl.core.model.workflow.RecurrenceType;
 import bio.terra.pearl.core.service.workflow.TaskConfig;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,46 +39,73 @@ public class StudyEnvironmentSurvey extends BaseEntity implements VersionedEntit
 
     @Override
     public String getStableId() {
+        if (survey == null) {
+            return null;
+        }
         return survey.getStableId();
     }
 
     @Override
     public Integer getVersion() {
+        if (survey == null) {
+            return null;
+        }
         return survey.getVersion();
     }
 
     @Override
     public RecurrenceType getRecurrenceType() {
+        if (survey == null) {
+            return null;
+        }
         return survey.getRecurrenceType();
     }
 
     @Override
     public Integer getDaysAfterEligible() {
+        if (survey == null) {
+            return null;
+        }
         return survey.getDaysAfterEligible();
     }
 
     @Override
     public Integer getRecurrenceIntervalDays() {
+        if (survey == null) {
+            return null;
+        }
         return survey.getRecurrenceIntervalDays();
     }
 
     @Override
     public String getEligibilityRule() {
+        if (survey == null) {
+            return null;
+        }
         return survey.getEligibilityRule();
     }
 
     @Override
     public Boolean isAutoAssign() {
+        if (survey == null) {
+            return null;
+        }
         return survey.isAutoAssign();
     }
 
     @Override
     public Boolean isAutoUpdateTaskAssignments() {
+        if (survey == null) {
+            return null;
+        }
         return survey.isAutoUpdateTaskAssignments();
     }
 
     @Override
     public Boolean isAssignToExistingEnrollees() {
+        if (survey == null) {
+            return null;
+        }
         return survey.isAssignToExistingEnrollees();
     }
 }

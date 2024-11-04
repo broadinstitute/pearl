@@ -1,6 +1,6 @@
 package bio.terra.pearl.core.service.workflow;
 
-import bio.terra.pearl.core.model.survey.RecurrenceType;
+import bio.terra.pearl.core.model.workflow.RecurrenceType;
 
 import java.util.UUID;
 

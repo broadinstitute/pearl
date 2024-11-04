@@ -1,4 +1,4 @@
-package bio.terra.pearl.core.model.survey;
+package bio.terra.pearl.core.model.workflow;
 
 public enum RecurrenceType {
     NONE,

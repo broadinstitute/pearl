@@ -5,9 +5,8 @@ import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
-import bio.terra.pearl.core.model.survey.RecurrenceType;
-import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
+import bio.terra.pearl.core.model.workflow.RecurrenceType;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
 import bio.terra.pearl.core.service.participant.PortalParticipantUserService;
@@ -18,8 +17,6 @@ import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.survey.event.EnrolleeSurveyEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -29,7 +26,9 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-/** listens for events and updates enrollee survey tasks accordingly */
+/**
+ * Handles dispatching tasks to enrollees based on task configurations.
+ */
 @Service
 @Slf4j
 public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskConfigCreatedEvent> {
@@ -55,14 +54,53 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
         this.portalParticipantUserService = portalParticipantUserService;
     }
 
+    /**
+     * handle new task config creation/publishing
+     */
+    public void handleNewTaskConfigEvent(E newEvent) {
+        T newTaskConfig = findTaskConfigByStableId(newEvent.getStudyEnvironmentId(), newEvent.getStableId(), newEvent.getVersion());
+        handleNewTaskConfig(newTaskConfig);
+    }
+
+    /**
+     * create the survey tasks for an enrollee's initial creation
+     */
+    public void handleNewEnrolleeEvent(EnrolleeCreationEvent enrolleeEvent) {
+        updateTasksFromEnrolleeEvent(enrolleeEvent);
+    }
+
+    /**
+     * survey responses can update what surveys a person is eligible for -- recompute as needed
+     */
+    public void handleSurveyEvent(EnrolleeSurveyEvent enrolleeEvent) {
+        /** for now, only recompute on updates involving a completed survey.  This will
+         * avoid assigning surveys based on an answer that was quickly changed, since we don't
+         * yet have functions for unassigning surveys */
+        if (!enrolleeEvent.getSurveyResponse().isComplete()) {
+            return;
+        }
+        updateTasksFromEnrolleeEvent(enrolleeEvent);
+    }
+
+    /**
+     * builds a task for the given survey -- does NOT evaluate the rule or check duplicates
+     */
+    public abstract ParticipantTask buildTask(Enrollee enrollee, PortalParticipantUser portalParticipantUser, T taskDispatchConfig);
+
+    protected abstract List<T> findTaskConfigsByStudyEnvironment(UUID studyEnvId);
+
+    protected abstract T findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version);
+
+    protected abstract void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, T taskDispatchConfig);
+
+    protected abstract TaskType getTaskType(T taskDispatchConfig);
+
     public void assignScheduledTasks() {
         List<StudyEnvironment> studyEnvironments = studyEnvironmentService.findAll();
         for (StudyEnvironment studyEnv : studyEnvironments) {
             assignScheduledTasks(studyEnv);
         }
     }
-
-    protected abstract List<T> findTaskConfigsByStudyEnvironment(UUID studyEnvId);
 
     public void assignScheduledTasks(StudyEnvironment studyEnv) {
         List<T> assignableTasks = findTaskConfigsByStudyEnvironment(studyEnv.getId());
@@ -76,7 +114,9 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
         }
     }
 
-    /** will assign a recurringsurvey to enrollees who have already taken it at least once, but are due to take it again */
+    /**
+     * will assign a recurring task to enrollees who have already taken it at least once, but are due to take it again
+     */
     public void assignRecurring(T taskConfig) {
         List<Enrollee> enrollees = enrolleeService.findWithTaskInPast(
                 taskConfig.getStudyEnvironmentId(),
@@ -85,7 +125,9 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
         assign(enrollees, taskConfig, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignRecurringSurvey")));
     }
 
-    /** will assign a delayed survey to enrollees who have never taken it, but are due to take it now */
+    /**
+     * will assign a delayed task to enrollees who have never taken it, but are due to take it now
+     */
     public void assignDelayedSurvey(T taskConfig) {
         List<Enrollee> enrollees = enrolleeService.findUnassignedToTask(taskConfig.getStudyEnvironmentId(), taskConfig.getStableId(), null);
         enrollees = enrollees.stream().filter(enrollee ->
@@ -93,8 +135,6 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
                         .isBefore(Instant.now())).toList();
         assign(enrollees, taskConfig, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignDelayedSurvey")));
     }
-
-    protected abstract T findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version);
 
     public List<ParticipantTask> assign(ParticipantTaskAssignDto assignDto,
                                         UUID studyEnvironmentId,
@@ -152,48 +192,6 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
                     .max(Comparator.comparing(ParticipantTask::getCreatedAt));
             existingTask.ifPresent(participantTask -> copyTaskData(task, participantTask, taskDispatchConfig));
         }
-    }
-
-
-    protected abstract void copyTaskData(ParticipantTask newTask, ParticipantTask oldTask, T taskDispatchConfig);
-
-
-    @EventListener
-    @Order(DispatcherOrder.SURVEY_TASK)
-    public void handleNewTaskConfigEvent(E newEvent) {
-        T newTaskConfig = findTaskConfigByStableId(newEvent.getStudyEnvironmentId(), newEvent.getStableId(), newEvent.getVersion());
-        handleNewTaskConfig(newTaskConfig);
-    }
-
-    protected List<Enrollee> findMatchingEnrollees(ParticipantTaskAssignDto assignDto,
-                                                   UUID studyEnvironmentId) {
-        if (assignDto.assignAllUnassigned()
-                && (Objects.isNull(assignDto.enrolleeIds()) || assignDto.enrolleeIds().isEmpty())) {
-            return enrolleeService.findUnassignedToTask(studyEnvironmentId,
-                    assignDto.targetStableId(), null);
-        } else {
-            return enrolleeService.findAll(assignDto.enrolleeIds());
-        }
-    }
-
-    /** create the survey tasks for an enrollee's initial creation */
-    @EventListener
-    @Order(DispatcherOrder.SURVEY_TASK)
-    public void updateTasksForNewEnrollee(EnrolleeCreationEvent enrolleeEvent) {
-        updateTasksFromEnrolleeEvent(enrolleeEvent);
-    }
-
-    /** survey responses can update what surveys a person is eligible for -- recompute as needed */
-    @EventListener
-    @Order(DispatcherOrder.SURVEY_TASK)
-    public void updateTasksFromSurvey(EnrolleeSurveyEvent enrolleeEvent) {
-        /** for now, only recompute on updates involving a completed survey.  This will
-         * avoid assigning surveys based on an answer that was quickly changed, since we don't
-         * yet have functions for unassigning surveys */
-        if (!enrolleeEvent.getSurveyResponse().isComplete()) {
-            return;
-        }
-        updateTasksFromEnrolleeEvent(enrolleeEvent);
     }
 
     protected void updateTasksFromEnrolleeEvent(EnrolleeEvent enrolleeEvent) {
@@ -258,10 +256,7 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
         }
     }
 
-    protected abstract TaskType getTaskType(T taskDispatchConfig);
-
-
-    /** builds any survey tasks that the enrollee is eligible for that are not duplicates
+    /** builds any tasks that the enrollee is eligible for that are not duplicates
      *  Does not add them to the event or persist them.
      *  */
     public Optional<ParticipantTask> buildTaskIfApplicable(Enrollee enrollee,
@@ -280,7 +275,7 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
 
     public boolean isEligible(T taskDispatchConfig, EnrolleeContext enrolleeContext) {
         /**
-         * eligible if the enrollee is a subject, the survey is not restricted by time, and the enrollee meets the rule
+         * eligible if the enrollee is a subject, the task is not restricted by time, and the enrollee meets the rule
          * note that this does not include a duplicate task check -- that is done elsewhere
          */
         // TODO JN-977: this logic will need to change because we will need to support surveys for proxies
@@ -292,11 +287,20 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
                         .evaluate(new EnrolleeSearchContext(enrolleeContext.getEnrollee(), enrolleeContext.getProfile()));
     }
 
-    /** builds a task for the given survey -- does NOT evaluate the rule or check duplicates */
-    public abstract ParticipantTask buildTask(Enrollee enrollee, PortalParticipantUser portalParticipantUser, T taskDispatchConfig);
+
+    protected List<Enrollee> findMatchingEnrollees(ParticipantTaskAssignDto assignDto,
+                                                   UUID studyEnvironmentId) {
+        if (assignDto.assignAllUnassigned()
+                && (Objects.isNull(assignDto.enrolleeIds()) || assignDto.enrolleeIds().isEmpty())) {
+            return enrolleeService.findUnassignedToTask(studyEnvironmentId,
+                    assignDto.targetStableId(), null);
+        } else {
+            return enrolleeService.findAll(assignDto.enrolleeIds());
+        }
+    }
 
     /**
-     * To avoid accidentally assigning the same survey or outreach activity to a participant multiple times,
+     * To avoid accidentally assigning the same tasks or outreach activity to a participant multiple times,
      * confirm that if the stableId matches an existing task, the existing task must be complete and the
      * configured survey must allow recurrence.
      */
@@ -311,7 +315,7 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
     }
 
     /**
-     * whether or not sufficient time has passed since a previous instance of a survey being assigned to assign
+     * whether or not sufficient time has passed since a previous instance of a task being assigned to assign
      * a new one
      */
     public boolean isRecurrenceWindowOpen(T taskDispatchConfig, ParticipantTask pastTask) {
@@ -322,8 +326,4 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig, E extends TaskC
                 .minusDays(taskDispatchConfig.getRecurrenceIntervalDays()).toInstant();
         return pastTask.getCreatedAt().isBefore(pastCutoffTime);
     }
-
-    public abstract ParticipantTask buildTask(Enrollee enrollee,
-                                              PortalParticipantUser portalParticipantUser,
-                                              StudyEnvironmentSurvey studyEnvSurvey);
 }
