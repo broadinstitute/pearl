@@ -28,7 +28,7 @@ public class ProxyFormatterTests {
         Map<String, String> enrolleeMap = proxyFormatter.toStringMap(exportData);
 
         assertThat(enrolleeMap.size(), equalTo(2));
-        System.out.println(enrolleeMap.keySet());
+
         assertThat(enrolleeMap.get("proxy.username"), equalTo("proxy1@test.com"));
         assertThat(enrolleeMap.get("proxy.2.username"), equalTo("proxy2@test.com"));
 

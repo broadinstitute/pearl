@@ -24,7 +24,6 @@ public class PublishingUtils {
         C destConfig = configService.find(versionedConfigChange.destId()).get();
         try {
             for (ConfigChange change : versionedConfigChange.configChanges()) {
-                System.out.println("change: " + change);
                 setPropertyEnumSafe(destConfig, change.propertyName(), change.newValue());
             }
         } catch (Exception e) {
@@ -32,7 +31,6 @@ public class PublishingUtils {
         }
 
         if (versionedConfigChange.documentChange().isChanged()) {
-            System.out.println("document change: " + versionedConfigChange.documentChange());
             VersionedEntityChange<T> docChange = versionedConfigChange.documentChange();
             UUID newDocumentId = null;
             if (docChange.newStableId() != null) {
