@@ -34,5 +34,4 @@ public class StudyEnvironmentDocumentRequest extends BaseEntity implements Versi
     public void updateVersionedEntityId(UUID documentRequestId) {
         setDocumentRequestId(documentRequestId);
     }
-
 }

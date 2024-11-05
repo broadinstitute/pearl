@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: "document_request_task"
+      author: connorlbark
+      changes:
+        - createTable:
+            tableName: document_request
+            columns:
+              - column: { name: id, type: uuid, defaultValueComputed: gen_random_uuid(), constraints: { nullable: false, primaryKey: true } }
+              - column: { name: created_at, type: datetime, constraints: { nullable: false } }
+              - column: { name: last_updated_at, type: datetime, constraints: { nullable: false } }
+              - column: { name: stable_id, type: text, constraints: { nullable: false } }
+              - column: { name: version, type: integer, constraints: { nullable: false } }
+              - column: { name: published_version, type: integer }
+              - column: { name: portal_id, type: uuid, constraints: { nullable: false, foreignKeyName: fk_document_request_portal, references: portal(id) } }
+              - column: { name: document_name, type: text, constraints: { nullable: false } }
+              - column: { name: blurb, type: text }
+              - column: { name: allowed_file_types, type: text }
+              - column: { name: max_file_size, type: integer }
+              - column: { name: multiple_files_allowed, type: boolean, defaultValueBoolean: false }
+              - column: { name: recurrence_type, type: text, constraints: { nullable: false }, defaultValue: 'NONE'}
+              - column: { name: days_after_eligible, type: integer }
+              - column: { name: recurrence_interval_days, type: integer }
+              - column: { name: eligibility_rule, type: text }
+              - column: { name: auto_assign, type: boolean, defaultValueBoolean: false }
+              - column: { name: auto_update_task_assignments, type: boolean, defaultValueBoolean: false }
+              - column: { name: assign_to_existing_enrollees, type: boolean, defaultValueBoolean: false }
+        - createTable:
+            tableName: study_environment_document_request
+            columns:
+              - column: { name: id, type: uuid, defaultValueComputed: gen_random_uuid(), constraints: { nullable: false, primaryKey: true } }
+              - column: { name: created_at, type: datetime, constraints: { nullable: false } }
+              - column: { name: last_updated_at, type: datetime, constraints: { nullable: false } }
+              - column: { name: study_environment_id, type: uuid, constraints: { nullable: false, foreignKeyName: fk_study_environment_document_request_study_environment, references: study_environment(id) } }
+              - column: { name: document_request_id, type: uuid, constraints: { nullable: false, foreignKeyName: fk_study_environment_document_request_document_request, references: document_request(id) } }
+              - column: { name: active, type: boolean, constraints: { nullable: false }, defaultValueBoolean: true }
+              - column: { name: task_order, type: integer, constraints: { nullable: false } }
+        - addColumn:
+            tableName: participant_task
+            columns:
+              # TODO: add a fk to participant file
+              - column: { name: participant_file_id, type: uuid, constraints: { nullable: true } }

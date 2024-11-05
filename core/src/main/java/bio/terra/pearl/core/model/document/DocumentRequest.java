@@ -34,7 +34,8 @@ public class DocumentRequest extends BaseEntity implements Versioned {
     private Boolean multipleFilesAllowed;
 
     // task assignment config
-    private RecurrenceType recurrenceType;
+    @Builder.Default
+    private RecurrenceType recurrenceType = RecurrenceType.NONE;
 
     private Integer daysAfterEligible;
     private Integer recurrenceIntervalDays;

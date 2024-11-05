@@ -2,6 +2,7 @@ package bio.terra.pearl.core.service.workflow;
 
 import bio.terra.pearl.core.dao.workflow.EventDao;
 import bio.terra.pearl.core.model.BaseEntity;
+import bio.terra.pearl.core.model.document.DocumentRequest;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitRequestStatus;
 import bio.terra.pearl.core.model.participant.Enrollee;
@@ -10,9 +11,13 @@ import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyResponse;
-import bio.terra.pearl.core.model.workflow.*;
+import bio.terra.pearl.core.model.workflow.Event;
+import bio.terra.pearl.core.model.workflow.EventClass;
+import bio.terra.pearl.core.model.workflow.HubResponse;
+import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.service.ImmutableEntityService;
 import bio.terra.pearl.core.service.consent.EnrolleeConsentEvent;
+import bio.terra.pearl.core.service.document.event.DocumentRequestPublishedEvent;
 import bio.terra.pearl.core.service.kit.KitStatusEvent;
 import bio.terra.pearl.core.service.rule.EnrolleeContext;
 import bio.terra.pearl.core.service.rule.EnrolleeContextService;
@@ -128,6 +133,20 @@ public class EventService extends ImmutableEntityService<Event, EventDao> {
                 .survey(survey)
                 .portalEnvironmentId(portalEnvId)
                 .eventClass(EventClass.SURVEY_PUBLISHED_EVENT)
+                .build();
+
+        dao.create(event);
+        applicationEventPublisher.publishEvent(event);
+        return event;
+    }
+
+    public DocumentRequestPublishedEvent publishDocumentRequestPublishedEvent(UUID portalEnvId, UUID studyEnvId, DocumentRequest documentRequest) {
+        DocumentRequestPublishedEvent event = DocumentRequestPublishedEvent.builder()
+                .studyEnvironmentId(studyEnvId)
+                .documentRequestId(documentRequest.getId())
+                .documentRequest(documentRequest)
+                .portalEnvironmentId(portalEnvId)
+                .eventClass(EventClass.DOCUMENT_REQUEST_PUBLISHED_EVENT)
                 .build();
 
         dao.create(event);
