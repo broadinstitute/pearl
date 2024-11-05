@@ -90,7 +90,7 @@ public class AnswerDaoTests extends BaseSpringBootTest {
 
   @Test
   @Transactional
-  void testFindByProfileIdByStudyAndQuestion(TestInfo info) {
+  void testFindByProfileIdStudyAndQuestion(TestInfo info) {
     StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
     PortalEnvironment portalEnv = studyEnvBundle.getPortalEnv();
     StudyEnvironment studyEnv = studyEnvBundle.getStudyEnv();
@@ -118,7 +118,7 @@ public class AnswerDaoTests extends BaseSpringBootTest {
     surveyResponseFactory.buildWithAnswers(unrelatedEnrollee.enrollee(), surveyInEnv2, Map.of("different_question", "something"));
 
     // find question that enrollee 1 filled out
-    Optional<Answer> answer = answerDao.findByProfileIdByStudyAndQuestion(
+    Optional<Answer> answer = answerDao.findByProfileIdStudyAndQuestion(
             enrollee1.getProfileId(),
             studyEnvBundle.getStudy().getName(),
             surveyInEnv1.getStableId(),
@@ -126,7 +126,7 @@ public class AnswerDaoTests extends BaseSpringBootTest {
     assertThat(answer.get().getStringValue(), equalTo("answer1"));
 
     // find question that enrollee 2 filled out
-    answer = answerDao.findByProfileIdByStudyAndQuestion(
+    answer = answerDao.findByProfileIdStudyAndQuestion(
             enrollee1.getProfileId(),
             studyEnvBundle2.getStudy().getName(),
             surveyInEnv2.getStableId(),
@@ -135,7 +135,7 @@ public class AnswerDaoTests extends BaseSpringBootTest {
 
 
     // find question that enrollee 2 filled out but ask for wrong study
-    answer = answerDao.findByProfileIdByStudyAndQuestion(
+    answer = answerDao.findByProfileIdStudyAndQuestion(
             enrollee1.getProfileId(),
             studyEnvBundle.getStudy().getName(),
             surveyInEnv2.getStableId(),
@@ -143,7 +143,7 @@ public class AnswerDaoTests extends BaseSpringBootTest {
     assertThat(answer.isEmpty(), equalTo(true));
 
     // find question that neither enrollee 1 nor 2 filled out
-    answer = answerDao.findByProfileIdByStudyAndQuestion(
+    answer = answerDao.findByProfileIdStudyAndQuestion(
             enrollee1.getProfileId(),
             studyEnvBundle2.getStudy().getName(),
             surveyInEnv2.getStableId(),

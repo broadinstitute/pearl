@@ -43,7 +43,7 @@ public class AnswerTerm extends SearchTerm {
         Optional<Answer> answerOpt =
                 this.studyName == null
                         ? answerDao.findForEnrolleeByQuestion(context.getEnrollee().getId(), surveyStableId, questionStableId)
-                        : answerDao.findByProfileIdByStudyAndQuestion(context.getEnrollee().getProfileId(), studyName, surveyStableId, questionStableId);
+                        : answerDao.findByProfileIdStudyAndQuestion(context.getEnrollee().getProfileId(), studyName, surveyStableId, questionStableId);
         if (answerOpt.isEmpty()) {
             return new SearchValue();
         }
