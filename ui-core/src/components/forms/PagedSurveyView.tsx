@@ -126,7 +126,7 @@ export function PagedSurveyView({
 
   /** Submit the response to the server */
   const onComplete = async () => {
-    cancelAutosave()
+    if (cancelAutosave) { cancelAutosave() }
     if (!surveyModel || !refreshSurvey) {
       return
     }
