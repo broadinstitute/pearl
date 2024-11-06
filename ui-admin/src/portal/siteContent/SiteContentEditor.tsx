@@ -68,12 +68,11 @@ const SiteContentEditor = (props: InitializedSiteContentViewProps) => {
     defaultLanguage, languageOnChange, selectedLanguageOption,
     selectLanguageInputId, languageOptions
   } = useLanguageSelectorFromParam()
-  const selectedLanguage = selectedLanguageOption?.value
+  const selectedLanguage = selectedLanguageOption?.value || defaultLanguage
   const [workingContent, setWorkingContent] = useState<SiteContent>(siteContent)
   const localContent = useMemo(
     () => workingContent.localizedSiteContents.find(lsc => lsc.language === selectedLanguage?.languageCode),
     [workingContent, selectedLanguage])
-
 
   const { portalEnv } = portalEnvContext
   const [activeTab, setActiveTab] = useState<string | null>('designer')
@@ -226,7 +225,6 @@ const SiteContentEditor = (props: InitializedSiteContentViewProps) => {
 
   const isEditable = !readOnly && portalEnv.environmentName === 'sandbox'
 
-
   const pageOpts: {
     label: string,
     value: string
@@ -311,13 +309,13 @@ const SiteContentEditor = (props: InitializedSiteContentViewProps) => {
               onChange={languageOnChange}/>
           </div> }
           <div className="d-flex ms-auto">
-            <Button variant="light" onClick={() => setShowBrandingModal(true)}>
+            <Button variant="light" className='border' onClick={() => setShowBrandingModal(true)}>
               <FontAwesomeIcon icon={faPalette} className="fa-lg"/> Branding
             </Button>
-            <Link to="../media" className="btn btn-light ms-2">
+            <Link to="../media" className="btn btn-light ms-2 border">
               <FontAwesomeIcon icon={faImage} className="fa-lg"/> Media
             </Link>
-            <Button variant="light" onClick={() => setShowTranslationModal(true)} className="ms-2">
+            <Button variant="light" onClick={() => setShowTranslationModal(true)} className="ms-2 border">
               <FontAwesomeIcon icon={faGlobe} className="fa-lg"/> Translations
             </Button>
           </div>

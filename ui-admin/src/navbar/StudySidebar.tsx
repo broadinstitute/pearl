@@ -19,21 +19,18 @@ import {
   studyEnvExportIntegrationsPath,
   studyEnvFormsPath,
   studyEnvImportPath,
-  studyEnvMailingListPath,
   studyEnvMetricsPath,
   studyEnvNotificationsPath,
-  studyEnvSiteContentPath,
   studyEnvSiteSettingsPath
-} from '../study/StudyEnvironmentRouter'
+} from 'study/StudyEnvironmentRouter'
 import CollapsableMenu from './CollapsableMenu'
 import {
   userHasPermission,
   useUser
 } from 'user/UserProvider'
 import {
-  studyPublishingPath,
-  studyUsersPath
-} from '../study/StudyRouter'
+  studyPublishingPath
+} from 'study/StudyRouter'
 import { sidebarNavLinkClasses } from './AdminSidebar'
 
 
@@ -63,7 +60,7 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
       <CollapsableMenu header={'Research Coordination'} content={<ul className="list-unstyled">
         <li className="mb-2">
           <NavLink to={studyParticipantsPath(portalShortcode, study.shortcode, 'live')}
-            className={sidebarNavLinkClasses} style={navStyleFunc}>Participant List</NavLink>
+            className={sidebarNavLinkClasses} style={navStyleFunc}>Participants</NavLink>
         </li>
         <li className="mb-2">
           <NavLink to={studyKitsPath(portalShortcode, study.shortcode, 'live')}
@@ -74,10 +71,6 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
             className={sidebarNavLinkClasses} style={navStyleFunc}>Tasks</NavLink>
         </li>
         <li className="mb-2">
-          <NavLink to={studyEnvMailingListPath(portalShortcode, study.shortcode, 'live')}
-            className={sidebarNavLinkClasses} style={navStyleFunc}>Mailing List</NavLink>
-        </li>
-        <li className="mb-2">
           <NavLink to={studyEnvImportPath(portalShortcode, study.shortcode, 'sandbox')}
             className={sidebarNavLinkClasses} style={navStyleFunc}>Import Participants</NavLink>
         </li>
@@ -85,7 +78,7 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
       <CollapsableMenu header={'Analytics & Data'} content={<ul className="list-unstyled">
         <li className="mb-2">
           <NavLink to={studyEnvMetricsPath(portalShortcode, study.shortcode, 'live')}
-            className={sidebarNavLinkClasses} style={navStyleFunc}>Participant Analytics</NavLink>
+            className={sidebarNavLinkClasses} style={navStyleFunc}>Study Trends</NavLink>
         </li>
         <li className="mb-2">
           <NavLink to={studyEnvDataBrowserPath(portalShortcode, study.shortcode, 'live')}
@@ -103,10 +96,6 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
         }
       </ul>}/>
       <CollapsableMenu header={'Design & Build'} content={<ul className="list-unstyled">
-        <li className="mb-2">
-          <NavLink to={studyEnvSiteContentPath(portalShortcode, study.shortcode, 'sandbox')}
-            className={sidebarNavLinkClasses} style={navStyleFunc}>Website</NavLink>
-        </li>
         <li className="mb-2">
           <NavLink to={studyEnvFormsPath(portalShortcode, study.shortcode, 'sandbox')}
             className={sidebarNavLinkClasses} style={navStyleFunc}>Forms &amp; Surveys</NavLink>
@@ -126,13 +115,6 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
             className={sidebarNavLinkClasses} style={navStyleFunc}>Site Settings</NavLink>
         </li>
       </ul>}/>
-      <CollapsableMenu header={'Administration'} content={<ul className="list-unstyled">
-        <li className="mb-2">
-          <NavLink to={studyUsersPath(portalShortcode, study.shortcode)}
-            className={sidebarNavLinkClasses} style={navStyleFunc}>Manage Team</NavLink>
-        </li>
-      </ul>}/>
-
     </div>
   </div>
 }

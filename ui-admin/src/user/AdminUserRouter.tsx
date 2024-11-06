@@ -3,8 +3,7 @@ import { Link, Route, Routes } from 'react-router-dom'
 import UserList from './UserList'
 import AdminUserDetail from './AdminUserDetail'
 import { NavBreadcrumb } from 'navbar/AdminNavbar'
-import { studyUsersPath } from 'study/StudyRouter'
-import { Portal, Study } from '@juniper/ui-core'
+import { Portal } from '@juniper/ui-core'
 import RolesList from './RolesList'
 
 /**
@@ -27,10 +26,10 @@ export default function AdminUserRouter() {
 /**
  * handles user management paths for the given portal & study
  */
-export function PortalAdminUserRouter({ portal, study }: {portal: Portal, study: Study}) {
+export function PortalAdminUserRouter({ portal }: {portal: Portal}) {
   return <>
     <NavBreadcrumb value="users">
-      <Link to={studyUsersPath(portal.shortcode, study.shortcode)}>Users</Link>
+      <Link to={portalUsersPath(portal.shortcode)}>Users</Link>
     </NavBreadcrumb>
     <Routes>
       <Route path="roles" element={<RolesList/>}/>
@@ -39,4 +38,9 @@ export function PortalAdminUserRouter({ portal, study }: {portal: Portal, study:
       <Route path="*" element={<div>Unknown portal admin user page</div>}/>
     </Routes>
   </>
+}
+
+/** path to portal-specific user list, but keeps study in-context */
+export const portalUsersPath = (portalShortcode: string) => {
+  return `/${portalShortcode}/users`
 }
