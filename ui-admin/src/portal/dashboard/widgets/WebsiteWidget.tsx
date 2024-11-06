@@ -1,6 +1,6 @@
 import { Button } from 'components/forms/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faGear, faImage, faPalette, faPencil } from '@fortawesome/free-solid-svg-icons'
+import { faArrowUpRightFromSquare, faEye, faGear, faImage, faPalette, faPencil } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
 import { Portal } from '@juniper/ui-core'
 import { DropdownButton } from 'study/participants/survey/SurveyResponseView'
@@ -13,7 +13,7 @@ export const WebsiteWidget = ({ portal }: { portal: Portal }) => {
     env.environmentName === 'live')?.portalEnvironmentConfig.participantHostname
 
   return (
-    <InfoCard classNames={''}>
+    <InfoCard>
       <InfoCardHeader>
         <div className="d-flex align-items-center justify-content-between w-100">
           <span className="fw-bold">Website</span>
@@ -31,15 +31,23 @@ export const WebsiteWidget = ({ portal }: { portal: Portal }) => {
         </div>
       </InfoCardHeader>
       <InfoCardBody>
-        <div className="d-flex">
-          <div style={{ minHeight: '200px' }}>
-            { livePortalUrl ?
-              <img className="border rounded-3"
-                style={{ maxWidth: '100%', height: 'auto' }}
-                src={`https://api.urlbox.io/v1/A8hJem0DKIAE8mDm/png?url=${livePortalUrl}`}
-                alt={'Website preview'}/> :
-              <span className="text-muted bg-gray">Website not yet published</span>
-            }
+        <div className="container">
+          <div className="w-100">
+            <div style={{ minHeight: '200px' }} className="d-flex justify-content-center align-items-center">
+              {livePortalUrl ?
+                <Button
+                  variant="light"
+                  className="border"
+                  onClick={() => {
+                    const url = livePortalUrl?.startsWith('http') ? livePortalUrl : `https://${livePortalUrl}`
+                    window.open(url, '_blank')
+                  }}
+                >
+                  <FontAwesomeIcon icon={faArrowUpRightFromSquare}/> Visit website
+                </Button> :
+                <span className="text-muted bg-gray">Website not yet published</span>
+              }
+            </div>
           </div>
         </div>
       </InfoCardBody>

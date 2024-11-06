@@ -35,7 +35,7 @@ export const StudyTrendsWidget = ({ portal, study }: { portal: Portal, study: St
   }
 
   return (
-    <InfoCard classNames={''}>
+    <InfoCard>
       <InfoCardHeader>
         <div className="d-flex align-items-center justify-content-between w-100">
           <span className="fw-bold text-wrap text-break">{study.name}</span>

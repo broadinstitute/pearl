@@ -8,7 +8,7 @@ import { InfoCard, InfoCardBody, InfoCardHeader } from 'components/InfoCard'
 
 export const TutorialsWidget = () => {
   return (
-    <InfoCard classNames={''}>
+    <InfoCard>
       <InfoCardHeader>
         <div className="d-flex align-items-center justify-content-between w-100">
           <span className="fw-bold">Help & Tutorials</span>
