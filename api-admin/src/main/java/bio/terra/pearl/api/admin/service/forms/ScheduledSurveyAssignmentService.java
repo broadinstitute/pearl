@@ -4,8 +4,10 @@ import bio.terra.pearl.core.service.survey.SurveyTaskDispatcher;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class ScheduledSurveyAssignmentService {
   private final SurveyTaskDispatcher surveyTaskDispatcher;
 
