@@ -52,6 +52,45 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
     }
 
     @Test
+    public void testToStringMapMultipleResponses() {
+        Survey testSurvey = Survey.builder().id(UUID.randomUUID()).stableId("oh_surveyA").version(1).build();
+        SurveyQuestionDefinition questionDef = SurveyQuestionDefinition.builder()
+                .questionStableId("oh_surveyA_q1")
+                .questionType("text")
+                .exportOrder(1)
+                .build();
+        SurveyFormatter moduleFormatter = new SurveyFormatter(new ExportOptions(), "oh_surveyA", List.of(testSurvey), List.of(questionDef), List.of(), objectMapper);
+        SurveyResponse testResponse1 = SurveyResponse.builder()
+                .id(UUID.randomUUID())
+                .surveyId(testSurvey.getId()).build();
+        Answer answer1 = Answer.builder()
+                .surveyStableId(testSurvey.getStableId())
+                .questionStableId("oh_surveyA_q1")
+                .surveyResponseId(testResponse1.getId())
+                .stringValue("value1")
+                .build();
+        SurveyResponse testResponse2 = SurveyResponse.builder()
+                .id(UUID.randomUUID())
+                .complete(true)
+                .surveyId(testSurvey.getId()).build();
+        Answer answer2 = Answer.builder()
+                .surveyStableId(testSurvey.getStableId())
+                .questionStableId("oh_surveyA_q1")
+                .surveyResponseId(testResponse2.getId())
+                .stringValue("value2")
+                .build();
+
+        EnrolleeExportData enrolleeExportData = new EnrolleeExportData(null, null, null, null,
+                List.of(answer1, answer2), null, List.of(testResponse1, testResponse2), null, null, null, null);
+        Map<String, String> valueMap = moduleFormatter.toStringMap(enrolleeExportData);
+
+        assertThat(valueMap.get("oh_surveyA.oh_surveyA_q1"), equalTo("value1"));
+        assertThat(valueMap.get("oh_surveyA.complete"), equalTo("false"));
+        assertThat(valueMap.get("oh_surveyA[2].oh_surveyA_q1"), equalTo("value2"));
+        assertThat(valueMap.get("oh_surveyA[2].complete"), equalTo("true"));
+    }
+
+    @Test
     public void testAddAnswerToMapHandlesMissingVersion() throws Exception {
         SurveyQuestionDefinition questionDef = SurveyQuestionDefinition.builder()
                 .questionStableId("oh_surveyA_q1")
@@ -258,7 +297,7 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
                 .findFirst().orElseThrow(() -> new IllegalStateException("formatter did not produce an AnswerItemFormatter"));
 
         Map<String, List<Answer>> answerMap = Map.of(mapStableId, List.of(answer));
-        moduleFormatter.addAnswersToMap(itemFormatter, answerMap, valueMap);
+        moduleFormatter.addAnswersToMap(itemFormatter, answerMap, valueMap, 1);
         return valueMap;
     }
 
