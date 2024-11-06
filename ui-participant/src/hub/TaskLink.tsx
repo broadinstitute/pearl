@@ -76,12 +76,13 @@ export default function TaskLink({ task, studyShortcode, enrollee, history, nest
               {i18n(`${task.targetStableId}:${task.targetAssignedVersion}`, { defaultValue: task.targetName })}
             </Link>
             : i18n(`${task.targetStableId}:${task.targetAssignedVersion}`, { defaultValue: task.targetName })}
+          { (task.status === 'NEW' && !!history?.length) && <sup className="ms-1">{i18n('taskNew')}</sup>}
           {(isExpanded || nested) && <span className="text-muted fst-italic ms-2">
             ({instantToDateString(task.createdAt)})
           </span> }
         </div>
         { history && history.length > 0 && <button onClick={() => setIsExpanded(!isExpanded)}
-          className="btn btn-link py-0" title={i18n('')}>
+          className="btn btn-link py-0" title={i18n('taskHistory')}>
           <FontAwesomeIcon icon={isExpanded ? faChevronDown : faChevronUp}/>
         </button>}
         {task.taskType === 'CONSENT' && task.status === 'COMPLETE' && (
@@ -98,7 +99,7 @@ export default function TaskLink({ task, studyShortcode, enrollee, history, nest
             : i18n('taskLocked')}
         </div>
       </div>
-      { isExpanded && history && <ol className="list-unstyled mt-2 w-100">
+      { isExpanded && history && <ol className="list-unstyled mt-3 w-100">
         {history.map(task =>
           <li className="ps-3" key={task.id}>
             <TaskLink task={task} key={task.id} studyShortcode={studyShortcode} enrollee={enrollee} nested={true}/>
