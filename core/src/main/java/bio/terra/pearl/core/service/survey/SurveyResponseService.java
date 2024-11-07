@@ -159,7 +159,7 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
         allAnswers.addAll(existingAnswers);
         response.setAnswers(allAnswers);
 
-        List<ParticipantFile> updatedFiles = createOrUpdateParticipantFiles(response, responseDto.getParticipantFiles(), operator);
+        List<ParticipantFile> updatedFiles = updateParticipantFileLinks(response, responseDto.getParticipantFiles(), operator);
         response.setParticipantFiles(updatedFiles);
 
         DataAuditInfo auditInfo = DataAuditInfo.builder()
@@ -345,8 +345,13 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
         return answerService.create(answer);
     }
 
+    /**
+     * Manages the links between participant files and survey responses; does not actually create or delete files, only
+     * references to the files. Creating and deleting files from the frontend will happen before this method is called
+     * via the participant file controller.
+     */
     @Transactional
-    protected List<ParticipantFile> createOrUpdateParticipantFiles(SurveyResponse response, List<ParticipantFile> participantFiles, ResponsibleEntity operator) {
+    protected List<ParticipantFile> updateParticipantFileLinks(SurveyResponse response, List<ParticipantFile> participantFiles, ResponsibleEntity operator) {
         List<ParticipantFileSurveyResponse> existingParticipantFileSurveyResponses = participantFileSurveyResponseService.findBySurveyResponseId(response.getId());
 
         // delete links to any files no longer in list (does not delete underlying participant file)
