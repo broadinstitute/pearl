@@ -16,7 +16,7 @@ type OutreachParams = {
 /** gets the outreach params from the URL */
 const useOutreachParams = () => {
   const params = useParams<OutreachParams>()
-  const taskId = useTaskIdParam()
+  const { taskId } = useTaskIdParam()
   return {
     ...params,
     taskId,

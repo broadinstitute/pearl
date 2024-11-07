@@ -12,10 +12,7 @@ import bio.terra.pearl.core.model.search.EnrolleeSearchExpressionResult;
 import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironmentConfig;
-import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
-import bio.terra.pearl.core.model.survey.Survey;
-import bio.terra.pearl.core.model.survey.SurveyQuestionDefinition;
-import bio.terra.pearl.core.model.survey.SurveyType;
+import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.service.export.formatters.module.*;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.participant.EnrolleeRelationService;
@@ -211,7 +208,6 @@ public class EnrolleeExportService {
                 .toList();
 
         // create one moduleExportInfo for each survey stableId.
-
         for (Map.Entry<String, List<StudyEnvironmentSurvey>> surveysOfStableId : sortedCfgSurveysByStableId) {
             List<Survey> surveys = surveysOfStableId.getValue().stream().map(StudyEnvironmentSurvey::getSurvey).toList();
             List<SurveyQuestionDefinition> surveyQuestionDefinitions = surveyQuestionDefinitionDao.findAllBySurveyIds(surveys.stream().map(Survey::getId).toList());
@@ -248,7 +244,8 @@ public class EnrolleeExportService {
                 profileService.loadWithMailingAddress(enrollee.getProfileId()).get(),
                 answerDao.findByEnrolleeId(enrollee.getId()),
                 participantTaskService.findByEnrolleeId(enrollee.getId()),
-                surveyResponseService.findByEnrolleeId(enrollee.getId()),
+                surveyResponseService.findByEnrolleeId(enrollee.getId())
+                        .stream().sorted(Comparator.comparing(SurveyResponse::getCreatedAt).reversed()).toList(),
                 kitRequestService.findByEnrollee(enrollee),
                 relations,
                 config.isEnableFamilyLinkage() ? familyService.findByEnrolleeIdWithProband(enrollee.getId()) : Collections.emptyList(),

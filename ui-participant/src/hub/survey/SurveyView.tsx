@@ -53,7 +53,7 @@ function SurveyView({ showHeaders = true }: { showHeaders?: boolean }) {
     ?.profile : undefined
 
   const { i18n, selectedLanguage } = useI18n()
-  const taskId = useTaskIdParam() ?? ''
+  const { taskId } = useTaskIdParam() ?? ''
   const navigate = useNavigate()
 
   if (!stableId || !version || !studyShortcode) {

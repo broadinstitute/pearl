@@ -207,11 +207,10 @@ public class ParticipantMergeService {
         // copy across the survey responses
         List<SurveyResponse> responses = surveyResponseService.findByEnrolleeId(enrollee.getId());
         for (SurveyResponse response : responses) {
-            if (response.getCreatingParticipantUserId() != null) {
-                response.setCreatingParticipantUserId(targetPpUser.getParticipantUserId());
-                surveyResponseService.update(response);
-            }
+            moveResponse(response.getId(), enrollee, targetPpUser, auditInfo);
         }
+        // we need to reassign the participantUserIds, even though the enrolleeId will not change
+        mergeDao.reassignEnrolleeNotifications(enrollee.getId(), enrollee.getId(), targetPpUser.getParticipantUserId());
         reassignDataChanges(enrollee, enrollee, targetPpUser);
     }
 

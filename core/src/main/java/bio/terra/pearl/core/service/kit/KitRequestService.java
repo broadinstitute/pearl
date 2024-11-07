@@ -412,7 +412,9 @@ public class KitRequestService extends CrudService<KitRequest, KitRequestDao> {
             setKitDates(kitRequest, pepperKit);
             // for now just copy these over on each update, since there is currently no reason to make it conditional
             kitRequest.setTrackingNumber(pepperKit.getTrackingNumber());
-            kitRequest.setReturnTrackingNumber(pepperKit.getReturnTrackingNumber());
+            if(pepperKit.getReturnTrackingNumber() != null) {
+                kitRequest.setReturnTrackingNumber(pepperKit.getReturnTrackingNumber());
+            }
             kitRequest.setErrorMessage(pepperKit.getErrorMessage());
             dao.update(kitRequest);
         } catch (JsonProcessingException e) {
