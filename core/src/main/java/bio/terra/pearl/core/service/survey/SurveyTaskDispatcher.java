@@ -320,7 +320,8 @@ public class SurveyTaskDispatcher {
             SurveyType.CONSENT, TaskType.CONSENT,
             SurveyType.RESEARCH, TaskType.SURVEY,
             SurveyType.OUTREACH, TaskType.OUTREACH,
-            SurveyType.ADMIN, TaskType.ADMIN_FORM
+            SurveyType.ADMIN, TaskType.ADMIN_FORM,
+            SurveyType.DOCUMENT_REQUEST, TaskType.DOCUMENT_REQUEST
     );
 
     /**
