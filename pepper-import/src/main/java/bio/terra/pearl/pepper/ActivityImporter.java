@@ -615,6 +615,11 @@ public class ActivityImporter {
      * After testing some more surveys, we might want to upgrade this to use a html->markdown parsing library */
     static Map<String, String> JUNIPER_PEPPER_STRING_MAP = Map.ofEntries(
             Map.entry("\\$ddp.participantFirstName\\(\\)", "{profile.givenName}"),
+/**
+ * If uncommented, all the HTML tags will be stripped from the survey. Not always helpful - without
+ * a much more complex system, it removes tags in places that are sometimes helpful. Depends on the survey
+ * which is easier to clean up.
+ */
 //            Map.entry("\\<p.*?\\>", ""),
 //            Map.entry("\\</p\\>", "\\\\n"),
 //            Map.entry("\\<span.*?\\>", ""),
