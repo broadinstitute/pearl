@@ -32,7 +32,7 @@ import java.util.*;
  */
 @Service
 @Slf4j
-public abstract class TaskConfigDispatcher<T extends TaskConfig> {
+public abstract class TaskDispatcher<T extends TaskConfig> {
     private final StudyEnvironmentService studyEnvironmentService;
     private final ParticipantTaskService participantTaskService;
     private final EnrolleeService enrolleeService;
@@ -41,12 +41,12 @@ public abstract class TaskConfigDispatcher<T extends TaskConfig> {
     private final PortalParticipantUserService portalParticipantUserService;
 
 
-    public TaskConfigDispatcher(StudyEnvironmentService studyEnvironmentService,
-                                ParticipantTaskService participantTaskService,
-                                EnrolleeService enrolleeService,
-                                EnrolleeSearchExpressionParser enrolleeSearchExpressionParser,
-                                EnrolleeContextService enrolleeContextService,
-                                PortalParticipantUserService portalParticipantUserService) {
+    public TaskDispatcher(StudyEnvironmentService studyEnvironmentService,
+                          ParticipantTaskService participantTaskService,
+                          EnrolleeService enrolleeService,
+                          EnrolleeSearchExpressionParser enrolleeSearchExpressionParser,
+                          EnrolleeContextService enrolleeContextService,
+                          PortalParticipantUserService portalParticipantUserService) {
         this.studyEnvironmentService = studyEnvironmentService;
         this.participantTaskService = participantTaskService;
         this.enrolleeService = enrolleeService;

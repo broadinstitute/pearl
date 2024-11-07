@@ -28,7 +28,7 @@ import java.util.UUID;
 /** listens for events and updates enrollee survey tasks accordingly */
 @Service
 @Slf4j
-public class SurveyTaskDispatcher extends TaskConfigDispatcher<SurveyTaskConfigDto> {
+public class SurveyTaskDispatcher extends TaskDispatcher<SurveyTaskConfigDto> {
     private final StudyEnvironmentSurveyService studyEnvironmentSurveyService;
     private final SurveyService surveyService;
 

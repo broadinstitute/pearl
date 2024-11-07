@@ -1,18 +1,19 @@
 package bio.terra.pearl.api.admin.service.forms;
 
-import bio.terra.pearl.core.service.workflow.TaskConfigDispatcher;
-import java.util.List;
+import bio.terra.pearl.core.service.workflow.TaskDispatcher;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @Component
 public class ScheduledAssignmentService {
-  private final List<TaskConfigDispatcher> taskDispatchers;
+  private final List<TaskDispatcher> taskDispatchers;
 
-  public ScheduledAssignmentService(List<TaskConfigDispatcher> taskDispatchers) {
+  public ScheduledAssignmentService(List<TaskDispatcher> taskDispatchers) {
     this.taskDispatchers = taskDispatchers;
   }
 
@@ -25,7 +26,7 @@ public class ScheduledAssignmentService {
       lockAtLeastFor = "10s")
   public void assignScheduledSurveys() {
     log.info("Scheduled task processing beginning");
-    taskDispatchers.forEach(TaskConfigDispatcher::assignScheduledTasks);
+    taskDispatchers.forEach(TaskDispatcher::assignScheduledTasks);
     log.info("Scheduled task processing complete");
   }
 }
