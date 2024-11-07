@@ -245,7 +245,7 @@ public class EnrolleeExportService {
                 answerDao.findByEnrolleeId(enrollee.getId()),
                 participantTaskService.findByEnrolleeId(enrollee.getId()),
                 surveyResponseService.findByEnrolleeId(enrollee.getId())
-                        .stream().sorted(Comparator.comparing(SurveyResponse::getCreatedAt).reversed()).toList(),
+                        .stream().sorted(Comparator.comparing(SurveyResponse::getCreatedAt)).toList(),
                 kitRequestService.findByEnrollee(enrollee),
                 relations,
                 config.isEnableFamilyLinkage() ? familyService.findByEnrolleeIdWithProband(enrollee.getId()) : Collections.emptyList(),

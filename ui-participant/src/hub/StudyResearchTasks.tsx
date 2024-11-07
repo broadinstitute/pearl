@@ -6,9 +6,6 @@ import { getNextTask, getTaskPath, isTaskAccessible, isTaskActive, taskComparato
 import TaskLink from './TaskLink'
 import _groupBy from 'lodash/groupBy'
 import _flatten from 'lodash/flatten'
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-
 
 const taskTypeMap: Record<string, string> = {
   CONSENT: 'taskTypeConsent',
@@ -123,7 +120,7 @@ function TaskGrouping({ title, taskArrays, enrollee, studyShortcode }: {
       <ol className="list-unstyled p-0">
         {taskArrays.map(tasks =>
           <TaskLink task={tasks[0]} history={tasks.slice(1)}
-                     enrollee={enrollee} studyShortcode={studyShortcode} key={tasks[0].id}/>
+            enrollee={enrollee} studyShortcode={studyShortcode} key={tasks[0].id}/>
         )}
       </ol>
     </>
