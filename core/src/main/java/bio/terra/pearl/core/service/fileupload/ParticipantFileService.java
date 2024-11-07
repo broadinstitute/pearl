@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,5 +27,9 @@ public class ParticipantFileService extends ImmutableEntityService<ParticipantFi
         UUID fileId = fileStorageBackend.uploadFile(file);
         participantFile.setExternalFileId(fileId);
         return dao.create(participantFile);
+    }
+
+    public List<ParticipantFile> findBySurveyResponseId(UUID surveyResponseId) {
+        return dao.findBySurveyResponseId(surveyResponseId);
     }
 }
