@@ -260,4 +260,67 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
                 containsInAnyOrder(responseSt2.getId(), responseTt1.getId(), response_Tt3.getId(), responseSt1.getId()));
         assertThat(surveyResponseService.findByEnrolleeId(targetBundle.enrollee().getId()), hasSize(4));
     }
+
+    /** merge two enrollees who each have a survey task with a response */
+    @Test
+    @Transactional
+    public void testRecurringSurveyTaskMerge(TestInfo info) {
+        StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
+        Survey survey1 = surveyFactory.buildPersisted(getTestName(info), studyEnvBundle.getPortal().getId());
+        surveyFactory.attachToEnv(survey1, studyEnvBundle.getStudyEnv().getId(), true);
+
+        // note we use the 'enroll' factory method so that tasks are added
+        EnrolleeBundle sourceBundle = enrolleeFactory.enroll("source@test.com", studyEnvBundle.getPortal().getShortcode(),
+                studyEnvBundle.getStudy().getShortcode(), studyEnvBundle.getStudyEnv().getEnvironmentName());
+
+        EnrolleeBundle targetBundle = enrolleeFactory.enroll("target@test.com", studyEnvBundle.getPortal().getShortcode(),
+                studyEnvBundle.getStudy().getShortcode(), studyEnvBundle.getStudyEnv().getEnvironmentName());
+
+        // the source has one response, the target has multiple
+        SurveyResponse responseS1 = surveyResponseFactory.submitStringAnswer(
+                        survey1.getStableId(),
+                        "question1", "source1", true, sourceBundle)
+                .getResponse();
+        SurveyResponse responseT1 = surveyResponseFactory.submitStringAnswer(
+                        survey1.getStableId(),
+                        "question1", "target1", true, targetBundle)
+                .getResponse();
+        
+        SurveyResponse responseT2 = surveyResponseFactory.submitStringAnswer(
+                        survey1.getStableId(),
+                        "question1", "target2", true, targetBundle)
+                .getResponse();
+
+        ParticipantUserMerge merge = participantMergePlanService.planMerge(sourceBundle.participantUser(), targetBundle.participantUser(),
+                studyEnvBundle.getPortal());
+
+        assertThat(merge.getEnrollees(), hasSize(1));
+        List<MergeAction<ParticipantTask, ?>> taskMerges = merge.getEnrollees().get(0).getMergePlan().getTasks();
+        // there should be 3 task 'pairs'
+        assertThat(taskMerges, hasSize(3));
+        for (MergeAction<ParticipantTask, ?> taskMerge : taskMerges) {
+            if (Objects.equal(taskMerge.getSource().getTargetStableId(), survey1.getStableId())) {
+                assertThat(taskMerge.getTarget().getTargetStableId(), equalTo(survey1.getStableId()));
+                assertThat(taskMerge.getAction(), equalTo(MergeAction.Action.MOVE_SOURCE));
+            } else if (Objects.equal(taskMerge.getSource().getTargetStableId(), survey2.getStableId())) {
+                assertThat(taskMerge.getTarget().getTargetStableId(), equalTo(survey2.getStableId()));
+                assertThat(taskMerge.getAction(), equalTo(MergeAction.Action.MOVE_SOURCE_DELETE_TARGET));
+            } else if (Objects.equal(taskMerge.getTarget().getTargetStableId(), survey3.getStableId())) {
+                assertThat(taskMerge.getSource().getTargetStableId(), equalTo(survey3.getStableId()));
+                assertThat(taskMerge.getAction(), equalTo(MergeAction.Action.DELETE_SOURCE));
+            } else {
+                throw new RuntimeException("unexpected task merge");
+            }
+        }
+        participantMergeService.applyMerge(merge, DataAuditInfo.builder().systemProcess("test").build());
+        assertThat(participantTaskService.findByEnrolleeId(sourceBundle.enrollee().getId()), hasSize(0));
+        List<ParticipantTask> tasks = participantTaskService.findByEnrolleeId(targetBundle.enrollee().getId());
+        assertThat(tasks, hasSize(4));
+        // two tasks for survey 1, and 1 task for each of the others
+        assertThat(tasks.stream().map(ParticipantTask::getTargetStableId).toList(),
+                containsInAnyOrder(survey1.getStableId(), survey1.getStableId(), survey2.getStableId(), survey3.getStableId()));
+        assertThat(tasks.stream().map(ParticipantTask::getSurveyResponseId).toList(),
+                containsInAnyOrder(responseSt2.getId(), responseTt1.getId(), response_Tt3.getId(), responseSt1.getId()));
+        assertThat(surveyResponseService.findByEnrolleeId(targetBundle.enrollee().getId()), hasSize(4));
+    }
 }
