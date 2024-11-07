@@ -84,7 +84,6 @@ const StudyControls = ({ portal, study, primaryStudy }: {
             data-bs-toggle='dropdown'
             className="dropdown-toggle border m-1"
             type="button"
-            id={`editStudyMenu-${study.shortcode}`}
             variant="light"
             aria-haspopup="true"
             aria-expanded="false"
