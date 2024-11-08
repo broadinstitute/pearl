@@ -346,6 +346,7 @@ export type ParticipantTaskAssignDto = {
   // if true, the enrolleeIds list will be ignored and tasks will be assigned to all enrollees
   // not already having the task in the duplicate window
   assignAllUnassigned: boolean
+  overrideEligibility: boolean
 }
 
 export type TaskUpdateSpec = {
