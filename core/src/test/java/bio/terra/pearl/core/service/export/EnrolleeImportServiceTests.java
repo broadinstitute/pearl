@@ -227,7 +227,7 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
     @Transactional
     public void testImportEnrolleeMultipleKitRequests(TestInfo info) {
         String csvStringMultipleKits = """
-                account.username,account.createdAt,enrollee.createdAt,profile.birthDate,sample_kit.status,sample_kit.createdAt,sample_kit.sentAt,sample_kit.trackingNumber,sample_kit.sentToAddress,sample_kit.kitType,medical_history.diagnosis,sample_kit.2.status,sample_kit.2.createdAt,sample_kit.2.sentAt,sample_kit.2.receivedAt,sample_kit.2.trackingNumber,sample_kit.2.sentToAddress,sample_kit.2.kitType
+                account.username,account.createdAt,enrollee.createdAt,profile.birthDate,sample_kit.status,sample_kit.createdAt,sample_kit.sentAt,sample_kit.trackingNumber,sample_kit.sentToAddress,sample_kit.kitType,medical_history.diagnosis,sample_kit[2].status,sample_kit[2].createdAt,sample_kit[2].sentAt,sample_kit[2].receivedAt,sample_kit[2].trackingNumber,sample_kit[2].sentToAddress,sample_kit[2].kitType
                 userName1,"2024-05-09 01:37PM","2024-05-09 01:38PM","1980-10-10","SENT","2024-05-09 10:10AM","2024-05-19 01:38PM","KITTRACKNUMBER_1","{""firstName"":""SS"",""lastName"":""LN1"",""street1"":""320 Charles Street"",""city"":""Cambridge"",""state"":""MA"",""postalCode"":""02141"",""country"":""US""}","SALIVA", "sick","RECEIVED","2024-05-21 11:10AM","2024-05-22 01:38PM","2024-05-25 01:10AM","KITTRACKNUMBER_2","{""firstName"":""SS2"",""street1"":""320 Charles Street"",""city"":""Cambridge""}","SALIVA"
                 userName2,"2024-05-11 10:00AM","2024-05-11 10:00AM"
                 """;

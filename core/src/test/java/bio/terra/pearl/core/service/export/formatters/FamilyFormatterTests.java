@@ -33,7 +33,7 @@ public class FamilyFormatterTests {
         assertThat(enrolleeMap.size(), equalTo(4));
         assertThat(enrolleeMap.get("family.shortcode"), equalTo("F_FAM1"));
         assertThat(enrolleeMap.get("family.proband.shortcode"), equalTo("HDPROBAND1"));
-        assertThat(enrolleeMap.get("family.2.shortcode"), equalTo("F_FAM2"));
-        assertThat(enrolleeMap.get("family.2.proband.shortcode"), equalTo("HDPROBAND2"));
+        assertThat(enrolleeMap.get("family[2].shortcode"), equalTo("F_FAM2"));
+        assertThat(enrolleeMap.get("family[2].proband.shortcode"), equalTo("HDPROBAND2"));
     }
 }

@@ -2,7 +2,6 @@ package bio.terra.pearl.core.service.search.terms;
 
 import bio.terra.pearl.core.dao.participant.ParticipantUserDao;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
-import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.search.SearchValueTypeDefinition;
 import bio.terra.pearl.core.service.search.EnrolleeSearchContext;
 import bio.terra.pearl.core.service.search.sql.EnrolleeSearchQueryBuilder;
@@ -13,12 +12,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import static bio.terra.pearl.core.dao.BaseJdbiDao.toSnakeCase;
-import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.*;
+import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.INSTANT;
+import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.STRING;
 
 /**
  * Allows searching on basic ParticipantUser properties, e.g. "lastLogin"
  */
-public class UserTerm implements SearchTerm {
+public class UserTerm extends SearchTerm {
 
     private final String field;
     private final ParticipantUserDao participantUserDao;
