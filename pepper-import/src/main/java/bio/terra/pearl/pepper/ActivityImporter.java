@@ -615,20 +615,25 @@ public class ActivityImporter {
      * After testing some more surveys, we might want to upgrade this to use a html->markdown parsing library */
     static Map<String, String> JUNIPER_PEPPER_STRING_MAP = Map.ofEntries(
             Map.entry("\\$ddp.participantFirstName\\(\\)", "{profile.givenName}"),
-            Map.entry("\\<p.*?\\>", ""),
-            Map.entry("\\</p\\>", "\\\\n"),
-            Map.entry("\\<span.*?\\>", ""),
-            Map.entry("\\</span\\>", ""),
-            Map.entry("\\<b.*?\\>", "**"),
-            Map.entry("\\</b\\>", "**"),
-            Map.entry("<b.*?>", "**"),
-            Map.entry("</b>", "**"),
-            Map.entry("\\<i.*?\\>", "*"),
-            Map.entry("\\</i\\>", "*"),
-            Map.entry("<i.*?>", "*"),
-            Map.entry("</i>", "*"),
-            Map.entry("\\<em.*?\\>", "*"),
-            Map.entry("\\</em\\>", "*"),
+/**
+ * If uncommented, all the HTML tags will be stripped from the survey. Not always helpful - without
+ * a much more complex system, it removes tags in places that are sometimes helpful. Depends on the survey
+ * which is easier to clean up.
+ */
+//            Map.entry("\\<p.*?\\>", ""),
+//            Map.entry("\\</p\\>", "\\\\n"),
+//            Map.entry("\\<span.*?\\>", ""),
+//            Map.entry("\\</span\\>", ""),
+//            Map.entry("\\<b.*?\\>", "**"),
+//            Map.entry("\\</b\\>", "**"),
+//            Map.entry("<b.*?>", "**"),
+//            Map.entry("</b>", "**"),
+//            Map.entry("\\<i.*?\\>", "*"),
+//            Map.entry("\\</i\\>", "*"),
+//            Map.entry("<i.*?>", "*"),
+//            Map.entry("</i>", "*"),
+//            Map.entry("\\<em.*?\\>", "*"),
+//            Map.entry("\\</em\\>", "*"),
             Map.entry(" +", " ")
     );
 
