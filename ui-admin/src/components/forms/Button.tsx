@@ -91,15 +91,16 @@ export type IconButtonProps = ButtonProps & {
   // Make aria-label required because this button has an icon in place of text content.
   'aria-label': string
   icon: IconDefinition
+  iconClassNames?: string
 }
 
 /** A button with an icon. */
 export const IconButton = (props: IconButtonProps) => {
-  const { icon, ...buttonProps } = props
+  const { icon, iconClassNames, ...buttonProps } = props
   const { 'aria-label': ariaLabel } = buttonProps
   return (
     <Button tooltip={ariaLabel} {...buttonProps}>
-      <FontAwesomeIcon icon={icon} />
+      <FontAwesomeIcon icon={icon} className={iconClassNames}/>
     </Button>
   )
 }

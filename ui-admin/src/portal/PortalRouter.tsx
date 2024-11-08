@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import {
   Link,
   Route,
-  Routes, useNavigate,
+  Routes,
   useParams
 } from 'react-router-dom'
 import StudyRouter from '../study/StudyRouter'
@@ -24,13 +24,12 @@ import {
 import SiteContentLoader from './siteContent/SiteContentLoader'
 import { PortalAdminUserRouter } from 'user/AdminUserRouter'
 import { NavBreadcrumb } from 'navbar/AdminNavbar'
-import Select from 'react-select'
 import { portalEnvPath } from 'study/StudyEnvironmentRouter'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronRight, faHome } from '@fortawesome/free-solid-svg-icons'
 import SiteMediaList from './media/SiteMediaList'
 import { previewApi } from 'util/apiContextUtils'
-import { ENVIRONMENT_ICON_MAP } from '../util/publishUtils'
+import { EnvironmentSwitcher } from '../navbar/EnvironmentSwitcher'
 
 export type PortalEnvContext = {
   portal: Portal
@@ -76,7 +75,6 @@ export const usePortalEnvParamsFromPath = () => {
 /** controls routes within a portal environment, such as config, mailing list, etc... */
 function PortalEnvRouter({ portalContext }: {portalContext: LoadedPortalContextT}) {
   const params = useParams<PortalParams>()
-  const navigate = useNavigate()
   const portalEnvName: string | undefined = params.portalEnv
   const { portal } = portalContext
   const portalEnv = portal.portalEnvironments.find(env => env.environmentName === portalEnvName)
@@ -84,43 +82,15 @@ function PortalEnvRouter({ portalContext }: {portalContext: LoadedPortalContextT
     return <div>No environment matches {portalEnvName}</div>
   }
 
-  const envOpts = ['live', 'irb', 'sandbox'].map(env => ({
-    label: <span>
-      {ENVIRONMENT_ICON_MAP[env]} &nbsp; {env}
-    </span>, value: env
-  }))
-
   const portalEnvContext: PortalEnvContext = {
     ...portalContext,
     portalEnv
   }
 
-  const changeEnv = (newEnv?: string) => {
-    if (!newEnv) {
-      return
-    }
-    const currentPath = window.location.pathname
-    const newPath = currentPath
-      .replace(`/env/${portalEnvName}`, `/env/${newEnv}`)
-    navigate(newPath)
-  }
-
   const currentEnvPath = portalEnvPath(portal.shortcode, portalEnvName || '')
 
   return <>
-    <NavBreadcrumb value={currentEnvPath}>
-      <Select options={envOpts}
-        value={envOpts.find(opt => opt.value === portalEnvName)}
-        className="me-2"
-        styles={{
-          control: baseStyles => ({
-            ...baseStyles,
-            minWidth: '9em'
-          })
-        }}
-        onChange={opt => changeEnv(opt?.value)}
-      />
-    </NavBreadcrumb>
+    <EnvironmentSwitcher currentEnvPath={currentEnvPath} envName={portalEnvName || ''}/>
     <ApiProvider api={previewApi(portal.shortcode, portalEnv.environmentName)}>
       <I18nProvider defaultLanguage={'en'} portalShortcode={portal.shortcode}>
         <Routes>
