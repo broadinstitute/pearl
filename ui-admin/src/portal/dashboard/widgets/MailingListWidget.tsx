@@ -42,7 +42,7 @@ export const MailingListWidget = ({ portal }: { portal: Portal }) => {
         <LoadingSpinner isLoading={isMailingListLoading}>
           {contacts.length === 0 ?
             <span className={'fst-italic text-muted'}>Your mailing list does not have any subscribers</span> :
-            <>
+            <div data-testid={'mailing-list-content'}>
               <div>Your mailing list has
                 <span className={'fw-semibold'}> {contacts.length} </span>
                   total {pluralize('subscriber', contacts.length)} and
@@ -54,7 +54,7 @@ export const MailingListWidget = ({ portal }: { portal: Portal }) => {
                 <FontAwesomeIcon className="me-1" icon={faLightbulb}/>
                 Keep potential participants engaged with your study by sending them updates and newsletters.
               </div>
-            </>
+            </div>
           }
         </LoadingSpinner>
       </InfoCardBody>

@@ -1,6 +1,6 @@
 import { Button } from 'components/forms/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowUpRightFromSquare, faEye, faGear, faImage, faPalette, faPencil } from '@fortawesome/free-solid-svg-icons'
+import { faArrowUpRightFromSquare, faEye, faGear, faImage, faPencil } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
 import { Portal } from '@juniper/ui-core'
 import { DropdownButton } from 'study/participants/survey/SurveyResponseView'
@@ -78,16 +78,6 @@ const CustomizeWebsiteDropdown = ({ portal }: { portal: Portal }) => {
           icon={faPencil}
           label="Edit website"
           description="Design your portal website"
-        />
-        <div className="dropdown-divider my-1"></div>
-        {/* rendering the existing randing modal within the context of the portal dashboard
-            isn't particularly clean, from a user experience perspective
-            for now, we'll direct users to the sandbox site editor to edit branding */}
-        <DropdownButton
-          onClick={() => navigate(siteContentPath(portal.shortcode, 'sandbox'))}
-          icon={faPalette}
-          label="Edit branding"
-          description="Customize styling and colors"
         />
         <div className="dropdown-divider my-1"></div>
         <DropdownButton
