@@ -68,7 +68,8 @@ const SiteContentEditor = (props: InitializedSiteContentViewProps) => {
     defaultLanguage, languageOnChange, selectedLanguageOption,
     selectLanguageInputId, languageOptions
   } = useLanguageSelectorFromParam()
-  const selectedLanguage = selectedLanguageOption?.value || defaultLanguage
+
+  const selectedLanguage = selectedLanguageOption?.value
   const [workingContent, setWorkingContent] = useState<SiteContent>(siteContent)
   const localContent = useMemo(
     () => workingContent.localizedSiteContents.find(lsc => lsc.language === selectedLanguage?.languageCode),

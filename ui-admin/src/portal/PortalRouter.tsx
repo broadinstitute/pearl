@@ -65,6 +65,14 @@ export default function PortalRouter() {
   </>
 }
 
+export const usePortalEnvParamsFromPath = () => {
+  const params = useParams<PortalParams>()
+  return {
+    portalShortcode: params.portalShortcode,
+    portalEnv: params.portalEnv
+  }
+}
+
 /** controls routes within a portal environment, such as config, mailing list, etc... */
 function PortalEnvRouter({ portalContext }: {portalContext: LoadedPortalContextT}) {
   const params = useParams<PortalParams>()
