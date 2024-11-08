@@ -1,4 +1,4 @@
-package bio.terra.pearl.api.admin.service.forms;
+package bio.terra.pearl.api.admin.service.scheduled;
 
 import bio.terra.pearl.core.service.survey.SurveyTaskDispatcher;
 import lombok.extern.slf4j.Slf4j;

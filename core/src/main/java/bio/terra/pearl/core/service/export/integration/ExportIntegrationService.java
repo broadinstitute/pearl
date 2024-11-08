@@ -7,6 +7,9 @@ import bio.terra.pearl.core.model.export.ExportDestinationType;
 import bio.terra.pearl.core.model.export.ExportIntegration;
 import bio.terra.pearl.core.model.export.ExportIntegrationJob;
 import bio.terra.pearl.core.model.export.ExportOptions;
+import bio.terra.pearl.core.model.notification.Trigger;
+import bio.terra.pearl.core.model.notification.TriggerType;
+import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
@@ -52,6 +55,13 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
         ExportIntegration newIntegration = super.update(integration);
         newIntegration.setExportOptions(updatedOpts);
         return newIntegration;
+    }
+
+    public void doAllExports(ResponsibleEntity operator) {
+        List<ExportIntegration> integrations = dao.findAllActiveWithOptions();
+        for (ExportIntegration integration : integrations) {
+            doExport(integration, operator);
+        }
     }
 
     public ExportIntegrationJob doExport(ExportIntegration integration, ResponsibleEntity operator) {

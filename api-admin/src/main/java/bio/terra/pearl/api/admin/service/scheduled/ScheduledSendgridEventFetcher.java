@@ -1,6 +1,8 @@
-package bio.terra.pearl.api.admin.service.notifications;
+package bio.terra.pearl.api.admin.service.scheduled;
 
 import java.util.concurrent.TimeUnit;
+
+import bio.terra.pearl.api.admin.service.notifications.SendgridEventService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
