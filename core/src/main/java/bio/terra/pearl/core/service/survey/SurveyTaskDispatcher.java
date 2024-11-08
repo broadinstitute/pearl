@@ -111,7 +111,8 @@ public class SurveyTaskDispatcher extends TaskDispatcher<SurveyTaskConfigDto> {
             SurveyType.CONSENT, TaskType.CONSENT,
             SurveyType.RESEARCH, TaskType.SURVEY,
             SurveyType.OUTREACH, TaskType.OUTREACH,
-            SurveyType.ADMIN, TaskType.ADMIN_FORM
+            SurveyType.ADMIN, TaskType.ADMIN_FORM,
+            SurveyType.DOCUMENT_REQUEST, TaskType.DOCUMENT_REQUEST
     );
 
     protected Optional<SurveyTaskConfigDto> findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {

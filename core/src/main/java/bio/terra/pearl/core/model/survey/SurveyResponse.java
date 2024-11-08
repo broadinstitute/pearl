@@ -1,16 +1,17 @@
 package bio.terra.pearl.core.model.survey;
 
 import bio.terra.pearl.core.model.BaseEntity;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
+import bio.terra.pearl.core.model.fileupload.ParticipantFile;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * container for response data from a given survey instance.
@@ -25,6 +26,8 @@ public class SurveyResponse extends BaseEntity {
     private UUID surveyId;
     @Builder.Default
     private List<Answer> answers = new ArrayList<>();
+    @Builder.Default
+    private List<ParticipantFile> participantFiles = new ArrayList<>();
     @Builder.Default
     private boolean complete = false;
     // a json map of userId -> an object with information about where that particular user left off
