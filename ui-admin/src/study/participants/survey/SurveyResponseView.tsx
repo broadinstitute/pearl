@@ -78,7 +78,8 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
     <h4>{surveyAndResponses.survey.survey.name}</h4>
     { !isAssigned && <div className="d-flex align-items-center">
       <span className="text-muted fst-italic me-4">Not assigned</span>
-      <Button variant={'secondary'} onClick={() => setShowAssignModal(!showAssignModal)} className="ms-2">
+      <Button variant={'secondary'} outline={true}
+        onClick={() => setShowAssignModal(!showAssignModal)} className="ms-2">
         Assign
       </Button>
     </div>}
