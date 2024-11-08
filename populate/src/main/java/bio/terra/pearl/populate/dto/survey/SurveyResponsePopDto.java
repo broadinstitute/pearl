@@ -10,7 +10,6 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Getter @Setter @NoArgsConstructor @SuperBuilder
 public class SurveyResponsePopDto extends SurveyResponse implements TimeShiftable {
@@ -18,6 +17,8 @@ public class SurveyResponsePopDto extends SurveyResponse implements TimeShiftabl
     private int surveyVersion;
     @Builder.Default
     private List<AnswerPopDto> answerPopDtos = new ArrayList<>();
+    @Builder.Default
+    private List<String> participantFileNames = new ArrayList<>();
     private Integer currentPageNo;
     private Integer submittedHoursAgo;
     private String justification;

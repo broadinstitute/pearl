@@ -1,7 +1,19 @@
-import React, { useEffect, useState } from 'react'
-import { ParticipantTask, StudyEnvironmentSurvey, SurveyResponse } from 'api/api'
+import React, {
+  useEffect,
+  useState
+} from 'react'
+import {
+  ParticipantTask,
+  StudyEnvironmentSurvey,
+  SurveyResponse
+} from 'api/api'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
-import { Link, NavLink, Route, Routes } from 'react-router-dom'
+import {
+  Link,
+  NavLink,
+  Route,
+  Routes
+} from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import SurveyResponseView from '../survey/SurveyResponseView'
 import PreEnrollmentView from '../survey/PreEnrollmentView'
@@ -16,11 +28,23 @@ import { NavBreadcrumb } from 'navbar/AdminNavbar'
 import useRoutedEnrollee from './useRoutedEnrollee'
 import LoadingSpinner from 'util/LoadingSpinner'
 import CollapsableMenu from 'navbar/CollapsableMenu'
-import { faCircleCheck, faCircleHalfStroke } from '@fortawesome/free-solid-svg-icons'
-import { faCircle as faEmptyCircle, faCircleXmark } from '@fortawesome/free-regular-svg-icons'
-import { Enrollee, ParticipantTaskStatus } from '@juniper/ui-core'
+import {
+  faCircleCheck,
+  faCircleHalfStroke
+} from '@fortawesome/free-solid-svg-icons'
+import {
+  faCircle as faEmptyCircle,
+  faCircleXmark
+} from '@fortawesome/free-regular-svg-icons'
+import {
+  Enrollee,
+  ParticipantTaskStatus
+} from '@juniper/ui-core'
 import EnrolleeOverview from './EnrolleeOverview'
-import { navDivStyle, navListItemStyle } from 'util/subNavStyles'
+import {
+  navDivStyle,
+  navListItemStyle
+} from 'util/subNavStyles'
 
 
 export type SurveyWithResponsesT = {
@@ -57,6 +81,8 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
     .filter(survey => survey.survey.surveyType === 'CONSENT')
   const adminSurveys = surveys
     .filter(survey => survey.survey.surveyType === 'ADMIN')
+  const documentRequests = surveys
+    .filter(survey => survey.survey.surveyType === 'DOCUMENT_REQUEST')
 
   const updateResponseMap = (stableId: string, response: SurveyResponse) => {
     setResponseMap({
@@ -118,7 +144,7 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                   <ul className="list-unstyled">
                     {currentEnv.preEnrollSurvey && <li className="mb-2">
                       <NavLink to="preRegistration" className={getLinkCssClasses}>
-                        PreEnrollment
+                          PreEnrollment
                       </NavLink>
                     </li>}
                     {consentSurveys.map(survey => {
@@ -152,6 +178,23 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                       <span className="text-muted fst-italic">No study staff forms</span>
                     </li>}
                     {adminSurveys.map(survey => {
+                      const stableId = survey.survey.stableId
+                      return <li className="mb-2 d-flex justify-content-between
+                        align-items-center" key={stableId}>
+                        {createSurveyNavLink(stableId, responseMap, survey)}
+                        {badgeForResponses(responseMap[stableId]?.response)}
+                      </li>
+                    })}
+                  </ul>}
+                />
+              </li>
+              <li style={navListItemStyle}>
+                <CollapsableMenu header={'Document Requests'} headerClass="text-black" content={
+                  <ul className="list-unstyled">
+                    {documentRequests.length === 0 && <li className="mb-2">
+                      <span className="text-muted fst-italic">No document requests</span>
+                    </li>}
+                    {documentRequests.map(survey => {
                       const stableId = survey.survey.stableId
                       return <li className="mb-2 d-flex justify-content-between
                         align-items-center" key={stableId}>

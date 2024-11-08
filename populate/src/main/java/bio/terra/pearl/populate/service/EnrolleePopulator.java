@@ -9,6 +9,7 @@ import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
+import bio.terra.pearl.core.model.fileupload.ParticipantFile;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitRequestStatus;
 import bio.terra.pearl.core.model.kit.KitType;
@@ -21,8 +22,12 @@ import bio.terra.pearl.core.model.workflow.HubResponse;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.CascadeProperty;
-import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import bio.terra.pearl.core.service.exception.NotFoundException;
+import bio.terra.pearl.core.service.exception.internal.InternalServerException;
+import bio.terra.pearl.core.service.fileupload.ParticipantFileService;
+import bio.terra.pearl.core.service.fileupload.ParticipantFileSurveyResponseService;
+import bio.terra.pearl.core.service.fileupload.backends.FileStorageBackend;
+import bio.terra.pearl.core.service.fileupload.backends.FileStorageBackendProvider;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.kit.pepper.PepperKit;
@@ -38,6 +43,7 @@ import bio.terra.pearl.core.service.survey.SurveyService;
 import bio.terra.pearl.core.service.workflow.EnrollmentService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import bio.terra.pearl.populate.dao.ParticipantUserPopulateDao;
+import bio.terra.pearl.populate.dto.fileupload.ParticipantFilePopDto;
 import bio.terra.pearl.populate.dto.kit.KitRequestPopDto;
 import bio.terra.pearl.populate.dto.notifications.NotificationPopDto;
 import bio.terra.pearl.populate.dto.participant.*;
@@ -57,7 +63,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -69,6 +77,8 @@ import static java.time.temporal.ChronoUnit.HOURS;
 @Service
 @Slf4j
 public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, StudyPopulateContext> {
+    private final ParticipantFileService participantFileService;
+    private final ParticipantFileSurveyResponseService participantFileSurveyResponseService;
 
     public EnrolleePopulator(EnrolleeService enrolleeService,
                              StudyEnvironmentService studyEnvironmentService,
@@ -85,7 +95,7 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                              KitRequestService kitRequestService, KitTypeDao kitTypeDao, AdminUserDao adminUserDao,
                              ParticipantNotePopulator participantNotePopulator,
                              ParticipantUserPopulateDao participantUserPopulateDao, PortalParticipantUserPopulator portalParticipantUserPopulator, ObjectMapper objectMapper, PortalService portalService,
-                             SurveyQuestionDefinitionDao surveyQuestionDefinitionDao, ShortcodeService shortcodeService) {
+                             SurveyQuestionDefinitionDao surveyQuestionDefinitionDao, ShortcodeService shortcodeService, FileStorageBackendProvider fileStorageBackendProvider, ParticipantFileService participantFileService, ParticipantFileSurveyResponseService participantFileSurveyResponseService) {
         this.portalParticipantUserService = portalParticipantUserService;
         this.preEnrollmentResponseDao = preEnrollmentResponseDao;
         this.surveyService = surveyService;
@@ -111,10 +121,14 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         this.portalService = portalService;
         this.surveyQuestionDefinitionDao = surveyQuestionDefinitionDao;
         this.shortcodeService = shortcodeService;
+        this.fileStorageBackend = fileStorageBackendProvider.get();
+        this.participantFileService = participantFileService;
+        this.participantFileSurveyResponseService = participantFileSurveyResponseService;
     }
 
     private void populateResponse(Enrollee enrollee, SurveyResponsePopDto responsePopDto,
-                                  PortalParticipantUser ppUser, boolean simulateSubmissions, StudyPopulateContext context,
+                                  PortalParticipantUser ppUser, boolean simulateSubmissions,
+                                  List<ParticipantFile> participantFiles, StudyPopulateContext context,
                                   ParticipantUser pUser)
             throws JsonProcessingException {
         ResponsibleEntity responsibleUser;
@@ -180,6 +194,29 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         }
 
         enrollee.getSurveyResponses().add(savedResponse);
+
+
+        for (String fileName : responsePopDto.getParticipantFileNames()) {
+            Optional<ParticipantFile> fileOpt = participantFiles.stream()
+                    .filter(pf -> pf.getFileName().equals(fileName))
+                    .findFirst();
+
+            if (fileOpt.isPresent()) {
+                ParticipantFile file = fileOpt.get();
+
+                ParticipantFileSurveyResponse surveyResponseFileLink = ParticipantFileSurveyResponse
+                        .builder()
+                        .creatingParticipantUserId(enrollee.getParticipantUserId())
+                        .participantFileId(file.getId())
+                        .surveyResponseId(savedResponse.getId())
+                        .build();
+
+                participantFileSurveyResponseService.create(surveyResponseFileLink);
+            } else {
+                log.warn("Participant file not found for reference: " + fileName);
+            }
+        }
+
     }
 
     public String makeResumeData(Integer currentPageNo, UUID participantUserId) throws JsonProcessingException {
@@ -260,6 +297,24 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         enrollee.getKitRequests().add(
                 new KitRequestDto(kitRequest, kitType, enrollee.getShortcode(), objectMapper));
         return kitRequest;
+    }
+
+    private ParticipantFile populateParticipantFile(Enrollee enrollee, ParticipantFilePopDto fileDto) {
+        InputStream fileContentStream = new ByteArrayInputStream(fileDto.getFileContent().getBytes());
+
+        UUID uploadId = fileStorageBackend.uploadFile(fileContentStream);
+
+        ParticipantFile file = ParticipantFile.builder()
+                .enrolleeId(enrollee.getId())
+                .fileName(fileDto.getFileName())
+                .fileType(fileDto.getFileType())
+                .externalFileId(uploadId)
+                .fileType(fileDto.getFileType())
+                .creatingParticipantUserId(enrollee.getParticipantUserId())
+                .build();
+
+        System.out.println("Creating participant file: " + file.getFileName());
+        return participantFileService.create(file);
     }
 
     private String getTargetName(TaskType taskType, String stableId, UUID portalId, int version) {
@@ -413,8 +468,14 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                                       List<ParticipantTask> tasks, StudyEnvironment attachedEnv, StudyPopulateContext context)
             throws JsonProcessingException {
         ParticipantUser responsibleUser = participantUserService.find(enrollee.getParticipantUserId()).orElseThrow();
+
+        List<ParticipantFile> participantFiles = new ArrayList<>();
+        for (ParticipantFilePopDto fileDto : popDto.getParticipantFilePopDtos()) {
+            participantFiles.add(populateParticipantFile(enrollee, fileDto));
+        }
+
         for (SurveyResponsePopDto responsePopDto : popDto.getSurveyResponseDtos()) {
-            populateResponse(enrollee, responsePopDto, ppUser, popDto.isSimulateSubmissions(), context, responsibleUser);
+            populateResponse(enrollee, responsePopDto, ppUser, popDto.isSimulateSubmissions(), participantFiles, context, responsibleUser);
         }
         for (ParticipantTaskPopDto taskDto : popDto.getParticipantTaskDtos()) {
             populateTask(enrollee, ppUser, taskDto);
@@ -607,7 +668,7 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                 .answerPopDtos(answers)
                 .build();
         try {
-            populateResponse(enrollee, responsePopDto, ppUser, true, popContext, user);
+            populateResponse(enrollee, responsePopDto, ppUser, true, List.of(), popContext, user);
         } catch (JsonProcessingException e) {
             throw new InternalServerException("Unable to complete survey enrollee due to error: " + e.getMessage());
         }
@@ -638,5 +699,7 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
     private final PortalService portalService;
     private final SurveyQuestionDefinitionDao surveyQuestionDefinitionDao;
     private final ShortcodeService shortcodeService;
+    private final FileStorageBackend fileStorageBackend;
+
 }
 

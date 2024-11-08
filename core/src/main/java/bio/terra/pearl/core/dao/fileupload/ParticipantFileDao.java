@@ -32,4 +32,12 @@ public class ParticipantFileDao extends BaseJdbiDao<ParticipantFile> {
                         .toList()
         );
     }
+
+    public List<ParticipantFile> findByEnrolleeId(UUID enrolleeId) {
+        return findAllByProperty("enrollee_id", enrolleeId);
+    }
+
+    public void deleteByEnrolleeId(UUID enrolleeId) {
+        deleteByProperty("enrollee_id", enrolleeId);
+    }
 }

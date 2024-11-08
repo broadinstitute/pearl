@@ -3,6 +3,13 @@
   "shortcode": "HDSALK",
   "simulateSubmissions": true,
   "submittedHoursAgo": 52,
+  "participantFilePopDtos": [
+    {
+      "fileName": "my_file.txt",
+      "fileType": "txt",
+      "fileContent": "Hi!"
+    }
+  ],
   "preEnrollmentResponseDto": {
     "qualified": true,
     "surveyStableId": "hd_hd_preenroll",
@@ -88,7 +95,16 @@
         }
       ],
       "currentPageNo": 6
-    }],
+    },
+    {
+      "surveyStableId": "med_record_request",
+      "surveyVersion": 1,
+      "complete": true,
+      "participantFileNames": [
+        "my_file.txt"
+      ]
+    }
+  ],
   "kitRequestDtos": [
     {
       "creatingAdminUsername": "heartdemostaff@gmail.com",

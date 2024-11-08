@@ -32,4 +32,12 @@ public class ParticipantFileService extends ImmutableEntityService<ParticipantFi
     public List<ParticipantFile> findBySurveyResponseId(UUID surveyResponseId) {
         return dao.findBySurveyResponseId(surveyResponseId);
     }
+
+    public List<ParticipantFile> findByEnrolleeId(UUID enrolleeId) {
+        return dao.findByEnrolleeId(enrolleeId);
+    }
+
+    public void deleteByEnrolleeId(UUID enrolleeId) {
+        dao.deleteByEnrolleeId(enrolleeId);
+    }
 }

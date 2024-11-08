@@ -19,4 +19,8 @@ public class ParticipantFileSurveyResponseService extends ImmutableEntityService
     public List<ParticipantFileSurveyResponse> findBySurveyResponseId(UUID surveyResponseId) {
         return dao.findBySurveyResponseId(surveyResponseId);
     }
+
+    public void deleteByEnrolleeId(UUID enrolleeId) {
+        dao.deleteByEnrolleeId(enrolleeId);
+    }
 }

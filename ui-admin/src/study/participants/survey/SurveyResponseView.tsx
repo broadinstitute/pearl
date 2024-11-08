@@ -45,6 +45,7 @@ import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import classNames from 'classnames'
 import { faCircle as faEmptyCircle } from '@fortawesome/free-regular-svg-icons'
 import JustifyChangesModal from '../JustifyChangesModal'
+import { ParticipantFileSurveyResponseView } from 'study/participants/survey/ParticipantFileSurveyResponseView'
 
 /** Show responses for a survey based on url param */
 export default function SurveyResponseView({ enrollee, responseMap, updateResponseMap, studyEnvContext, onUpdate }: {
@@ -152,13 +153,17 @@ export function RawEnrolleeSurveyView({
         </div>
       </div>
       <hr/>
-      {(!isEditing && !response?.answers.length) && <div>No response for enrollee {enrollee.shortcode}</div>}
-      {(!isEditing && response?.answers.length) && <SurveyFullDataView
+      {(!isEditing && (!response?.answers.length && !response?.participantFiles.length)) &&
+          <div>No response for enrollee {enrollee.shortcode}</div>}
+      {!isEditing && response?.answers.length !== undefined && response?.answers.length > 0 && <SurveyFullDataView
         responseId={response.id}
         enrollee={enrollee}
         answers={response?.answers || []}
         survey={configSurvey.survey}
         studyEnvContext={studyEnvContext}/>}
+      {!isEditing && (response?.participantFiles.length !== undefined && response.participantFiles.length > 0) &&
+          <ParticipantFileSurveyResponseView surveyResponse={response}/>
+      }
       {isEditing && user && <SurveyResponseEditor studyEnvContext={studyEnvContext}
         updateResponseMap={updateResponseMap}
         justification={justification}
@@ -178,7 +183,6 @@ export function RawEnrolleeSurveyView({
     </div>
   </div>
 }
-
 function surveyTaskStatus(surveyResponse?: SurveyResponse) {
   let versionString = ''
   if (surveyResponse && surveyResponse.answers.length) {

@@ -1,23 +1,37 @@
-import React, { useContext, useState } from 'react'
+import React, {
+  useContext,
+  useState
+} from 'react'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import Modal from 'react-bootstrap/Modal'
 import LoadingSpinner from 'util/LoadingSpinner'
 import { useNavigate } from 'react-router-dom'
-import { PortalContext, PortalContextT } from 'portal/PortalProvider'
+import {
+  PortalContext,
+  PortalContextT
+} from 'portal/PortalProvider'
 import InfoPopup from 'components/forms/InfoPopup'
-import { ApiErrorResponse, defaultApiErrorHandle, doApiLoad } from 'api/api-utils'
+import {
+  ApiErrorResponse,
+  defaultApiErrorHandle,
+  doApiLoad
+} from 'api/api-utils'
 import Api, { Survey } from 'api/api'
 import { useFormCreationNameFields } from './useFormCreationNameFields'
-import { defaultSurvey, SurveyType } from '@juniper/ui-core'
+import {
+  defaultSurvey,
+  SurveyType
+} from '@juniper/ui-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faLightbulb, faUsersViewfinder } from '@fortawesome/free-solid-svg-icons'
+import {
+  faLightbulb,
+  faUsersViewfinder
+} from '@fortawesome/free-solid-svg-icons'
 import { FormOptions } from './FormOptionsModal'
-import { useUser } from '../../user/UserProvider'
+import { useUser } from 'user/UserProvider'
+import { getSurveyContentTemplate } from 'study/surveys/SurveyTemplates'
 
-const QUESTIONNAIRE_TEMPLATE = '{"pages":[{"elements":[]}]}'
-const randomSuffix = Math.random().toString(36).substring(2, 15)
-const HTML_TEMPLATE = `{"pages":[{"elements":[{"type":"html","name":"outreach_content_${randomSuffix}"}]}]}`
 
 /** renders a modal that creates a new survey in a portal and configures it to the current study env */
 const CreateSurveyModal = ({ studyEnvContext, onDismiss, type }:
@@ -45,16 +59,18 @@ const CreateSurveyModal = ({ studyEnvContext, onDismiss, type }:
     name: '',
     surveyType: type,
     version: 1,
-    content: type === 'OUTREACH' ? HTML_TEMPLATE : QUESTIONNAIRE_TEMPLATE,
+    content: '',
     id: '',
     createdAt: new Date().getDate(),
     lastUpdatedAt: new Date().getDate(),
-    eligibilityRule: ''
+    eligibilityRule: '',
+    recurrenceType: 'NONE'
   })
 
   const { clearFields, NameInput, StableIdInput } = useFormCreationNameFields(form, setForm)
 
   const createSurvey = async () => {
+    form.content = getSurveyContentTemplate(form)
     doApiLoad(async () => {
       const createdSurvey = await Api.createNewSurvey(studyEnvContext.portal.shortcode,
         form)
@@ -82,7 +98,7 @@ const CreateSurveyModal = ({ studyEnvContext, onDismiss, type }:
 
   return <Modal show={true} size={'xl'} onHide={onDismiss} className={type === 'OUTREACH' ? 'modal-lg' : 'modal'}>
     <Modal.Header closeButton>
-      <Modal.Title>Create new {type.toLowerCase()} form</Modal.Title>
+      <Modal.Title>Create new {type.toLowerCase().replaceAll('_', ' ')} form</Modal.Title>
       <div className="ms-4">
         {studyEnvContext.study.name}: {studyEnvContext.currentEnv.environmentName}
       </div>
@@ -110,7 +126,6 @@ const CreateSurveyModal = ({ studyEnvContext, onDismiss, type }:
               description="Marketing opportunities allow you to display messages in the participant dashboard."
               onSelect={() => {
                 setIsOutreachScreener(false)
-                setForm({ ...form, content: HTML_TEMPLATE })
               }}
               isSelected={!isOutreachScreener}
             />
@@ -121,7 +136,6 @@ const CreateSurveyModal = ({ studyEnvContext, onDismiss, type }:
               so you can follow up with qualified participants."
               onSelect={() => {
                 setIsOutreachScreener(true)
-                setForm({ ...form, content: QUESTIONNAIRE_TEMPLATE })
               }}
               isSelected={isOutreachScreener}
             />
@@ -148,7 +162,8 @@ const CreateSurveyModal = ({ studyEnvContext, onDismiss, type }:
               stableId: importForm.stableId,
               version: importForm.version ?? 1,
               name: importForm.name,
-              content: JSON.stringify(importForm.jsonContent)
+              content: JSON.stringify(importForm.jsonContent),
+              recurrenceType: importForm.recurrenceType ?? 'NONE'
             })
           }}/>
         </div>}

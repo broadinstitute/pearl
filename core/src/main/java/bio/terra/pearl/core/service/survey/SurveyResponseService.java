@@ -109,6 +109,7 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
             lastResponse = dao.findMostRecent(enrollee.getId(), form.getId()).orElse(null);
             if (lastResponse != null) {
                 dao.attachAnswers(lastResponse);
+                dao.attachParticipantFiles(lastResponse);
             }
         }
         StudyEnvironmentSurvey configSurvey = studyEnvironmentSurveyService

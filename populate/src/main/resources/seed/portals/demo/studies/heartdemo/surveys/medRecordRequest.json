@@ -1,0 +1,20 @@
+{
+  "stableId": "med_record_request",
+  "version": 1,
+  "surveyType": "DOCUMENT_REQUEST",
+  "name": "Medical Record Request",
+  "jsonContent": {
+    "title": {
+      "en": "Medical Record Request",
+      "es": "Solicitud de expediente médico",
+      "dev": "DEV_Medical Record Request"
+    },
+    "showQuestionNumbers": "off",
+    "showProgressBar": "bottom",
+    "pages": [
+      {
+        "elements": []
+      }
+    ]
+  }
+}
