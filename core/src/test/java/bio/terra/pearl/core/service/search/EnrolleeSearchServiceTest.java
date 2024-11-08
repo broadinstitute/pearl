@@ -197,7 +197,7 @@ class EnrolleeSearchServiceTest extends BaseSpringBootTest {
         List<QuestionChoice> kitStatusChoices = Arrays.stream(KitRequestStatus.values())
                 .map(val -> new QuestionChoice(val.name(), val.name()))
                 .collect(Collectors.toList());
-        
+
         Map<String, SearchValueTypeDefinition> expected = Map.ofEntries(
                 Map.entry("profile.givenName", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.familyName", SearchValueTypeDefinition.builder().type(STRING).build()),

@@ -79,4 +79,27 @@ public class AnswerDao extends BaseMutableJdbiDao<Answer> {
                         .findFirst()
         );
     }
+
+    public Optional<Answer> findByProfileIdStudyAndQuestion(UUID profileId, String studyName, String surveyStableId, String questionStableId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select a.* from %s a
+                                inner join enrollee e on e.id = a.enrollee_id
+                                inner join study_environment se on se.id = e.study_environment_id
+                                inner join study s on s.id = se.study_id
+                                where e.profile_id = :profileId
+                                and s.name = :studyName
+                                and a.survey_stable_id = :surveyStableId
+                                and a.question_stable_id = :questionStableId
+                                order by last_updated_at
+                                desc limit 1
+                                """.formatted(tableName))
+                        .bind("profileId", profileId)
+                        .bind("studyName", studyName)
+                        .bind("surveyStableId", surveyStableId)
+                        .bind("questionStableId", questionStableId)
+                        .mapTo(clazz)
+                        .findFirst()
+        );
+    }
 }
