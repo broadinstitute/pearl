@@ -7,7 +7,6 @@ import bio.terra.pearl.core.dao.survey.PreEnrollmentResponseDao;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
-import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitRequestStatus;
@@ -16,16 +15,17 @@ import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.participant.*;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
-import bio.terra.pearl.core.model.survey.*;
+import bio.terra.pearl.core.model.survey.PreEnrollmentResponse;
+import bio.terra.pearl.core.model.survey.RecurrenceType;
+import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
+import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.workflow.HubResponse;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.CascadeProperty;
-import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import bio.terra.pearl.core.service.file.ParticipantFileService;
-import bio.terra.pearl.core.service.file.ParticipantFileSurveyResponseService;
 import bio.terra.pearl.core.service.file.backends.FileStorageBackend;
 import bio.terra.pearl.core.service.file.backends.FileStorageBackendProvider;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
@@ -48,8 +48,6 @@ import bio.terra.pearl.populate.dto.fileupload.ParticipantFilePopDto;
 import bio.terra.pearl.populate.dto.kit.KitRequestPopDto;
 import bio.terra.pearl.populate.dto.notifications.NotificationPopDto;
 import bio.terra.pearl.populate.dto.participant.*;
-import bio.terra.pearl.populate.dto.survey.AnswerPopDto;
-import bio.terra.pearl.populate.dto.survey.PreEnrollmentResponsePopDto;
 import bio.terra.pearl.populate.dto.survey.SurveyResponsePopDto;
 import bio.terra.pearl.populate.service.contexts.StudyPopulateContext;
 import bio.terra.pearl.populate.util.PopulateUtils;
@@ -79,8 +77,6 @@ import static java.time.temporal.ChronoUnit.HOURS;
 @Service
 @Slf4j
 public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, StudyPopulateContext> {
-    private final ParticipantFileService participantFileService;
-    private final ParticipantFileSurveyResponseService participantFileSurveyResponseService;
 
     public EnrolleePopulator(EnrolleeService enrolleeService,
                              StudyEnvironmentService studyEnvironmentService,
@@ -96,16 +92,9 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                              TimeShiftDao timeShiftDao,
                              KitRequestService kitRequestService, KitTypeDao kitTypeDao, AdminUserDao adminUserDao,
                              ParticipantNotePopulator participantNotePopulator,
-                             ParticipantUserPopulateDao participantUserPopulateDao,
-                             PortalParticipantUserPopulator portalParticipantUserPopulator,
-                             ObjectMapper objectMapper,
-                             PortalService portalService,
-                             ShortcodeService shortcodeService,
-                             FileStorageBackendProvider fileStorageBackendProvider,
-                             ParticipantFileService participantFileService,
-                             ParticipantFileSurveyResponseService participantFileSurveyResponseService,
-                             StudyEnvironmentSurveyService studyEnvironmentSurveyService,
-                             EnrolleeResponsePopulator enrolleeResponsePopulator) {
+                             ParticipantUserPopulateDao participantUserPopulateDao, PortalParticipantUserPopulator portalParticipantUserPopulator, ObjectMapper objectMapper, PortalService portalService,
+                             ShortcodeService shortcodeService, StudyEnvironmentSurveyService studyEnvironmentSurveyService, EnrolleeResponsePopulator enrolleeResponsePopulator,
+                             FileStorageBackendProvider fileStorageBackendProvider, ParticipantFileService participantFileService) {
         this.portalParticipantUserService = portalParticipantUserService;
         this.preEnrollmentResponseDao = preEnrollmentResponseDao;
         this.surveyService = surveyService;
@@ -130,141 +119,11 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         this.objectMapper = objectMapper;
         this.portalService = portalService;
         this.shortcodeService = shortcodeService;
-        this.fileStorageBackend = fileStorageBackendProvider.get();
-        this.participantFileService = participantFileService;
-        this.participantFileSurveyResponseService = participantFileSurveyResponseService;
         this.studyEnvironmentSurveyService = studyEnvironmentSurveyService;
         this.enrolleeResponsePopulator = enrolleeResponsePopulator;
-    }
+        this.fileStorageBackend = fileStorageBackendProvider.get();
+        this.participantFileService = participantFileService;
 
-    private void populateResponse(Enrollee enrollee, SurveyResponsePopDto responsePopDto,
-                                  PortalParticipantUser ppUser, boolean simulateSubmissions,
-                                  List<ParticipantFile> participantFiles, StudyPopulateContext context,
-                                  ParticipantUser pUser)
-            throws JsonProcessingException {
-        ResponsibleEntity responsibleUser;
-        if(responsePopDto.getCreatingAdminUsername() != null) {
-            responsibleUser = new ResponsibleEntity(adminUserDao.findByUsername(responsePopDto.getCreatingAdminUsername()).get());
-        } else {
-            responsibleUser = new ResponsibleEntity(pUser);
-        }
-        Survey survey = surveyService.findByStableIdAndPortalShortcodeWithMappings(responsePopDto.getSurveyStableId(),
-                responsePopDto.getSurveyVersion(), context.getPortalShortcode()).orElseThrow(() -> new NotFoundException("Survey not found " + context.applyShortcodeOverride(responsePopDto.getSurveyStableId())));
-
-        SurveyResponseWithJustification response = SurveyResponseWithJustification.builder()
-                .surveyId(survey.getId())
-                .enrolleeId(enrollee.getId())
-                .complete(responsePopDto.isComplete())
-                .justification(responsePopDto.getJustification())
-                .creatingParticipantUserId(enrollee.getParticipantUserId())
-                .resumeData(makeResumeData(responsePopDto.getCurrentPageNo(), enrollee.getParticipantUserId()))
-                .build();
-
-        for (AnswerPopDto answerPopDto : responsePopDto.getAnswerPopDtos()) {
-            Answer answer = convertAnswerPopDto(answerPopDto);
-            response.getAnswers().add(answer);
-        }
-        DataAuditInfo auditInfo = DataAuditInfo.builder()
-                .enrolleeId(enrollee.getId())
-                .portalParticipantUserId(ppUser.getId()).build();
-
-        auditInfo.setResponsibleEntity(responsibleUser);
-
-        if(responsePopDto.getCreatingAdminUsername() != null) {
-            AdminUser adminUser = adminUserDao.findByUsername(responsePopDto.getCreatingAdminUsername()).get();
-            response.setCreatingAdminUserId(adminUser.getId());
-            response.setCreatingParticipantUserId(null);
-            auditInfo.setJustification(responsePopDto.getJustification());
-        }
-
-        SurveyResponse savedResponse;
-        if (simulateSubmissions) {
-            ParticipantTask task = participantTaskService
-                        .findTaskForActivity(ppUser.getId(), enrollee.getStudyEnvironmentId(), survey.getStableId()).get();
-
-            if (responsePopDto.getSurveyVersion() != task.getTargetAssignedVersion()) {
-                /**
-                 * in simulateSubmission mode, tasks will be automatically created with the curren versions of the survey.
-                 * To enable mocking of submissions of prior versions, if the version specified in the enrollee's seed file
-                 * doesn't match the latest, update the task so it's as if the task had been assigned to the prior versipm
-                 */
-                task.setTargetAssignedVersion(responsePopDto.getSurveyVersion());
-                participantTaskService.update(task, auditInfo);
-            }
-            HubResponse<SurveyResponse> hubResponse = surveyResponseService
-                    .updateResponse(response, responsibleUser, responsePopDto.getJustification(), ppUser, enrollee, task.getId(), survey.getPortalId());
-            savedResponse = hubResponse.getResponse();
-            if (responsePopDto.isTimeShifted()) {
-                timeShiftDao.changeSurveyResponseTime(savedResponse.getId(), responsePopDto.shiftedInstant());
-                if (responsePopDto.isComplete()) {
-                    timeShiftDao.changeTaskCompleteTime(task.getId(), responsePopDto.shiftedInstant());
-                }
-            }
-        } else {
-            savedResponse = surveyResponseService.create(response);
-        }
-
-        enrollee.getSurveyResponses().add(savedResponse);
-
-
-        for (String fileName : responsePopDto.getParticipantFileNames()) {
-            Optional<ParticipantFile> fileOpt = participantFiles.stream()
-                    .filter(pf -> pf.getFileName().equals(fileName))
-                    .findFirst();
-
-            if (fileOpt.isPresent()) {
-                ParticipantFile file = fileOpt.get();
-
-                ParticipantFileSurveyResponse surveyResponseFileLink = ParticipantFileSurveyResponse
-                        .builder()
-                        .creatingParticipantUserId(enrollee.getParticipantUserId())
-                        .participantFileId(file.getId())
-                        .surveyResponseId(savedResponse.getId())
-                        .build();
-
-                participantFileSurveyResponseService.create(surveyResponseFileLink);
-            } else {
-                log.warn("Participant file not found for reference: " + fileName);
-            }
-        }
-
-    }
-
-    public String makeResumeData(Integer currentPageNo, UUID participantUserId) throws JsonProcessingException {
-        if (currentPageNo != null) {
-            return objectMapper.writeValueAsString(Map.of(participantUserId,
-                    Map.of("currentPageNo", currentPageNo)));
-        }
-        return null;
-    }
-
-    public Answer convertAnswerPopDto(AnswerPopDto popDto) throws JsonProcessingException {
-        if (popDto.getObjectJsonValue() != null) {
-            popDto.setObjectValue(objectMapper.writeValueAsString(popDto.getObjectJsonValue()));
-        }
-        return popDto;
-    }
-
-    /**
-     * persists any preEnrollmentResponse, and then attaches it to the enrollee
-     */
-    private PreEnrollmentResponse populatePreEnrollResponse(EnrolleePopDto enrolleeDto, StudyEnvironment studyEnv, StudyPopulateContext context) throws JsonProcessingException {
-        PreEnrollmentResponsePopDto responsePopDto = enrolleeDto.getPreEnrollmentResponseDto();
-        if (responsePopDto == null) {
-            return null;
-        }
-        Survey survey = surveyService.findByStableIdAndPortalShortcode(responsePopDto.getSurveyStableId(),
-                responsePopDto.getSurveyVersion(), context.getPortalShortcode()).get();
-        String fullData = objectMapper.writeValueAsString(responsePopDto.getAnswers());
-        PreEnrollmentResponse response = PreEnrollmentResponse.builder()
-                .surveyId(survey.getId())
-                .creatingParticipantUserId(enrolleeDto.getParticipantUserId())
-                .studyEnvironmentId(studyEnv.getId())
-                .qualified(responsePopDto.isQualified())
-                .fullData(fullData)
-                .build();
-
-        return preEnrollmentResponseDao.create(response);
     }
 
     private void populateTask(Enrollee enrollee, PortalParticipantUser ppUser, ParticipantTaskPopDto taskDto) {
@@ -739,5 +598,5 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
     private final ShortcodeService shortcodeService;
     private final FileStorageBackend fileStorageBackend;
     private final EnrolleeResponsePopulator enrolleeResponsePopulator;
+    private final ParticipantFileService participantFileService;
 }
-

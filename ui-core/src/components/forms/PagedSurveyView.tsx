@@ -76,7 +76,8 @@ export function PagedSurveyView({
       creatingParticipantId: adminUserId ? null : enrollee.participantUserId,
       creatingAdminUserId: adminUserId,
       surveyId: form.id,
-      complete: true
+      complete: true,
+      participantFiles: response?.participantFiles || []
     } as SurveyResponse
 
     try {

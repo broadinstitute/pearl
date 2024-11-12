@@ -10,7 +10,8 @@ import Api, {
   PortalEnvironmentConfig,
   PortalStudy,
   SiteMediaMetadata,
-  StudyEnvironment, StudyEnvironmentConfig,
+  StudyEnvironment,
+  StudyEnvironmentConfig,
   SurveyResponse,
   Trigger
 } from 'api/api'
@@ -20,7 +21,8 @@ import {
   EmailTemplate,
   Enrollee,
   Family,
-  KitRequest, KitRequestStatus,
+  KitRequest,
+  KitRequestStatus,
   KitType,
   LocalizedEmailTemplate,
   ParticipantDashboardAlert,
@@ -55,6 +57,7 @@ import { ReactNotifications } from 'react-notifications-component'
 
 // add all jest-extended matchers
 import * as matchers from 'jest-extended'
+
 expect.extend(matchers)
 
 const randomString = (length: number) => {
@@ -142,7 +145,8 @@ export const mockSurvey: (surveyType?: SurveyType) => Survey = (surveyType = 'RE
   name: 'Survey number one',
   lastUpdatedAt: 0,
   createdAt: 0,
-  surveyType
+  surveyType,
+  recurrenceType: 'NONE'
 })
 
 /** returns a mock portal study */
@@ -511,7 +515,8 @@ export const mockSurveyResponse = (): SurveyResponse => {
     resumeData: '{}',
     enrolleeId: 'enrollee1',
     complete: false,
-    answers: []
+    answers: [],
+    participantFiles: []
   }
 }
 
