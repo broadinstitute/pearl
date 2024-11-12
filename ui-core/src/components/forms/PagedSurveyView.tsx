@@ -127,7 +127,8 @@ export function PagedSurveyView({
       creatingAdminUserId: adminUserId,
       surveyId: form.id,
       justification,
-      complete: response?.complete ?? false
+      complete: response?.complete ?? false,
+      participantFiles: response?.participantFiles || []
     } as SurveyResponse
     // only log & alert if this is the first autosave problem to avoid spamming logs & alerts
     const alertErrors = !lastAutoSaveErrored.current

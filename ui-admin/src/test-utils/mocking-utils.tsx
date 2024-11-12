@@ -646,7 +646,13 @@ export const renderInPortalRouter = (portal: Portal,
   return renderWithRouter(
     <AdminUserContext.Provider value={{ users: opts.adminUsers ?? [], isLoading: false }}>
       <UserContext.Provider
-        value={{ user: opts.user, logoutUser: jest.fn(), loginUser: jest.fn(), loginUserUnauthed: jest.fn() }}>
+        value={{
+          user: opts.user,
+          logoutUser: jest.fn(),
+          loginUser: jest.fn(),
+          loginUserUnauthed: jest.fn(),
+          toggleSuperuserOverride: jest.fn()
+        }}>
         <PortalContext.Provider value={portalContext}>
           { children }
         </PortalContext.Provider>
