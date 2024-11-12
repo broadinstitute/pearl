@@ -8,18 +8,19 @@ import {
 } from 'api/api'
 
 import {
+  NavLink,
   useLocation,
   useNavigate,
   useParams
 } from 'react-router-dom'
 import SurveyFullDataView from './SurveyFullDataView'
 import SurveyResponseEditor from './SurveyResponseEditor'
-import { ResponseMapT } from '../enrolleeView/EnrolleeView'
+import { ResponseMapT, surveyResponsePath } from '../enrolleeView/EnrolleeView'
 import { EnrolleeParams } from '../enrolleeView/useRoutedEnrollee'
 import {
   AutosaveStatus,
-  Enrollee,
-  instantToDefaultString
+  Enrollee, instantToDateString,
+  instantToDefaultString, useTaskIdParam
 } from '@juniper/ui-core'
 import DocumentTitle from 'util/DocumentTitle'
 import _uniq from 'lodash/uniq'
@@ -54,6 +55,7 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
   studyEnvContext: StudyEnvContextT, onUpdate: () => void
 }) {
   const params = useParams<EnrolleeParams>()
+  let { taskId } = useTaskIdParam()
 
   const surveyStableId: string | undefined = params.surveyStableId
 
@@ -61,14 +63,37 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
     return <div>Select a survey</div>
   }
   const surveyAndResponses = responseMap[surveyStableId]
-  if (!surveyAndResponses) {
+  if (!surveyAndResponses.tasks.length) {
     return <div>This survey has not been assigned to this participant</div>
   }
+  /** default to the most recent (tasks are already sorted by creation date) */
+  if (!taskId) {
+    taskId = surveyAndResponses.tasks[0].id
+  }
+  const task = surveyAndResponses.tasks.find(t => t.id === taskId)
+  const response = surveyAndResponses.responses.find(r => task?.surveyResponseId === r.id)
+  const showTaskBar = surveyAndResponses.tasks.length > 1
   // key forces the component to be destroyed/remounted when different survey selected
-  return <RawEnrolleeSurveyView key={surveyStableId} enrollee={enrollee} studyEnvContext={studyEnvContext}
-    updateResponseMap={updateResponseMap}
-    configSurvey={surveyAndResponses.survey} response={surveyAndResponses.response} onUpdate={onUpdate}/>
+  return <div>
+    <DocumentTitle title={`${enrollee.shortcode} - ${surveyAndResponses.survey.survey.name}`}/>
+    <h4>{surveyAndResponses.survey.survey.name}</h4>
+    { showTaskBar && <div className="d-flex">
+      {surveyAndResponses.tasks.map(task => <NavLink key={task.id}
+        style={({ isActive }: {isActive: boolean}) => ({
+          borderBottom: (isActive && task.id === taskId) ? '2px solid #708DBC': '',
+          background: (isActive && task.id === taskId) ? '#E1E8F7' : ''
+        })}
+        className="p-2"
+        to={surveyResponsePath(studyEnvContext.currentEnvPath, enrollee.shortcode, surveyStableId, task.id)}>
+        {instantToDateString(task.completedAt ?? task.createdAt)}
+      </NavLink>)}
+    </div>}
+    <RawEnrolleeSurveyView key={`${surveyStableId}${taskId}`} enrollee={enrollee} studyEnvContext={studyEnvContext}
+      updateResponseMap={updateResponseMap}
+      configSurvey={surveyAndResponses.survey} response={response} onUpdate={onUpdate}/>
+  </div>
 }
+
 
 /** show responses for a survey */
 export function RawEnrolleeSurveyView({
@@ -89,8 +114,6 @@ export function RawEnrolleeSurveyView({
   const [justification, setJustification] = useState<string>('')
 
   return <div>
-    <DocumentTitle title={`${enrollee.shortcode} - ${configSurvey.survey.name}`}/>
-    <h4>{configSurvey.survey.name}</h4>
     <div>
       <div className="d-flex align-items-center justify-content-between">
         <div>{surveyTaskStatus(response)}</div>

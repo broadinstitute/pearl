@@ -10,7 +10,8 @@ term: NUMBER | STRING | VARIABLE | BOOLEAN | NULL | FUNCTION_NAME PAR_OPEN term 
 // Lexer rules
 NUMBER: [0-9]+ ('.' [0-9]+)?;
 STRING: '\'' (~[\\'\r\n])* '\'';
-VARIABLE: '{' ([a-zA-Z0-9_]|'.')+ '}';
+// matches {variableName.arg1.arg2} or {variableName["study"].arg1.arg2}
+VARIABLE: '{' ([a-zA-Z0-9_]+'["'[a-zA-Z0-9_]+'"].')? ([a-zA-Z0-9_]|'.')+ '}';
 BOOLEAN: 'true' | 'false';
 NULL: 'null';
 WS: [ \t\r\n]+ -> skip;

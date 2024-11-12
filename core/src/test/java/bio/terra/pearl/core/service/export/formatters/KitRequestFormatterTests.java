@@ -45,8 +45,8 @@ public class KitRequestFormatterTests {
         // the older kit should be first
         assertThat(valueMap.get("sample_kit.status"), equalTo("DEACTIVATED"));
         assertThat(valueMap.get("sample_kit.kitType"), equalTo("type2"));
-        assertThat(valueMap.get("sample_kit.2.status"), equalTo("SENT"));
-        assertThat(valueMap.get("sample_kit.2.kitType"), equalTo("type1"));
-        assertThat(valueMap.get("sample_kit.2.sentAt"), containsString("2023-11-17"));
+        assertThat(valueMap.get("sample_kit[2].status"), equalTo("SENT"));
+        assertThat(valueMap.get("sample_kit[2].kitType"), equalTo("type1"));
+        assertThat(valueMap.get("sample_kit[2].sentAt"), containsString("2023-11-17"));
     }
 }

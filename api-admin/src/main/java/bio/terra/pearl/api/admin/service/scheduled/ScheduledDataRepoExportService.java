@@ -1,4 +1,4 @@
-package bio.terra.pearl.api.admin.service;
+package bio.terra.pearl.api.admin.service.scheduled;
 
 import bio.terra.pearl.core.service.datarepo.DataRepoExportService;
 import com.google.common.collect.ImmutableSet;

@@ -5,7 +5,7 @@
     "enrollAsProxy": true}],
   "shortcode": "HDGVBA",
   "linkedUsername": "proxyFamily2@test.com-prox-GVBA",
-  "submittedHoursAgo": 10,
+  "submittedHoursAgo": 310,
   "simulateSubmissions": true,
   "preEnrollmentResponseDto": {
     "qualified": true,
@@ -28,7 +28,7 @@
     ],
     "currentPageNo": 2,
     "complete": true,
-    "submittedHoursAgo": 48
+    "submittedHoursAgo": 248
   },
   {
     "surveyStableId": "hd_hd_socialHealth",
@@ -39,7 +39,7 @@
     ],
     "currentPageNo": 1,
     "complete": true,
-    "submittedHoursAgo": 36
+    "submittedHoursAgo": 236
   },
   {
     "surveyStableId": "hd_hd_mental",
@@ -50,7 +50,7 @@
     ],
     "currentPageNo": 1,
     "complete": true,
-    "submittedHoursAgo": 47
+    "submittedHoursAgo": 247
   }, {
     "surveyStableId": "hd_hd_basicInfo",
     "surveyVersion": 1,
@@ -62,7 +62,7 @@
     ],
     "currentPageNo": 1,
     "complete": true,
-    "submittedHoursAgo": 18
+    "submittedHoursAgo": 218
   }, {
       "surveyStableId": "hd_hd_consent",
       "surveyVersion": 1,

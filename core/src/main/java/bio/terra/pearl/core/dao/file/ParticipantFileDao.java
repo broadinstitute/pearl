@@ -45,4 +45,19 @@ public class ParticipantFileDao extends BaseJdbiDao<ParticipantFile> {
     public Optional<ParticipantFile> findByEnrolleeIdAndFileName(UUID enrolleeId, String fileName) {
         return findByTwoProperties("enrollee_id", enrolleeId, "file_name", fileName);
     }
+
+    public List<ParticipantFile> findAllByFileNameForEnrollee(UUID enrolleeId, List<String> participantFileNames) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select * from %s
+                                where enrollee_id = :enrolleeId
+                                and file_name in (<fileNames>)
+                                """.formatted(tableName))
+                        .bind("enrolleeId", enrolleeId)
+                        .bindList("fileNames", participantFileNames)
+                        .mapTo(clazz)
+                        .stream()
+                        .toList()
+        );
+    }
 }

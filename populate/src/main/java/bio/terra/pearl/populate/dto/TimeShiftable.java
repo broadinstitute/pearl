@@ -10,6 +10,6 @@ public interface TimeShiftable {
   }
 
   default Instant shiftedInstant() {
-    return Instant.now().minus(Duration.ofHours(getSubmittedHoursAgo()));
+    return Instant.now().minus(Duration.ofHours(getSubmittedHoursAgo() != null ? getSubmittedHoursAgo() : 0));
   }
 }

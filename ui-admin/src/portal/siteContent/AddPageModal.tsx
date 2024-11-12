@@ -48,7 +48,7 @@ const AddPageModal = ({ portalEnv, portalShortcode, insertNewPage, onDismiss }: 
   const isItemValid = (page: HtmlPage) => {
     return page.path.length > 0
       && page.title.length > 0
-      && /^[a-zA-Z0-9]+$/.test(page.path) // is alphanumeric
+      && /^[a-zA-Z0-9-]+$/.test(page.path) // is alphanumeric
   }
 
   const clearFields = () => {

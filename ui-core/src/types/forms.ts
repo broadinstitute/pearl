@@ -55,7 +55,7 @@ export const defaultSurvey = {
   autoAssign: true,
   assignToExistingEnrollees: false,
   autoUpdateTaskAssignments: false,
-  recur: false,
+  recurrenceType: 'NONE',
   recurrenceIntervalDays: 0,
   allowAdminEdit: true,
   allowParticipantStart: true,

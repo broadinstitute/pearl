@@ -32,15 +32,11 @@ public abstract class ModuleFormatter<T, F extends ItemFormatter<T>> {
     }
 
     public String getColumnKey(F itemFormatter, boolean isOtherDescription, QuestionChoice choice, int moduleRepeatNum) {
-        if (moduleRepeatNum > 1) {
-            return "%s%s%s%s%s".formatted(
-                    moduleName,
-                    ExportFormatUtils.COLUMN_NAME_DELIMITER,
-                    moduleRepeatNum,
-                    ExportFormatUtils.COLUMN_NAME_DELIMITER,
-                    itemFormatter.getBaseColumnKey());
-       }
-        return "%s%s%s".formatted(moduleName, ExportFormatUtils.COLUMN_NAME_DELIMITER,  itemFormatter.getBaseColumnKey());
+        return "%s%s%s%s".formatted(
+                moduleName,
+                moduleRepeatNum > 1 ? ExportFormatUtils.formatIndex(moduleRepeatNum) : "",
+                ExportFormatUtils.COLUMN_NAME_DELIMITER,
+                itemFormatter.getBaseColumnKey());
     }
 
     protected abstract List<F> generateItemFormatters(ExportOptions options);
