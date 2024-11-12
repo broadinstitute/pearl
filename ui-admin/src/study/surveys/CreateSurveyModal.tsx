@@ -70,7 +70,7 @@ const CreateSurveyModal = ({ studyEnvContext, onDismiss, type }:
   const { clearFields, NameInput, StableIdInput } = useFormCreationNameFields(form, setForm)
 
   const createSurvey = async () => {
-    form.content = getSurveyContentTemplate(form)
+    form.content = getSurveyContentTemplate(form, isOutreachScreener)
     doApiLoad(async () => {
       const createdSurvey = await Api.createNewSurvey(studyEnvContext.portal.shortcode,
         form)
