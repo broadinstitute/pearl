@@ -65,6 +65,7 @@ export const ParticipantFileSurveyResponseView = ({
       enrollee.shortcode,
       file.fileName
     )
+    console.log(response)
 
     saveBlobAsDownload(await response.blob(), file.fileName)
   }
