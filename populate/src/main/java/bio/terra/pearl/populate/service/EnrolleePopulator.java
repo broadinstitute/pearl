@@ -324,7 +324,6 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                 .creatingParticipantUserId(enrollee.getParticipantUserId())
                 .build();
 
-        System.out.println("Creating participant file: " + file.getFileName());
         return participantFileService.create(file);
     }
 

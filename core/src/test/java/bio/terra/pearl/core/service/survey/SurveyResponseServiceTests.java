@@ -14,22 +14,14 @@ import bio.terra.pearl.core.factory.survey.SurveyResponseFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.audit.ParticipantDataChange;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
-<<<<<<< HEAD
 import bio.terra.pearl.core.model.file.ParticipantFile;
-=======
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
->>>>>>> origin/development
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
-<<<<<<< HEAD
 import bio.terra.pearl.core.service.file.ParticipantFileService;
-=======
-import bio.terra.pearl.core.service.fileupload.ParticipantFileService;
->>>>>>> origin/development
 import bio.terra.pearl.core.service.participant.EnrolleeService;
 import bio.terra.pearl.core.service.participant.ParticipantUserService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
