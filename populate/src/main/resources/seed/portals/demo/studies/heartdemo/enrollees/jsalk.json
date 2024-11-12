@@ -6,7 +6,7 @@
   "participantFilePopDtos": [
     {
       "fileName": "my_file.txt",
-      "fileType": "txt",
+      "fileType": "text/plain",
       "fileContent": "Hi!"
     }
   ],

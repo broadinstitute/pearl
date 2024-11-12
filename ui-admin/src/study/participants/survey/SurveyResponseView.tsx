@@ -162,7 +162,10 @@ export function RawEnrolleeSurveyView({
         survey={configSurvey.survey}
         studyEnvContext={studyEnvContext}/>}
       {!isEditing && (response?.participantFiles.length !== undefined && response.participantFiles.length > 0) &&
-          <ParticipantFileSurveyResponseView surveyResponse={response}/>
+          <ParticipantFileSurveyResponseView
+            studyEnvContext={studyEnvContext}
+            enrollee={enrollee}
+            surveyResponse={response}/>
       }
       {isEditing && user && <SurveyResponseEditor studyEnvContext={studyEnvContext}
         updateResponseMap={updateResponseMap}

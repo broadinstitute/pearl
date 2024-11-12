@@ -1,11 +1,11 @@
 package bio.terra.pearl.core.factory.fileupload;
 
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.survey.ParticipantFileSurveyResponse;
-import bio.terra.pearl.core.service.fileupload.ParticipantFileService;
-import bio.terra.pearl.core.service.fileupload.ParticipantFileSurveyResponseService;
+import bio.terra.pearl.core.service.file.ParticipantFileService;
+import bio.terra.pearl.core.service.file.ParticipantFileSurveyResponseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

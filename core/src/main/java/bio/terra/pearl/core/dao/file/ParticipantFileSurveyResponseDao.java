@@ -1,4 +1,4 @@
-package bio.terra.pearl.core.dao.fileupload;
+package bio.terra.pearl.core.dao.file;
 
 import bio.terra.pearl.core.dao.BaseJdbiDao;
 import bio.terra.pearl.core.model.survey.ParticipantFileSurveyResponse;

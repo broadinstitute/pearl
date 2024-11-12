@@ -1,11 +1,12 @@
-package bio.terra.pearl.core.dao.fileupload;
+package bio.terra.pearl.core.dao.file;
 
 import bio.terra.pearl.core.dao.BaseJdbiDao;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -39,5 +40,9 @@ public class ParticipantFileDao extends BaseJdbiDao<ParticipantFile> {
 
     public void deleteByEnrolleeId(UUID enrolleeId) {
         deleteByProperty("enrollee_id", enrolleeId);
+    }
+
+    public Optional<ParticipantFile> findByEnrolleeIdAndFileName(UUID enrolleeId, String fileName) {
+        return findByTwoProperties("enrollee_id", enrolleeId, "file_name", fileName);
     }
 }

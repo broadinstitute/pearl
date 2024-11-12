@@ -1,6 +1,6 @@
-package bio.terra.pearl.core.service.fileupload;
+package bio.terra.pearl.core.service.file;
 
-import bio.terra.pearl.core.dao.fileupload.ParticipantFileSurveyResponseDao;
+import bio.terra.pearl.core.dao.file.ParticipantFileSurveyResponseDao;
 import bio.terra.pearl.core.model.survey.ParticipantFileSurveyResponse;
 import bio.terra.pearl.core.service.ImmutableEntityService;
 import lombok.extern.slf4j.Slf4j;

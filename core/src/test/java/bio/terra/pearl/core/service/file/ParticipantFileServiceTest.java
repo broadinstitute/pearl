@@ -1,10 +1,10 @@
-package bio.terra.pearl.core.service.fileupload;
+package bio.terra.pearl.core.service.file;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
-import bio.terra.pearl.core.service.fileupload.backends.LocalFileStorageBackend;
+import bio.terra.pearl.core.model.file.ParticipantFile;
+import bio.terra.pearl.core.service.file.backends.LocalFileStorageBackend;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;

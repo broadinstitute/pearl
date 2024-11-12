@@ -1,4 +1,4 @@
-package bio.terra.pearl.core.service.fileupload.backends;
+package bio.terra.pearl.core.service.file.backends;
 
 import java.io.InputStream;
 import java.util.UUID;

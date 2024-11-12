@@ -1,6 +1,6 @@
 package bio.terra.pearl.populate.dto.fileupload;
 
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.populate.dto.FilePopulatable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

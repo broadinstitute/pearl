@@ -576,6 +576,20 @@ export default {
     return await this.processResponse(response)
   },
 
+  async downloadParticipantFile(
+    portalShortcode: string,
+    studyShortcode: string,
+    envName: string,
+    enrolleeShortcode: string,
+    fileName: string): Promise<Response> {
+    const url = `${
+      baseStudyEnvUrl(portalShortcode, studyShortcode, envName)
+    }/enrollees/${enrolleeShortcode}/file/${fileName}`
+
+    const response = await fetch(url, this.getGetInit())
+    return await this.processResponse(response)
+  },
+
   async getPortalMedia(portalShortcode: string): Promise<SiteMediaMetadata[]> {
     const response = await fetch(`${API_ROOT}/portals/v1/${portalShortcode}/siteMedia`, this.getGetInit())
     return await this.processJsonResponse(response)

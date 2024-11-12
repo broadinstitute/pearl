@@ -1,4 +1,4 @@
-package bio.terra.pearl.core.model.fileupload;
+package bio.terra.pearl.core.model.file;
 
 import bio.terra.pearl.core.model.BaseEntity;
 import lombok.Getter;

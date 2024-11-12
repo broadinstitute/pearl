@@ -1,8 +1,8 @@
 package bio.terra.pearl.core.dao.survey;
 
 import bio.terra.pearl.core.dao.BaseMutableJdbiDao;
-import bio.terra.pearl.core.dao.fileupload.ParticipantFileDao;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.core.dao.file.ParticipantFileDao;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.survey.Answer;
 import bio.terra.pearl.core.model.survey.SurveyResponse;
 import org.jdbi.v3.core.Jdbi;

@@ -1,15 +1,16 @@
-package bio.terra.pearl.core.service.fileupload;
+package bio.terra.pearl.core.service.file;
 
-import bio.terra.pearl.core.dao.fileupload.ParticipantFileDao;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.core.dao.file.ParticipantFileDao;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.service.ImmutableEntityService;
-import bio.terra.pearl.core.service.fileupload.backends.FileStorageBackend;
-import bio.terra.pearl.core.service.fileupload.backends.FileStorageBackendProvider;
+import bio.terra.pearl.core.service.file.backends.FileStorageBackend;
+import bio.terra.pearl.core.service.file.backends.FileStorageBackendProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,5 +40,9 @@ public class ParticipantFileService extends ImmutableEntityService<ParticipantFi
 
     public void deleteByEnrolleeId(UUID enrolleeId) {
         dao.deleteByEnrolleeId(enrolleeId);
+    }
+
+    public Optional<ParticipantFile> findByEnrolleeIdAndFileName(UUID enrolleeId, String fileName) {
+        return dao.findByEnrolleeIdAndFileName(enrolleeId, fileName);
     }
 }

@@ -1,4 +1,4 @@
-package bio.terra.pearl.core.service.fileupload;
+package bio.terra.pearl.core.service.file;
 
 import lombok.Getter;
 import lombok.Setter;
