@@ -78,6 +78,24 @@ public class SurveyDao extends BaseVersionedJdbiDao<Survey> {
         );
     }
 
+    public Optional<Survey> findActiveByStudyEnvironmentIdAndStableIdNoContent(UUID studyEnvId, String stableId, Integer version) {
+        return jdbi.withHandle(
+                handle -> handle.createQuery("""
+                                                            SELECT s.* FROM survey s
+                                                                INNER JOIN study_environment_survey ses ON ses.survey_id = s.id
+                                                                WHERE ses.study_environment_id = :studyEnvironmentId
+                                                                AND s.stable_id = :stableId
+                                                                AND s.version = :version
+                                                                AND ses.active = true
+                                """)
+                        .bind("studyEnvironmentId", studyEnvId)
+                        .bind("stableId", stableId)
+                        .bind("version", version)
+                        .mapTo(clazz)
+                        .findOne()
+        );
+    }
+
     @Override
     protected Class<Survey> getClazz() {
         return Survey.class;

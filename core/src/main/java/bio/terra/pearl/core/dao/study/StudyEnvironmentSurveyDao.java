@@ -5,14 +5,15 @@ import bio.terra.pearl.core.dao.StudyEnvAttachedDao;
 import bio.terra.pearl.core.dao.survey.SurveyDao;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Query;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class StudyEnvironmentSurveyDao extends BaseMutableJdbiDao<StudyEnvironmentSurvey> implements StudyEnvAttachedDao<StudyEnvironmentSurvey> {
@@ -41,9 +42,9 @@ public class StudyEnvironmentSurveyDao extends BaseMutableJdbiDao<StudyEnvironme
     public Optional<StudyEnvironmentSurvey> findActiveBySurvey(UUID studyEnvId, UUID surveyId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("""
-                                select * from %s
-                                    where study_environment_id = :studyEnvId
-                                    and survey_id = :surveyId
+                                select %s from %s a
+                                    where a.study_environment_id = :studyEnvId
+                                    and a.survey_id = :surveyId
                                     and a.active = true;
                                 """.formatted(prefixedGetQueryColumns("a"), tableName))
                         .bind("surveyId", surveyId)

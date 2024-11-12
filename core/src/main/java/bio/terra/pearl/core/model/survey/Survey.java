@@ -3,6 +3,7 @@ package bio.terra.pearl.core.model.survey;
 import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.PortalAttached;
 import bio.terra.pearl.core.model.Versioned;
+import bio.terra.pearl.core.model.workflow.RecurrenceType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
