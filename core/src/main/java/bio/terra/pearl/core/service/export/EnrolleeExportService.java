@@ -4,16 +4,16 @@ import bio.terra.pearl.core.dao.search.EnrolleeSearchExpressionDao;
 import bio.terra.pearl.core.dao.survey.AnswerDao;
 import bio.terra.pearl.core.dao.survey.SurveyQuestionDefinitionDao;
 import bio.terra.pearl.core.model.export.ExportOptions;
-import bio.terra.pearl.core.model.participant.Enrollee;
-import bio.terra.pearl.core.model.participant.EnrolleeRelation;
-import bio.terra.pearl.core.model.participant.ParticipantUser;
-import bio.terra.pearl.core.model.participant.RelationshipType;
+import bio.terra.pearl.core.model.kit.KitRequest;
+import bio.terra.pearl.core.model.participant.*;
 import bio.terra.pearl.core.model.search.EnrolleeSearchExpressionResult;
 import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironmentConfig;
 import bio.terra.pearl.core.model.survey.*;
+import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.service.export.formatters.module.*;
+import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.participant.EnrolleeRelationService;
 import bio.terra.pearl.core.service.participant.FamilyService;
@@ -102,14 +102,6 @@ public class EnrolleeExportService {
         List<Map<String, String>> enrolleeMaps = generateExportMaps(enrolleeExportData, moduleFormatters);
         BaseExporter exporter = getExporter(exportOptions.getFileFormat(), moduleFormatters, enrolleeMaps, exportOptions.getIncludeFields());
         exporter.export(os, exportOptions.isIncludeSubHeaders());
-    }
-
-    public List<EnrolleeExportData> loadEnrolleeExportData(UUID studyEnvironmentId, ExportOptionsWithExpression exportOptions) {
-        Study study = studyService.findByStudyEnvironmentId(studyEnvironmentId).orElseThrow();
-        return loadEnrolleesForExport(
-                study,
-                studyEnvironmentConfigService.findByStudyEnvironmentId(studyEnvironmentId),
-                loadEnrollees(studyEnvironmentId, exportOptions.getFilterExpression(), exportOptions.getRowLimit()));
     }
 
     private List<Enrollee> loadEnrollees(UUID studyEnvironmentId, EnrolleeSearchExpression filter, Integer limit) {
@@ -222,32 +214,45 @@ public class EnrolleeExportService {
         return moduleFormatters;
     }
 
-    protected List<EnrolleeExportData> loadEnrolleesForExport(Study study,
-                                                              StudyEnvironmentConfig config,
-                                                              List<Enrollee> enrollees) {
-        // for now, load each enrollee individually.  Later we'll want more sophisticated batching strategies
-        return enrollees
-                .stream()
-                .map(enrollee -> loadEnrolleeData(study, config, enrollee))
+    public List<EnrolleeExportData> loadEnrolleeExportData(UUID studyEnvironmentId, ExportOptionsWithExpression exportOptions) {
+        Study study = studyService.findByStudyEnvironmentId(studyEnvironmentId).orElseThrow();
+        List<Enrollee> enrollees = loadEnrollees(studyEnvironmentId, exportOptions.getFilterExpression(), exportOptions.getRowLimit());
+
+        List<UUID> enrolleeIds = enrollees.stream().map(Enrollee::getId).toList();
+        List<UUID> profileIds = enrollees.stream().map(Enrollee::getProfileId).toList();
+        List<UUID> participantUserIds = enrollees.stream().map(Enrollee::getParticipantUserId).toList();
+
+        Map<UUID, Profile> profiles = profileService.loadAllWithMailingAddress(profileIds);
+        Map<UUID, ParticipantUser> participantUsers = participantUserService.findByParticipantUserIds(participantUserIds);
+        Map<UUID, List<Answer>> answers = answerDao.findByEnrolleeIds(enrolleeIds);
+        Map<UUID, List<ParticipantTask>> tasks = participantTaskService.findByEnrolleeIds(enrolleeIds);
+        Map<UUID, List<SurveyResponse>> surveyResponses = surveyResponseService.findByEnrolleeIds(enrolleeIds);
+        Map<UUID, List<KitRequestDto>> kitRequests = kitRequestService.findByEnrollees(enrollees);
+
+        return enrollees.stream()
+                .map(enrollee -> loadEnrolleeData(study, studyEnvironmentConfigService.findByStudyEnvironmentId(studyEnvironmentId), enrollee, profiles, participantUsers, answers, tasks, surveyResponses, kitRequests))
                 .toList();
     }
 
-    protected EnrolleeExportData loadEnrolleeData(Study study, StudyEnvironmentConfig config,
-                                                  Enrollee enrollee) {
+    protected EnrolleeExportData loadEnrolleeData(Study study, StudyEnvironmentConfig config, Enrollee enrollee,
+                                                  Map<UUID, Profile> profiles, Map<UUID, ParticipantUser> participantUsers,
+                                                  Map<UUID, List<Answer>> answers, Map<UUID, List<ParticipantTask>> tasks,
+                                                  Map<UUID, List<SurveyResponse>> surveyResponses, Map<UUID, List<KitRequestDto>> kitRequests) {
 
-        List<EnrolleeRelation> relations = loadRelations(config, enrollee);
-        List<ParticipantUser> proxies = loadProxyUsers(config, relations);
+        List<EnrolleeRelation> enrolleeRelations = loadRelations(config, enrollee);
+        List<ParticipantUser> proxies = loadProxyUsers(config, enrolleeRelations);
+
         return new EnrolleeExportData(
                 study,
                 enrollee,
-                participantUserService.find(enrollee.getParticipantUserId()).orElseThrow(),
-                profileService.loadWithMailingAddress(enrollee.getProfileId()).get(),
-                answerDao.findByEnrolleeId(enrollee.getId()),
-                participantTaskService.findByEnrolleeId(enrollee.getId()),
-                surveyResponseService.findByEnrolleeId(enrollee.getId())
+                participantUsers.get(enrollee.getParticipantUserId()),
+                profiles.get(enrollee.getProfileId()),
+                answers.getOrDefault(enrollee.getId(), Collections.emptyList()),
+                tasks.getOrDefault(enrollee.getId(), Collections.emptyList()),
+                surveyResponses.getOrDefault(enrollee.getId(), Collections.emptyList())
                         .stream().sorted(Comparator.comparing(SurveyResponse::getCreatedAt).reversed()).toList(),
-                kitRequestService.findByEnrollee(enrollee),
-                relations,
+                kitRequests.getOrDefault(enrollee.getId(), Collections.emptyList()),
+                enrolleeRelations,
                 config.isEnableFamilyLinkage() ? familyService.findByEnrolleeIdWithProband(enrollee.getId()) : Collections.emptyList(),
                 proxies
         );
