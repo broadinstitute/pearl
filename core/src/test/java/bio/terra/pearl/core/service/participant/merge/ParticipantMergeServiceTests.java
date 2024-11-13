@@ -11,6 +11,7 @@ import bio.terra.pearl.core.factory.survey.SurveyFactory;
 import bio.terra.pearl.core.factory.survey.SurveyResponseFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
+import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.notification.NotificationDeliveryType;
 import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.notification.TriggerEventType;
@@ -19,6 +20,7 @@ import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.EnrolleeWithdrawalReason;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
 import bio.terra.pearl.core.model.participant.WithdrawnEnrollee;
+import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyResponse;
 import bio.terra.pearl.core.model.workflow.HubResponse;
@@ -27,6 +29,7 @@ import bio.terra.pearl.core.service.participant.EnrolleeService;
 import bio.terra.pearl.core.service.participant.ParticipantUserService;
 import bio.terra.pearl.core.service.participant.WithdrawnEnrolleeService;
 import bio.terra.pearl.core.service.survey.SurveyResponseService;
+import bio.terra.pearl.core.service.survey.SurveyTaskDispatcher;
 import bio.terra.pearl.core.service.workflow.EnrollmentService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import bio.terra.pearl.core.service.workflow.RegistrationService;
@@ -73,6 +76,8 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
     private TriggerFactory triggerFactory;
     @Autowired
     private EmailTemplateFactory emailTemplateFactory;
+    @Autowired
+    private SurveyTaskDispatcher surveyTaskDispatcher;
 
     /** merge two enrollees who each have a single not-started survey task */
     @Test
@@ -259,5 +264,48 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
         assertThat(tasks.stream().map(ParticipantTask::getSurveyResponseId).toList(),
                 containsInAnyOrder(responseSt2.getId(), responseTt1.getId(), response_Tt3.getId(), responseSt1.getId()));
         assertThat(surveyResponseService.findByEnrolleeId(targetBundle.enrollee().getId()), hasSize(4));
+    }
+
+    /** merge two enrollees who have different numbers of responses to a survey */
+    @Test
+    @Transactional
+    public void testRecurringSurveyTaskMerge(TestInfo info) {
+        StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
+        Survey survey1 = surveyFactory.buildPersisted(getTestName(info), studyEnvBundle.getPortal().getId());
+        StudyEnvironmentSurvey studyEnvSurvey = surveyFactory.attachToEnv(survey1, studyEnvBundle.getStudyEnv().getId(), true);
+
+        EnrolleeBundle sourceBundle = enrolleeFactory.enroll("source@test.com", studyEnvBundle.getPortal().getShortcode(),
+                studyEnvBundle.getStudy().getShortcode(), studyEnvBundle.getStudyEnv().getEnvironmentName());
+
+        EnrolleeBundle targetBundle = enrolleeFactory.enroll("target@test.com", studyEnvBundle.getPortal().getShortcode(),
+                studyEnvBundle.getStudy().getShortcode(), studyEnvBundle.getStudyEnv().getEnvironmentName());
+
+        // the source has one response, the target has multiple
+        SurveyResponse responseS1 = surveyResponseFactory.submitStringAnswer(
+                        survey1.getStableId(),
+                        "question1", "source1", true, sourceBundle)
+                .getResponse();
+        SurveyResponse responseT1 = surveyResponseFactory.submitStringAnswer(
+                        survey1.getStableId(),
+                        "question1", "target1", true, targetBundle)
+                .getResponse();
+        // manually create a second task (this is easier than futzing with dates)
+        ParticipantTask task2 = surveyTaskDispatcher.assign(List.of(targetBundle.enrollee()), studyEnvSurvey, true, new ResponsibleEntity(getTestName(info))).get(0);
+        SurveyResponse responseT2 = surveyResponseFactory.submitStringAnswer(
+                        task2, "question1", "target2", true, targetBundle)
+                .getResponse();
+
+        ParticipantUserMerge merge = participantMergePlanService.planMerge(sourceBundle.participantUser(), targetBundle.participantUser(),
+                studyEnvBundle.getPortal());
+
+        assertThat(merge.getEnrollees(), hasSize(1));
+        List<MergeAction<ParticipantTask, ?>> taskMerges = merge.getEnrollees().get(0).getMergePlan().getTasks();
+        // there should be 2 task 'pairs'
+        assertThat(taskMerges, hasSize(2));
+
+        participantMergeService.applyMerge(merge, DataAuditInfo.builder().systemProcess("test").build());
+        assertThat(participantTaskService.findByEnrolleeId(sourceBundle.enrollee().getId()), hasSize(0));
+        List<ParticipantTask> tasks = participantTaskService.findByEnrolleeId(targetBundle.enrollee().getId());
+        assertThat(tasks, hasSize(3));
     }
 }
