@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Store } from 'react-notifications-component'
 
 import {
-  StudyEnvContextT,
-  studyEnvSiteContentPath
+  StudyEnvContextT
 } from 'study/StudyEnvironmentRouter'
 import Api, { Survey } from 'api/api'
 
@@ -17,7 +16,7 @@ import {
   useSurveyParams
 } from './SurveyView'
 import { doApiLoad } from 'api/api-utils'
-import { PortalEnvContext } from 'portal/PortalRouter'
+import { PortalEnvContext, siteContentPath } from 'portal/PortalRouter'
 import {
   DocsKey,
   ZendeskLink
@@ -36,7 +35,7 @@ function RawPreRegView({ studyEnvContext, portalEnvContext, survey, readOnly = f
 
   /** saves as a new version and updates the study environment accordingly */
   async function createNewVersion(changes: SaveableFormProps): Promise<void> {
-    const newSurvey = { ...currentSurvey, ...changes }
+    const newSurvey = { ...currentSurvey, ...changes } as Survey
     doApiLoad(async () => {
       const updatedSurvey = await Api.createNewSurveyVersion(portal.shortcode, newSurvey)
       Store.addNotification(successNotification(`Survey saved successfully`))
@@ -63,8 +62,7 @@ function RawPreRegView({ studyEnvContext, portalEnvContext, survey, readOnly = f
       studyEnvContext={studyEnvContext}
       currentForm={currentSurvey}
       readOnly={readOnly}
-      onCancel={() => navigate(studyEnvSiteContentPath(portal.shortcode,
-        studyEnvContext.study.shortcode, portalEnv.environmentName))}
+      onCancel={() => navigate(siteContentPath(portal.shortcode, portalEnv.environmentName))}
       onSave={createNewVersion}
     />
   </>
