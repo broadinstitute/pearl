@@ -19,8 +19,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.stream;
-
 @Service
 public class EnrolleeRelationService extends ParticipantDataAuditedService<EnrolleeRelation, EnrolleeRelationDao> {
     private final EnrolleeService enrolleeService;
