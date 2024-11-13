@@ -222,6 +222,8 @@ public class EnrolleeExportService {
         List<UUID> profileIds = enrollees.stream().map(Enrollee::getProfileId).toList();
         List<UUID> participantUserIds = enrollees.stream().map(Enrollee::getParticipantUserId).toList();
 
+        // batch load the following modules to reduce the number of queries and reduce the memory footprint of data exports.
+        // eventually, the in-clauses of these sql queries will be too large, and we'll need to batch load these in smaller chunks
         Map<UUID, Profile> profiles = profileService.loadAllWithMailingAddress(profileIds);
         Map<UUID, ParticipantUser> participantUsers = participantUserService.findByParticipantUserIds(participantUserIds);
         Map<UUID, List<Answer>> answers = answerDao.findByEnrolleeIds(enrolleeIds);
