@@ -58,10 +58,10 @@ public class ParticipantTaskServiceTests extends BaseSpringBootTest {
                                 .targetAssignedVersion(1));
 
         // issue a command to update surveyA tasks to version 2
-        ParticipantTaskUpdateDto.TaskUpdateSpec updateSpec =
-                new ParticipantTaskUpdateDto.TaskUpdateSpec("surveyA", 2, 1, null);
-        ParticipantTaskUpdateDto updateDto =
-                new ParticipantTaskUpdateDto(List.of(updateSpec), null, true);
+        ParticipantTaskBulkUpdateDto.TaskUpdateSpec updateSpec =
+                new ParticipantTaskBulkUpdateDto.TaskUpdateSpec("surveyA", 2, 1, null);
+        ParticipantTaskBulkUpdateDto updateDto =
+                new ParticipantTaskBulkUpdateDto(List.of(updateSpec), null, true);
         participantTaskService.updateTasks(
                 bundle.getStudyEnv().getId(),
                 updateDto,

@@ -244,7 +244,7 @@ public class EnrolleeExportService {
                 profileService.loadWithMailingAddress(enrollee.getProfileId()).get(),
                 answerDao.findByEnrolleeId(enrollee.getId()),
                 participantTaskService.findByEnrolleeId(enrollee.getId()),
-                surveyResponseService.findByEnrolleeId(enrollee.getId())
+                surveyResponseService.findByEnrolleeIdNotRemoved(enrollee.getId())
                         .stream().sorted(Comparator.comparing(SurveyResponse::getCreatedAt).reversed()).toList(),
                 kitRequestService.findByEnrollee(enrollee),
                 relations,

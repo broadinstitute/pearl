@@ -3,6 +3,7 @@ import React, {
   useState
 } from 'react'
 import {
+  ParticipantTask,
   StudyEnvironmentSurvey,
   SurveyResponse
 } from 'api/api'
@@ -20,7 +21,7 @@ import { EnrolleeParams } from '../enrolleeView/useRoutedEnrollee'
 import {
   AutosaveStatus,
   Enrollee, instantToDateString,
-  instantToDefaultString, useTaskIdParam
+  instantToDefaultString, ParticipantTaskStatus, useTaskIdParam
 } from '@juniper/ui-core'
 import DocumentTitle from 'util/DocumentTitle'
 import _uniq from 'lodash/uniq'
@@ -35,7 +36,7 @@ import {
   faCheck,
   faCircleCheck,
   faCircleHalfStroke,
-  faEye,
+  faEye, faMinus,
   faPencil,
   faPrint,
   faSave,
@@ -47,6 +48,7 @@ import classNames from 'classnames'
 import { faCircle as faEmptyCircle } from '@fortawesome/free-regular-svg-icons'
 import JustifyChangesModal from '../JustifyChangesModal'
 import SurveyAssignModal from './SurveyAssignModal'
+import TaskChangeModal from './TaskChangeModal'
 
 /** Show responses for a survey based on url param */
 export default function SurveyResponseView({ enrollee, responseMap, updateResponseMap, studyEnvContext, onUpdate }: {
@@ -97,6 +99,7 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
       </div>}
       <RawEnrolleeSurveyView key={`${surveyStableId}${taskId}`} enrollee={enrollee} studyEnvContext={studyEnvContext}
         updateResponseMap={updateResponseMap}
+        task={task!}
         configSurvey={surveyAndResponses.survey} response={response} onUpdate={onUpdate}/>
     </> }
     { showAssignModal && <SurveyAssignModal studyEnvParams={paramsFromContext(studyEnvContext)}
@@ -108,10 +111,10 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
 
 /** show responses for a survey */
 export function RawEnrolleeSurveyView({
-  enrollee, configSurvey, response, studyEnvContext, onUpdate,
+  enrollee, configSurvey, task, response, studyEnvContext, onUpdate,
   updateResponseMap
 }: {
-  enrollee: Enrollee, configSurvey: StudyEnvironmentSurvey,
+  enrollee: Enrollee, configSurvey: StudyEnvironmentSurvey, task: ParticipantTask,
   updateResponseMap: (stableId: string, response: SurveyResponse) => void,
   response?: SurveyResponse, studyEnvContext: StudyEnvContextT, onUpdate: () => void
 }) {
@@ -123,11 +126,17 @@ export function RawEnrolleeSurveyView({
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus | undefined>()
   const [showJustificationModal, setShowJustificationModal] = useState(false)
   const [justification, setJustification] = useState<string>('')
+  const [showTaskModal, setShowTaskModal] = useState(false)
 
   return <div>
     <div>
       <div className="d-flex align-items-center justify-content-between">
-        <div>{surveyTaskStatus(response)}</div>
+        <div className="d-flex align-items-center">
+          {surveyTaskStatus(task, response)}
+          <Button variant="secondary" onClick={() => setShowTaskModal(!showTaskModal)}>
+            change / remove
+          </Button>
+        </div>
         <div className="d-flex align-items-center">
           <AutosaveStatusIndicator status={autosaveStatus}/>
           <div className="dropdown">
@@ -211,30 +220,39 @@ export function RawEnrolleeSurveyView({
         confirmText={'Continue to edit'}
       />}
     </div>
+    {showTaskModal && <TaskChangeModal studyEnvParams={paramsFromContext(studyEnvContext)}
+      onDismiss={() => setShowTaskModal(false)}
+      task={task} enrollee={enrollee} onSubmit={onUpdate}/> }
   </div>
 }
 
-function surveyTaskStatus(surveyResponse?: SurveyResponse) {
+const taskStatusIndicators: Record<ParticipantTaskStatus, React.ReactNode> = {
+  NEW: <span className="badge bg-secondary p-2"><FontAwesomeIcon icon={faEmptyCircle}/> Not Started</span>,
+  VIEWED: <span className="badge bg-secondary p-2">
+    <FontAwesomeIcon icon={faCircleHalfStroke}/> Viewed
+  </span>,
+  IN_PROGRESS: <span className="badge bg-secondary p-2">
+    <FontAwesomeIcon icon={faCircleHalfStroke}/> In Progress
+  </span>,
+  REJECTED: <span className="badge bg-danger p-2">
+    <FontAwesomeIcon icon={faCircleHalfStroke}/> Declined
+  </span>,
+  COMPLETE: <span className="badge bg-success p-2"><FontAwesomeIcon icon={faCircleCheck}/> Complete</span>,
+  REMOVED: <span className="badge bg-secondary p-2"><FontAwesomeIcon icon={faMinus}/> Removed</span>
+}
+
+function surveyTaskStatus(task: ParticipantTask, surveyResponse?: SurveyResponse) {
   let versionString = ''
   if (surveyResponse && surveyResponse.answers.length) {
     const answerVersions = _uniq(surveyResponse.answers.map(ans => ans.surveyVersion))
     versionString = `${pluralize('version', answerVersions.length)} ${answerVersions.join(', ')}`
   }
 
-  if (!surveyResponse) {
-    return <span className="badge bg-secondary p-2"><FontAwesomeIcon icon={faEmptyCircle}/> Not Started</span>
-  }
   return <div className="d-flex align-items-center">
-    {surveyResponse.complete ?
-      <span className="badge bg-success p-2">
-        <FontAwesomeIcon icon={faCircleCheck}/> Complete
-      </span> :
-      <span className="badge bg-secondary p-2">
-        <FontAwesomeIcon icon={faCircleHalfStroke}/> In Progress
-      </span>}
-    <div className="vr m-3"></div>
-    <span>{surveyResponse.complete?
-      'Completed' : 'Last Updated'} {instantToDefaultString(surveyResponse.createdAt)} ({versionString})</span>
+    {taskStatusIndicators[task.status]}
+    { surveyResponse && <span>{surveyResponse.complete?
+      'Completed' : 'Last Updated'} {instantToDefaultString(surveyResponse.createdAt)} ({versionString})
+    </span> }
   </div>
 }
 

@@ -334,7 +334,7 @@ export type InternalConfig = {
 
 export type ParticipantTaskUpdateDto = {
   updates: TaskUpdateSpec[]
-  portalParticipantUserIds?: string[]
+  enrolleeIds?: string[]
   updateAll: boolean // if true, the portalParticipantUserIds list will be ignored and all participants will be updated
 }
 
@@ -758,7 +758,7 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async updateParticipantTaskVersions(studyEnvParams: StudyEnvParams,
+  async updateParticipantTasks(studyEnvParams: StudyEnvParams,
     update: ParticipantTaskUpdateDto): Promise<ParticipantTask[]> {
     const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/participantTasks/updateAll`
     const response = await fetch(url, {
@@ -1409,9 +1409,9 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async updateAdminTask(portalShortcode: string, studyShortcode: string,
-    envName: string, task: ParticipantTask): Promise<ParticipantTask> {
-    const url = `${baseStudyEnvUrl(portalShortcode, studyShortcode, envName)}/adminTasks/${task.id}`
+  async updateTask(studyEnvParams: StudyEnvParams, task: ParticipantTask): Promise<ParticipantTask> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/enrollees/` +
+      `${task.enrolleeId}/participantTasks/${task.id}`
     const response = await fetch(url, {
       method: 'PATCH',
       headers: this.getInitHeaders(),

@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom'
 import { enrolleeKitRequestPath } from './EnrolleeView'
 import React, { useState } from 'react'
 import { AdminTaskEditModal } from 'study/adminTasks/AdminTaskEditor'
-import { StudyEnvContextT } from '../../StudyEnvironmentRouter'
+import { paramsFromContext, StudyEnvContextT } from '../../StudyEnvironmentRouter'
 import classNames from 'classnames'
 
 
@@ -88,7 +88,7 @@ export function ParticipantNoteView({
           await reloadTasks()
           setShowTaskEdit(false)
         }}
-        studyEnvContext={studyEnvContext}/>
+        studyEnvParams={paramsFromContext(studyEnvContext)}/>
     </div> }
     <div className="my-2">{note.text}</div>
     { note.kitRequestId && <Link to={enrolleeKitRequestPath(studyEnvContext.currentEnvPath, enrollee.shortcode)}>

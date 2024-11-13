@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { ParticipantTask, ParticipantTaskStatus } from 'api/api'
-import { faCheck, faCircleHalfStroke, faLock, faPrint } from '@fortawesome/free-solid-svg-icons'
+import { faCheck, faCircleHalfStroke, faLock, faMinus, faPrint } from '@fortawesome/free-solid-svg-icons'
 import { faCircle, faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { hideVisually } from 'polished'
@@ -33,6 +33,10 @@ const statusDisplayMap: Record<ParticipantTaskStatus, StatusDisplayInfo> = {
   'VIEWED': {
     icon: <FontAwesomeIcon icon={faCircle} style={{ color: '#777' }}/>,
     statusDisplayKey: 'taskNotStarted'
+  },
+  'REMOVED': { // this status isn't displayed anywhere in the UI right now, but is included for completness
+    icon: <FontAwesomeIcon icon={faMinus} style={{ color: '#777' }}/>,
+    statusDisplayKey: 'taskRemoved'
   }
 }
 

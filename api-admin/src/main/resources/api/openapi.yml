@@ -103,25 +103,6 @@ paths:
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
-  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/adminTasks/{id}:
-    patch:
-      summary: Updates the specified task
-      tags: [ participantTask ]
-      operationId: update
-      parameters:
-        - *portalShortcodeParam
-        - *studyShortcodeParam
-        - *envNameParam
-        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
-      requestBody:
-        required: true
-        content: *jsonContent
-      responses:
-        '200':
-          description: The updated task
-          content: *jsonContent
-        '500':
-          $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/surveys/{stableId}/{version}:
     get:
       summary: gets the requested survey
@@ -681,7 +662,7 @@ paths:
         - *portalShortcodeParam
         - *studyShortcodeParam
         - *envNameParam
-        - { name: enrolleeShortcodeOrId, in: path, required: true, schema: { type: string } }
+        - &enrolleeShortcodeOrIdParam { name: enrolleeShortcodeOrId, in: path, required: true, schema: { type: string } }
       responses:
         '200':
           description: Enrollee object
@@ -785,6 +766,26 @@ paths:
       responses:
         '200':
           description: List of DataChangeRecords
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrollees/{enrolleeShortcodeOrId}/participantTasks/{id}:
+    patch:
+      summary: Updates the specified task
+      tags: [ participantTask ]
+      operationId: update
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - *enrolleeShortcodeOrIdParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: The updated task
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'

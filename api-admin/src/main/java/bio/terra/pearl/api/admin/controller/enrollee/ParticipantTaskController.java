@@ -2,6 +2,7 @@ package bio.terra.pearl.api.admin.controller.enrollee;
 
 import bio.terra.pearl.api.admin.api.ParticipantTaskApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnrolleeAuthContext;
 import bio.terra.pearl.api.admin.service.enrollee.ParticipantTaskExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -98,14 +99,21 @@ public class ParticipantTaskController implements ParticipantTaskApi {
 
   @Override
   public ResponseEntity<Object> update(
-      String portalShortcode, String studyShortcode, String envName, UUID taskId, Object body) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+      String portalShortcode,
+      String studyShortcode,
+      String envName,
+      String enrolleeShortcodeOrId,
+      UUID taskId,
+      Object body) {
+    AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     ParticipantTask updatedTask = objectMapper.convertValue(body, ParticipantTask.class);
     updatedTask.setId(taskId);
     updatedTask =
         participantTaskExtService.update(
-            portalShortcode, studyShortcode, environmentName, taskId, updatedTask, user);
+            PortalEnrolleeAuthContext.of(
+                operator, portalShortcode, studyShortcode, environmentName, enrolleeShortcodeOrId),
+            updatedTask);
     return ResponseEntity.ok(updatedTask);
   }
 }

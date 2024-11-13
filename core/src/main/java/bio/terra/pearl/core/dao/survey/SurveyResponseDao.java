@@ -31,6 +31,21 @@ public class SurveyResponseDao extends BaseMutableJdbiDao<SurveyResponse> {
         return findAllByProperty("enrollee_id", enrolleeId);
     }
 
+    /** excludes responses that are associated with removed tasks */
+    public List<SurveyResponse> findByEnrolleeIdNotRemoved(UUID enrolleeId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select * from %s
+                                join task on task.survey_response_id = survey_response.id
+                                where enrollee_id = :enrolleeId"
+                                and task.status != 'REMOVED')
+                                """.formatted(tableName))
+                        .bind("enrolleeId", enrolleeId)
+                        .mapTo(clazz)
+                        .list()
+        );
+    }
+
     /**
      * this avoids N+1 querying, but is otherwise unoptimized. It grabs all the responses, then all the answers
      */

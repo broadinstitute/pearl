@@ -1,6 +1,8 @@
 package bio.terra.pearl.api.admin.service.enrollee;
 
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.EnforcePortalEnrolleePermission;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnrolleeAuthContext;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
@@ -9,6 +11,7 @@ import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
+import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.exception.StudyEnvironmentMissing;
 import bio.terra.pearl.core.service.survey.SurveyTaskDispatcher;
@@ -16,7 +19,6 @@ import bio.terra.pearl.core.service.workflow.ParticipantTaskAssignDto;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskUpdateDto;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -113,24 +115,28 @@ public class ParticipantTaskExtService {
         .toList();
   }
 
+  /** current we only allow editing admin assignment and task status. */
+  @EnforcePortalEnrolleePermission(permission = "participant_data_edit")
   public ParticipantTask update(
-      String portalShortcode,
-      String studyShortcode,
-      EnvironmentName envName,
-      UUID taskId,
-      ParticipantTask updatedTask,
-      AdminUser operator) {
-    authUtilService.authUserToStudy(operator, portalShortcode, studyShortcode);
-    StudyEnvironment studyEnvironment =
-        studyEnvironmentService.findByStudy(studyShortcode, envName).get();
-    ParticipantTask taskToUpdate = participantTaskService.find(taskId).get();
-    if (!taskToUpdate.getStudyEnvironmentId().equals(studyEnvironment.getId())) {
-      throw new IllegalArgumentException("You cannot access that task from this study");
+      PortalEnrolleeAuthContext authContext, ParticipantTask updatedTask) {
+    ParticipantTask taskToUpdate =
+        participantTaskService
+            .find(updatedTask.getId())
+            .orElseThrow(
+                () -> new NotFoundException("task %s not found".formatted(updatedTask.getId())));
+    if (!taskToUpdate.getEnrolleeId().equals(authContext.getEnrollee().getId())) {
+      throw new IllegalArgumentException(
+          "task does not belong to enrollee %s"
+              .formatted(authContext.getEnrollee().getShortcode()));
     }
     taskToUpdate.setAssignedAdminUserId(updatedTask.getAssignedAdminUserId());
     taskToUpdate.setStatus(updatedTask.getStatus());
     DataAuditInfo auditInfo =
-        DataAuditInfo.builder().responsibleAdminUserId(operator.getId()).build();
+        DataAuditInfo.builder()
+            .responsibleAdminUserId(authContext.getOperator().getId())
+            .enrolleeId(authContext.getEnrollee().getId())
+            .portalParticipantUserId(taskToUpdate.getPortalParticipantUserId())
+            .build();
     return participantTaskService.update(taskToUpdate, auditInfo);
   }
 }
