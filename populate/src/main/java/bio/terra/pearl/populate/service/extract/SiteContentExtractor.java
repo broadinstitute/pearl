@@ -29,7 +29,9 @@ public class SiteContentExtractor {
     }
 
     public void writeSiteContents(Portal portal, ExtractPopulateContext context) {
-        List<SiteContent> siteContents = siteContentService.findByPortalId(portal.getId());
+        List<SiteContent> siteContents = context.isExtractPublishedVersionsOnly()
+                ? siteContentService.findPublishedContentByPortalId(portal.getId())
+                : siteContentService.findByPortalId(portal.getId());
         for (SiteContent siteContent : siteContents) {
             siteContentService.attachChildContent(siteContent, "en");
             writeSiteContent(siteContent, context);

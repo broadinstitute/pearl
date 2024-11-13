@@ -25,7 +25,9 @@ public class SurveyExtractor {
 
     /** writes all versions of all surveys to the zip file */
     public void writeSurveys(Portal portal, ExtractPopulateContext context) {
-        List<Survey> surveys = surveyService.findByPortalId(portal.getId());
+        List<Survey> surveys = context.isExtractPublishedVersionsOnly()
+                ? surveyService.findPublishedSurveysByPortalId(portal.getId())
+                : surveyService.findByPortalId(portal.getId());
         for (Survey survey : surveys) {
             surveyService.attachAnswerMappings(survey);
             writeSurvey(survey, context);

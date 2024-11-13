@@ -19,11 +19,15 @@ public class ExtractPopulateContext {
     @Getter
     private final PortalPopDto portalPopDto;
 
-    public ExtractPopulateContext(Portal portal, ZipOutputStream zipOut) {
+    @Getter
+    private boolean extractPublishedVersionsOnly;
+
+    public ExtractPopulateContext(Portal portal, ZipOutputStream zipOut, boolean extractPublishedVersionsOnly) {
         this.zipOut = zipOut;
         portalPopDto = new PortalPopDto();
         portalPopDto.setShortcode(portal.getShortcode());
         portalPopDto.setName(portal.getName());
+        this.extractPublishedVersionsOnly = extractPublishedVersionsOnly;
     }
 
     /** write a file to the zip file, but only if it hasn't already been written */

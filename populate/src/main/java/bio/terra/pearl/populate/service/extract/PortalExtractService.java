@@ -8,8 +8,8 @@ import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.PortalStudy;
 import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.portal.PortalEnvironmentConfigService;
-import bio.terra.pearl.core.service.portal.PortalEnvironmentService;
 import bio.terra.pearl.core.service.portal.PortalEnvironmentLanguageService;
+import bio.terra.pearl.core.service.portal.PortalEnvironmentService;
 import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.portal.exception.PortalConfigMissing;
 import bio.terra.pearl.populate.dto.PortalEnvironmentPopDto;
@@ -66,11 +66,11 @@ public class PortalExtractService {
         this.objectMapper.addMixIn(Portal.class, PortalMixin.class);
     }
 
-    public void extract(String portalShortcode, OutputStream os) throws IOException {
+    public void extract(String portalShortcode, OutputStream os, boolean extractPublishedVersionsOnly) throws IOException {
         Portal portal = portalService.findOneByShortcode(portalShortcode)
                 .orElseThrow(() -> new NotFoundException("Portal not found: " + portalShortcode));
         ZipOutputStream zipOut = new ZipOutputStream(os);
-        ExtractPopulateContext context = new ExtractPopulateContext(portal, zipOut);
+        ExtractPopulateContext context = new ExtractPopulateContext(portal, zipOut, extractPublishedVersionsOnly);
         mediaExtractor.writeMedia(portal, context);
         siteContentExtractor.writeSiteContents(portal, context);
         surveyExtractor.writeSurveys(portal, context);

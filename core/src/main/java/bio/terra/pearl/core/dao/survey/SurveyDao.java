@@ -100,4 +100,17 @@ public class SurveyDao extends BaseVersionedJdbiDao<Survey> {
     protected Class<Survey> getClazz() {
         return Survey.class;
     }
+
+    public List<Survey> findPublishedSurveysByPortalId(UUID portalId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select s.* from survey s
+                                inner join study_environment_survey ses on s.id = ses.survey_id and ses.active = true
+                                where s.portal_id = :portalId
+                                """)
+                        .bind("portalId", portalId)
+                        .mapTo(clazz)
+                        .list()
+        );
+    }
 }

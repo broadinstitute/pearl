@@ -112,4 +112,8 @@ public class SiteContentService extends VersionedEntityService<SiteContent, Site
             section.setHtmlPageId(null);
         }
     }
+
+    public List<SiteContent> findPublishedContentByPortalId(UUID portalId) {
+        return dao.findPublishedContentByPortalId(portalId);
+    }
 }

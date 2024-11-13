@@ -38,7 +38,7 @@ public class PortalExtractTest extends BasePopulatePortalsTest {
         String tmpFileName = "/tmp/demo-%s.zip".formatted(RandomStringUtils.randomAlphanumeric(8));
         File tmpFile = new File(tmpFileName);
         FileOutputStream fos = new FileOutputStream(tmpFile);
-        portalExtractService.extract("demo", fos);
+        portalExtractService.extract("demo", fos, false);
         fos.close();
 
         // we technically don't need this manual delete since the populate below should include a delete, but just to be sure...
