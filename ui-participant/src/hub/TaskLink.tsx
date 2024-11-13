@@ -2,8 +2,10 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { ParticipantTask, ParticipantTaskStatus } from 'api/api'
 import {
+  faCaretDown,
+  faCaretUp,
   faCheck,
-  faCircleHalfStroke, faEllipsisV,
+  faCircleHalfStroke,
   faLock,
   faPrint
 } from '@fortawesome/free-solid-svg-icons'
@@ -81,7 +83,7 @@ export default function TaskLink({ task, studyShortcode, enrollee, history, nest
         </div>
         { history && history.length > 0 && <button onClick={() => setIsExpanded(!isExpanded)}
           className="btn btn-link py-0" title={i18n('taskHistory')}>
-          <FontAwesomeIcon icon={faEllipsisV}/>
+          <FontAwesomeIcon icon={isExpanded ? faCaretUp : faCaretDown}/>
         </button>}
         {task.taskType === 'CONSENT' && task.status === 'COMPLETE' && (
           <div className="ms-3">
