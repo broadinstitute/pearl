@@ -108,10 +108,9 @@ public class SiteContentDao extends BaseVersionedJdbiDao<SiteContent> {
     public List<SiteContent> findPublishedContentByPortalId(UUID portalId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("""
-                                 select distinct on (sc.id) sc.* from site_content sc
+                                 select sc.* from site_content sc
                                  inner join portal_environment pe on sc.id = pe.site_content_id
                                  where pe.portal_id = :portalId
-                                 order by sc.id, sc.version desc
                                 """)
                         .bind("portalId", portalId)
                         .mapTo(getClazz())

@@ -86,13 +86,17 @@ public class StudyExtractor {
         studyEnvPopDto.setStudyEnvironmentConfig(
                 studyEnvironmentConfigService.find(studyEnv.getStudyEnvironmentConfigId()).orElseThrow(StudyEnvConfigMissing::new)
         );
-        if (studyEnv.getPreEnrollSurveyId() != null) {
+        if (studyEnv.getPreEnrollSurveyId() != null && context.hasEntityBeenWritten(studyEnv.getPreEnrollSurveyId())) {
             SurveyExtractor.SurveyPopDtoStub surveyPopDtoStub = new SurveyExtractor.SurveyPopDtoStub();
             surveyPopDtoStub.setPopulateFileName("../../" + context.getFileNameForEntity(studyEnv.getPreEnrollSurveyId()));
             studyEnvPopDto.setPreEnrollSurveyDto(surveyPopDtoStub);
         }
         List<StudyEnvironmentSurvey> studyEnvSurveys = studyEnvironmentSurveyService.findAllByStudyEnvId(studyEnv.getId(), null);
         for (StudyEnvironmentSurvey studyEnvSurvey : studyEnvSurveys) {;
+            if (!context.hasEntityBeenWritten(studyEnvSurvey.getSurveyId())) {
+                continue;
+            }
+
             StudyEnvironmentSurveyPopDto studyEnvSurveyPopDto = new StudyEnvironmentSurveyPopDto();
             BeanUtils.copyProperties(studyEnvSurvey, studyEnvSurveyPopDto, "id", "studyEnvironmentId", "surveyId");
             studyEnvSurveyPopDto.setPopulateFileName("../../" + context.getFileNameForEntity(studyEnvSurvey.getSurveyId()));

@@ -101,12 +101,27 @@ public class SurveyDao extends BaseVersionedJdbiDao<Survey> {
         return Survey.class;
     }
 
-    public List<Survey> findPublishedSurveysByPortalId(UUID portalId) {
+    public List<Survey> findPublishedSurveysByPortalIdNoPreEnrolls(UUID portalId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("""
                                 select s.* from survey s
                                 inner join study_environment_survey ses on s.id = ses.survey_id and ses.active = true
                                 where s.portal_id = :portalId
+                                """)
+                        .bind("portalId", portalId)
+                        .mapTo(clazz)
+                        .list()
+        );
+    }
+
+    public List<Survey> findPublishedPreEnrolleeSurveysByPortalId(UUID portalId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select s.* from survey s
+                                inner join portal on s.portal_id = portal.id
+                                inner join portal_study ps on portal.id = ps.portal_id
+                                inner join study_environment se on ps.study_id = se.study_id
+                                where s.portal_id = :portalId and s.id = se.pre_enroll_survey_id
                                 """)
                         .bind("portalId", portalId)
                         .mapTo(clazz)

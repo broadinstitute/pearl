@@ -74,4 +74,8 @@ public class ExtractPopulateContext {
     public String getFileNameForEntity(UUID entityId) {
         return writtenEntities.get(entityId);
     }
+
+    public boolean hasEntityBeenWritten(UUID entityId) {
+        return writtenEntities.containsKey(entityId);
+    }
 }
