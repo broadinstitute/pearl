@@ -38,6 +38,7 @@ import {
 } from '../api/api-utils'
 import _uniq from 'lodash/uniq'
 import SurveyEnvironmentTable from './surveys/SurveyEnvironmentTable'
+import { RequireUserPermission } from 'util/RequireUserPermission'
 
 
 /** renders the main configuration page for a study environment */
@@ -197,30 +198,32 @@ function StudyContent({ studyEnvContext }: {studyEnvContext: StudyEnvContextT}) 
               </div>
             </div>
           </li>
-          <li className="mb-3 rounded-2 p-3" style={{ background: '#efefef' }}>
-            <h6>Document Requests</h6>
-            <div className="flex-grow-1 pt-3">
-              <SurveyEnvironmentTable
-                key={studyEnvContext.currentEnvPath}
-                stableIds={documnetRequestStableIds}
-                studyEnvParams={paramsFromContext(studyEnvContext)}
-                configuredSurveys={configuredSurveys}
-                setSelectedSurveyConfig={setSelectedSurveyConfig}
-                updateConfiguredSurveys={updateConfiguredSurveys}
-                setShowDeleteSurveyModal={setShowDeleteSurveyModal}
-                setShowArchiveSurveyModal={setShowArchiveSurveyModal}
-                showArchiveSurveyModal={showArchiveSurveyModal}
-                showDeleteSurveyModal={showDeleteSurveyModal}
-              />
-              <div>
-                <Button variant="secondary" data-testid={'addDocumentRequest'} onClick={() => {
-                  setCreateSurveyType('DOCUMENT_REQUEST')
-                }}>
-                  <FontAwesomeIcon icon={faPlus}/> Add
-                </Button>
+          <RequireUserPermission superuser>
+            <li className="mb-3 rounded-2 p-3" style={{ background: '#efefef' }}>
+              <h6>Document Requests</h6>
+              <div className="flex-grow-1 pt-3">
+                <SurveyEnvironmentTable
+                  key={studyEnvContext.currentEnvPath}
+                  stableIds={documnetRequestStableIds}
+                  studyEnvParams={paramsFromContext(studyEnvContext)}
+                  configuredSurveys={configuredSurveys}
+                  setSelectedSurveyConfig={setSelectedSurveyConfig}
+                  updateConfiguredSurveys={updateConfiguredSurveys}
+                  setShowDeleteSurveyModal={setShowDeleteSurveyModal}
+                  setShowArchiveSurveyModal={setShowArchiveSurveyModal}
+                  showArchiveSurveyModal={showArchiveSurveyModal}
+                  showDeleteSurveyModal={showDeleteSurveyModal}
+                />
+                <div>
+                  <Button variant="secondary" data-testid={'addDocumentRequest'} onClick={() => {
+                    setCreateSurveyType('DOCUMENT_REQUEST')
+                  }}>
+                    <FontAwesomeIcon icon={faPlus}/> Add
+                  </Button>
+                </div>
               </div>
-            </div>
-          </li>
+            </li>
+          </RequireUserPermission>
           <li className="mb-3 rounded-2 p-3" style={{ background: '#efefef' }}>
             <h6>Outreach</h6>
             <div className="flex-grow-1 pt-3">

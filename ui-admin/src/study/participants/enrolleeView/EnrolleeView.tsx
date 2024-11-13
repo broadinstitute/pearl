@@ -43,6 +43,7 @@ import {
   navDivStyle,
   navListItemStyle
 } from 'util/subNavStyles'
+import { RequireUserPermission } from 'util/RequireUserPermission'
 
 
 export type SurveyWithResponsesT = {
@@ -162,14 +163,16 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                   responseMap={responseMap} emptyText={'No study staff forms'}/>}
                 />
               </li>
-              <li style={navListItemStyle}>
-                <CollapsableMenu header={'Document Requests'} headerClass="text-black" content={
-                  <SurveyList surveys={surveys
-                    .filter(survey => survey.survey.surveyType === 'DOCUMENT_REQUEST')}
-                  responseMap={responseMap} emptyText={'No document requests'}
-                  />}
-                />
-              </li>
+              <RequireUserPermission superuser>
+                <li style={navListItemStyle}>
+                  <CollapsableMenu header={'Document Requests'} headerClass="text-black" content={
+                    <SurveyList surveys={surveys
+                      .filter(survey => survey.survey.surveyType === 'DOCUMENT_REQUEST')}
+                    responseMap={responseMap} emptyText={'No document requests'}
+                    />}
+                  />
+                </li>
+              </RequireUserPermission>
               <li style={navListItemStyle}>
                 <CollapsableMenu header={'Outreach'} headerClass="text-black" content={
                   <SurveyList surveys={surveys
