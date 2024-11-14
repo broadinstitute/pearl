@@ -13,7 +13,14 @@
     "showProgressBar": "bottom",
     "pages": [
       {
-        "elements": []
+        "elements": [
+          {
+            "type": "document_request",
+            "isRequired": true,
+            "name": "medical_record_document_request",
+            "title": "Medical Record Request"
+          }
+        ]
       }
     ]
   }

@@ -15,7 +15,6 @@ import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.file.ParticipantFileService;
-import bio.terra.pearl.core.service.file.ParticipantFileSurveyResponseService;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.notification.NotificationService;
@@ -56,7 +55,6 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
     private final ShortcodeService shortcodeService;
     private final FamilyEnrolleeService familyEnrolleeService;
     private final ParticipantFileService participantFileService;
-    private final ParticipantFileSurveyResponseService participantFileSurveyResponseService;
 
     public EnrolleeService(EnrolleeDao enrolleeDao,
                            SurveyResponseDao surveyResponseDao,
@@ -76,7 +74,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
                            RandomUtilService randomUtilService,
                            EnrolleeRelationService enrolleeRelationService,
                            @Lazy PortalParticipantUserService portalParticipantUserService,
-                           FamilyService familyService, ShortcodeService shortcodeService, FamilyEnrolleeService familyEnrolleeService, ParticipantFileService participantFileService, ParticipantFileSurveyResponseService participantFileSurveyResponseService) {
+                           FamilyService familyService, ShortcodeService shortcodeService, FamilyEnrolleeService familyEnrolleeService, ParticipantFileService participantFileService) {
         super(enrolleeDao);
         this.surveyResponseDao = surveyResponseDao;
         this.participantTaskDao = participantTaskDao;
@@ -99,7 +97,6 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
         this.shortcodeService = shortcodeService;
         this.familyEnrolleeService = familyEnrolleeService;
         this.participantFileService = participantFileService;
-        this.participantFileSurveyResponseService = participantFileSurveyResponseService;
     }
 
     public Optional<Enrollee> findOneByShortcode(String shortcode) {
@@ -218,7 +215,6 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
         }
         participantTaskService.deleteByEnrolleeId(enrolleeId);
 
-        participantFileSurveyResponseService.deleteByEnrolleeId(enrolleeId);
         participantFileService.deleteByEnrolleeId(enrolleeId);
 
         for (SurveyResponse surveyResponse : surveyResponseService.findByEnrolleeId(enrolleeId)) {

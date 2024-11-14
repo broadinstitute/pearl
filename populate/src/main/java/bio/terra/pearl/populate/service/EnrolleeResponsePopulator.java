@@ -7,7 +7,6 @@ import bio.terra.pearl.core.dao.survey.SurveyQuestionDefinitionDao;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
-import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
@@ -18,8 +17,6 @@ import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
-import bio.terra.pearl.core.service.file.ParticipantFileService;
-import bio.terra.pearl.core.service.file.ParticipantFileSurveyResponseService;
 import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.survey.SurveyResponseService;
 import bio.terra.pearl.core.service.survey.SurveyService;
@@ -49,10 +46,8 @@ import java.util.UUID;
 @Slf4j
 public class EnrolleeResponsePopulator {
 
-    private final ParticipantFileService participantFileService;
-    private final ParticipantFileSurveyResponseService participantFileSurveyResponseService;
 
-    public EnrolleeResponsePopulator(PreEnrollmentResponseDao preEnrollmentResponseDao, ObjectMapper objectMapper, SurveyService surveyService, SurveyResponseService surveyResponseService, ParticipantTaskService participantTaskService, TimeShiftDao timeShiftDao, AdminUserDao adminUserDao, PortalService portalService, SurveyQuestionDefinitionDao surveyQuestionDefinitionDao, ParticipantFileService participantFileService, ParticipantFileSurveyResponseService participantFileSurveyResponseService) {
+    public EnrolleeResponsePopulator(PreEnrollmentResponseDao preEnrollmentResponseDao, ObjectMapper objectMapper, SurveyService surveyService, SurveyResponseService surveyResponseService, ParticipantTaskService participantTaskService, TimeShiftDao timeShiftDao, AdminUserDao adminUserDao, PortalService portalService, SurveyQuestionDefinitionDao surveyQuestionDefinitionDao) {
         this.preEnrollmentResponseDao = preEnrollmentResponseDao;
         this.objectMapper = objectMapper;
         this.surveyService = surveyService;
@@ -62,8 +57,6 @@ public class EnrolleeResponsePopulator {
         this.adminUserDao = adminUserDao;
         this.portalService = portalService;
         this.surveyQuestionDefinitionDao = surveyQuestionDefinitionDao;
-        this.participantFileService = participantFileService;
-        this.participantFileSurveyResponseService = participantFileSurveyResponseService;
     }
 
     public void populateResponse(Enrollee enrollee,
@@ -143,19 +136,6 @@ public class EnrolleeResponsePopulator {
             }
         } else {
             savedResponse = surveyResponseService.create(response);
-        }
-
-        if (responsePopDto.getParticipantFileNames() != null && !responsePopDto.getParticipantFileNames().isEmpty()) {
-            List<ParticipantFile> participantFiles = participantFileService.findAllByFileNameForEnrollee(enrollee.getId(), responsePopDto.getParticipantFileNames());
-
-            for (ParticipantFile participantFile : participantFiles) {
-                ParticipantFileSurveyResponse participantFileSurveyResponse = ParticipantFileSurveyResponse.builder()
-                        .participantFileId(participantFile.getId())
-                        .surveyResponseId(savedResponse.getId())
-                        .build();
-
-                participantFileSurveyResponseService.create(participantFileSurveyResponse);
-            }
         }
 
         enrollee.getSurveyResponses().add(savedResponse);
