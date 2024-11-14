@@ -102,6 +102,12 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
             ParticipantTask task = participantTaskService.find(taskId).get();
             // if there is an associated task, try to find an associated response
             lastResponse = dao.findOneWithAnswers(task.getSurveyResponseId()).orElse(null);
+        }  else {
+            // if there's no task specified, grab the most recently created response
+            lastResponse = dao.findMostRecent(enrollee.getId(), form.getId()).orElse(null);
+            if (lastResponse != null) {
+                dao.attachAnswers(lastResponse);
+            }
         }
 
         StudyEnvironmentSurvey configSurvey = studyEnvironmentSurveyService

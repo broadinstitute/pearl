@@ -203,7 +203,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
         List<ModuleFormatter> moduleInfos = enrolleeExportService.generateModuleInfos(options, sandboxEnvironmentId, enrolleeExportData);
         List<Map<String, String>> exportData = enrolleeExportService.generateExportMaps(enrolleeExportData, moduleInfos);
 
-        assertThat(exportData, hasSize(14));
+        assertThat(exportData, hasSize(15));
         // confirm pre-enroll questions are included
         Map<String, String> salkMap = exportData.stream().filter(map -> "HDSALK".equals(map.get("enrollee.shortcode")))
                 .findFirst().get();
