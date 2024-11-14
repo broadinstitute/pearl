@@ -8,8 +8,6 @@ admin_url = "juniper-cmi.org"
 environment = "prod"
 # note: automatically creates DNS records for these portals under the admin domain
 portals = ["demo"]
-infra_project = "broad-juniper-eng-infra"
-infra_region = "us-central1"
 admin_dnssec = "off"
 k8s_namespace = "juniper-prod"
 

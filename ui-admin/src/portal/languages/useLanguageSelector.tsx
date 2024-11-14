@@ -1,6 +1,6 @@
 import { usePortalLanguage } from './usePortalLanguage'
 import { useSearchParams } from 'react-router-dom'
-import { useNonNullReactSingleSelect } from '../../util/react-select-utils'
+import { useNonNullReactSingleSelect } from 'util/react-select-utils'
 import { PortalEnvironmentLanguage } from '@juniper/ui-core'
 
 const LANGUAGE_PARAM_KEY = 'lang'

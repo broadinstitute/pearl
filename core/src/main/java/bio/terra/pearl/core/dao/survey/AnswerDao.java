@@ -5,10 +5,8 @@ import bio.terra.pearl.core.model.survey.Answer;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class AnswerDao extends BaseMutableJdbiDao<Answer> {
@@ -52,6 +50,11 @@ public class AnswerDao extends BaseMutableJdbiDao<Answer> {
 
     public List<Answer> findByEnrollee(UUID enrolleeId) {
         return findAllByProperty("enrollee_id", enrolleeId);
+    }
+
+    public Map<UUID, List<Answer>> findByEnrolleeIds(Collection<UUID> enrolleeIds) {
+        return findAllByPropertyCollection("enrollee_id", enrolleeIds)
+                .stream().collect(Collectors.groupingBy(Answer::getEnrolleeId, Collectors.toList()));
     }
 
     public List<Answer> findByEnrolleeAndSurvey(UUID enrolleeId, String surveyStableId) {

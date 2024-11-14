@@ -66,16 +66,6 @@ variable "customer_urls" {
   description = "Customer URLs"
 }
 
-variable "infra_project" {
-  type = string
-  description = "Infra project"
-}
-
-variable "infra_region" {
-  type = string
-  description = "Infra region"
-}
-
 variable "admin_dnssec" {
     type = string
     default = "on"
