@@ -13,10 +13,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ProfileService extends ParticipantDataAuditedService<Profile, ProfileDao> {
@@ -39,6 +38,11 @@ public class ProfileService extends ParticipantDataAuditedService<Profile, Profi
 
     public Optional<Profile> loadWithMailingAddress(UUID profileId) {
         return dao.loadWithMailingAddress(profileId);
+    }
+
+    public Map<UUID, Profile> loadAllWithMailingAddress(List<UUID> profileIds) {
+        return dao.loadAllWithMailingAddress(profileIds).stream()
+                .collect(Collectors.toMap(Profile::getId, Function.identity()));
     }
 
     @Transactional
