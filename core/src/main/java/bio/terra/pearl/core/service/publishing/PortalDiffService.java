@@ -5,7 +5,6 @@ import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.dashboard.AlertTrigger;
 import bio.terra.pearl.core.model.dashboard.ParticipantDashboardAlert;
 import bio.terra.pearl.core.model.kit.KitType;
-import bio.terra.pearl.core.model.kit.StudyEnvironmentKitType;
 import bio.terra.pearl.core.model.notification.EmailTemplate;
 import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
@@ -27,11 +26,9 @@ import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyService;
 import bio.terra.pearl.core.service.survey.SurveyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.beans.IntrospectionException;
-import java.util.*;
-
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 public class PortalDiffService {

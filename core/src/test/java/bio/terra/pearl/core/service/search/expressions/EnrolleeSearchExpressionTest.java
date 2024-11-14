@@ -12,7 +12,7 @@ import bio.terra.pearl.core.model.address.MailingAddress;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.Family;
 import bio.terra.pearl.core.model.participant.Profile;
-import bio.terra.pearl.core.model.search.EnrolleeSearchExpressionResult;
+import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
@@ -24,14 +24,12 @@ import bio.terra.pearl.core.service.rule.EnrolleeContextService;
 import bio.terra.pearl.core.service.search.EnrolleeSearchContext;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpression;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -643,6 +641,73 @@ class EnrolleeSearchExpressionTest extends BaseSpringBootTest {
         assertTrue(familyExp.evaluate(EnrolleeSearchContext.builder().enrollee(enrolleeWithFamily).build()));
         assertFalse(familyExp.evaluate(EnrolleeSearchContext.builder().enrollee(enrolleeNoFamily).build()));
         assertFalse(familyExp.evaluate(EnrolleeSearchContext.builder().enrollee(enrolleeWithOtherFamily).build()));
+    }
+
+    @Test
+    @Transactional
+    public void testAnswerCrossStudyEvaluate(TestInfo info) {
+        StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
+        PortalEnvironment portalEnv = studyEnvBundle.getPortalEnv();
+        StudyEnvironment studyEnv = studyEnvBundle.getStudyEnv();
+
+        StudyEnvironmentBundle studyEnvBundle2 = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox, studyEnvBundle.getPortal(), studyEnvBundle.getPortalEnv());
+        StudyEnvironment studyEnv2 = studyEnvBundle2.getStudyEnv();
+
+        Survey surveyInEnv1 = surveyFactory.buildPersisted(getTestName(info), portalEnv.getPortalId());
+
+        surveyFactory.attachToEnv(surveyInEnv1, studyEnv.getId(), true);
+
+        Survey surveyInEnv2 = surveyFactory.buildPersisted(getTestName(info), portalEnv.getPortalId());
+
+        surveyFactory.attachToEnv(surveyInEnv2, studyEnv2.getId(), true);
+
+        EnrolleeBundle bundle = enrolleeFactory.buildWithPortalUser(getTestName(info), portalEnv, studyEnv);
+
+        Enrollee enrollee1 = bundle.enrollee();
+        Enrollee enrollee2 = enrolleeFactory.buildPersisted(getTestName(info), studyEnv2.getId(), enrollee1.getParticipantUserId(), enrollee1.getProfileId());
+        Enrollee unrelatedEnrollee = enrolleeFactory.buildPersisted(getTestName(info), studyEnv2);
+
+        surveyResponseFactory.buildWithAnswers(enrollee1, surveyInEnv1, Map.of("question_env_1", "answer1"));
+        surveyResponseFactory.buildWithAnswers(enrollee2, surveyInEnv2, Map.of("question_env_2", "differentAnswer"));
+        surveyResponseFactory.buildWithAnswers(unrelatedEnrollee, surveyInEnv2, Map.of("question_env_2", "wrongEnrollee"));
+
+
+        String study2StableId = studyEnvBundle2.getStudy().getName();
+        String survey1StableId = surveyInEnv1.getStableId();
+        String survey2StableId = surveyInEnv2.getStableId();
+
+        EnrolleeSearchExpression crossStudyAnswer = enrolleeSearchExpressionParser.parseRule(
+                "{answer." + survey1StableId + ".question_env_1} = 'answer1' and {answer[\"" + study2StableId + "\"]." + survey2StableId + ".question_env_2} = 'differentAnswer'"
+        );
+
+        EnrolleeSearchExpression wrongOtherStudyAnswer = enrolleeSearchExpressionParser.parseRule(
+                "{answer." + survey1StableId + ".question_env_1} = 'answer1' and {answer[\"" + study2StableId + "\"]." + survey2StableId + ".question_env_2} = 'wrongEnrollee'"
+        );
+
+        EnrolleeSearchExpression wrongOtherStudyName = enrolleeSearchExpressionParser.parseRule(
+                "{answer." + survey1StableId + ".question_env_1} = 'answer1' and {answer[\"notastudy\"]." + survey2StableId + ".question_env_2} = 'differentAnswer'"
+        );
+
+        EnrolleeSearchExpression wrongQuestion = enrolleeSearchExpressionParser.parseRule(
+                "{answer." + survey1StableId + ".question_env_1} = 'answer1' and {answer[\"" + study2StableId + "\"]." + survey2StableId + ".wrong_question} = 'differentAnswer'"
+        );
+
+
+        EnrolleeSearchContext enrollee1Context = EnrolleeSearchContext.builder().enrollee(enrollee1).build();
+        EnrolleeSearchContext enrollee2Context = EnrolleeSearchContext.builder().enrollee(enrollee2).build();
+
+
+        assertTrue(crossStudyAnswer.evaluate(enrollee1Context));
+        assertFalse(crossStudyAnswer.evaluate(enrollee2Context));
+
+        assertFalse(wrongOtherStudyAnswer.evaluate(enrollee1Context));
+        assertFalse(wrongOtherStudyAnswer.evaluate(enrollee2Context));
+
+        assertFalse(wrongOtherStudyName.evaluate(enrollee1Context));
+        assertFalse(wrongOtherStudyName.evaluate(enrollee2Context));
+
+        assertFalse(wrongQuestion.evaluate(enrollee1Context));
+        assertFalse(wrongQuestion.evaluate(enrollee2Context));
     }
 
 }

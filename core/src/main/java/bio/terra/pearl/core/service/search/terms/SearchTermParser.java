@@ -16,14 +16,26 @@ public abstract class SearchTermParser<T extends SearchTerm> {
 
         List<String> splitModelName = List.of(variableNoBraces.split("\\.", 2));
 
-        if (!splitModelName.getFirst().equals(this.getTermName())) {
+        String modelName = splitModelName.get(0);
+        String studyName = null;
+
+        if (modelName.contains("[")) {
+            int startIndex = modelName.indexOf("[");
+            int endIndex = modelName.indexOf("]");
+            studyName = modelName.substring(startIndex + 2, endIndex - 1);
+            modelName = modelName.substring(0, startIndex);
+        }
+
+        if (!modelName.equals(this.getTermName())) {
             throw new IllegalArgumentException("Variable does not match term parser: " + variable);
         }
 
-        if (splitModelName.size() == 1) {
-            return this.parse("");
+        String arguments = splitModelName.size() == 1 ? "" : splitModelName.get(1);
+
+        if (studyName == null) {
+            return this.parse(arguments);
         } else {
-            return this.parse(splitModelName.get(1));
+            return this.parse(studyName, arguments);
         }
     }
 
@@ -33,12 +45,26 @@ public abstract class SearchTermParser<T extends SearchTerm> {
     protected abstract T parse(String arguments);
 
     /**
+     <<<<<<< HEAD
+     * Parse the term string into a search term for the given study environment.
+     */
+    protected T parse(String study, String arguments) {
+        throw new IllegalArgumentException("The " + getTermName() + " term does not support searching across study environments.");
+    }
+
+    /**
+     =======
+     >>>>>>> origin/development
      * Get the facets that can be used in a search expression for the given study environment.
      */
     public abstract Map<String, SearchValueTypeDefinition> getFacets(UUID studyEnvId);
 
     /**
      * The name of the term. E.g., AgeTermParser would return "age".
+     <<<<<<< HEAD
+     * Any variable that starts with this name will be parsed by this parser.
+     =======
+     >>>>>>> origin/development
      */
     public abstract String getTermName();
 
@@ -48,7 +74,8 @@ public abstract class SearchTermParser<T extends SearchTerm> {
     public Boolean match(String variable) {
         variable = stripBraces(variable);
         return variable.equals(this.getTermName())
-                || variable.startsWith(this.getTermName() + ".");
+                || variable.startsWith(this.getTermName() + ".")
+                || variable.startsWith(this.getTermName() + "[");
     };
 
     /**

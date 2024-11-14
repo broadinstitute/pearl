@@ -14,7 +14,7 @@ import java.util.Optional;
  * A search term that converts a string value to lowercase.
  * Example: lower({enrollee.shortcode}) = 'hdsalk'
  */
-public class LowerFunction implements SearchTerm {
+public class LowerFunction extends SearchTerm {
 
     private final SearchTerm term;
 

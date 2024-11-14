@@ -1,4 +1,4 @@
-package bio.terra.pearl.api.admin.service.notifications;
+package bio.terra.pearl.api.admin.service.scheduled;
 
 import bio.terra.pearl.core.service.notification.EnrolleeReminderService;
 import lombok.extern.slf4j.Slf4j;

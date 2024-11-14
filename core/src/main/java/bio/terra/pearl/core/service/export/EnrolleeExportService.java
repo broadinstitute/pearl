@@ -172,7 +172,7 @@ public class EnrolleeExportService {
         return moduleFormatters;
     }
 
-    List<SurveyType> SURVEY_TYPE_EXPORT_ORDER = List.of(SurveyType.CONSENT, SurveyType.RESEARCH, SurveyType.OUTREACH);
+    List<SurveyType> SURVEY_TYPE_EXPORT_ORDER = List.of(SurveyType.CONSENT, SurveyType.RESEARCH, SurveyType.DOCUMENT_REQUEST, SurveyType.OUTREACH);
 
     /**
      * returns a ModuleExportInfo for each unique survey stableId that has ever been attached to the studyEnvironment
@@ -245,7 +245,7 @@ public class EnrolleeExportService {
                 answerDao.findByEnrolleeId(enrollee.getId()),
                 participantTaskService.findByEnrolleeId(enrollee.getId()),
                 surveyResponseService.findByEnrolleeId(enrollee.getId())
-                        .stream().sorted(Comparator.comparing(SurveyResponse::getCreatedAt)).toList(),
+                        .stream().sorted(Comparator.comparing(SurveyResponse::getCreatedAt).reversed()).toList(),
                 kitRequestService.findByEnrollee(enrollee),
                 relations,
                 config.isEnableFamilyLinkage() ? familyService.findByEnrolleeIdWithProband(enrollee.getId()) : Collections.emptyList(),

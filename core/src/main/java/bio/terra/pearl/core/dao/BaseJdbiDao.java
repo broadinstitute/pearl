@@ -250,7 +250,8 @@ public abstract class BaseJdbiDao<T extends BaseEntity> implements JdbiDao<T> {
         );
     }
 
-    /* fetches all the entities with a child attached.  For example, if the parent table has a column "portal_environment_config_id" and
+    /**
+     *  fetches all the entities with a child attached.  For example, if the parent table has a column "portal_environment_config_id" and
      * a field portalEnvironmentConfig, this method could be used to fetch the portal environments with the configs already hydrated
      * and do so in a single SQL query instead of performing n queries to attach children to n parents
      */

@@ -24,7 +24,7 @@ public class ScheduledSurveyAssignmentService {
       lockAtLeastFor = "10s")
   public void assignScheduledSurveys() {
     log.info("Scheduled survey processing beginning");
-    surveyTaskDispatcher.assignScheduledSurveys();
+    surveyTaskDispatcher.assignScheduledTasks();
     log.info("Scheduled survey processing complete");
   }
 }
