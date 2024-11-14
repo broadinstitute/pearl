@@ -70,8 +70,6 @@ public class AnswerService extends CrudService<Answer, AnswerDao> {
         }
 
         if (answer.getFormat().equals(AnswerFormat.FILE_NAME)) {
-            System.out.println(answer.getEnrolleeId());
-            System.out.println(answer.getStringValue());
             participantFileService.findByEnrolleeIdAndFileName(answer.getEnrolleeId(), answer.getStringValue())
                     .orElseThrow(() -> new IllegalArgumentException("File not found for answer"));
         }
