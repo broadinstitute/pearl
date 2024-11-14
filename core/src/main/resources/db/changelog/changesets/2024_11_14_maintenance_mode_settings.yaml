@@ -7,9 +7,9 @@
                tableName: maintenance_mode
                columns:
                 - column:
-                     { name: message, type: varchar(255), constraints: { nullable: true } }
+                     { name: message, type: text, constraints: { nullable: true } }
                 - column:
-                     { name: password, type: varchar(255), constraints: { nullable: true } }
+                     { name: password, type: text, constraints: { nullable: true } }
                 - column:
                      { name: enabled, type: boolean, constraints: { nullable: false } }
                 - column:
