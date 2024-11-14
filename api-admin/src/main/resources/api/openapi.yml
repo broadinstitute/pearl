@@ -37,6 +37,18 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /maintenance:
+    get:
+      summary: Get maintenance mode settings
+      tags: [ public ]
+      operationId: getMaintenanceModeSettings
+      security: [ ]
+      responses:
+        '200':
+          description: Maintenance mode status
+          content: &jsonContent { application/json: { schema: { type: object } } }
+        '500':
+          $ref: '#/components/responses/ServerError'
   /config:
     get:
       summary: Get configuration info for authenticating with and using the API

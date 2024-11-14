@@ -9,7 +9,7 @@
                 - column:
                      { name: message, type: text, constraints: { nullable: true } }
                 - column:
-                     { name: password, type: text, constraints: { nullable: true } }
+                     { name: bypass_phrase, type: text, constraints: { nullable: true } }
                 - column:
                      { name: enabled, type: boolean, constraints: { nullable: false } }
                 - column:

@@ -7,7 +7,7 @@ import lombok.experimental.SuperBuilder;
 @Getter @Setter @SuperBuilder
 public class MaintenanceModeSettings {
     private String message;
-    private String password;
+    private String bypassPhrase;
     private boolean enabled;
     private boolean disableScheduledJobs;
 }

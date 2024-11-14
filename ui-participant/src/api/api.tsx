@@ -16,13 +16,12 @@ import {
   StudyEnvParams,
   Survey,
   SurveyResponse,
-  MaintenanceModeSettings
+  MaintenanceModeSettings, Answer
 } from '@juniper/ui-core'
 import { defaultApiErrorHandle } from 'util/error-utils'
 import queryString from 'query-string'
 
 export type {
-  Answer,
   HtmlPage,
   HtmlSection,
   LocalSiteContent,
@@ -444,20 +443,9 @@ export default {
   },
 
   async loadMaintenanceModeSettings(): Promise<MaintenanceModeSettings> {
-    // const url = `${API_ROOT}/maintenanceMode`
-    // const response = await fetch(url, this.getGetInit())
-    // return await this.processJsonResponse(response)
-
-    // hardcoding the maintenance mode settings for now
-    return {
-      enabled: true,
-      message: 'This website is currently undergoing scheduled maintenance. All study activities will be unavailable ' +
-          'during this time. We expect to be back online by **9:00 PM EST** on **12/11/2024**.' +
-          ' Please contact [support@juniper.terra.bio](mailto:support@juniper.terra.bio) ' +
-          'if you have any questions or need additional support.',
-      bypassPhrase: 'd2p4eva!',
-      disableScheduledJobs: false
-    }
+    const url = `/maintenance`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
   },
 
   async log(logEvent: LogEvent): Promise<void> {

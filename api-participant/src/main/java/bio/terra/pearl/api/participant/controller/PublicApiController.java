@@ -13,6 +13,7 @@ import bio.terra.pearl.core.model.site.SiteMedia;
 import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.site.SiteMediaService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,22 @@ public class PublicApiController implements PublicApi {
       return ResponseEntity.notFound().build();
     }
     return ResponseEntity.ok(portalConfig);
+  }
+
+  @Override
+  public ResponseEntity<Object> getMaintenanceModeSettings() {
+    Map<String, Object> config = new HashMap<>();
+    config.put(
+        "message",
+        "This website is currently undergoing scheduled maintenance. "
+            + "All study activities will be unavailable during this time. "
+            + "We expect to be back online by **9:00 PM EST** on **12/11/2024**. "
+            + "Please contact [support@juniper.terra.bio](mailto:support@juniper.terra.bio) "
+            + "if you have any questions or need additional support.");
+    config.put("bypassPhrase", "broad_institute");
+    config.put("enabled", true);
+    config.put("disableScheduledJobs", false);
+    return ResponseEntity.ok(config);
   }
 
   /**
