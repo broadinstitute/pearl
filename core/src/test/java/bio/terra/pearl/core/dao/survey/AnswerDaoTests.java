@@ -13,6 +13,7 @@ import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.Answer;
+import bio.terra.pearl.core.model.survey.AnswerFormat;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyResponse;
 import bio.terra.pearl.core.service.survey.SurveyService;
@@ -53,6 +54,7 @@ public class AnswerDaoTests extends BaseSpringBootTest {
         .creatingParticipantUserId(response.getCreatingParticipantUserId())
         .surveyStableId("something")
         .surveyVersion(1)
+            .format(AnswerFormat.NONE)
         .build();
     Answer savedAnswer = answerDao.create(stringAnswer);
     DaoTestUtils.assertGeneratedProperties(savedAnswer);
@@ -65,24 +67,28 @@ public class AnswerDaoTests extends BaseSpringBootTest {
     SurveyResponse response = surveyResponseFactory.buildPersisted(getTestName(info));
     Answer stringAnswer = answerForResponse(response, "q1")
         .stringValue("test1234")
+            .format(AnswerFormat.NONE)
         .build();
     Answer savedAnswer = answerDao.create(stringAnswer);
     assertThat(savedAnswer.getStringValue(), equalTo(stringAnswer.getStringValue()));
 
     Answer objectAnswer = answerForResponse(response, "q2")
         .objectValue("[\"foo\", \"bar\"]")
+            .format(AnswerFormat.NONE)
         .build();
     savedAnswer = answerDao.create(objectAnswer);
     assertThat(savedAnswer.getObjectValue(), equalTo(objectAnswer.getObjectValue()));
 
     Answer booleanAnswer = answerForResponse(response, "q3")
         .booleanValue(true)
+            .format(AnswerFormat.NONE)
         .build();
     savedAnswer = answerDao.create(booleanAnswer);
     assertThat(savedAnswer.getBooleanValue(), equalTo(booleanAnswer.getBooleanValue()));
 
     Answer numberAnswer = answerForResponse(response, "q4")
         .numberValue(45.6)
+            .format(AnswerFormat.NONE)
         .build();
     savedAnswer = answerDao.create(numberAnswer);
     assertThat(savedAnswer.getNumberValue(), equalTo(numberAnswer.getNumberValue()));

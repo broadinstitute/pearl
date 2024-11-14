@@ -2062,7 +2062,7 @@ paths:
         - { name: fileName, in: path, required: true, schema: { type: string } }
       responses:
         '200':
-          description: file data. Note that "version" supports both integers and the string 'latest' to get the most recent
+          description: file data
           content:
             application/*: # any file type
               schema:

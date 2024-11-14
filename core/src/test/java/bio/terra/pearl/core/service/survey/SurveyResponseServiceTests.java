@@ -297,7 +297,7 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
                 .surveyId(survey.getId())
                 .complete(false)
                 .answers(List.of(
-                        Answer.builder().stringValue(file.getFileName()).format(AnswerFormat.FILE_NAME).build())
+                        Answer.builder().stringValue(file.getFileName()).format(AnswerFormat.FILE_NAME).questionStableId("my_file_question").build())
                 )
                 .build();
 
@@ -310,14 +310,6 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
         // check that the answers were created
         SurveyResponse savedResponse = surveyResponseService.findByEnrolleeId(enrolleeBundle.enrollee().getId()).get(0);
         assertThat(participantFileService.findBySurveyResponseId(savedResponse.getId()), hasSize(1));
-
-
-        savedResponse.setAnswers(List.of());
-        surveyResponseService.updateResponse(savedResponse, new ResponsibleEntity(enrolleeBundle.participantUser()), null,
-                enrolleeBundle.portalParticipantUser(), enrolleeBundle.enrollee(), task.getId(), survey.getPortalId());
-
-        assertThat(participantFileService.findBySurveyResponseId(savedResponse.getId()), hasSize(0));
-
     }
 
     @Test

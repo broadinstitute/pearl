@@ -59,6 +59,7 @@ class EnrolleeSearchExpressionParserTest extends BaseSpringBootTest {
                         answer_diagnosis.survey_version as answer_diagnosis_survey_version, \
                         answer_diagnosis.viewed_language as answer_diagnosis_viewed_language, \
                         answer_diagnosis.answer_type as answer_diagnosis_answer_type, \
+                        answer_diagnosis.format as answer_diagnosis_format, \
                         answer_diagnosis.string_value as answer_diagnosis_string_value, \
                         answer_diagnosis.object_value as answer_diagnosis_object_value, \
                         answer_diagnosis.number_value as answer_diagnosis_number_value, \
