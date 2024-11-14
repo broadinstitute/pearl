@@ -1781,7 +1781,7 @@ export default {
           'during this time. We expect to be back online by **9:00 PM EST** on **12/11/2024**.' +
           ' Please contact [support@juniper.terra.bio](mailto:support@juniper.terra.bio) ' +
           'if you have any questions or need additional support.',
-      maintenancePassword: 'd2p4eva!',
+      bypassPhrase: 'd2p4eva!',
       disableScheduledJobs: false
     }
   },

@@ -28,10 +28,10 @@ export function MaintenanceMode({ children }: { children: React.ReactNode }) {
   return (
     <div>
       <div className={'d-flex justify-content-center align-items-center vh-100'}>
-        <div className={'text-center'}>
+        <div className={'text-center w-75'}>
           <h1><FontAwesomeIcon icon={faScrewdriverWrench}/> This application is currently unavailable</h1>
           <Markdown className={'py-2'}>{settings?.message}</Markdown>
-          <p>If you are a system administrator, you may login below:</p>
+          <div className={'mt-5 mb-2'}>If you are a system administrator, you may login below:</div>
           <div className={'d-flex justify-content-center'}>
             <input
               className={'form-control'}
@@ -40,9 +40,9 @@ export function MaintenanceMode({ children }: { children: React.ReactNode }) {
               onChange={e => { setPassword(e.target.value) }
               }/>
             <button
-              className={'btn btn-primary mx-2'}
+              className={'btn btn-primary mx-2 border border-1'}
               onClick={() => {
-                if (password === settings?.maintenancePassword) {
+                if (password === settings?.bypassPhrase) {
                   setBypassMaintenanceMode(true)
                 }
               }}
@@ -52,7 +52,6 @@ export function MaintenanceMode({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </div>
-      )
     </div>
   )
 }

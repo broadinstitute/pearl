@@ -1,6 +1,6 @@
 export type MaintenanceModeSettings = {
     enabled: boolean
     message: string
-    maintenancePassword: string
+    bypassPhrase: string
     disableScheduledJobs: boolean
 }

@@ -50,12 +50,12 @@ export default function MaintenanceSettings() {
             value={settings?.message} onChange={e => setSettings({ ...settings, message: e })}
           />
           <TextInput
-            label={'Maintenance Bypass Password'}
+            label={'Maintenance Bypass Phrase'}
             disabled={!settings?.enabled}
             description={'Password required to bypass maintenance mode. This is not encrypted in any way and ' +
                       'is only intended to discourage access to the application.'}
-            value={settings?.maintenancePassword || ''}
-            onChange={e => setSettings({ ...settings, maintenancePassword: e })}
+            value={settings?.bypassPhrase || ''}
+            onChange={e => setSettings({ ...settings, bypassPhrase: e })}
           />
         </div>
         <div className={'bg-light p-3 my-3 rounded-3 border border-1'}>

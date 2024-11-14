@@ -24,11 +24,11 @@ export type ValidateAddressFunc = (address: MailingAddress) => Promise<AddressVa
  * main participant ui app.
  */
 export type ApiContextT = {
-  getImageUrl: ImageUrlFunc,
-  submitMailingListContact: SubmitMailingListContactFunc,
-  getLanguageTexts: GetLanguageTextsFunc,
-  updateSurveyResponse: UpdateSurveyResponseFunc,
-  validateAddress: ValidateAddressFunc,
+  getImageUrl: ImageUrlFunc
+  submitMailingListContact: SubmitMailingListContactFunc
+  getLanguageTexts: GetLanguageTextsFunc
+  updateSurveyResponse: UpdateSurveyResponseFunc
+  validateAddress: ValidateAddressFunc
   loadMaintenanceModeSettings: LoadMaintenanceModeSettingsFunc
 }
 
