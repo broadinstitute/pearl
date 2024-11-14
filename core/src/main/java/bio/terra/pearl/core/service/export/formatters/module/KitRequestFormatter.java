@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class KitRequestFormatter extends BeanListModuleFormatter<KitRequestDto> {
     private static final List<String> KIT_REQUEST_INCLUDED_PROPERTIES =
-            List.of("status", "sentToAddress", "sentAt", "receivedAt", "createdAt", "labeledAt",
+            List.of("status", "sentToAddress", "sentAt", "receivedAt", "createdAt", "labeledAt", "kitLabel",
                     "trackingNumber", "returnTrackingNumber", "skipAddressValidation");
 
     public KitRequestFormatter(ExportOptions options) {
