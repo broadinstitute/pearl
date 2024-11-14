@@ -10,10 +10,11 @@ import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.portal.PortalEnvironmentDescriptor;
 import bio.terra.pearl.core.model.site.SiteMedia;
+import bio.terra.pearl.core.service.maintenance.MaintenanceModeService;
 import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.site.SiteMediaService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.HashMap;
+
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class PublicApiController implements PublicApi {
   private final SiteMediaService siteMediaService;
   private final PortalService portalService;
   private final StatusService statusService;
+  private final MaintenanceModeService maintenanceModeService;
   private final VersionConfiguration versionConfiguration;
   private final Environment env;
 
@@ -45,12 +47,14 @@ public class PublicApiController implements PublicApi {
       SiteMediaService siteMediaService,
       PortalService portalService,
       StatusService statusService,
+      MaintenanceModeService maintenanceModeService,
       VersionConfiguration versionConfiguration,
       Environment env) {
     this.b2CConfigurationService = b2CConfigurationService;
     this.siteMediaService = siteMediaService;
     this.portalService = portalService;
     this.statusService = statusService;
+    this.maintenanceModeService = maintenanceModeService;
     this.versionConfiguration = versionConfiguration;
     this.env = env;
   }
@@ -90,17 +94,7 @@ public class PublicApiController implements PublicApi {
 
   @Override
   public ResponseEntity<Object> getMaintenanceModeSettings() {
-    Map<String, Object> config = new HashMap<>();
-    config.put(
-        "message",
-        "This website is currently undergoing scheduled maintenance. "
-            + "All study activities will be unavailable during this time. "
-            + "We expect to be back online by **9:00 PM EST** on **12/11/2024**. "
-            + "Please contact [support@juniper.terra.bio](mailto:support@juniper.terra.bio) "
-            + "if you have any questions or need additional support.");
-    config.put("bypassPhrase", "broad_institute");
-    config.put("enabled", true);
-    config.put("disableScheduledJobs", false);
+    Map<String, Object> config = maintenanceModeService.getMaintenanceModeSettings();
     return ResponseEntity.ok(config);
   }
 

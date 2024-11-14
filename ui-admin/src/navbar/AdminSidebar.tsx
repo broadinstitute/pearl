@@ -85,7 +85,7 @@ const AdminSidebar = ({ config }: { config: Config }) => {
               <NavLink to="/logEvents" className={sidebarNavLinkClasses}>Log Events</NavLink>
             </li>
             <li className="mb-2">
-              <NavLink to="/maintenance" className={sidebarNavLinkClasses}>Maintenance</NavLink>
+              <NavLink to="/maintenanceMode" className={sidebarNavLinkClasses}>Maintenance</NavLink>
             </li>
           </ul>}/>}
       </>}

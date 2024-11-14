@@ -72,7 +72,7 @@ function App() {
                           </ProtectedRoute>}>
                             <Route path="populate/*" element={<PopulateRouteSelect/>}/>
                             <Route path="logEvents/*" element={<LogEventViewer/>}/>
-                            <Route path="maintenance/*" element={<MaintenanceSettings/>}/>
+                            <Route path="maintenanceMode/*" element={<MaintenanceSettings/>}/>
                             <Route path="users/*" element={<AdminUserRouter/>}/>
                             <Route path="integrations/*" element={<IntegrationDashboard/>}/>
                             <Route path=":portalShortcode/*" element={
