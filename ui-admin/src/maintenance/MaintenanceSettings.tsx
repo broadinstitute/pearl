@@ -4,6 +4,7 @@ import { Checkbox } from 'components/forms/Checkbox'
 import { Textarea } from 'components/forms/Textarea'
 import { TextInput } from '../components/forms/TextInput'
 import { renderPageHeader } from '../util/pageUtils'
+import { MaintenanceModeSettings } from '@juniper/ui-core'
 import Api from 'api/api'
 
 export default function MaintenanceSettings() {

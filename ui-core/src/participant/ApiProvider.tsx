@@ -1,9 +1,9 @@
-import React, { useContext } from 'react'
+import React, { createContext, useContext } from 'react'
 import { StudyEnvParams } from 'src/types/study'
 import { HubResponse } from 'src/types/user'
 import { AddressValidationResult, MailingAddress } from 'src/types/address'
 import { SurveyResponseWithJustification } from 'src/types/forms'
-import { MaintenanceModeSettings } from 'src/maintenance/MaintenanceMode'
+import { MaintenanceModeSettings } from 'src/types/maintenance'
 
 export type ImageUrlFunc = (cleanFileName: string, version: number) => string
 export type SubmitMailingListContactFunc = (name: string, email: string) => Promise<object>
@@ -17,7 +17,6 @@ export type UpdateSurveyResponseFunc = ({
   response: SurveyResponseWithJustification, enrolleeShortcode: string, taskId: string, alertErrors?: boolean
 }) => Promise<HubResponse>
 export type LoadMaintenanceModeSettingsFunc = () => Promise<MaintenanceModeSettings>
-
 export type ValidateAddressFunc = (address: MailingAddress) => Promise<AddressValidationResult>
 
 /**
@@ -42,7 +41,7 @@ export const emptyApi: ApiContextT = {
   loadMaintenanceModeSettings: () => Promise.resolve({} as MaintenanceModeSettings)
 }
 
-const ApiContext = React.createContext<ApiContextT>(emptyApi)
+const ApiContext = createContext<ApiContextT>(emptyApi)
 /** helper function for using the api context */
 export const useApiContext = () => {
   return useContext(ApiContext)

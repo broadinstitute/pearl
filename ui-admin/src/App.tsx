@@ -29,11 +29,10 @@ import PopulateRouteSelect from './populate/PopulateRouteSelect'
 import IntegrationDashboard from './integration/IntegrationDashboard'
 import AdminUserRouter from './user/AdminUserRouter'
 import LogEventViewer from './health/LogEventViewer'
-import { initializeMixpanel } from '@juniper/ui-core'
+import { initializeMixpanel, MaintenanceMode } from '@juniper/ui-core'
 import mixpanel from 'mixpanel-browser'
 import { StatusPage } from './status/StatusPage'
 import MaintenanceSettings from './maintenance/MaintenanceSettings'
-import { MaintenanceMode } from './MaintenanceMode'
 
 /** auto-scroll-to-top on any navigation */
 const ScrollToTop = () => {

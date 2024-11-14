@@ -3,13 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faScrewdriverWrench } from '@fortawesome/free-solid-svg-icons'
 import { Markdown, useApiContext } from '@juniper/ui-core'
-
-export type MaintenanceModeSettings = {
-    enabled: boolean
-    message: string
-    maintenancePassword: string
-    disableScheduledJobs: boolean
-}
+import { MaintenanceModeSettings } from 'src/types/maintenance'
 
 export function MaintenanceMode({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<MaintenanceModeSettings>()
@@ -26,7 +20,9 @@ export function MaintenanceMode({ children }: { children: React.ReactNode }) {
   }, [])
 
   if (!settings?.enabled || bypassMaintenanceMode) {
-    return children
+    return <>
+      { children }
+    </>
   }
 
   return (
@@ -51,12 +47,12 @@ export function MaintenanceMode({ children }: { children: React.ReactNode }) {
                 }
               }}
             >
-                            Enter
+              Enter
             </button>
           </div>
         </div>
       </div>
-            )
+      )
     </div>
   )
 }

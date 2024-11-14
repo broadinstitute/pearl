@@ -15,7 +15,8 @@ import {
   StudyEnvironmentSurvey,
   StudyEnvParams,
   Survey,
-  SurveyResponse
+  SurveyResponse,
+  MaintenanceModeSettings
 } from '@juniper/ui-core'
 import { defaultApiErrorHandle } from 'util/error-utils'
 import queryString from 'query-string'
