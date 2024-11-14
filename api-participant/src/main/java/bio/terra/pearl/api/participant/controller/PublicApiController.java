@@ -14,7 +14,6 @@ import bio.terra.pearl.core.service.maintenance.MaintenanceModeService;
 import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.site.SiteMediaService;
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
