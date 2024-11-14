@@ -17,6 +17,7 @@ import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.PreEnrollmentResponse;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
+import bio.terra.pearl.core.model.survey.SurveyTaskConfigDto;
 import bio.terra.pearl.core.model.workflow.*;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
@@ -498,14 +499,14 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
             if (RecurrenceType.LONGITUDINAL.equals(survey.getRecurrenceType())) {
                 for (int i = 0; i < createdDaysAgo / survey.getRecurrenceIntervalDays(); i++) {
                     Instant taskTime = enrollee.getCreatedAt().plus((i + 1) * survey.getRecurrenceIntervalDays(), DAYS);
-                    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee, ppUser, studyEnvSurvey, survey);
+                    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee, ppUser, new SurveyTaskConfigDto(studyEnvSurvey, survey));
                     task = participantTaskService.create(task, auditInfo);
                     timeShiftDao.changeTaskCreationTime(task.getId(), taskTime);
                 }
             } else if (RecurrenceType.UPDATE.equals(survey.getRecurrenceType())) {
                 if (enrollee.getCreatedAt().plus(survey.getDaysAfterEligible(), ChronoUnit.DAYS).isBefore(Instant.now())) {
                     Instant taskTime = enrollee.getCreatedAt().plus(survey.getDaysAfterEligible(), DAYS);
-                    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee, ppUser, studyEnvSurvey, survey);
+                    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee, ppUser, new SurveyTaskConfigDto(studyEnvSurvey, survey));
                     task = participantTaskService.create(task, auditInfo);
                     timeShiftDao.changeTaskCreationTime(task.getId(), taskTime);
                 }
