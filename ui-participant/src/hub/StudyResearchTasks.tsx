@@ -1,8 +1,17 @@
 import { Link } from 'react-router-dom'
 import React from 'react'
 import { ParticipantTask } from 'api/api'
-import { Enrollee, useI18n } from '@juniper/ui-core'
-import { getNextTask, getTaskPath, isTaskAccessible, isTaskActive, taskComparator } from './task/taskUtils'
+import {
+  Enrollee,
+  useI18n
+} from '@juniper/ui-core'
+import {
+  getNextTask,
+  getTaskPath,
+  isTaskAccessible,
+  isTaskActive,
+  taskComparator
+} from './task/taskUtils'
 import TaskLink from './TaskLink'
 
 
@@ -39,6 +48,11 @@ export default function StudyResearchTasks(props: StudyResearchTasksProps) {
     .filter(task => task.taskType === 'SURVEY')
     .sort(taskComparator)
   const hasSurveyTasks = sortedSurveyTasks.length > 0
+
+  const sortedDocumentRequests = participantTasks
+    .filter(task => task.taskType === 'DOCUMENT_REQUEST')
+    .sort(taskComparator)
+  const hasDocumentRequests = sortedDocumentRequests.length > 0
 
   const nextTask = getNextTask(enrollee, [...sortedActiveConsentTasks, ...sortedSurveyTasks])
   const numTasksOfNextTaskType = nextTask
@@ -87,6 +101,14 @@ export default function StudyResearchTasks(props: StudyResearchTasksProps) {
           title={i18n('taskTypeSurveys')}
         />
       )}
+
+      {hasDocumentRequests &&
+          <TaskGrouping
+            enrollee={enrollee}
+            tasks={sortedDocumentRequests}
+            studyShortcode={studyShortcode}
+            title={i18n('taskTypeDocumentRequests')}
+          />}
 
       {hasCompletedConsentTasks && (
         <TaskGrouping

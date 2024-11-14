@@ -4,11 +4,16 @@ import { useDropzone } from 'react-dropzone'
 import './DocumentRequestUpload.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faCaretDown,
+  faCaretUp,
   faFile,
   faFilePdf,
   faImage,
-  faUpload
+  faUpload,
+  faX
 } from '@fortawesome/free-solid-svg-icons'
+import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
+import { isNil } from 'lodash'
 
 export const DocumentRequestUpload = (
   {
@@ -48,18 +53,18 @@ export const DocumentRequestUpload = (
     <div className='mb-2'>
       <SelectedFiles selectedFiles={selectedFiles} removeFile={removeFile}/>
     </div>
-    {/*<div className='w-100 d-flex'>*/}
-    {/*  <div className="w-25 p-3">*/}
     <div className='mb-2'>
-      <DragAndDrop uploadNewFile={uploadAndSelectFile}/>
+      {/* show on desktops */}
+      <div className='d-none d-lg-block'>
+        <DragAndDrop uploadNewFile={uploadAndSelectFile}/>
+      </div>
+      {/* show on mobile */}
+      <div className={'d-lg-none'}>
+        <FileUpload uploadNewFile={uploadAndSelectFile}/>
+      </div>
 
     </div>
-    {/*</div>*/}
-    {/*<div className="w-75 p-3">*/}
-    <Library files={files} selectFile={selectFile}/>
-
-    {/*  </div>*/}
-    {/*</div>*/}
+    <Library files={files} selectFile={selectFile} removeFile={removeFile} selectedFiles={selectedFiles}/>
   </div>
 }
 
@@ -73,10 +78,19 @@ const SelectedFiles = (
   }
 ) => {
   return <div>
+    <p>Selected files ({selectedFiles.length})</p>
     {selectedFiles.map(selectedFile => {
-      return <div key={selectedFile.id} className='w-100 d-flex'>
-        <span>{selectedFile.fileName}</span>
-        <button onClick={() => removeFile(selectedFile)}>x</button>
+      return <div key={selectedFile.id} className='w-100 justify-content-between d-flex'>
+        <div>
+          <FileIcon mimeType={selectedFile.fileType}/>
+          <span> {selectedFile.fileName}</span>
+        </div>
+        <button
+          className={'btn btn-link'}
+          onClick={() => removeFile(selectedFile)}
+        >
+          <FontAwesomeIcon icon={faX}/>
+        </button>
       </div>
     })}
   </div>
@@ -85,17 +99,32 @@ const SelectedFiles = (
 const Library = (
   {
     files,
-    selectFile
+    selectedFiles,
+    selectFile,
+    removeFile
   }: {
     files: ParticipantFile[],
-    selectFile: (file: ParticipantFile) => void
+    selectedFiles: ParticipantFile[],
+    selectFile: (file: ParticipantFile) => void,
+    removeFile: (file: ParticipantFile) => void
   }
 ) => {
+  const isSelected = (file: ParticipantFile) => {
+    return selectedFiles.find(f => f.id === file.id)
+  }
+
+  const [expanded, setExpanded] = React.useState(true)
+
   return <div className='card'>
     <div className='card-body'>
-      <p className='card-title'>My files <span>({files.length})</span></p>
+      <p className='card-title'>
+        My files <span>({files.length})</span>
+        <button className='btn btn-link' onClick={() => setExpanded(!expanded)}>
+          <FontAwesomeIcon icon={expanded ? faCaretUp : faCaretDown}/>
+        </button>
+      </p>
 
-      {files.map(file => {
+      {expanded && files.map(file => {
         return <div key={file.id}
           className={'border border-1 rounded-1 bg-light-subtle p-2 d-flex align-items-center justify-content-between'}>
           <div className='d-flex align-items-center justify-content-start'>
@@ -103,7 +132,17 @@ const Library = (
             <button className='btn btn-link'>{file.fileName}</button>
 
           </div>
-          <button onClick={() => selectFile(file)} className='float-end btn btn-link text-decoration-none'>+</button>
+          {isSelected(file)
+            ? <button
+              onClick={() => removeFile(file)}
+              className='float-end btn btn-outline-danger text-decoration-none border-0'>
+              <FontAwesomeIcon icon={faX}/>
+            </button>
+            : <button
+              onClick={() => selectFile(file)}
+              className='float-end btn btn-outline-primary text-decoration-none border-0'>
+              <FontAwesomeIcon icon={faPlus}/>
+            </button>}
         </div>
       })}
     </div>
@@ -148,5 +187,16 @@ const DragAndDrop = ({ uploadNewFile }: { uploadNewFile: (file: File) => void })
         </span>
       </div>
     </div>
+  </div>
+}
+
+const FileUpload = ({ uploadNewFile }: { uploadNewFile: (file: File) => void }) => {
+  return <div>
+    <input type="file" className={'form-control'} onChange={e => {
+      const file = e.target.files?.item(0) || null
+      if (!isNil(file)) {
+        uploadNewFile(file)
+      }
+    }}/>
   </div>
 }
