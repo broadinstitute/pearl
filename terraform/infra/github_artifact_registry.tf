@@ -31,10 +31,11 @@ resource "google_iam_workload_identity_pool_provider" "github_actions_pool_provi
     "attribute.repository_id"    = "assertion.repository_id"
     "attribute.repository_owner" = "assertion.repository_owner"
     "attribute.repository_owner_id" = "assertion.repository_owner_id"
+    "attribute.ref"              = "assertion.ref"
   }
 
   # NOTE: this is what restricts external access, this ids are from github
-  attribute_condition = "assertion.repository_owner_id == '393552' && assertion.repository_id == '566938309'"
+  attribute_condition = "assertion.repository_owner_id == '393552' && assertion.repository_id == '566938309' && assertion.ref == 'refs/heads/development'"
   oidc {
     allowed_audiences = []
     issuer_uri = "https://token.actions.githubusercontent.com"
