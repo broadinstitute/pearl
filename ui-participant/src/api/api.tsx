@@ -442,6 +442,23 @@ export default {
     bearerToken = token
   },
 
+  async loadMaintenanceModeSettings(): Promise<MaintenanceModeSettings> {
+    // const url = `${API_ROOT}/maintenanceMode`
+    // const response = await fetch(url, this.getGetInit())
+    // return await this.processJsonResponse(response)
+
+    // hardcoding the maintenance mode settings for now
+    return {
+      enabled: true,
+      message: 'This website is currently undergoing scheduled maintenance. All study activities will be unavailable ' +
+          'during this time. We expect to be back online by **9:00 PM EST** on **12/11/2024**.' +
+          ' Please contact [support@juniper.terra.bio](mailto:support@juniper.terra.bio) ' +
+          'if you have any questions or need additional support.',
+      maintenancePassword: 'd2p4eva!',
+      disableScheduledJobs: false
+    }
+  },
+
   async log(logEvent: LogEvent): Promise<void> {
     const url = `${API_ROOT}/public/log/v1/log`
     await fetch(url, {

@@ -3,6 +3,7 @@ import { StudyEnvParams } from 'src/types/study'
 import { HubResponse } from 'src/types/user'
 import { AddressValidationResult, MailingAddress } from 'src/types/address'
 import { SurveyResponseWithJustification } from 'src/types/forms'
+import { MaintenanceModeSettings } from 'src/maintenance/MaintenanceMode'
 
 export type ImageUrlFunc = (cleanFileName: string, version: number) => string
 export type SubmitMailingListContactFunc = (name: string, email: string) => Promise<object>
@@ -15,6 +16,7 @@ export type UpdateSurveyResponseFunc = ({
   studyEnvParams: StudyEnvParams, stableId: string, version: number,
   response: SurveyResponseWithJustification, enrolleeShortcode: string, taskId: string, alertErrors?: boolean
 }) => Promise<HubResponse>
+export type LoadMaintenanceModeSettingsFunc = () => Promise<MaintenanceModeSettings>
 
 export type ValidateAddressFunc = (address: MailingAddress) => Promise<AddressValidationResult>
 
@@ -27,7 +29,8 @@ export type ApiContextT = {
   submitMailingListContact: SubmitMailingListContactFunc,
   getLanguageTexts: GetLanguageTextsFunc,
   updateSurveyResponse: UpdateSurveyResponseFunc,
-  validateAddress: ValidateAddressFunc
+  validateAddress: ValidateAddressFunc,
+  loadMaintenanceModeSettings: LoadMaintenanceModeSettingsFunc
 }
 
 export const emptyApi: ApiContextT = {
@@ -35,7 +38,8 @@ export const emptyApi: ApiContextT = {
   submitMailingListContact: () => Promise.resolve({}),
   getLanguageTexts: () => Promise.resolve({}),
   updateSurveyResponse: () => Promise.resolve({} as HubResponse),
-  validateAddress: () => Promise.resolve({} as AddressValidationResult)
+  validateAddress: () => Promise.resolve({} as AddressValidationResult),
+  loadMaintenanceModeSettings: () => Promise.resolve({} as MaintenanceModeSettings)
 }
 
 const ApiContext = React.createContext<ApiContextT>(emptyApi)
