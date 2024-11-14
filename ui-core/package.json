@@ -8,13 +8,15 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@tanstack/react-virtual": "^3.0.0-beta.54",
     "@types/diff": "^5.0.9",
+    "@types/react-dropzone": "^5.1.0",
     "classnames": "^2.3.2",
     "diff": "^5.2.0",
     "downshift": "^7.6.0",
     "inputmask": "3.3.10",
+    "lodash": "^4.17.21",
     "micromark": "3.1.0",
-    "react-select": "^5.4.0",
-    "lodash": "^4.17.21"
+    "react-dropzone": "^14.3.5",
+    "react-select": "^5.4.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.21.5",
