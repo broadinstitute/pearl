@@ -20,9 +20,19 @@ export type AdminUserParams = {
 export type PortalAdminUser = {
   portalId: string
   roles: Role[]
+  portalAdminUserRoles: PortalAdminUserRole[]
+}
+
+export type PortalAdminUserRole = {
+  id: string,
+  roleId: string,
+  createdAt: number,
+  portalAdminUserId: string
+  lastUpdatedAt: number
 }
 
 export type Role = {
+  id: string
   name: string
   displayName: string
   description: string

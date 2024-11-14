@@ -22,16 +22,14 @@ public class MergePair<T extends BaseEntity> {
 
     public static <D extends BaseEntity> List<MergePair<D>> pairLists(List<D> sourceList, List<D> targetList, BiFunction<D, D, Boolean> comparator) {
         List<MergePair<D>> pairs = new ArrayList<>();
+        List<D> targetsToMatch = new ArrayList<>(targetList);
         for (D source : sourceList) {
-            D target = targetList.stream().filter(t -> comparator.apply(source, t)).findFirst().orElse(null);
+            D target = targetsToMatch.stream().filter(t -> comparator.apply(source, t)).findFirst().orElse(null);
             pairs.add(new MergePair<D>(source, target));
+            targetsToMatch.remove(target);
         }
-        for (D target : targetList) {
-            D source = sourceList.stream().filter(t -> comparator.apply(target, t)).findFirst().orElse(null);
-            // we only need to add unmatched targets -- matched will have been handled in the loop above
-            if (source == null) {
-                pairs.add(new MergePair<D>(source, target));
-            }
+        for (D target : targetsToMatch) {
+            pairs.add(new MergePair<D>(null, target));
         }
         return pairs;
     }

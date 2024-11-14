@@ -120,9 +120,9 @@
       "surveyStableId": "med_record_request",
       "surveyVersion": 1,
       "complete": true,
-      "participantFileNames": [
-        "my_file.txt"
-      ]
+      "answerPopDtos": [
+        {"questionStableId": "medical_record_document_request", "format": "FILE_NAME", "stringValue":  "my_file.txt"}
+     ]
     }
   ],
   "kitRequestDtos": [

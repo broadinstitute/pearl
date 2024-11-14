@@ -31,6 +31,10 @@ public class ParticipantUserDao extends BaseMutableJdbiDao<ParticipantUser> {
       return findByProperty("shortcode", shortcode);
    }
 
+   public List<ParticipantUser> findByParticipantUserIds(List<UUID> participantUserIds) {
+      return findAllByPropertyCollection("id", participantUserIds);
+   }
+
    public Optional<ParticipantUser> findByEnrolleeId(UUID enrolleeId) {
       return jdbi.withHandle(handle -> handle.createQuery("""
                       SELECT pu.* FROM participant_user pu

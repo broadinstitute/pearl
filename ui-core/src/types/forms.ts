@@ -92,7 +92,7 @@ export type SurveyResponse = FormResponse & {
   surveyId: string
   enrolleeId: string
   answers: Answer[]
-  participantFiles: ParticipantFile[]
+  participantFiles?: ParticipantFile[]
   complete: boolean
 }
 

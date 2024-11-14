@@ -1,15 +1,15 @@
-import { setupRouterTest } from '@juniper/ui-core'
+import { renderWithRouter, setupRouterTest } from '@juniper/ui-core'
 import {
   mockAnswer,
   mockConfiguredSurvey,
-  mockEnrollee,
+  mockEnrollee, mockParticipantTask,
   mockStudyEnvContext,
   mockSurveyResponse
 } from 'test-utils/mocking-utils'
 import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { userEvent } from '@testing-library/user-event'
-import { RawEnrolleeSurveyView } from './SurveyResponseView'
+import SurveyResponseView, { RawEnrolleeSurveyView } from './SurveyResponseView'
 import { userHasPermission } from 'user/UserProvider'
 import Api from 'api/api'
 
@@ -19,6 +19,36 @@ jest.mock('user/UserProvider', () => ({
 }))
 
 jest.spyOn(Api, 'fetchEnrolleeChangeRecords').mockResolvedValue([])
+
+describe('SurveyResponseView', () => {
+  test('Displays assignment button if unassigned', async () => {
+    renderWithRouter(<SurveyResponseView enrollee={mockEnrollee()}
+      updateResponseMap={jest.fn()}
+      studyEnvContext={mockStudyEnvContext()}
+      responseMap={{
+        someSurvey: {
+          tasks: [], responses: [],
+          survey: mockConfiguredSurvey()
+        }
+      }} onUpdate={jest.fn()}/>, ['/someSurvey'], ':surveyStableId')
+    expect(screen.getByText('Not assigned')).toBeVisible()
+    expect(screen.getByText('Assign')).toBeVisible()
+  })
+
+  test('Displays response if assigned', async () => {
+    renderWithRouter(<SurveyResponseView enrollee={mockEnrollee()}
+      updateResponseMap={jest.fn()}
+      studyEnvContext={mockStudyEnvContext()}
+      responseMap={{
+        someSurvey: {
+          tasks: [mockParticipantTask('SURVEY', 'NEW')], responses: [],
+          survey: mockConfiguredSurvey()
+        }
+      }} onUpdate={jest.fn()}/>, ['/someSurvey'], ':surveyStableId')
+    expect(screen.getByText('Not Started')).toBeVisible()
+  })
+})
+
 
 describe('RawEnrolleeSurveyView', () => {
   jest.clearAllMocks()
