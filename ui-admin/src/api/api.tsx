@@ -1707,10 +1707,10 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async extractPortal(portalShortcode: string, onlyExtractPublishedVersion: boolean) {
+  async extractPortal(portalShortcode: string, onlyExtractActiveVersions: boolean) {
     const url = `${
       basePopulateUrl()
-    }/portal/${portalShortcode}/extract?onlyExtractPublishedVersions=${onlyExtractPublishedVersion}`
+    }/portal/${portalShortcode}/extract?onlyExtractActiveVersions=${onlyExtractActiveVersions}`
     const response = await fetch(url, this.getGetInit())
     return this.processResponse(response)
   },

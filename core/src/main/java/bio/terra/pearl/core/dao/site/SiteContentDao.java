@@ -105,7 +105,7 @@ public class SiteContentDao extends BaseVersionedJdbiDao<SiteContent> {
         ) + 1;
     }
 
-    public List<SiteContent> findPublishedContentByPortalId(UUID portalId) {
+    public List<SiteContent> findActiveContentByPortalId(UUID portalId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("""
                                  select sc.* from site_content sc

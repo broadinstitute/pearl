@@ -101,7 +101,7 @@ public class SurveyDao extends BaseVersionedJdbiDao<Survey> {
         return Survey.class;
     }
 
-    public List<Survey> findPublishedSurveysByPortalIdNoPreEnrolls(UUID portalId) {
+    public List<Survey> findActiveSurveysByPortalIdNoPreEnrolls(UUID portalId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("""
                                 select s.* from survey s
@@ -114,7 +114,7 @@ public class SurveyDao extends BaseVersionedJdbiDao<Survey> {
         );
     }
 
-    public List<Survey> findPublishedPreEnrolleeSurveysByPortalId(UUID portalId) {
+    public List<Survey> findActivePreEnrolleeSurveysByPortalId(UUID portalId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("""
                                 select s.* from survey s

@@ -14,11 +14,11 @@ export default function ExtractPortal({ initialPortalShortcode }: {initialPortal
   const [portalShortcode, setPortalShortcode] = useState(initialPortalShortcode)
   const [isLoading, setIsLoading] = useState(false)
 
-  const [onlyExtractPublishedVersions, setOnlyExtractPublishedVersions] = useState(false)
+  const [onlyExtractActiveVersions, setOnlyExtractActiveVersions] = useState(false)
 
   const doExport = async () => {
     doApiLoad(async () => {
-      const response = await Api.extractPortal(portalShortcode, onlyExtractPublishedVersions)
+      const response = await Api.extractPortal(portalShortcode, onlyExtractActiveVersions)
       const blob = await response.blob()
       const fileName = `${currentIsoDate()}-${portalShortcode}-config.zip`
       saveBlobAsDownload(blob, fileName)
@@ -39,11 +39,11 @@ export default function ExtractPortal({ initialPortalShortcode }: {initialPortal
       <input
         className="form-check-input"
         type="checkbox"
-        value={onlyExtractPublishedVersions.toString()}
-        onChange={e => setOnlyExtractPublishedVersions(e.target.checked)}
+        value={onlyExtractActiveVersions.toString()}
+        onChange={e => setOnlyExtractActiveVersions(e.target.checked)}
         id="onlyPublishedVersions"/>
       <label className="form-check-label" htmlFor="onlyPublishedVersions">
-        Only extract published content
+        Only extract active content
       </label>
     </div>
     <br/>

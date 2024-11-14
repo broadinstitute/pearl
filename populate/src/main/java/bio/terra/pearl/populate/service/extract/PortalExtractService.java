@@ -66,11 +66,11 @@ public class PortalExtractService {
         this.objectMapper.addMixIn(Portal.class, PortalMixin.class);
     }
 
-    public void extract(String portalShortcode, OutputStream os, boolean extractPublishedVersionsOnly) throws IOException {
+    public void extract(String portalShortcode, OutputStream os, boolean extractActiveVersionsOnly) throws IOException {
         Portal portal = portalService.findOneByShortcode(portalShortcode)
                 .orElseThrow(() -> new NotFoundException("Portal not found: " + portalShortcode));
         ZipOutputStream zipOut = new ZipOutputStream(os);
-        ExtractPopulateContext context = new ExtractPopulateContext(portal, zipOut, extractPublishedVersionsOnly);
+        ExtractPopulateContext context = new ExtractPopulateContext(portal, zipOut, extractActiveVersionsOnly);
         mediaExtractor.writeMedia(portal, context);
         siteContentExtractor.writeSiteContents(portal, context);
         surveyExtractor.writeSurveys(portal, context);

@@ -113,7 +113,7 @@ public class SiteContentService extends VersionedEntityService<SiteContent, Site
         }
     }
 
-    public List<SiteContent> findPublishedContentByPortalId(UUID portalId) {
-        return dao.findPublishedContentByPortalId(portalId);
+    public List<SiteContent> findActiveContentByPortalId(UUID portalId) {
+        return dao.findActiveContentByPortalId(portalId);
     }
 }

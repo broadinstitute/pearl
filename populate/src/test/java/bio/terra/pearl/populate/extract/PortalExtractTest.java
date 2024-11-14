@@ -71,7 +71,7 @@ public class PortalExtractTest extends BasePopulatePortalsTest {
 
     @Test
     @Transactional
-    public void testExtractOnlyPublishedVersion() throws Exception {
+    public void testExtractOnlyActiveVersions() throws Exception {
         baseSeedPopulator.populateRolesAndPermissions();
         // populate a portal, then see if we can extract it, delete it, and repopulate it
 
@@ -89,13 +89,13 @@ public class PortalExtractTest extends BasePopulatePortalsTest {
         ZipInputStream zis = new ZipInputStream(new FileInputStream(tmpFileName));
         Portal restoredPortal = portalPopulator.populateFromZipFile(zis, true, null);
 
-        List<Survey> onlyPublishedSurveys = surveyService.findByPortalId(restoredPortal.getId());
-        List<SiteContent> onlyPublishedSiteContent = siteContentService.findByPortalId(restoredPortal.getId());
+        List<Survey> onlyActiveSurveys = surveyService.findByPortalId(restoredPortal.getId());
+        List<SiteContent> onlyActiveSiteContent = siteContentService.findByPortalId(restoredPortal.getId());
 
         assertEquals(431, allSurveyVersions.size());
         assertEquals(63, allSiteContentVersions.size());
-        assertEquals(12, onlyPublishedSurveys.size());
-        assertEquals(1, onlyPublishedSiteContent.size());
+        assertEquals(12, onlyActiveSurveys.size());
+        assertEquals(1, onlyActiveSiteContent.size());
 
     }
 
