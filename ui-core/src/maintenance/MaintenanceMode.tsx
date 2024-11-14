@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faScrewdriverWrench } from '@fortawesome/free-solid-svg-icons'
-import { Markdown, useApiContext } from '@juniper/ui-core'
 import { MaintenanceModeSettings } from 'src/types/maintenance'
+import { useApiContext } from 'src/participant/ApiProvider'
+import { Markdown } from 'src/participant/landing/Markdown'
 
 export function MaintenanceMode({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<MaintenanceModeSettings>()
