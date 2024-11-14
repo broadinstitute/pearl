@@ -180,12 +180,12 @@ public class PopulateController implements PopulateApi {
 
   @Override
   public ResponseEntity<Resource> extractPortal(
-      String portalShortcode, Boolean extractPublishedVersionsOnly) {
+      String portalShortcode, Boolean extractActiveVersionsOnly) {
     AdminUser operator = authUtilService.requireAdminUser(request);
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       populateExtService.extractPortal(
-          OperatorAuthContext.of(operator), portalShortcode, baos, extractPublishedVersionsOnly);
+          OperatorAuthContext.of(operator), portalShortcode, baos, extractActiveVersionsOnly);
       return ResponseEntity.ok().body(new ByteArrayResource(baos.toByteArray()));
     } catch (IOException e) {
       throw new InternalServerErrorException("Error exporting portal", e);

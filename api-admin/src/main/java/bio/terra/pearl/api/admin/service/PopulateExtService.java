@@ -183,9 +183,9 @@ public class PopulateExtService {
       OperatorAuthContext authContext,
       String portalShortcode,
       OutputStream os,
-      boolean extractPublishedVersionsOnly)
+      boolean extractActiveVersionsOnly)
       throws IOException {
-    portalExtractService.extract(portalShortcode, os, extractPublishedVersionsOnly);
+    portalExtractService.extract(portalShortcode, os, extractActiveVersionsOnly);
   }
 
   @Transactional
