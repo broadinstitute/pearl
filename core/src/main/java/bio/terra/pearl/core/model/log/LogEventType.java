@@ -7,5 +7,4 @@ public enum LogEventType {
   EVENT, // an ApplicationEvent was fired
   STATS, // stats measurement -- e.g. webVitals
   INFO // something interesting that isn't an error
-
 }
