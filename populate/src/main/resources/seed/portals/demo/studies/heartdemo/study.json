@@ -113,7 +113,8 @@
         "enrollees/child2Family2.json",
         "enrollees/invited.json",
         "enrollees/lostInterest.json",
-        "enrollees/lostInterestNo.json"
+        "enrollees/lostInterestNo.json",
+        "enrollees/recurrenceDue.json"
       ],
       "familyFiles": [
         "families/salk.json"

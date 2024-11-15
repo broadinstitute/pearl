@@ -46,7 +46,8 @@
         "participants/invited.json",
         "participants/unenrolled.json",
         "participants/lostInterest.json",
-        "participants/lostInterestNo.json"
+        "participants/lostInterestNo.json",
+        "participants/recurrenceDue.json"
       ],
       "mailingListContacts": [
         {

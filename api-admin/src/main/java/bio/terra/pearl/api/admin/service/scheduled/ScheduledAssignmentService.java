@@ -22,7 +22,7 @@ public class ScheduledAssignmentService {
   @SchedulerLock(
       name = "ScheduledSurveyAssignmentService.assignScheduledSurveys",
       lockAtMostFor = "500s",
-      lockAtLeastFor = "10s")
+      lockAtLeastFor = "60s")
   public void assignScheduledSurveys() {
     log.info("Scheduled task processing beginning");
     taskDispatchers.forEach(TaskDispatcher::assignScheduledTasks);
