@@ -8,6 +8,7 @@ import bio.terra.pearl.api.admin.config.VersionConfiguration;
 import bio.terra.pearl.api.admin.model.SystemStatus;
 import bio.terra.pearl.api.admin.service.ConfigExtService;
 import bio.terra.pearl.api.admin.service.StatusService;
+import bio.terra.pearl.core.service.maintenance.MaintenanceModeService;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ class PublicApiControllerTest {
   @MockBean private StatusService statusService;
 
   @MockBean private VersionConfiguration versionConfiguration;
+
+  @MockBean private MaintenanceModeService maintenanceModeService;
 
   @Test
   void testStatus() throws Exception {
