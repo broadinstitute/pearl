@@ -13,6 +13,7 @@ import {
 
 import {
   Answer,
+  AnswerFormat,
   FormContent,
   FormElement,
   Survey,
@@ -181,16 +182,22 @@ export function getSurveyJsAnswerList(surveyJSModel: SurveyModel, selectedLangua
     .filter(([key]) => {
       return !key.endsWith(SURVEY_JS_OTHER_SUFFIX) && surveyJSModel.getQuestionByName(key)?.getType() !== 'html'
     })
-    .map(([key, value]) => makeAnswer(value as SurveyJsValueType, key, surveyJSModel.data, selectedLanguage))
+    .map(([key, value]) => makeAnswer(
+      surveyJSModel,
+      value as SurveyJsValueType,
+      key,
+      surveyJSModel.data,
+      selectedLanguage))
 }
 
 /** return an Answer for the given value.  This should be updated to take some sort of questionType/dataType param */
 export function makeAnswer(
+  model: SurveyModel,
   value: SurveyJsValueType,
   questionStableId: string,
   surveyJsData: Record<string, SurveyJsValueType>,
   viewedLanguage?: string): Answer {
-  const answer: Answer = { questionStableId }
+  const answer: Answer = { questionStableId, format: getFormat(model, questionStableId) }
   if (viewedLanguage) {
     answer.viewedLanguage = viewedLanguage
   }
@@ -208,20 +215,45 @@ export function makeAnswer(
     answer.otherDescription = surveyJsData[questionStableId + SURVEY_JS_OTHER_SUFFIX] as string
   } else if (questionStableId.endsWith(SURVEY_JS_OTHER_SUFFIX)) {
     const baseStableId = questionStableId.substring(0, questionStableId.lastIndexOf('-'))
-    return makeAnswer(surveyJsData[baseStableId], baseStableId, surveyJsData, viewedLanguage)
+    return makeAnswer(model, surveyJsData[baseStableId], baseStableId, surveyJsData, viewedLanguage)
   }
   return answer
 }
 
+const getFormat = (model: SurveyModel, questionStableId: string): AnswerFormat => {
+  if (isFileQuestion(model, questionStableId)) {
+    return 'FILE_NAME'
+  }
+  return 'NONE'
+}
+
+const isFileQuestion = (model: SurveyModel, questionStableId: string): boolean => {
+  // will have format 'questionName[idx]'
+  // need to strip [idx] and check if original question is a file question
+
+  const endRegex = /\[\d+\]$/
+
+  if (!endRegex.test(questionStableId)) {
+    return false
+  }
+
+  const questionName = questionStableId.replace(endRegex, '')
+  const question = model.getQuestionByName(questionName)
+
+  return question?.getType() === 'documentrequest'
+}
+
 /** compares two surveyModel.data objects and returns a list of answers corresponding to updates */
-export function getUpdatedAnswers(original: Record<string, SurveyJsValueType>,
+export function getUpdatedAnswers(
+  model: SurveyModel,
+  original: Record<string, SurveyJsValueType>,
   updated: Record<string, SurveyJsValueType>, viewedLanguage?: string): Answer[] {
   const allKeys = _union(_keys(original), _keys(updated))
   const updatedKeys = allKeys.filter(key => !_isEqual(original[key], updated[key]))
     .map(key => key.endsWith(SURVEY_JS_OTHER_SUFFIX) ? key.substring(0, key.lastIndexOf(SURVEY_JS_OTHER_SUFFIX)) : key)
   const dedupedKeys = Array.from(new Set(updatedKeys).values())
 
-  return dedupedKeys.map(key => makeAnswer(updated[key], key, updated, viewedLanguage))
+  return dedupedKeys.map(key => makeAnswer(model, updated[key], key, updated, viewedLanguage))
 }
 
 
@@ -233,7 +265,7 @@ export function getDataWithCalculatedValues(model: SurveyModel) {
       calculatedHash[val.name] = val.value
     }
   })
-
+  console.log(model.data)
   return {
     ...model.data,
     ...calculatedHash

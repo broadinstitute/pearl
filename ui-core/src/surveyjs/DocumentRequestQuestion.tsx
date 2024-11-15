@@ -11,6 +11,10 @@ import {
 } from 'survey-react-ui'
 import { StudyEnvParams } from 'src/types/study'
 import { DocumentRequestUpload } from 'src/components/DocumentRequestUpload'
+import {
+  isNil,
+  join
+} from 'lodash'
 
 const DOCUMENT_REQUEST_TYPE = 'documentrequest'
 
@@ -40,30 +44,59 @@ export class SurveyQuestionDocumentRequest extends SurveyQuestionElementBase {
     return this.questionBase
   }
 
-  get value() {
-    return this.question.value || []
+  get fileNames() {
+    const fileNames = []
+
+    let index = 0
+    const survey = this.question.survey as SurveyModel
+    while (!isNil(survey.getValue(formatFileIndex(this.question.name, index)))) {
+      const value = survey.getValue(formatFileIndex(this.question.name, index))
+      fileNames.push(value)
+      index++
+    }
+
+    return fileNames
   }
 
   renderElement() {
     const survey = this.question.survey as SurveyModel
 
-    const studyEnvParams = survey.getVariable('studyEnvParams') as StudyEnvParams
-    const enrolleeShortcode = survey.getVariable('enrolleeShortcode') as string
-
-    survey.setValue(this.question.name, this.value)
+    const studyEnvParams: StudyEnvParams = {
+      portalShortcode: 'demo',
+      studyShortcode: 'heartdemo',
+      envName: 'sandbox'
+    }//survey.getVariable('studyEnvParams') as StudyEnvParams
+    const enrolleeShortcode = 'HDSALK'//survey.getVariable('enrolleeShortcode') as string
 
     return <DocumentRequestUpload
       studyEnvParams={studyEnvParams}
       enrolleeShortcode={enrolleeShortcode}
-      selectedFiles={this.value}
-      setSelectedFiles={files => {
-        this.question.value = files
+      selectedFileNames={this.fileNames}
+      setSelectedFileNames={fileNames => {
+        // clear files
+        const numOldFiles = this.fileNames.length
+        const numNewFiles = fileNames.length
+
+        const numFiles = Math.max(numOldFiles, numNewFiles)
+
+        for (let i = 0; i < numFiles; i++) {
+          if (i < fileNames.length) {
+            survey.setValue(formatFileIndex(this.question.name, i), fileNames[i])
+          } else {
+            survey.setValue(formatFileIndex(this.question.name, i), undefined)
+          }
+        }
+
+        this.question.value = join(fileNames, ',')
       }}
     />
   }
 }
 
-// Register `SurveyQuestionColorPicker` as a class that renders `color-picker` questions
+const formatFileIndex = (stableId: string, index: number) => {
+  return `${stableId}[${index}]`
+}
+
 ReactQuestionFactory.Instance.registerQuestion(DOCUMENT_REQUEST_TYPE, props => {
   return React.createElement(SurveyQuestionDocumentRequest, props)
 })

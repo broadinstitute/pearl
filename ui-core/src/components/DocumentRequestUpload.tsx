@@ -21,36 +21,45 @@ export const DocumentRequestUpload = (
   {
     studyEnvParams,
     enrolleeShortcode,
-    selectedFiles,
-    setSelectedFiles
+    selectedFileNames,
+    setSelectedFileNames
   } : {
     studyEnvParams: StudyEnvParams,
     enrolleeShortcode: string,
-    selectedFiles: ParticipantFile[]
-    setSelectedFiles: (files: ParticipantFile[]) => void
+    selectedFileNames: string[]
+    setSelectedFileNames: (fileNames: string[]) => void
   }) => {
   const [files, setFiles] = React.useState<ParticipantFile[]>([])
+  const [selectedFiles, setSelectedFiles] = React.useState<ParticipantFile[]>([])
 
   const Api = useApiContext()
 
   useEffect(() => {
-    Api.getParticipantFiles({ studyEnvParams, enrolleeShortcode }).then(setFiles)
+    Api.getParticipantFiles({ studyEnvParams, enrolleeShortcode }).then(files => {
+      setFiles(files)
+      setSelectedFiles(files.filter(f => selectedFileNames.includes(f.fileName)))
+    })
   }, [])
+
+  const updateSelectedFiles = (newSelectedFiles: ParticipantFile[]) => {
+    setSelectedFiles(newSelectedFiles)
+    setSelectedFileNames(newSelectedFiles.map(f => f.fileName))
+  }
 
   const selectFile = (file: ParticipantFile) => {
     if (!selectedFiles.find(f => f.id === file.id)) {
-      setSelectedFiles([...selectedFiles, file])
+      updateSelectedFiles([...selectedFiles, file])
     }
   }
 
   const uploadAndSelectFile = async (fileData: File) => {
     const newFile = await Api.uploadParticipantFile({ studyEnvParams, enrolleeShortcode, file: fileData })
-    setSelectedFiles([...selectedFiles, newFile])
+    updateSelectedFiles([...selectedFiles, newFile])
     setFiles([...files, newFile])
   }
 
   const removeFile = (file: ParticipantFile) => {
-    setSelectedFiles(selectedFiles.filter(f => f.id !== file.id))
+    updateSelectedFiles(selectedFiles.filter(f => f.id !== file.id))
   }
 
   return <div className='p-3'>

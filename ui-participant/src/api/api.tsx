@@ -6,6 +6,7 @@ import {
   LogEvent,
   MailingAddress,
   ParticipantDashboardAlert,
+  ParticipantFile,
   ParticipantTask,
   ParticipantUser,
   Portal,
@@ -328,6 +329,41 @@ export default {
       body: JSON.stringify(response)
     })
     return await this.processJsonResponse(result, { alertErrors })
+  },
+
+  async getParticipantFiles({ studyEnvParams, enrolleeShortcode }: {
+    studyEnvParams: StudyEnvParams, enrolleeShortcode: string
+  }): Promise<ParticipantFile[]> {
+    const url = `${baseStudyEnvUrl(false, studyEnvParams.studyShortcode)}/enrollee/${enrolleeShortcode}/file`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async uploadParticipantFile({ studyEnvParams, enrolleeShortcode, file }: {
+    studyEnvParams: StudyEnvParams, enrolleeShortcode: string, file: File
+  }): Promise<ParticipantFile> {
+    const url = `${baseStudyEnvUrl(false, studyEnvParams.studyShortcode)}/enrollee/${enrolleeShortcode}/file`
+    const formData = new FormData()
+    formData.append('participantFile', file)
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getInitHeaders(),
+      body: formData
+    })
+    return await this.processJsonResponse(response)
+  },
+
+  async downloadParticipantFile({ studyEnvParams, enrolleeShortcode, fileName }: {
+    studyEnvParams: StudyEnvParams, enrolleeShortcode: string, fileName: string
+  }): Promise<Response> {
+    const url = `${
+      baseStudyEnvUrl(false, studyEnvParams.studyShortcode)
+    }/enrollee/${enrolleeShortcode}/file/${fileName}`
+    const response = await fetch(url, this.getGetInit())
+    if (!response.ok) {
+      return Promise.reject(response)
+    }
+    return Promise.resolve(response)
   },
 
   async findProfile(

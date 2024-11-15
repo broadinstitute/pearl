@@ -66,11 +66,12 @@ export function PagedSurveyView({
   const saveDiff = () => {
     const currentModelValues = getDataWithCalculatedValues(surveyModel)
     const updatedAnswers = getUpdatedAnswers(
-        prevSave.current as Record<string, object>, currentModelValues, selectedLanguage)
+      surveyModel, prevSave.current as Record<string, object>, currentModelValues, selectedLanguage)
     if (updatedAnswers.length < 1) {
       // don't bother saving if there are no changes
       return
     }
+    console.log('saving diff', updatedAnswers)
     setAutosaveStatus('SAVING')
     const prevPrevSave = prevSave.current
     prevSave.current = currentModelValues

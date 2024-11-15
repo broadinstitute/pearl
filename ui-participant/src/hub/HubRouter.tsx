@@ -1,5 +1,8 @@
 import React, { lazy } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import {
+  Route,
+  Routes
+} from 'react-router-dom'
 import Navbar from '../Navbar'
 import HubPage from './HubPage'
 
@@ -8,6 +11,7 @@ import { ParticipantProfile } from 'participant/ParticipantProfile'
 import PrintSurveyView from './survey/PrintSurveyView'
 import ManageProfiles from '../participant/ManageProfiles'
 import KitsPage from './kit/KitsPage'
+
 const KitInstructions = lazy(() => import('./kit/in-person/KitInstructions'))
 
 /** Handles url pathing for hub routes (a.k.a participant is signed in) */
@@ -25,6 +29,12 @@ export default function HubRouter() {
         element={<SurveyView/>}/>
       <Route
         path="study/:studyShortcode/enrollee/:enrolleeShortcode/survey/:stableId/:version/print"
+        element={<PrintSurveyView/>}
+      />
+      <Route path="study/:studyShortcode/enrollee/:enrolleeShortcode/document_request/:stableId/:version"
+        element={<SurveyView/>}/>
+      <Route
+        path="study/:studyShortcode/enrollee/:enrolleeShortcode/document_request/:stableId/:version/print"
         element={<PrintSurveyView/>}
       />
       <Route path="study/:studyShortcode/enrollee/:enrolleeShortcode/outreach/:stableId/:version"
