@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service.scheduled;
 
+import bio.terra.pearl.api.admin.service.maintenance.CheckDisableScheduledTasks;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -24,6 +25,7 @@ public class ScheduledKitStatusService {
       name = "KitRequestService.updateAllKitStatuses",
       lockAtLeastFor = "1m",
       lockAtMostFor = "360m")
+  @CheckDisableScheduledTasks
   public void fetchUpdatedKitStatuses() {
     log.info("Updating kit status from Pepper...");
     kitRequestService.syncAllKitStatusesFromPepper();

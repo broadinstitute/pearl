@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service.scheduled;
 
+import bio.terra.pearl.api.admin.service.maintenance.CheckDisableScheduledTasks;
 import bio.terra.pearl.core.service.notification.EnrolleeReminderService;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -22,6 +23,7 @@ public class ScheduledEnrolleeReminderService {
       name = "EnrolleeReminderService.sendTaskReminders",
       lockAtMostFor = "500s",
       lockAtLeastFor = "10s")
+  @CheckDisableScheduledTasks
   public void sendReminderEmails() {
     log.info("Beginning enrollee reminder processing");
     enrolleeReminderService.sendTaskReminders();
