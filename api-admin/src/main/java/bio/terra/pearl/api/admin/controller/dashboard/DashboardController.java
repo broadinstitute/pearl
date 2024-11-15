@@ -2,6 +2,7 @@ package bio.terra.pearl.api.admin.controller.dashboard;
 
 import bio.terra.pearl.api.admin.api.DashboardApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
 import bio.terra.pearl.api.admin.service.dashboard.DashboardExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -34,11 +35,11 @@ public class DashboardController implements DashboardApi {
 
   @Override
   public ResponseEntity<Object> listPortalEnvAlerts(String portalShortcode, String envName) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
 
     List<ParticipantDashboardAlert> alerts =
-        dashboardExtService.listPortalEnvAlerts(portalShortcode, environmentName, user);
+        dashboardExtService.listPortalEnvAlerts(PortalEnvAuthContext.of(operator, portalShortcode, environmentName));
 
     return ResponseEntity.ok(alerts);
   }
@@ -46,7 +47,7 @@ public class DashboardController implements DashboardApi {
   @Override
   public ResponseEntity<Object> updatePortalEnvAlert(
       String portalShortcode, String envName, String triggerName, Object body) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
 
     ParticipantDashboardAlert alert =
@@ -56,7 +57,7 @@ public class DashboardController implements DashboardApi {
 
     ParticipantDashboardAlert updatedAlert =
         dashboardExtService.updatePortalEnvAlert(
-            portalShortcode, environmentName, trigger, alert, user);
+                PortalEnvAuthContext.of(operator, portalShortcode, environmentName), trigger, alert);
 
     return ResponseEntity.ok(updatedAlert);
   }
@@ -64,7 +65,7 @@ public class DashboardController implements DashboardApi {
   @Override
   public ResponseEntity<Object> createPortalEnvAlert(
       String portalShortcode, String envName, String triggerName, Object body) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
 
     ParticipantDashboardAlert alert =
@@ -74,7 +75,7 @@ public class DashboardController implements DashboardApi {
 
     ParticipantDashboardAlert createdAlert =
         dashboardExtService.createPortalEnvAlert(
-            portalShortcode, environmentName, trigger, alert, user);
+                PortalEnvAuthContext.of(operator, portalShortcode, environmentName), trigger, alert);
 
     return ResponseEntity.ok(createdAlert);
   }
