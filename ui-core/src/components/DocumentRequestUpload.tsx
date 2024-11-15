@@ -14,23 +14,27 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { isNil } from 'lodash'
+import { useApiContext } from 'src/participant/ApiProvider'
+import { StudyEnvParams } from 'src/types/study'
 
 export const DocumentRequestUpload = (
   {
-    uploadNewFile,
-    fetchFileLibrary,
+    studyEnvParams,
+    enrolleeShortcode,
     selectedFiles,
     setSelectedFiles
   } : {
-    uploadNewFile: (file: File) => Promise<ParticipantFile>,
-    fetchFileLibrary: () => Promise<ParticipantFile[]>,
+    studyEnvParams: StudyEnvParams,
+    enrolleeShortcode: string,
     selectedFiles: ParticipantFile[]
     setSelectedFiles: (files: ParticipantFile[]) => void
   }) => {
   const [files, setFiles] = React.useState<ParticipantFile[]>([])
 
+  const Api = useApiContext()
+
   useEffect(() => {
-    fetchFileLibrary().then(setFiles)
+    Api.getParticipantFiles({ studyEnvParams, enrolleeShortcode }).then(setFiles)
   }, [])
 
   const selectFile = (file: ParticipantFile) => {
@@ -39,8 +43,8 @@ export const DocumentRequestUpload = (
     }
   }
 
-  const uploadAndSelectFile = async (file: File) => {
-    const newFile = await uploadNewFile(file)
+  const uploadAndSelectFile = async (fileData: File) => {
+    const newFile = await Api.uploadParticipantFile({ studyEnvParams, enrolleeShortcode, file: fileData })
     setSelectedFiles([...selectedFiles, newFile])
     setFiles([...files, newFile])
   }

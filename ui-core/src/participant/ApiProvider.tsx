@@ -1,8 +1,13 @@
 import React, { useContext } from 'react'
 import { StudyEnvParams } from 'src/types/study'
 import { HubResponse } from 'src/types/user'
-import { AddressValidationResult, MailingAddress } from 'src/types/address'
+import {
+  AddressValidationResult,
+  MailingAddress
+} from 'src/types/address'
 import { SurveyResponseWithJustification } from 'src/types/forms'
+import { ParticipantFile } from 'src/types/participantFile'
+import { Response } from 'mixpanel-browser'
 
 export type ImageUrlFunc = (cleanFileName: string, version: number) => string
 export type SubmitMailingListContactFunc = (name: string, email: string) => Promise<object>
@@ -18,6 +23,23 @@ export type UpdateSurveyResponseFunc = ({
 
 export type ValidateAddressFunc = (address: MailingAddress) => Promise<AddressValidationResult>
 
+export type GetParticipantFilesFunc = ({ studyEnvParams, enrolleeShortcode }: {
+  studyEnvParams: StudyEnvParams,
+  enrolleeShortcode: string
+}) => Promise<ParticipantFile[]>
+
+export type UploadParticipantFileFunc = ({ studyEnvParams, enrolleeShortcode, file }: {
+  studyEnvParams: StudyEnvParams,
+  enrolleeShortcode: string,
+  file: File
+}) => Promise<ParticipantFile>
+
+export type DownloadParticipantFileFunc = ({ studyEnvParams, enrolleeShortcode, fileId }: {
+  studyEnvParams: StudyEnvParams,
+  enrolleeShortcode: string,
+  fileId: string
+}) => Promise<Response>
+
 /**
  * represents a minimal set of api functions needed to make the participant ui functional outside of the
  * main participant ui app.
@@ -27,7 +49,10 @@ export type ApiContextT = {
   submitMailingListContact: SubmitMailingListContactFunc,
   getLanguageTexts: GetLanguageTextsFunc,
   updateSurveyResponse: UpdateSurveyResponseFunc,
-  validateAddress: ValidateAddressFunc
+  validateAddress: ValidateAddressFunc,
+  getParticipantFiles: GetParticipantFilesFunc,
+  uploadParticipantFile: UploadParticipantFileFunc,
+  downloadParticipantFile: DownloadParticipantFileFunc
 }
 
 export const emptyApi: ApiContextT = {
@@ -35,7 +60,10 @@ export const emptyApi: ApiContextT = {
   submitMailingListContact: () => Promise.resolve({}),
   getLanguageTexts: () => Promise.resolve({}),
   updateSurveyResponse: () => Promise.resolve({} as HubResponse),
-  validateAddress: () => Promise.resolve({} as AddressValidationResult)
+  validateAddress: () => Promise.resolve({} as AddressValidationResult),
+  getParticipantFiles: () => Promise.resolve([]),
+  uploadParticipantFile: () => Promise.resolve({} as ParticipantFile),
+  downloadParticipantFile: () => Promise.resolve({} as Response)
 }
 
 const ApiContext = React.createContext<ApiContextT>(emptyApi)
