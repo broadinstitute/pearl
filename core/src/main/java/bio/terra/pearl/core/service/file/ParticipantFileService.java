@@ -27,7 +27,8 @@ public class ParticipantFileService extends ImmutableEntityService<ParticipantFi
     public ParticipantFile uploadFileAndCreate(ParticipantFile participantFile, InputStream file) {
         UUID fileId = fileStorageBackend.uploadFile(file);
         participantFile.setExternalFileId(fileId);
-        return dao.create(participantFile);
+        return dao.createOrReplace(participantFile);
+
     }
 
     public List<ParticipantFile> findBySurveyResponseId(UUID surveyResponseId) {

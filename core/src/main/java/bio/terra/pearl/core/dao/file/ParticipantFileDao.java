@@ -4,6 +4,7 @@ import bio.terra.pearl.core.dao.BaseJdbiDao;
 import bio.terra.pearl.core.model.file.ParticipantFile;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,5 +60,16 @@ public class ParticipantFileDao extends BaseJdbiDao<ParticipantFile> {
                         .stream()
                         .toList()
         );
+    }
+
+    @Transactional
+    public ParticipantFile createOrReplace(ParticipantFile participantFile) {
+        Optional<ParticipantFile> existingFileOpt = findByEnrolleeIdAndFileName(participantFile.getEnrolleeId(), participantFile.getFileName());
+
+        existingFileOpt.ifPresent(existingFile -> {
+            delete(existingFile.getId());
+        });
+
+        return create(participantFile);
     }
 }

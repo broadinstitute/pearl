@@ -64,14 +64,14 @@ public class ParticipantFileController implements ParticipantFileApi {
       String envName,
       String studyShortcode,
       String enrolleeShortcode,
-      MultipartFile file) {
+      MultipartFile participantFile) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
 
     // todo verify portalShortcode, studyShortcode, envName
-    ParticipantFile participantFile =
-        participantFileExtService.uploadFile(participantUser, enrolleeShortcode, file);
+    ParticipantFile created =
+        participantFileExtService.uploadFile(participantUser, enrolleeShortcode, participantFile);
 
-    return ResponseEntity.ok(participantFile);
+    return ResponseEntity.ok(created);
   }
 
   @Override

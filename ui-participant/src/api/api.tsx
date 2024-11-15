@@ -101,15 +101,22 @@ let bearerToken: string | null = null
 const API_ROOT = `/api`
 
 export default {
-  getInitHeaders() {
-    const headers: HeadersInit = {
+  getAuthHeaders(): HeadersInit {
+    if (bearerToken === null) {
+      return {}
+    }
+
+    return {
+      'Authorization': `Bearer ${bearerToken}`
+    }
+  },
+
+  getInitHeaders(): HeadersInit {
+    return {
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      ...this.getAuthHeaders()
     }
-    if (bearerToken !== null) {
-      headers['Authorization'] = `Bearer ${bearerToken}`
-    }
-    return headers
   },
 
   getGetInit() {
@@ -344,10 +351,10 @@ export default {
   }): Promise<ParticipantFile> {
     const url = `${baseStudyEnvUrl(false, studyEnvParams.studyShortcode)}/enrollee/${enrolleeShortcode}/file`
     const formData = new FormData()
-    formData.append('participantFile', file)
+    formData.append('file', file)
     const response = await fetch(url, {
       method: 'POST',
-      headers: this.getInitHeaders(),
+      headers: this.getAuthHeaders(),
       body: formData
     })
     return await this.processJsonResponse(response)

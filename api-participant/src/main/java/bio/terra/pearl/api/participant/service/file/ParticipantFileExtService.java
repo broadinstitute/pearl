@@ -61,6 +61,7 @@ public class ParticipantFileExtService {
 
     UUID externalFileId;
     try {
+      System.out.println("Uploading file");
       externalFileId = fileStorageBackend.uploadFile(file.getInputStream());
     } catch (IOException e) {
       throw new RuntimeException("Error uploading file");

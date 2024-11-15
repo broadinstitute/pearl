@@ -16,6 +16,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { isNil } from 'lodash'
 import { useApiContext } from 'src/participant/ApiProvider'
 import { StudyEnvParams } from 'src/types/study'
+import { LoadingSpinner } from '@juniper/ui-participant/src/util/LoadingSpinner'
 
 export const DocumentRequestUpload = (
   {
@@ -34,6 +35,8 @@ export const DocumentRequestUpload = (
 
   const Api = useApiContext()
 
+  const [isUploading, setIsUploading] = React.useState(false)
+
   useEffect(() => {
     Api.getParticipantFiles({ studyEnvParams, enrolleeShortcode }).then(files => {
       setFiles(files)
@@ -42,6 +45,7 @@ export const DocumentRequestUpload = (
   }, [])
 
   const updateSelectedFiles = (newSelectedFiles: ParticipantFile[]) => {
+    console.log('newSelectedFiles', newSelectedFiles)
     setSelectedFiles(newSelectedFiles)
     setSelectedFileNames(newSelectedFiles.map(f => f.fileName))
   }
@@ -53,13 +57,18 @@ export const DocumentRequestUpload = (
   }
 
   const uploadAndSelectFile = async (fileData: File) => {
+    setIsUploading(true)
     const newFile = await Api.uploadParticipantFile({ studyEnvParams, enrolleeShortcode, file: fileData })
+    setIsUploading(false)
     updateSelectedFiles([...selectedFiles, newFile])
-    setFiles([...files, newFile])
   }
 
   const removeFile = (file: ParticipantFile) => {
     updateSelectedFiles(selectedFiles.filter(f => f.id !== file.id))
+  }
+
+  if (isUploading) {
+    return <LoadingSpinner/>
   }
 
   return <div className='p-3'>

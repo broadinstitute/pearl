@@ -466,7 +466,7 @@ paths:
             schema:
               type: object
               properties:
-                participantFile:
+                file:
                   type: string
                   format: binary
       responses:
