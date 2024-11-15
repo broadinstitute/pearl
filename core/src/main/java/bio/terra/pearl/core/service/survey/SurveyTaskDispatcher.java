@@ -90,7 +90,7 @@ public class SurveyTaskDispatcher {
                 studyEnvSurvey.getStudyEnvironmentId(),
                 studyEnvSurvey.getSurvey().getStableId(),
                 Duration.of(studyEnvSurvey.getSurvey().getRecurrenceIntervalDays(), ChronoUnit.DAYS));
-        assign(enrollees, studyEnvSurvey, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignRecurringSurvey")));
+        assign(enrollees, studyEnvSurvey, false, "scheduled", new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignRecurringSurvey")));
     }
 
     /** will assign a delayed survey to enrollees who have never taken it, but are due to take it now */
@@ -99,7 +99,7 @@ public class SurveyTaskDispatcher {
         enrollees = enrollees.stream().filter(enrollee ->
                 enrollee.getCreatedAt().plus(studyEnvSurvey.getSurvey().getDaysAfterEligible(), ChronoUnit.DAYS)
                         .isBefore(Instant.now())).toList();
-        assign(enrollees, studyEnvSurvey, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignDelayedSurvey")));
+        assign(enrollees, studyEnvSurvey, false, "scheduled", new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignDelayedSurvey")));
     }
 
     public List<ParticipantTask> assign(ParticipantTaskAssignDto assignDto,
@@ -109,12 +109,13 @@ public class SurveyTaskDispatcher {
         StudyEnvironmentSurvey studyEnvironmentSurvey = studyEnvironmentSurveyService
                 .findAllWithSurveyNoContent(List.of(studyEnvironmentId), assignDto.targetStableId(), true)
                 .stream().findFirst().orElseThrow(() -> new NotFoundException("Could not find active survey to assign tasks"));
-        return assign(enrollees, studyEnvironmentSurvey, assignDto.overrideEligibility(), operator);
+        return assign(enrollees, studyEnvironmentSurvey, assignDto.overrideEligibility(), assignDto.justification(), operator);
     }
 
     public List<ParticipantTask> assign(List<Enrollee> enrollees,
                                         StudyEnvironmentSurvey studyEnvironmentSurvey,
                                         boolean overrideEligibility,
+                                        String justification,
                                         ResponsibleEntity operator) {
         List<UUID> profileIds = enrollees.stream().map(Enrollee::getProfileId).toList();
         List<PortalParticipantUser> ppUsers = portalParticipantUserService.findByProfileIds(profileIds);
@@ -141,6 +142,7 @@ public class SurveyTaskDispatcher {
                 DataAuditInfo auditInfo = DataAuditInfo.builder()
                         .portalParticipantUserId(ppUsers.get(i).getId())
                         .operationId(auditOperationId)
+                        .justification(justification)
                         .enrolleeId(enrollees.get(i).getId()).build();
                 auditInfo.setResponsibleEntity(operator);
 
@@ -254,7 +256,8 @@ public class SurveyTaskDispatcher {
                     event.getSurvey().getVersion(),
                 null,
                     true,
-                    false);
+                    false,
+                    "Survey published");
 
             assign(assignDto, event.getStudyEnvironmentId(),
                     new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "handleSurveyPublished.assignToExistingEnrollees")));

@@ -6,6 +6,7 @@ import LoadingSpinner from 'util/LoadingSpinner'
 import { failureNotification, successNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
 import { Enrollee, StudyEnvParams } from '@juniper/ui-core'
+import { TextInput } from '../../../components/forms/TextInput'
 
 /** Renders a modal for an admin to submit a sample collection kit request. */
 export default function SurveyAssignModal({
@@ -19,6 +20,7 @@ export default function SurveyAssignModal({
   onSubmit: () => void }) {
   const [isLoading, setIsLoading] = useState(false)
   const [overrideEligibility, setOverrideEligibility] = useState(false)
+  const [justification, setJustification] = useState('')
   const handleSubmit = async () => {
     doApiLoad(async () => {
       const tasks = await Api.assignParticipantTasksToEnrollees(studyEnvParams, {
@@ -27,7 +29,8 @@ export default function SurveyAssignModal({
         targetAssignedVersion: survey.version,
         enrolleeIds: [enrollee.id],
         assignAllUnassigned: false,
-        overrideEligibility
+        overrideEligibility,
+        justification
       })
       if (tasks.length > 0) {
         Store.addNotification(successNotification(`Task assigned - ${survey.name}`))
@@ -55,6 +58,7 @@ export default function SurveyAssignModal({
               className="me-1"/>
             Assign even if they do not meet eligibility criteria
           </label>
+          <TextInput value={justification} onChange={setJustification} label='Justification' labelClassname="mt-3"/>
         </div>
       </form>
     </Modal.Body>

@@ -222,7 +222,7 @@ export function RawEnrolleeSurveyView({
     </div>
     {showTaskModal && <TaskChangeModal studyEnvParams={paramsFromContext(studyEnvContext)}
       onDismiss={() => setShowTaskModal(false)}
-      task={task} enrollee={enrollee} onSubmit={onUpdate}/> }
+      task={task} onSubmit={onUpdate}/> }
   </div>
 }
 

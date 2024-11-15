@@ -5,9 +5,10 @@ import { doApiLoad } from 'api/api-utils'
 import LoadingSpinner from 'util/LoadingSpinner'
 import { successNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
-import { Enrollee, ParticipantTaskStatus, StudyEnvParams } from '@juniper/ui-core'
+import { ParticipantTaskStatus, StudyEnvParams } from '@juniper/ui-core'
 import Select from 'react-select'
 import { useNonNullReactSingleSelect } from '../../../util/react-select-utils'
+import { TextInput } from '../../../components/forms/TextInput'
 
 
 const statusOpts: {label: string, value: ParticipantTaskStatus}[] = [
@@ -19,21 +20,23 @@ const statusOpts: {label: string, value: ParticipantTaskStatus}[] = [
 
 /** Renders a modal for an admin to submit a sample collection kit request. */
 export default function TaskChangeModal({
-  studyEnvParams, enrollee, task,
+  studyEnvParams, task,
   onDismiss, onSubmit
 }: {
   studyEnvParams: StudyEnvParams,
   onDismiss: () => void,
   task: ParticipantTask,
-  enrollee: Enrollee,
   onSubmit: () => void }) {
   const [isLoading, setIsLoading] = useState(false)
   const [updatedStatus, setUpdatedStatus] = useState(task.status)
+  const [justification, setJustification] = useState('')
   const handleSubmit = async () => {
     doApiLoad(async () => {
       await Api.updateTask(studyEnvParams, {
-        ...task,
-        status: updatedStatus
+        task: {
+          ...task,
+          status: updatedStatus
+        }, justification
       })
       Store.addNotification(successNotification(`Task updated`))
       onSubmit()
@@ -51,10 +54,11 @@ export default function TaskChangeModal({
     </Modal.Header>
     <Modal.Body>
       <form onSubmit={e => e.preventDefault()}>
-        <label htmlFor={selectInputId}>Status</label>
+        <label htmlFor={selectInputId} className="fw-semibold">Status</label>
         <Select options={options} value={selectedOption} inputId={selectInputId}
           styles={{ control: baseStyles => ({ ...baseStyles }) }}
           onChange={onChange}/>
+        <TextInput value={justification} onChange={setJustification} label='Justification' labelClassname="mt-3"/>
       </form>
     </Modal.Body>
     <Modal.Footer>

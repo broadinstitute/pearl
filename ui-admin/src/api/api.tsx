@@ -347,6 +347,7 @@ export type ParticipantTaskAssignDto = {
   // not already having the task in the duplicate window
   assignAllUnassigned: boolean
   overrideEligibility: boolean
+  justification?: string
 }
 
 export type TaskUpdateSpec = {
@@ -1409,13 +1410,14 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async updateTask(studyEnvParams: StudyEnvParams, task: ParticipantTask): Promise<ParticipantTask> {
+  async updateTask(studyEnvParams: StudyEnvParams, taskUpdate: {task: ParticipantTask, justification: string}):
+    Promise<ParticipantTask> {
     const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/enrollees/` +
-      `${task.enrolleeId}/participantTasks/${task.id}`
+      `${taskUpdate.task.enrolleeId}/participantTasks/${taskUpdate.task.id}`
     const response = await fetch(url, {
       method: 'PATCH',
       headers: this.getInitHeaders(),
-      body: JSON.stringify(task)
+      body: JSON.stringify(taskUpdate)
     })
     return await this.processJsonResponse(response)
   },
