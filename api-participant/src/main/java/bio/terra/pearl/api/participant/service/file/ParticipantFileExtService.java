@@ -11,7 +11,6 @@ import bio.terra.pearl.core.service.file.backends.FileStorageBackendProvider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,21 +58,17 @@ public class ParticipantFileExtService {
     Enrollee enrollee =
         authUtilService.authParticipantUserToEnrollee(participantUser.getId(), enrolleeShortcode);
 
-    UUID externalFileId;
     try {
-      System.out.println("Uploading file");
-      externalFileId = fileStorageBackend.uploadFile(file.getInputStream());
+      return participantFileService.uploadFileAndCreate(
+          ParticipantFile.builder()
+              .enrolleeId(enrollee.getId())
+              .fileName(cleanFileName(file.getOriginalFilename()))
+              .fileType(file.getContentType())
+              .build(),
+          file.getInputStream());
     } catch (IOException e) {
       throw new RuntimeException("Error uploading file");
     }
-
-    return participantFileService.create(
-        ParticipantFile.builder()
-            .externalFileId(externalFileId)
-            .enrolleeId(enrollee.getId())
-            .fileName(cleanFileName(file.getOriginalFilename()))
-            .fileType(file.getContentType())
-            .build());
   }
 
   public List<ParticipantFile> list(ParticipantUser participantUser, String enrolleeShortcode) {

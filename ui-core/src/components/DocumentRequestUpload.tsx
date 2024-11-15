@@ -16,7 +16,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { isNil } from 'lodash'
 import { useApiContext } from 'src/participant/ApiProvider'
 import { StudyEnvParams } from 'src/types/study'
-import { LoadingSpinner } from '@juniper/ui-participant/src/util/LoadingSpinner'
+import LoadingSpinner from '@juniper/ui-admin/src/util/LoadingSpinner'
 
 export const DocumentRequestUpload = (
   {
@@ -35,7 +35,7 @@ export const DocumentRequestUpload = (
 
   const Api = useApiContext()
 
-  const [isUploading, setIsUploading] = React.useState(false)
+  const [uploadingFile, setUploadingFile] = React.useState<string>()
 
   useEffect(() => {
     Api.getParticipantFiles({ studyEnvParams, enrolleeShortcode }).then(files => {
@@ -44,36 +44,31 @@ export const DocumentRequestUpload = (
     })
   }, [])
 
-  const updateSelectedFiles = (newSelectedFiles: ParticipantFile[]) => {
-    console.log('newSelectedFiles', newSelectedFiles)
-    setSelectedFiles(newSelectedFiles)
-    setSelectedFileNames(newSelectedFiles.map(f => f.fileName))
-  }
-
-  const selectFile = (file: ParticipantFile) => {
-    if (!selectedFiles.find(f => f.id === file.id)) {
-      updateSelectedFiles([...selectedFiles, file])
+  const selectFile = (newFile: ParticipantFile) => {
+    if (!selectedFiles.find(f => f.id === newFile.id)) {
+      setSelectedFiles(oldSelected => [...oldSelected.filter(old => old.fileName !== newFile.fileName), newFile])
+      setSelectedFileNames([...selectedFileNames.filter(old => old !== newFile.fileName), newFile.fileName])
     }
   }
 
+  const unselectFile = (file: ParticipantFile) => {
+    setSelectedFiles(oldFiles => oldFiles.filter(f => f.id !== file.id))
+    setSelectedFileNames(selectedFileNames.filter(f => f !== file.fileName))
+  }
+
+
   const uploadAndSelectFile = async (fileData: File) => {
-    setIsUploading(true)
+    setUploadingFile(fileData.name)
     const newFile = await Api.uploadParticipantFile({ studyEnvParams, enrolleeShortcode, file: fileData })
-    setIsUploading(false)
-    updateSelectedFiles([...selectedFiles, newFile])
-  }
+    setUploadingFile(undefined)
 
-  const removeFile = (file: ParticipantFile) => {
-    updateSelectedFiles(selectedFiles.filter(f => f.id !== file.id))
-  }
-
-  if (isUploading) {
-    return <LoadingSpinner/>
+    setFiles(oldFiles => [newFile, ...oldFiles.filter(f => f.fileName !== newFile.fileName)])
+    selectFile(newFile)
   }
 
   return <div className='p-3'>
     <div className='mb-2'>
-      <SelectedFiles selectedFiles={selectedFiles} removeFile={removeFile}/>
+      <SelectedFiles selectedFiles={selectedFiles} removeFile={unselectFile}/>
     </div>
     <div className='mb-2'>
       {/* show on desktops */}
@@ -86,7 +81,8 @@ export const DocumentRequestUpload = (
       </div>
 
     </div>
-    <Library files={files} selectFile={selectFile} removeFile={removeFile} selectedFiles={selectedFiles}/>
+    <Library uploadingFile={uploadingFile} files={files} selectFile={selectFile} removeFile={unselectFile}
+      selectedFiles={selectedFiles}/>
   </div>
 }
 
@@ -120,11 +116,13 @@ const SelectedFiles = (
 
 const Library = (
   {
+    uploadingFile,
     files,
     selectedFiles,
     selectFile,
     removeFile
   }: {
+    uploadingFile?: string,
     files: ParticipantFile[],
     selectedFiles: ParticipantFile[],
     selectFile: (file: ParticipantFile) => void,
@@ -132,7 +130,7 @@ const Library = (
   }
 ) => {
   const isSelected = (file: ParticipantFile) => {
-    return selectedFiles.find(f => f.id === file.id)
+    return !!selectedFiles.find(f => f.id === file.id)
   }
 
   const [expanded, setExpanded] = React.useState(true)
@@ -146,29 +144,60 @@ const Library = (
         </button>
       </p>
 
+      {uploadingFile && <FileRow
+        fileType={'text/plain'}
+        fileName={uploadingFile}
+        isUploading={true}
+        isSelected={false}
+      />}
       {expanded && files.map(file => {
-        return <div key={file.id}
-          className={'border border-1 rounded-1 bg-light-subtle p-2 d-flex align-items-center justify-content-between'}>
-          <div className='d-flex align-items-center justify-content-start'>
-            <FileIcon mimeType={file.fileType}/>
-            <button className='btn btn-link'>{file.fileName}</button>
-
-          </div>
-          {isSelected(file)
-            ? <button
-              onClick={() => removeFile(file)}
-              className='float-end btn btn-outline-danger text-decoration-none border-0'>
-              <FontAwesomeIcon icon={faX}/>
-            </button>
-            : <button
-              onClick={() => selectFile(file)}
-              className='float-end btn btn-outline-primary text-decoration-none border-0'>
-              <FontAwesomeIcon icon={faPlus}/>
-            </button>}
-        </div>
+        return <FileRow
+          fileType={file.fileType}
+          fileName={file.fileName}
+          isUploading={false}
+          isSelected={isSelected(file)}
+          onRemove={() => removeFile(file)}
+          onSelect={() => selectFile(file)}/>
       })}
     </div>
 
+  </div>
+}
+
+const FileRow = ({
+  fileType,
+  fileName,
+  isUploading,
+  isSelected,
+  onSelect,
+  onRemove
+}: {
+  fileType: string,
+  fileName: string,
+  isUploading: boolean,
+  isSelected: boolean,
+  onSelect?: () => void,
+  onRemove?: () => void
+}) => {
+  return <div
+    className={'border border-1 rounded-1 bg-light-subtle p-2 d-flex align-items-center justify-content-between'}>
+    <div className='d-flex align-items-center justify-content-start'>
+      <FileIcon mimeType={fileType}/>
+      <button className='btn btn-link'>{fileName}</button>
+
+    </div>
+    {isUploading && <LoadingSpinner/>}
+    {isSelected
+      ? <button
+        onClick={onRemove}
+        className='float-end btn btn-outline-danger text-decoration-none border-0'>
+        <FontAwesomeIcon icon={faX}/>
+      </button>
+      : <button
+        onClick={onSelect}
+        className='float-end btn btn-outline-primary text-decoration-none border-0'>
+        <FontAwesomeIcon icon={faPlus}/>
+      </button>}
   </div>
 }
 

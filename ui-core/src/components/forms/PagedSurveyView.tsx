@@ -71,7 +71,7 @@ export function PagedSurveyView({
       // don't bother saving if there are no changes
       return
     }
-    console.log('saving diff', updatedAnswers)
+
     setAutosaveStatus('SAVING')
     const prevPrevSave = prevSave.current
     prevSave.current = currentModelValues
