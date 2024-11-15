@@ -9,6 +9,7 @@ import { ParticipantTaskStatus, StudyEnvParams } from '@juniper/ui-core'
 import Select from 'react-select'
 import { useNonNullReactSingleSelect } from '../../../util/react-select-utils'
 import { TextInput } from '../../../components/forms/TextInput'
+import { Button } from '../../../components/forms/Button'
 
 
 const statusOpts: {label: string, value: ParticipantTaskStatus}[] = [
@@ -58,30 +59,15 @@ export default function TaskChangeModal({
         <Select options={options} value={selectedOption} inputId={selectInputId}
           styles={{ control: baseStyles => ({ ...baseStyles }) }}
           onChange={onChange}/>
-        <TextInput value={justification} onChange={setJustification} label='Justification' labelClassname="mt-3"/>
+        <TextInput required={true} value={justification}
+          onChange={setJustification} label='Justification' labelClassname="mt-3"/>
       </form>
     </Modal.Body>
     <Modal.Footer>
       <LoadingSpinner isLoading={isLoading}>
-        <button className='btn btn-primary' onClick={handleSubmit}>Update</button>
-        <button className='btn btn-secondary' onClick={onDismiss}>Cancel</button>
+        <Button variant="primary" disabled={!justification} onClick={handleSubmit}>Update</Button>
+        <Button variant="secondary" onClick={onDismiss}>Cancel</Button>
       </LoadingSpinner>
     </Modal.Footer>
   </Modal>
 }
-
-
-type TaskUpdateSpec = {
-  targetStableId: string
-  updateToVersion: number
-  updateFromVersion?: number // if absent, any other versions will be updated
-  newStatus?: string // if specified, will change the status -- if, e.g. you want to make the updated tasks incomplete
-}
-
-type ParticipantTaskUpdateDto = {
-  updates: TaskUpdateSpec[]
-  portalParticipantUserIds?: string[]
-  updateAll: boolean // if true, the portalParticipantUserIds list will be ignored and all participants will be updated
-}
-
-
