@@ -63,7 +63,7 @@ export default function TaskLink({ task, studyShortcode, enrollee, history, nest
   const { i18n } = useI18n()
 
   return (
-    <div style={styleProps}>
+    <li style={styleProps}>
       <div className="d-flex flex-row flex-grow-1 align-items-center" >
         <div className="detail">
           {isAccessible
@@ -106,6 +106,6 @@ export default function TaskLink({ task, studyShortcode, enrollee, history, nest
           </li>
         )}
       </ol>}
-    </div>
+    </li>
   )
 }
