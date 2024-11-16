@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import bio.terra.pearl.api.admin.AuthAnnotationSpec;
 import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.SandboxOnly;
 import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
@@ -48,11 +49,11 @@ public class SurveyExtServiceTests extends BaseSpringBootTest {
         surveyExtService,
         Map.of(
             "get",
-            AuthAnnotationSpec.withPortalPerm("BASE"),
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
             "listVersions",
-            AuthAnnotationSpec.withPortalPerm("BASE"),
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
             "findWithSurveyNoContent",
-            AuthAnnotationSpec.withPortalStudyPerm("BASE"),
+            AuthAnnotationSpec.withPortalStudyPerm(AuthUtilService.BASE_PERMISSION),
             "create",
             AuthAnnotationSpec.withPortalPerm("survey_edit"),
             "delete",

@@ -64,7 +64,7 @@ public class StudyEnvironmentExtService {
     return studyEnvConfigService.update(existing);
   }
 
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<KitType> getKitTypes(PortalStudyEnvAuthContext authContext) {
     return studyEnvironmentKitTypeService.findKitTypesByStudyEnvironmentId(
         authContext.getStudyEnvironment().getId());
@@ -114,12 +114,12 @@ public class StudyEnvironmentExtService {
     studyEnvironmentKitTypeService.bulkCreate(newKitTypes);
   }
 
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<KitType> getAllowedKitTypes(PortalStudyEnvAuthContext authContext) {
     return studyEnvironmentKitTypeService.findAllowedKitTypes();
   }
 
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public StudyEnvStats getStats(PortalStudyEnvAuthContext authContext) {
     return new StudyEnvStats(
         enrolleeService.countByStudyEnvironmentId(authContext.getStudyEnvironment().getId()),

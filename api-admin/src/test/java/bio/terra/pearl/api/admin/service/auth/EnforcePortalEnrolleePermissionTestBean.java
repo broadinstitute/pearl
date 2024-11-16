@@ -9,7 +9,7 @@ public class EnforcePortalEnrolleePermissionTestBean {
   @EnforcePortalEnrolleePermission(permission = "participant_data_view")
   public void requiresParticipantDataView(PortalEnrolleeAuthContext authContext) {}
 
-  @EnforcePortalEnrolleePermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalEnrolleePermission(permission = AuthUtilService.BASE_PERMISSION)
   public void baseMethod(PortalEnrolleeAuthContext authContext) {}
 
   @EnforcePortalEnrolleePermission(permission = "participant_data_edit")
