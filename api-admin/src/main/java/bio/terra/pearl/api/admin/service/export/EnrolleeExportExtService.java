@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service.export;
 
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyEnvPermission;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.core.model.export.ExportOptions;
@@ -27,7 +28,7 @@ public class EnrolleeExportExtService {
     enrolleeExportService.export(options, authContext.getStudyEnvironment().getId(), os);
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public void exportDictionary(
       PortalStudyEnvAuthContext authContext, ExportOptions exportOptions, OutputStream os) {
     dictionaryExportService.exportDictionary(

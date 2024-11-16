@@ -3,6 +3,7 @@ package bio.terra.pearl.api.admin.service.export;
 import bio.terra.pearl.api.admin.AuthAnnotationSpec;
 import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,6 @@ public class EnrolleeExportExtServiceTests extends BaseSpringBootTest {
             "export",
             AuthAnnotationSpec.withPortalStudyEnvPerm("participant_data_view"),
             "exportDictionary",
-            AuthAnnotationSpec.withPortalStudyEnvPerm("BASE")));
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION)));
   }
 }

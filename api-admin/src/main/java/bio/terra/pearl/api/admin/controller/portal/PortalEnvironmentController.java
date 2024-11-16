@@ -2,6 +2,7 @@ package bio.terra.pearl.api.admin.controller.portal;
 
 import bio.terra.pearl.api.admin.api.PortalEnvironmentApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
 import bio.terra.pearl.api.admin.service.portal.PortalExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -34,22 +35,24 @@ public class PortalEnvironmentController implements PortalEnvironmentApi {
 
   @Override
   public ResponseEntity<Object> update(String portalShortcode, String envName, Object body) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     PortalEnvironment portalEnv = objectMapper.convertValue(body, PortalEnvironment.class);
     PortalEnvironment updatedEnv =
-        portalExtService.updateEnvironment(portalShortcode, environmentName, portalEnv, user);
+        portalExtService.updateEnvironment(
+            PortalEnvAuthContext.of(operator, portalShortcode, environmentName), portalEnv);
     return ResponseEntity.ok(updatedEnv);
   }
 
   @Override
   public ResponseEntity<Object> setLanguages(String portalShortcode, String envName, Object body) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     List<PortalEnvironmentLanguage> updatedLanguages =
         objectMapper.convertValue(body, new TypeReference<List<PortalEnvironmentLanguage>>() {});
     updatedLanguages =
-        portalExtService.setLanguages(portalShortcode, environmentName, updatedLanguages, user);
+        portalExtService.setLanguages(
+            PortalEnvAuthContext.of(operator, portalShortcode, environmentName), updatedLanguages);
     return ResponseEntity.ok(updatedLanguages);
   }
 }

@@ -2,19 +2,13 @@ package bio.terra.pearl.api.admin.service.dashboard;
 
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalEnvPermission;
-import bio.terra.pearl.api.admin.service.auth.EnforcePortalPermission;
 import bio.terra.pearl.api.admin.service.auth.SandboxOnly;
 import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
-import bio.terra.pearl.core.model.EnvironmentName;
-import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.dashboard.AlertTrigger;
 import bio.terra.pearl.core.model.dashboard.ParticipantDashboardAlert;
-import bio.terra.pearl.core.model.portal.Portal;
-import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.portal.PortalDashboardConfigService;
 import bio.terra.pearl.core.service.portal.PortalEnvironmentService;
-import bio.terra.pearl.core.service.portal.exception.PortalEnvironmentMissing;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -34,10 +28,10 @@ public class DashboardExtService {
     this.authUtilService = authUtilService;
   }
 
-  @EnforcePortalEnvPermission(permission = "BASE")
-  public List<ParticipantDashboardAlert> listPortalEnvAlerts(
-          PortalEnvAuthContext authContext) {
-    return portalDashboardConfigService.findByPortalEnvId(authContext.getPortalEnvironment().getId());
+  @EnforcePortalEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
+  public List<ParticipantDashboardAlert> listPortalEnvAlerts(PortalEnvAuthContext authContext) {
+    return portalDashboardConfigService.findByPortalEnvId(
+        authContext.getPortalEnvironment().getId());
   }
 
   @EnforcePortalEnvPermission(permission = "study_settings_edit")
@@ -66,7 +60,7 @@ public class DashboardExtService {
   @SandboxOnly
   @EnforcePortalEnvPermission(permission = "study_settings_edit")
   public ParticipantDashboardAlert createPortalEnvAlert(
-          PortalEnvAuthContext authContext,
+      PortalEnvAuthContext authContext,
       AlertTrigger triggerName,
       ParticipantDashboardAlert newAlert) {
 

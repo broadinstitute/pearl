@@ -50,14 +50,14 @@ public class SurveyExtService {
     this.enrolleeSearchExpressionParser = enrolleeSearchExpressionParser;
   }
 
-  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Survey get(PortalAuthContext authContext, String stableId, int version) {
     Survey survey = authUtilService.authSurveyToPortal(authContext.getPortal(), stableId, version);
     surveyService.attachAnswerMappings(survey);
     return survey;
   }
 
-  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<Survey> listVersions(PortalAuthContext authContext, String stableId) {
     // This is used to populate the version selector in the admin UI. It's not necessary
     // to return the surveys with any content or answer mappings, the response will
@@ -70,7 +70,7 @@ public class SurveyExtService {
     return surveysInPortal;
   }
 
-  @EnforcePortalStudyPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<StudyEnvironmentSurvey> findWithSurveyNoContent(
       PortalStudyAuthContext authContext,
       String stableId,

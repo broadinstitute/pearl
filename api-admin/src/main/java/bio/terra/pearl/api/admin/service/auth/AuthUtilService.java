@@ -30,7 +30,7 @@ public class AuthUtilService {
    * authorized to access the given portal. It might include public-ish operations like viewing
    * surveys, etc.
    */
-  public static final String BASE_PERMISSON = "BASE";
+  public static final String BASE_PERMISSION = "BASE";
 
   private final AdminUserService adminUserService;
   private final BearerTokenFactory bearerTokenFactory;
@@ -84,7 +84,7 @@ public class AuthUtilService {
   public Portal authUserToPortalWithPermission(
       AdminUser user, String portalShortcode, String permission) {
     Portal portal = authUserToPortal(user, portalShortcode);
-    if (user.isSuperuser() || BASE_PERMISSON.equals(permission)) {
+    if (user.isSuperuser() || BASE_PERMISSION.equals(permission)) {
       return portal;
     }
     adminUserService

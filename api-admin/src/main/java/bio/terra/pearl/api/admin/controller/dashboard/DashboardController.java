@@ -39,7 +39,8 @@ public class DashboardController implements DashboardApi {
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
 
     List<ParticipantDashboardAlert> alerts =
-        dashboardExtService.listPortalEnvAlerts(PortalEnvAuthContext.of(operator, portalShortcode, environmentName));
+        dashboardExtService.listPortalEnvAlerts(
+            PortalEnvAuthContext.of(operator, portalShortcode, environmentName));
 
     return ResponseEntity.ok(alerts);
   }
@@ -57,7 +58,7 @@ public class DashboardController implements DashboardApi {
 
     ParticipantDashboardAlert updatedAlert =
         dashboardExtService.updatePortalEnvAlert(
-                PortalEnvAuthContext.of(operator, portalShortcode, environmentName), trigger, alert);
+            PortalEnvAuthContext.of(operator, portalShortcode, environmentName), trigger, alert);
 
     return ResponseEntity.ok(updatedAlert);
   }
@@ -75,7 +76,7 @@ public class DashboardController implements DashboardApi {
 
     ParticipantDashboardAlert createdAlert =
         dashboardExtService.createPortalEnvAlert(
-                PortalEnvAuthContext.of(operator, portalShortcode, environmentName), trigger, alert);
+            PortalEnvAuthContext.of(operator, portalShortcode, environmentName), trigger, alert);
 
     return ResponseEntity.ok(createdAlert);
   }

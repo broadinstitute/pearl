@@ -107,10 +107,8 @@ public class TriggerController implements TriggerApi {
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     Trigger configUsed =
         notificationExtService.sendAdHoc(
-            adminUser,
-            portalShortcode,
-            studyShortcode,
-            environmentName,
+            PortalStudyEnvAuthContext.of(
+                adminUser, portalShortcode, studyShortcode, environmentName),
             adHoc.enrolleeShortcodes,
             adHoc.customMessages,
             adHoc.triggerId);

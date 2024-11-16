@@ -30,15 +30,17 @@ public class KitExtServiceTests extends BaseSpringBootTest {
         kitExtService,
         Map.of(
             "getKitRequestsByStudyEnvironment",
-                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON),
-            "requestKit", AuthAnnotationSpec.withPortalEnrolleePerm(AuthUtilService.BASE_PERMISSON),
+                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
+            "requestKit",
+                AuthAnnotationSpec.withPortalEnrolleePerm(AuthUtilService.BASE_PERMISSION),
             "requestKits",
-                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON),
-            "collectKit", AuthAnnotationSpec.withPortalEnrolleePerm(AuthUtilService.BASE_PERMISSON),
+                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
+            "collectKit",
+                AuthAnnotationSpec.withPortalEnrolleePerm(AuthUtilService.BASE_PERMISSION),
             "getKitRequests",
-                AuthAnnotationSpec.withPortalEnrolleePerm(AuthUtilService.BASE_PERMISSON),
+                AuthAnnotationSpec.withPortalEnrolleePerm(AuthUtilService.BASE_PERMISSION),
             "refreshKitStatuses",
-                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON)));
+                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION)));
   }
 
   @Test

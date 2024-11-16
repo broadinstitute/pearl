@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service;
 
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyEnvPermission;
 import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
@@ -132,7 +133,7 @@ public class PopulateExtService {
     }
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Enrollee populateEnrollee(
       PortalStudyEnvAuthContext authContext, String filePathName, boolean overwrite) {
     StudyPopulateContext config =
@@ -147,7 +148,7 @@ public class PopulateExtService {
     return enrolleePopulator.populate(config, overwrite);
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Enrollee populateEnrollee(
       PortalStudyEnvAuthContext authContext,
       EnrolleePopulateType enrolleePopulateType,
