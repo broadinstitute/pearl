@@ -1,6 +1,6 @@
 export type LogEvent = {
     id?: string,
-    eventType: 'ERROR' | 'ACCESS' | 'EVENT' | 'STATS' | 'INFO'
+    eventType: 'ERROR' | 'ACCESS' | 'EVENT' | 'STATS' | 'INFO' | 'WARN',
     eventName: string,
     stackTrace?: string,
     eventDetail?: string,
