@@ -91,7 +91,7 @@ public class StudyExtractor {
             surveyPopDtoStub.setPopulateFileName("../../" + context.getFileNameForEntity(studyEnv.getPreEnrollSurveyId()));
             studyEnvPopDto.setPreEnrollSurveyDto(surveyPopDtoStub);
         }
-        List<StudyEnvironmentSurvey> studyEnvSurveys = studyEnvironmentSurveyService.findAllByStudyEnvId(studyEnv.getId(), null);
+        List<StudyEnvironmentSurvey> studyEnvSurveys = studyEnvironmentSurveyService.findAllByStudyEnvId(studyEnv.getId(), context.isExtractActiveVersionsOnly() ? true : null);
         for (StudyEnvironmentSurvey studyEnvSurvey : studyEnvSurveys) {;
             StudyEnvironmentSurveyPopDto studyEnvSurveyPopDto = new StudyEnvironmentSurveyPopDto();
             BeanUtils.copyProperties(studyEnvSurvey, studyEnvSurveyPopDto, "id", "studyEnvironmentId", "surveyId");
