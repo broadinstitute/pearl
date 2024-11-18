@@ -73,7 +73,7 @@ export default function SystemSettingsEditor() {
             />
           </div>
           <div className={'bg-light p-3 my-3 rounded-3 border border-1'}>
-            <h5 className={'mb-3'}>Other Settings</h5>
+            <h5 className={'mb-3'}>General Settings</h5>
             <Checkbox
               className={'mb-3'}
               label={'Disable Scheduled Jobs'}

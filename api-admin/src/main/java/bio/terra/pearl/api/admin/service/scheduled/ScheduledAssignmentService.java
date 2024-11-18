@@ -23,7 +23,7 @@ public class ScheduledAssignmentService {
   @SchedulerLock(
       name = "ScheduledSurveyAssignmentService.assignScheduledSurveys",
       lockAtMostFor = "500s",
-      lockAtLeastFor = "60s")  
+      lockAtLeastFor = "60s")
   @CheckDisableScheduledTasks
   public void assignScheduledSurveys() {
     log.info("Scheduled task processing beginning");
