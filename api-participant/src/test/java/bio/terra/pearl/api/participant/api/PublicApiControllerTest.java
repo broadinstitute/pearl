@@ -11,9 +11,9 @@ import bio.terra.pearl.api.participant.config.VersionConfiguration;
 import bio.terra.pearl.api.participant.controller.PublicApiController;
 import bio.terra.pearl.api.participant.model.SystemStatus;
 import bio.terra.pearl.api.participant.service.StatusService;
-import bio.terra.pearl.core.service.maintenance.MaintenanceModeService;
 import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.site.SiteMediaService;
+import bio.terra.pearl.core.service.system.SystemSettingsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,7 +30,7 @@ class PublicApiControllerTest {
   @MockBean private B2CConfigurationService b2CConfigurationService;
   @MockBean private SiteMediaService siteMediaService;
   @MockBean private PortalService portalService;
-  @MockBean private MaintenanceModeService maintenanceModeService;
+  @MockBean private SystemSettingsService maintenanceModeService;
 
   @MockBean private StatusService statusService;
 

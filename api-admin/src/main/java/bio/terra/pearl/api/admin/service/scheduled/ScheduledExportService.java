@@ -1,6 +1,6 @@
 package bio.terra.pearl.api.admin.service.scheduled;
 
-import bio.terra.pearl.api.admin.service.maintenance.CheckDisableScheduledTasks;
+import bio.terra.pearl.api.admin.service.system.CheckDisableScheduledTasks;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.service.export.integration.ExportIntegrationService;
 import lombok.extern.slf4j.Slf4j;

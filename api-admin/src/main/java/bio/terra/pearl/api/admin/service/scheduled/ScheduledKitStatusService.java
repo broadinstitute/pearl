@@ -1,6 +1,6 @@
 package bio.terra.pearl.api.admin.service.scheduled;
 
-import bio.terra.pearl.api.admin.service.maintenance.CheckDisableScheduledTasks;
+import bio.terra.pearl.api.admin.service.system.CheckDisableScheduledTasks;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;

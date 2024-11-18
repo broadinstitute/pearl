@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.participant.controller;
 
+import bio.terra.juniper.core.model.maintenance.SystemSettings;
 import bio.terra.pearl.api.participant.api.PublicApi;
 import bio.terra.pearl.api.participant.config.B2CConfigurationService;
 import bio.terra.pearl.api.participant.config.VersionConfiguration;
@@ -10,9 +11,9 @@ import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.portal.PortalEnvironmentDescriptor;
 import bio.terra.pearl.core.model.site.SiteMedia;
-import bio.terra.pearl.core.service.maintenance.MaintenanceModeService;
 import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.site.SiteMediaService;
+import bio.terra.pearl.core.service.system.SystemSettingsService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +37,7 @@ public class PublicApiController implements PublicApi {
   private final SiteMediaService siteMediaService;
   private final PortalService portalService;
   private final StatusService statusService;
-  private final MaintenanceModeService maintenanceModeService;
+  private final SystemSettingsService maintenanceModeService;
   private final VersionConfiguration versionConfiguration;
   private final Environment env;
 
@@ -46,7 +47,7 @@ public class PublicApiController implements PublicApi {
       SiteMediaService siteMediaService,
       PortalService portalService,
       StatusService statusService,
-      MaintenanceModeService maintenanceModeService,
+      SystemSettingsService maintenanceModeService,
       VersionConfiguration versionConfiguration,
       Environment env) {
     this.b2CConfigurationService = b2CConfigurationService;
@@ -93,8 +94,8 @@ public class PublicApiController implements PublicApi {
 
   @Override
   public ResponseEntity<Object> getMaintenanceModeSettings() {
-    Map<String, Object> config = maintenanceModeService.getMaintenanceModeSettings();
-    return ResponseEntity.ok(config);
+    SystemSettings settings = maintenanceModeService.getSystemSettings();
+    return ResponseEntity.ok(settings);
   }
 
   /**

@@ -1,7 +1,7 @@
 package bio.terra.pearl.api.admin.service.scheduled;
 
-import bio.terra.pearl.api.admin.service.maintenance.CheckDisableScheduledTasks;
 import bio.terra.pearl.api.admin.service.notifications.SendgridEventService;
+import bio.terra.pearl.api.admin.service.system.CheckDisableScheduledTasks;
 import java.util.concurrent.TimeUnit;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;

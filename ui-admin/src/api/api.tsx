@@ -28,7 +28,7 @@ import {
   Survey,
   SurveyResponse,
   Trigger,
-  MaintenanceModeSettings
+  SystemSettings
 } from '@juniper/ui-core'
 import queryString from 'query-string'
 import {
@@ -1770,9 +1770,19 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async loadMaintenanceModeSettings(): Promise<MaintenanceModeSettings> {
+  async loadMaintenanceModeSettings(): Promise<SystemSettings> {
     const url = `/maintenance`
     const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async updateSystemSettings(settings: SystemSettings): Promise<SystemSettings> {
+    const url = `${API_ROOT}/system/settings`
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getInitHeaders(),
+      body: JSON.stringify(settings)
+    })
     return await this.processJsonResponse(response)
   },
 

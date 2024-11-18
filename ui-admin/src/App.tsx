@@ -33,7 +33,7 @@ import LogEventViewer from './health/LogEventViewer'
 import { ApiProvider, initializeMixpanel, MaintenanceMode } from '@juniper/ui-core'
 import mixpanel from 'mixpanel-browser'
 import { StatusPage } from './status/StatusPage'
-import MaintenanceSettings from './maintenance/MaintenanceSettings'
+import SystemSettingsEditor from './system/SystemSettingsEditor'
 
 /** auto-scroll-to-top on any navigation */
 const ScrollToTop = () => {
@@ -72,7 +72,7 @@ function App() {
                           </ProtectedRoute>}>
                             <Route path="populate/*" element={<PopulateRouteSelect/>}/>
                             <Route path="logEvents/*" element={<LogEventViewer/>}/>
-                            <Route path="maintenanceMode/*" element={<MaintenanceSettings/>}/>
+                            <Route path="system/settings" element={<SystemSettingsEditor/>}/>
                             <Route path="users/*" element={<AdminUserRouter/>}/>
                             <Route path="integrations/*" element={<IntegrationDashboard/>}/>
                             <Route path=":portalShortcode/*" element={

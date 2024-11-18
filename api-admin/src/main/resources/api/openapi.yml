@@ -2196,6 +2196,30 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /api/system/settings:
+    get:
+      summary: Gets the system settings
+      tags: [ systemSettings ]
+      operationId: get
+      responses:
+        '200':
+          description: system settings
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      summary: Updates the system settings
+      tags: [ systemSettings ]
+      operationId: update
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: system settings
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/logEvents:
     get:
       summary: Get log events. Filterable by event type and number of days.

@@ -4,11 +4,11 @@ import { Checkbox } from 'components/forms/Checkbox'
 import { Textarea } from 'components/forms/Textarea'
 import { TextInput } from '../components/forms/TextInput'
 import { renderPageHeader } from '../util/pageUtils'
-import { MaintenanceModeSettings } from '@juniper/ui-core'
+import { SystemSettings } from '@juniper/ui-core'
 import Api from 'api/api'
 
-export default function MaintenanceSettings() {
-  const [settings, setSettings] = useState<MaintenanceModeSettings>()
+export default function SystemSettingsEditor() {
+  const [settings, setSettings] = useState<SystemSettings>()
 
   const loadSettings = async () => {
     const response = await Api.loadMaintenanceModeSettings()
@@ -20,42 +20,48 @@ export default function MaintenanceSettings() {
   }, [])
 
   const doSave = () => {
-    console.log('saving...')
+    console.log('doSaving')
+    if (settings) {
+      console.log('for real')
+      Api.updateSystemSettings(settings)
+    }
   }
 
   return <div className={'mx-3'}><form onSubmit={e => {
     e.preventDefault()
   }}>
-    {renderPageHeader('Maintenance Mode Settings')}
+    {renderPageHeader('System Settings')}
     { !settings ?
       <div className="alert alert-warning">
         <strong>Warning:</strong> Unable to load maintenance mode settings.
       </div> :
       <>
         <div className={'bg-light p-3 mb-3 rounded-3 border border-1'}>
-          <h5 className={'mb-3'}>General Settings</h5>
+          <h5 className={'mb-3'}>Maintenance Mode Settings</h5>
           <Checkbox
             label={'Enable Maintenance Mode'}
             description={'When enabled, users will see the maintenance message. ' +
                       'Study staff and participants will not be allowed' +
                       ' to log in or use the system.'}
-            checked={settings?.enabled || false}
-            onChange={e => setSettings({ ...settings, enabled: e })}/>
+            checked={settings?.maintenanceModeEnabled || false}
+            onChange={e => setSettings({ ...settings, maintenanceModeEnabled: e })}/>
           <Textarea
             rows={4}
-            disabled={!settings?.enabled}
+            disabled={!settings?.maintenanceModeEnabled}
             label="Maintenance Message"
             description={'Message to display to study staff and participants' +
                 ' when maintenance mode is enabled. Markdown is supported.'}
-            value={settings?.message} onChange={e => setSettings({ ...settings, message: e })}
+            value={settings?.maintenanceModeMessage} onChange={e =>
+              setSettings({ ...settings, maintenanceModeMessage: e })
+            }
           />
           <TextInput
             label={'Maintenance Bypass Phrase'}
-            disabled={!settings?.enabled}
+            disabled={!settings?.maintenanceModeEnabled}
             description={'Password required to bypass maintenance mode. This is not encrypted in any way and ' +
                       'is only intended to discourage access to the application.'}
-            value={settings?.bypassPhrase || ''}
-            onChange={e => setSettings({ ...settings, bypassPhrase: e })}
+            value={settings?.maintenanceModeBypassPhrase || ''}
+            onChange={e => setSettings({ ...settings, maintenanceModeBypassPhrase: e })}
           />
         </div>
         <div className={'bg-light p-3 my-3 rounded-3 border border-1'}>

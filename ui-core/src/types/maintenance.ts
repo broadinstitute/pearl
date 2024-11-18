@@ -1,6 +1,6 @@
-export type MaintenanceModeSettings = {
-    enabled: boolean
-    message: string
-    bypassPhrase: string
+export type SystemSettings = {
+    maintenanceModeEnabled: boolean
+    maintenanceModeMessage: string
+    maintenanceModeBypassPhrase: string
     disableScheduledJobs: boolean
 }

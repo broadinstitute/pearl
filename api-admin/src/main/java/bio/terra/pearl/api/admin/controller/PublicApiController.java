@@ -1,12 +1,13 @@
 package bio.terra.pearl.api.admin.controller;
 
+import bio.terra.juniper.core.model.maintenance.SystemSettings;
 import bio.terra.pearl.api.admin.api.PublicApi;
 import bio.terra.pearl.api.admin.config.VersionConfiguration;
 import bio.terra.pearl.api.admin.model.SystemStatus;
 import bio.terra.pearl.api.admin.model.VersionProperties;
 import bio.terra.pearl.api.admin.service.ConfigExtService;
 import bio.terra.pearl.api.admin.service.StatusService;
-import bio.terra.pearl.core.service.maintenance.MaintenanceModeService;
+import bio.terra.pearl.core.service.system.SystemSettingsService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +22,14 @@ public class PublicApiController implements PublicApi {
   private final StatusService statusService;
   private final VersionConfiguration versionConfiguration;
   private final ConfigExtService configExtService;
-  private final MaintenanceModeService maintenanceModeService;
+  private final SystemSettingsService maintenanceModeService;
 
   @Autowired
   public PublicApiController(
       StatusService statusService,
       VersionConfiguration versionConfiguration,
       ConfigExtService configExtService,
-      MaintenanceModeService maintenanceModeService) {
+      SystemSettingsService maintenanceModeService) {
     this.statusService = statusService;
     this.versionConfiguration = versionConfiguration;
     this.configExtService = configExtService;
@@ -62,9 +63,8 @@ public class PublicApiController implements PublicApi {
   @Override
   public ResponseEntity<Object> getMaintenanceModeSettings() {
 
-    Map<String, Object> config = maintenanceModeService.getMaintenanceModeSettings();
-
-    return ResponseEntity.ok(config);
+    SystemSettings settings = maintenanceModeService.getSystemSettings();
+    return ResponseEntity.ok(settings);
   }
 
   @GetMapping(value = "/config.json")

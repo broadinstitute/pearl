@@ -1,4 +1,4 @@
-package bio.terra.pearl.api.admin.service.maintenance;
+package bio.terra.pearl.api.admin.service.system;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -357,7 +357,7 @@ databaseChangeLog:
       file: changesets/2024_11_07_create_participant_file_survey_response_table.yaml
       relativeToChangelogFile: true
   - include:
-      file: changesets/2024_11_14_maintenance_mode_settings.yaml
+      file: changesets/2024_11_14_system_settings.yaml
       relativeToChangelogFile: true
 
 
