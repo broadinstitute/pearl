@@ -218,4 +218,11 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
         survey.setAnswerMappings(answerMappingDao.findBySurveyId(survey.getId()));
     }
 
+    public List<Survey> findActiveSurveysByPortalId(UUID portalId) {
+        List<Survey> surveys = dao.findActiveSurveysByPortalIdNoPreEnrolls(portalId);
+
+        surveys.addAll(dao.findActivePreEnrolleeSurveysByPortalId(portalId));
+
+        return surveys;
+    }
 }

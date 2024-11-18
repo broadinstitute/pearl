@@ -95,7 +95,7 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
 
     /**
      * will load the survey and the surveyResponse associated with the task,
-     * or the most recent survey response, with answers attached
+     * if no task is specified, will return the survey with no response
      */
     public SurveyWithResponse findWithActiveResponse(UUID studyEnvId, UUID portalId, String stableId, Integer version,
                                                      Enrollee enrollee, UUID taskId) {
@@ -106,15 +106,14 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
             ParticipantTask task = participantTaskService.find(taskId).get();
             // if there is an associated task, try to find an associated response
             lastResponse = dao.findOneWithAnswers(task.getSurveyResponseId()).orElse(null);
-        }
-
-        if (lastResponse == null) {
-            // if there's no response already associated with the task, grab the most recently created
+        }  else {
+            // if there's no task specified, grab the most recently created response
             lastResponse = dao.findMostRecent(enrollee.getId(), form.getId()).orElse(null);
             if (lastResponse != null) {
                 dao.attachAnswers(lastResponse);
             }
         }
+
         StudyEnvironmentSurvey configSurvey = studyEnvironmentSurveyService
                 .findActiveBySurvey(studyEnvId, stableId)
                 .stream().findFirst().orElseThrow(() -> new NotFoundException("no active survey found"));

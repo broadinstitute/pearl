@@ -180,8 +180,12 @@ public class PopulateExtService {
 
   @SuperuserOnly
   public void extractPortal(
-      OperatorAuthContext authContext, String portalShortcode, OutputStream os) throws IOException {
-    portalExtractService.extract(portalShortcode, os);
+      OperatorAuthContext authContext,
+      String portalShortcode,
+      OutputStream os,
+      boolean extractActiveVersionsOnly)
+      throws IOException {
+    portalExtractService.extract(portalShortcode, os, extractActiveVersionsOnly);
   }
 
   @Transactional

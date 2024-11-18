@@ -572,7 +572,7 @@ def generate_juniper_module_repeat_stable_id(stable_id: str, repeat: int) -> str
     if repeat == 1:
         return stable_id
 
-    return stable_id + '_' + str(repeat)
+    return stable_id + '[' + str(repeat) + ']'
 
 def apply_translation(dsm_data: dict[str, Any], juniper_data: dict[str, Any], translation: Translation):
     if translation.translation_override is not None and translation.translation_override.constant_value is not None:
