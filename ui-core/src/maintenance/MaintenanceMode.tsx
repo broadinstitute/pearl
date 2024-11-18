@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faScrewdriverWrench } from '@fortawesome/free-solid-svg-icons'
-import { SystemSettings } from '../types/maintenance'
-import { Markdown } from '../participant/landing/Markdown'
-import { useApiContext } from '../participant/ApiProvider'
+import { SystemSettings } from 'src/types/maintenance'
+import { Markdown } from 'src/participant/landing/Markdown'
+import { useApiContext } from 'src/participant/ApiProvider'
 
 export function MaintenanceMode({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SystemSettings>()

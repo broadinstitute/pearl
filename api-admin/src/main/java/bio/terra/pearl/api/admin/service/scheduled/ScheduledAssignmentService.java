@@ -1,6 +1,6 @@
 package bio.terra.pearl.api.admin.service.scheduled;
 
-import bio.terra.pearl.api.admin.service.system.CheckDisableScheduledTasks;
+import bio.terra.pearl.api.admin.service.system.CheckDisableScheduledTask;
 import bio.terra.pearl.core.service.workflow.TaskDispatcher;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class ScheduledAssignmentService {
       name = "ScheduledSurveyAssignmentService.assignScheduledSurveys",
       lockAtMostFor = "500s",
       lockAtLeastFor = "60s")
-  @CheckDisableScheduledTasks
+  @CheckDisableScheduledTask
   public void assignScheduledSurveys() {
     log.info("Scheduled task processing beginning");
     taskDispatchers.forEach(TaskDispatcher::assignScheduledTasks);

@@ -19,7 +19,7 @@ public class SystemSettingsService {
 
     public SystemSettings getSystemSettings() {
         //system_settings is a singleton table
-        // if we have multiple rows, we'll log it and return the most recent row to avoid mass-disruption
+        // if we somehow end up with multiple rows, we'll log it and return the most recent row to avoid mass-disruption
         List<SystemSettings> settings = systemSettingsDao.findAll();
         if (settings.size() > 1) {
             log.error("Multiple system settings rows found, returning the most recent");
