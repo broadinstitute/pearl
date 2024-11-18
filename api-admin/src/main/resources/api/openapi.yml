@@ -37,15 +37,15 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
-  /maintenance:
+  /systemSettings:
     get:
-      summary: Get maintenance mode settings
+      summary: Get system settings
       tags: [ public ]
-      operationId: getMaintenanceModeSettings
+      operationId: getSystemSettings
       security: [ ]
       responses:
         '200':
-          description: Maintenance mode status
+          description: System settings
           content: &jsonContent { application/json: { schema: { type: object } } }
         '500':
           $ref: '#/components/responses/ServerError'
@@ -2197,18 +2197,8 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
-  /api/system/settings:
-    get:
-      summary: Gets the system settings
-      tags: [ systemSettings ]
-      operationId: get
-      responses:
-        '200':
-          description: system settings
-          content: *jsonContent
-        '500':
-          $ref: '#/components/responses/ServerError'
-    post:
+  /api/systemSettings:
+    patch:
       summary: Updates the system settings
       tags: [ systemSettings ]
       operationId: update

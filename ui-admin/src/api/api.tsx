@@ -1772,16 +1772,16 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async loadMaintenanceModeSettings(): Promise<SystemSettings> {
-    const url = `/maintenance`
+  async loadSystemSettings(): Promise<SystemSettings> {
+    const url = `/systemSettings`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },
 
   async updateSystemSettings(settings: SystemSettings): Promise<SystemSettings> {
-    const url = `${API_ROOT}/system/settings`
+    const url = `${API_ROOT}/systemSettings`
     const response = await fetch(url, {
-      method: 'POST',
+      method: 'PATCH',
       headers: this.getInitHeaders(),
       body: JSON.stringify(settings)
     })

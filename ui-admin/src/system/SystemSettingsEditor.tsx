@@ -16,7 +16,7 @@ export default function SystemSettingsEditor() {
   const [isSaving, setIsSaving] = useState(false)
 
   const loadSettings = async () => {
-    const response = await Api.loadMaintenanceModeSettings()
+    const response = await Api.loadSystemSettings()
     setSettings(response)
   }
 

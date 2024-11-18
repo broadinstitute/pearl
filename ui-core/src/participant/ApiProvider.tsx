@@ -16,7 +16,7 @@ export type UpdateSurveyResponseFunc = ({
   studyEnvParams: StudyEnvParams, stableId: string, version: number,
   response: SurveyResponseWithJustification, enrolleeShortcode: string, taskId: string, alertErrors?: boolean
 }) => Promise<HubResponse>
-export type LoadMaintenanceModeSettingsFunc = () => Promise<SystemSettings>
+export type LoadSystemSettingsFunc = () => Promise<SystemSettings>
 export type ValidateAddressFunc = (address: MailingAddress) => Promise<AddressValidationResult>
 
 /**
@@ -29,7 +29,7 @@ export type ApiContextT = {
   getLanguageTexts: GetLanguageTextsFunc
   updateSurveyResponse: UpdateSurveyResponseFunc
   validateAddress: ValidateAddressFunc
-  loadMaintenanceModeSettings: LoadMaintenanceModeSettingsFunc
+  loadSystemSettings: LoadSystemSettingsFunc
 }
 
 export const emptyApi: ApiContextT = {
@@ -38,7 +38,7 @@ export const emptyApi: ApiContextT = {
   getLanguageTexts: () => Promise.resolve({}),
   updateSurveyResponse: () => Promise.resolve({} as HubResponse),
   validateAddress: () => Promise.resolve({} as AddressValidationResult),
-  loadMaintenanceModeSettings: () => Promise.resolve({} as SystemSettings)
+  loadSystemSettings: () => Promise.resolve({} as SystemSettings)
 }
 
 const ApiContext = createContext<ApiContextT>(emptyApi)

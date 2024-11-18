@@ -16,7 +16,7 @@ import {
   StudyEnvParams,
   Survey,
   SurveyResponse,
-  MaintenanceModeSettings, Answer
+  Answer, SystemSettings
 } from '@juniper/ui-core'
 import { defaultApiErrorHandle } from 'util/error-utils'
 import queryString from 'query-string'
@@ -442,8 +442,8 @@ export default {
     bearerToken = token
   },
 
-  async loadMaintenanceModeSettings(): Promise<MaintenanceModeSettings> {
-    const url = `/maintenance`
+  async loadSystemSettings(): Promise<SystemSettings> {
+    const url = `/systemSettings`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },

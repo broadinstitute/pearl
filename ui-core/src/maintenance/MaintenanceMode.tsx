@@ -14,7 +14,7 @@ export function MaintenanceMode({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const loadMaintenanceSettings = async () => {
-      const response = await Api.loadMaintenanceModeSettings()
+      const response = await Api.loadSystemSettings()
       setSettings(response)
     }
 

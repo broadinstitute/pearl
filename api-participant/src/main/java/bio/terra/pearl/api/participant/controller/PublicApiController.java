@@ -93,7 +93,7 @@ public class PublicApiController implements PublicApi {
   }
 
   @Override
-  public ResponseEntity<Object> getMaintenanceModeSettings() {
+  public ResponseEntity<Object> getSystemSettings() {
     SystemSettings settings = maintenanceModeService.getSystemSettings();
     return ResponseEntity.ok(settings);
   }

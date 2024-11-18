@@ -27,8 +27,8 @@ export const previewApi = (portalShortcode: string, portalEnvName: string): ApiC
     validateAddress: (address: MailingAddress) => {
       return Api.validateAddress(address)
     },
-    loadMaintenanceModeSettings: () => {
-      return Api.loadMaintenanceModeSettings()
+    loadSystemSettings: () => {
+      return Api.loadSystemSettings()
     }
   }
 }
