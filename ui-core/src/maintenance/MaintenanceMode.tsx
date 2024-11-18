@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faScrewdriverWrench } from '@fortawesome/free-solid-svg-icons'
 import { SystemSettings } from 'src/types/maintenance'
-import { Markdown } from 'src/participant/landing/Markdown'
-import { useApiContext } from 'src/participant/ApiProvider'
+import { Markdown } from '../participant/landing/Markdown'
+import { useApiContext } from '../participant/ApiProvider'
 
 export function MaintenanceMode({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<SystemSettings>()
@@ -40,25 +40,31 @@ export function MaintenanceMode({ children }: { children: React.ReactNode }) {
         <div className={'text-center w-75'}>
           <h1><FontAwesomeIcon icon={faScrewdriverWrench}/> This application is currently unavailable</h1>
           <Markdown className={'py-2'}>{settings?.maintenanceModeMessage}</Markdown>
-          <div className={'mt-5 mb-2'}>If you are a system administrator, you may login below:</div>
-          <div className={'d-flex justify-content-center'}>
-            <input
-              className={'form-control'}
-              style={{ width: '200px' }}
-              value={password}
-              onChange={e => { setPassword(e.target.value) }
-              }/>
-            <button
-              className={'btn btn-primary mx-2 border border-1'}
-              onClick={() => {
-                if (password === settings?.maintenanceModeBypassPhrase) {
-                  setBypassMaintenanceMode(true)
+          { settings.maintenanceModeBypassPhrase  && <>
+            <div className={'mt-5 mb-2'}>If you are a system administrator, you may login below:</div>
+
+            <div className={'d-flex justify-content-center'}>
+              <input
+                className={'form-control'}
+                style={{ width: '200px' }}
+                value={password}
+                onChange={e => {
+                  setPassword(e.target.value)
                 }
-              }}
-            >
+                }/>
+              <button
+                className={'btn btn-primary mx-2 border border-1'}
+                onClick={() => {
+                  if (password === settings?.maintenanceModeBypassPhrase) {
+                    setBypassMaintenanceMode(true)
+                  }
+                }}
+              >
               Enter
-            </button>
-          </div>
+              </button>
+            </div>
+          </>
+          }
         </div>
       </div>
     </div>
