@@ -80,4 +80,29 @@ describe('AddPageModal', () => {
       }]
     })
   })
+
+  test('validates page path characters', async () => {
+    const { RoutedComponent } = setupRouterTest(<AddPageModal
+      onDismiss={jest.fn()}
+      insertNewPage={jest.fn()}
+      portalEnv={mockPortalEnvironment('sandbox')}
+      portalShortcode={'test'}
+    />)
+
+    render(RoutedComponent)
+
+    const pageTitleInput = screen.getByLabelText('Page Title')
+    const pagePathInput = screen.getByLabelText('Page Path')
+    const createButton = screen.getByText('Create')
+
+    await userEvent.type(pageTitleInput, 'My New Page')
+    await userEvent.type(pagePathInput, 'new-page-path')
+
+    expect(createButton).toBeEnabled()
+
+    await userEvent.clear(pagePathInput)
+    await userEvent.type(pagePathInput, 'new_page_path')
+
+    expect(createButton).toBeDisabled()
+  })
 })

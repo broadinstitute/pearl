@@ -29,7 +29,7 @@ type ExportIntegrationJobMatched = ExportIntegrationJob & {
   adminUser?: AdminUser
 }
 
-/** show the mailing list in table */
+/** show the list of export integrations for the environment */
 export default function ExportIntegrationJobList({ studyEnvContext }:
   {studyEnvContext: StudyEnvContextT }) {
   const [integrations, setIntegrations] = useState<ExportIntegration[]>([])
@@ -60,6 +60,9 @@ export default function ExportIntegrationJobList({ studyEnvContext }:
   }, {
     header: 'Status',
     accessorKey: 'status'
+  }, {
+    header: 'Result',
+    accessorKey: 'result'
   }]
 
   const table = useReactTable({

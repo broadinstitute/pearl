@@ -32,9 +32,7 @@ import DatasetDashboard from './export/datarepo/DatasetDashboard'
 import DatasetList from './export/datarepo/DatasetList'
 import Select from 'react-select'
 import MailingListView from '../portal/MailingListView'
-import { ENVIRONMENT_ICON_MAP } from './publishing/PortalPublishingView'
 import TriggerList from './notifications/TriggerList'
-import SiteContentLoader from '../portal/siteContent/SiteContentLoader'
 import AdminTaskList from './adminTasks/AdminTaskList'
 import SiteMediaList from '../portal/media/SiteMediaList'
 import PreRegView from './surveys/PreRegView'
@@ -49,10 +47,11 @@ import DataImportView from '../portal/DataImportView'
 import DataImportList from '../portal/DataImportList'
 import FamilyRouter from './families/FamilyRouter'
 import { KitScanner } from './kits/kitcollection/KitScanner'
-import { LoadedSettingsView } from 'study/settings/SettingsView'
 import ExportIntegrationList from './export/integrations/ExportIntegrationList'
 import ExportIntegrationView from './export/integrations/ExportIntegrationView'
 import ExportIntegrationJobList from './export/integrations/ExportIntegrationJobList'
+import LoadedSettingsView from './settings/SettingsView'
+import { ENVIRONMENT_ICON_MAP } from 'util/publishUtils'
 
 export type StudyEnvContextT = { study: Study, currentEnv: StudyEnvironment, currentEnvPath: string, portal: Portal }
 
@@ -94,7 +93,7 @@ function StudyEnvironmentRouter({ study }: { study: Study }) {
     ...portalContext, portalEnv
   }
 
-  return <div className="StudyView d-flex flex-column flex-grow-1">
+  return <div className="StudyView d-flex flex-column flex-grow-1" key={studyEnvContext.currentEnvPath}>
     <NavBreadcrumb value={currentEnvPath}>
       <Select options={envOpts}
         value={envOpts.find(opt => opt.value === envName)}
@@ -117,7 +116,6 @@ function StudyEnvironmentRouter({ study }: { study: Study }) {
           <Route path="families/*" element={<FamilyRouter studyEnvContext={studyEnvContext}/>}/>
           <Route path="kits/scan" element={<KitScanner studyEnvContext={studyEnvContext}/>}/>
           <Route path="kits/*" element={<KitsRouter studyEnvContext={studyEnvContext}/>}/>
-          <Route path="siteContent" element={<SiteContentLoader portalEnvContext={portalEnvContext}/>}/>
           <Route path="media" element={<SiteMediaList portalContext={portalContext} portalEnv={portalEnv}/>}/>
           <Route path="alerts" element={<DashboardSettings currentEnv={portalEnv}
             portalContext={portalContext}/>}/>
@@ -126,7 +124,7 @@ function StudyEnvironmentRouter({ study }: { study: Study }) {
             portalEnv={portalEnv}/>}/>
           <Route path="dataImports" element={<DataImportList studyEnvContext={studyEnvContext}/>}/>
           <Route path="dataImports/:dataImportId" element={<DataImportView studyEnvContext={studyEnvContext}/>}/>
-          <Route path="settings/*" element={<LoadedSettingsView key={currentEnv.environmentName}
+          <Route path="settings/*" element={<LoadedSettingsView
             studyEnvContext={studyEnvContext}
             portalContext={portalContext}/>}
           />
@@ -193,9 +191,17 @@ export const participantListPath = (portalShortcode: string, studyShortcode: str
   return `/${portalShortcode}/studies/${studyShortcode}/env/${envName}/participants`
 }
 
+export const participantAccountsPath = (portalShortcode: string, studyShortcode: string, envName: string) => {
+  return `/${portalShortcode}/studies/${studyShortcode}/env/${envName}/participants/accounts`
+}
+
 /** root study environment path */
 export const studyEnvPath = (portalShortcode: string, studyShortcode: string, envName: string) => {
   return `/${portalShortcode}/studies/${studyShortcode}/env/${envName}`
+}
+
+export const portalEnvPath = (portalShortcode: string, envName: string) => {
+  return `/${portalShortcode}/env/${envName}`
 }
 
 /** surveys, consents, etc.. */
@@ -244,34 +250,10 @@ export const studyEnvMetricsPath = (portalShortcode: string, studyShortcode: str
 }
 
 /**
- * helper function for mailing list route -- note the mailing list itself might not be study-specific,
- * but the route is set to maintain study context
- */
-export const studyEnvMailingListPath = (portalShortcode: string, studyShortcode: string, envName: string) => {
-  return `${studyEnvPath(portalShortcode, studyShortcode, envName)}/mailingList`
-}
-
-/**
  *
  */
 export const studyEnvImportPath = (portalShortcode: string, studyShortcode: string, envName: string) => {
   return `${studyEnvPath(portalShortcode, studyShortcode, envName)}/dataImports`
-}
-
-/**
- * helper function for mailing list route -- note the site content itself might not be study-specific,
- * but the route is set to maintain study context
- */
-export const studyEnvSiteContentPath = (portalShortcode: string, studyShortcode: string, envName: string) => {
-  return `${studyEnvPath(portalShortcode, studyShortcode, envName)}/siteContent`
-}
-
-/**
- * helper function for image manager route -- note the media are portal-scoped, rather than study-scoped,
- * but the route is set to maintain study context
- */
-export const studyEnvSiteMediaPath = (portalShortcode: string, studyShortcode: string, envName: string) => {
-  return `${studyEnvPath(portalShortcode, studyShortcode, envName)}/siteContent`
 }
 
 /** helper path for study settings */

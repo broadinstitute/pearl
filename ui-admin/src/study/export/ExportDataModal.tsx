@@ -33,13 +33,14 @@ const DEFAULT_EXPORT_OPTS: ExportOptions = {
   splitOptionsIntoColumns: false,
   stableIdsForOptions: false,
   fileFormat: 'TSV',
-  includeSubheaders: true,
+  includeSubHeaders: true,
   onlyIncludeMostRecent: true,
   filterString: undefined,
-  excludeModules: []
+  excludeModules: [],
+  includeFields: []
 }
 
-const MODULE_EXCLUDE_OPTIONS: Record<string, string> = { surveys: 'Surveys' }
+const MODULE_EXCLUDE_OPTIONS: Record<string, string> = { surveys: 'Surveys', profile: 'Profile', account: 'Account' }
 
 /** form for configuring and downloading enrollee data */
 const ExportDataModal = ({ studyEnvContext, show, setShow }: {studyEnvContext: StudyEnvContextT, show: boolean,
@@ -107,7 +108,7 @@ export function ExportOptionsForm({ exportOptions, setExportOptions }:
     !exportOptions.filterString?.includes('{enrollee.subject} = true')
 
 
-  return <form onSubmit={e => e.preventDefault()}>
+  return <div>
     <div className="py-2">
       <p className="fw-bold mb-1">
         Data format
@@ -170,12 +171,12 @@ export function ExportOptionsForm({ exportOptions, setExportOptions }:
           Include subheaders for columns
         </p>
         <label className="me-3">
-          <input type="radio" name="includeSubheaders" value="true" checked={exportOptions.includeSubheaders}
-            onChange={() => setExportOptions({ ...exportOptions, includeSubheaders: true })} className="me-1"/> Yes
+          <input type="radio" name="includeSubheaders" value="true" checked={exportOptions.includeSubHeaders}
+            onChange={() => setExportOptions({ ...exportOptions, includeSubHeaders: true })} className="me-1"/> Yes
         </label>
         <label>
-          <input type="radio" name="includeSubheaders" value="false" checked={!exportOptions.includeSubheaders}
-            onChange={() => setExportOptions({ ...exportOptions, includeSubheaders: false })} className="me-1"/> No
+          <input type="radio" name="includeSubheaders" value="false" checked={!exportOptions.includeSubHeaders}
+            onChange={() => setExportOptions({ ...exportOptions, includeSubHeaders: false })} className="me-1"/> No
         </label>
       </div>
       <div className="py-2">
@@ -218,6 +219,24 @@ export function ExportOptionsForm({ exportOptions, setExportOptions }:
           isMulti={true} value={selectedOptions}
           inputId={selectInputId}
           onChange={onChange}/>
+        <div className="d-flex pt-3 ps-2">
+          <label className="" htmlFor="exportFields">
+            Only include fields:
+          </label>
+          <InfoPopup content={<span>
+                Space-or-comma delimited list of field names. e.g. <pre>enrollee.shortcode</pre>
+            If any fields are specified here, only those fields will be included in the export.
+          </span>}/>
+        </div>
+
+        <textarea name="exportFields" id="exportFields" cols={70} value={exportOptions.includeFields?.join(' ')}
+          onChange={e => setExportOptions({
+            ...exportOptions,
+            includeFields: e.target.value ? e.target.value
+              .replace(/[\s,]+/g, ' ')
+              .split(' ') : []
+          })}
+          className="me-1"/>
       </div>
     </div> }
     <hr/>
@@ -227,7 +246,7 @@ export function ExportOptionsForm({ exportOptions, setExportOptions }:
       see the <Link to="https://broad-juniper.zendesk.com/hc/en-us/articles/18259824756123" target="_blank">
       help page</Link>.
     </div>
-  </form>
+  </div>
 }
 
 export default ExportDataModal

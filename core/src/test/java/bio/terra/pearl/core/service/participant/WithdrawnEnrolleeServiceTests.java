@@ -2,13 +2,13 @@ package bio.terra.pearl.core.service.participant;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.DaoTestUtils;
+import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
+import bio.terra.pearl.core.factory.participant.EnrolleeAndProxy;
+import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
-import bio.terra.pearl.core.model.participant.Enrollee;
-import bio.terra.pearl.core.model.participant.EnrolleeRelation;
-import bio.terra.pearl.core.model.participant.RelationshipType;
-import bio.terra.pearl.core.model.participant.WithdrawnEnrollee;
+import bio.terra.pearl.core.model.participant.*;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ public class WithdrawnEnrolleeServiceTests extends BaseSpringBootTest {
   public void testWithdraw(TestInfo info) {
     Enrollee enrollee = enrolleeFactory.buildPersisted(getTestName(info));
     DaoTestUtils.assertGeneratedProperties(enrollee);
-    WithdrawnEnrollee withdrawnEnrollee = withdrawnEnrolleeService.withdrawEnrollee(enrollee, getAuditInfo(info));
+    WithdrawnEnrollee withdrawnEnrollee = withdrawnEnrolleeService.withdrawEnrollee(enrollee, EnrolleeWithdrawalReason.TESTING, getAuditInfo(info));
     DaoTestUtils.assertGeneratedProperties(withdrawnEnrollee);
 
     assertThat(enrolleeService.find(enrollee.getId()).isPresent(), equalTo(false));
@@ -57,11 +57,11 @@ public class WithdrawnEnrolleeServiceTests extends BaseSpringBootTest {
   @Test
   @Transactional
   public void testWithdrawProxyEnrollee(TestInfo info) {
-    EnrolleeFactory.EnrolleeAndProxy enrolleeAndProxy = enrolleeFactory.buildProxyAndGovernedEnrollee(getTestName(info), "proxy-email@test.com");
+    EnrolleeAndProxy enrolleeAndProxy = enrolleeFactory.buildProxyAndGovernedEnrollee(getTestName(info), "proxy-email@test.com");
     Enrollee proxyEnrollee = enrolleeAndProxy.proxy();
     Enrollee governedEnrollee = enrolleeAndProxy.governedEnrollee();
     DaoTestUtils.assertGeneratedProperties(proxyEnrollee);
-    WithdrawnEnrollee withdrawnEnrollee = withdrawnEnrolleeService.withdrawEnrollee(governedEnrollee, getAuditInfo(info));
+    WithdrawnEnrollee withdrawnEnrollee = withdrawnEnrolleeService.withdrawEnrollee(governedEnrollee, EnrolleeWithdrawalReason.TESTING, getAuditInfo(info));
     DaoTestUtils.assertGeneratedProperties(withdrawnEnrollee);
     assertThat(governedEnrollee.getShortcode().equals(withdrawnEnrollee.getShortcode()), equalTo(true));
 
@@ -78,13 +78,13 @@ public class WithdrawnEnrolleeServiceTests extends BaseSpringBootTest {
     // potential edge case: withdrawing a subject that is also a proxy should withdraw the proxy
     // but then recreate a non-subject enrollee so that they can keep proxying.
 
-    StudyEnvironmentFactory.StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
+    StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
     StudyEnvironment studyEnvironment = studyEnvBundle.getStudyEnv();
     PortalEnvironment portalEnvironment = studyEnvBundle.getPortalEnv();
 
 
-    EnrolleeFactory.EnrolleeBundle proxyBundle = enrolleeFactory.buildWithPortalUser(getTestName(info), portalEnvironment, studyEnvironment);
-    EnrolleeFactory.EnrolleeBundle governedBundle = enrolleeFactory.buildWithPortalUser(getTestName(info), portalEnvironment, studyEnvironment);
+    EnrolleeBundle proxyBundle = enrolleeFactory.buildWithPortalUser(getTestName(info), portalEnvironment, studyEnvironment);
+    EnrolleeBundle governedBundle = enrolleeFactory.buildWithPortalUser(getTestName(info), portalEnvironment, studyEnvironment);
 
     Enrollee proxyEnrollee = proxyBundle.enrollee();
     Enrollee governedEnrollee = governedBundle.enrollee();
@@ -100,7 +100,7 @@ public class WithdrawnEnrolleeServiceTests extends BaseSpringBootTest {
             getAuditInfo(info)
     );
 
-    WithdrawnEnrollee withdrawnEnrollee = withdrawnEnrolleeService.withdrawEnrollee(proxyEnrollee, getAuditInfo(info));
+    WithdrawnEnrollee withdrawnEnrollee = withdrawnEnrolleeService.withdrawEnrollee(proxyEnrollee, EnrolleeWithdrawalReason.TESTING, getAuditInfo(info));
     DaoTestUtils.assertGeneratedProperties(withdrawnEnrollee);
     assertThat(proxyEnrollee.getShortcode().equals(withdrawnEnrollee.getShortcode()), equalTo(true));
 
@@ -133,13 +133,13 @@ public class WithdrawnEnrolleeServiceTests extends BaseSpringBootTest {
   @Transactional
   public void testWithdrawGovernedUserWithProxyThatIsSubject(TestInfo info) {
     // potential edge case: withdrawing a governed user that is being proxied by a subject should withdraw ONLY the governed user
-    StudyEnvironmentFactory.StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
+    StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
     StudyEnvironment studyEnvironment = studyEnvBundle.getStudyEnv();
     PortalEnvironment portalEnvironment = studyEnvBundle.getPortalEnv();
 
 
-    EnrolleeFactory.EnrolleeBundle proxyBundle = enrolleeFactory.buildWithPortalUser(getTestName(info), portalEnvironment, studyEnvironment);
-    EnrolleeFactory.EnrolleeBundle governedBundle = enrolleeFactory.buildWithPortalUser(getTestName(info), portalEnvironment, studyEnvironment);
+    EnrolleeBundle proxyBundle = enrolleeFactory.buildWithPortalUser(getTestName(info), portalEnvironment, studyEnvironment);
+    EnrolleeBundle governedBundle = enrolleeFactory.buildWithPortalUser(getTestName(info), portalEnvironment, studyEnvironment);
 
     Enrollee proxyEnrollee = proxyBundle.enrollee();
     Enrollee governedEnrollee = governedBundle.enrollee();
@@ -155,7 +155,7 @@ public class WithdrawnEnrolleeServiceTests extends BaseSpringBootTest {
             getAuditInfo(info)
     );
 
-    withdrawnEnrolleeService.withdrawEnrollee(governedEnrollee, getAuditInfo(info));
+    withdrawnEnrolleeService.withdrawEnrollee(governedEnrollee, EnrolleeWithdrawalReason.TESTING, getAuditInfo(info));
 
     assertThat(withdrawnEnrolleeService.isWithdrawn(governedEnrollee.getShortcode()), equalTo(true));
     assertThat(withdrawnEnrolleeService.isWithdrawn(proxyEnrollee.getShortcode()), equalTo(false));

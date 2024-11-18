@@ -4,6 +4,11 @@ variable "project" {
   description = "GCP project"
 }
 
+variable "project_number" {
+  type = number
+  description = "GCP project number"
+}
+
 variable "region" {
   type = string
   default = "us-central1"
@@ -12,8 +17,19 @@ variable "region" {
 
 variable "db_tier" {
   type = string
+  # for production, use machine type from https://cloud.google.com/sql/docs/postgres/instance-settings
   default = "db-f1-micro"
   description = "Database tier"
+}
+
+variable "db_availability_type" {
+  type = string
+  default = "ZONAL"
+  description = "Database availability type"
+  validation {
+    condition = can(regex("^(ZONAL|REGIONAL)$", var.db_availability_type))
+    error_message = "must be ZONAL or REGIONAL"
+  }
 }
 
 variable "dns_ttl" {
@@ -26,7 +42,6 @@ variable "admin_url" {
   type = string
   description = "Admin URL"
 }
-
 
 variable "environment" {
   type = string
@@ -43,12 +58,26 @@ variable "portals" {
   description = "Portals"
 }
 
-variable "infra_project" {
-  type = string
-  description = "Infra project"
+variable "customer_urls" {
+  type = map(object({
+    url = string
+    dnssec = string
+  }))
+  description = "Customer URLs"
 }
 
-variable "infra_region" {
+variable "admin_dnssec" {
+    type = string
+    default = "on"
+    description = "Admin DNSSEC"
+    validation {
+        condition = can(regex("^(on|off)$", var.admin_dnssec))
+        error_message = "must be on or off"
+    }
+}
+
+variable "k8s_namespace" {
   type = string
-  description = "Infra region"
+  description = "Kubernetes namespace"
+  default = "juniper"
 }

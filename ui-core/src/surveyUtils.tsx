@@ -6,7 +6,10 @@ import {
   isNil,
   set
 } from 'lodash'
-import { SurveyModel } from 'survey-core'
+import {
+  SurveyModel,
+  TextMarkdownEvent
+} from 'survey-core'
 
 import {
   Answer,
@@ -32,6 +35,7 @@ import { createAddressValidator } from './surveyjs/address-validator'
 import { useApiContext } from './participant/ApiProvider'
 import { EnvironmentName } from './types/study'
 import { Profile } from 'src/types/user'
+import { DefaultLight } from 'survey-core/themes'
 
 export type SurveyJsResumeData = {
   currentPageNo: number,
@@ -57,6 +61,8 @@ const applyDefaultSurveyConfig = (surveyModel: SurveyModel): void => {
   surveyModel.focusFirstQuestionAutomatic = false
   surveyModel.showTitle = false
   surveyModel.widthMode = 'static'
+
+  surveyModel.applyTheme(DefaultLight)
 }
 
 /** Create a SurveyJS SurveyModel from a Juniper FormContent object. */
@@ -308,6 +314,7 @@ export function useSurveyJSModel(
   envName: EnvironmentName,
   profile?: Profile,
   proxyProfile?: Profile,
+  referencedAnswers: Answer[] = [],
   opts: UseSurveyJsModelOpts = {}
 ) {
   const {
@@ -349,10 +356,17 @@ export function useSurveyJSModel(
       pageNumber = refreshData.currentPageNo
     }
     newSurveyModel.currentPageNo = pageNumber
+
+    // if you add any new variables that are objects (e.g. {profile.givenName}), make sure you add
+    // them to the list of non-survey object variables in SurveyParseUtils
     newSurveyModel.setVariable('profile', profile)
     newSurveyModel.setVariable('proxyProfile', proxyProfile)
     newSurveyModel.setVariable('isGovernedUser', !isNil(proxyProfile))
     newSurveyModel.setVariable('portalEnvironmentName', envName)
+    referencedAnswers.forEach(answer => {
+      newSurveyModel.setVariable(`${answer.surveyStableId}.${answer.questionStableId}`,
+        answer.stringValue ?? answer.numberValue ?? answer.booleanValue ?? answer.objectValue)
+    })
     Object.keys(extraVariables).forEach(key => {
       newSurveyModel.setVariable(key, extraVariables[key])
     })
@@ -381,7 +395,7 @@ export function useSurveyJSModel(
 }
 
 /** apply markdown to the given surveyJS entity */
-export const applyMarkdown = (survey: object, options: { text: string, html: string }) => {
+export const applyMarkdown = (sender: SurveyModel, options: TextMarkdownEvent) => {
   const markdownText = micromark(options.text)
   // chop off <p> tags.
   // See https://surveyjs.io/form-library/examples/edit-survey-questions-markdown/reactjs#content-code

@@ -4,7 +4,7 @@ import LoadingSpinner from 'util/LoadingSpinner'
 
 import { EnvironmentName, StudyEnvironmentSurvey, StudyEnvParams } from '@juniper/ui-core'
 import Api, { PortalEnvironmentChange } from 'api/api'
-import { emptyChangeSet, emptyStudyEnvChange } from 'portal/publish/PortalEnvDiffView'
+import { emptyChangeSet, emptyStudyEnvChange } from 'util/publishUtils'
 import { doApiLoad } from '../../api/api-utils'
 import { Store } from 'react-notifications-component'
 

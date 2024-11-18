@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class BaseJdbiDao<T extends BaseEntity> {
+public abstract class BaseJdbiDao<T extends BaseEntity> implements JdbiDao<T> {
     protected Jdbi jdbi;
     protected List<String> insertFields;
     protected List<String> insertFieldSymbols;
@@ -127,6 +127,7 @@ public abstract class BaseJdbiDao<T extends BaseEntity> {
         if (modelObj.getId() != null) {
             throw new IllegalArgumentException("object passed to create already has id - " + modelObj.getId());
         }
+        modelObj.setCreatedAt(Instant.now());
         return jdbi.withHandle(handle ->
                 handle.createUpdate(createQuerySql)
                         .bindBean(modelObj)
@@ -249,7 +250,8 @@ public abstract class BaseJdbiDao<T extends BaseEntity> {
         );
     }
 
-    /* fetches all the entities with a child attached.  For example, if the parent table has a column "portal_environment_config_id" and
+    /**
+     *  fetches all the entities with a child attached.  For example, if the parent table has a column "portal_environment_config_id" and
      * a field portalEnvironmentConfig, this method could be used to fetch the portal environments with the configs already hydrated
      * and do so in a single SQL query instead of performing n queries to attach children to n parents
      */
@@ -281,7 +283,7 @@ public abstract class BaseJdbiDao<T extends BaseEntity> {
         );
     }
 
-    public Optional<T> findByProperty(String columnName, Object columnValue) {
+    protected Optional<T> findByProperty(String columnName, Object columnValue) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("select * from " + tableName + " where " + columnName + " = :columnValue;")
                         .bind("columnValue", columnValue)
@@ -291,7 +293,7 @@ public abstract class BaseJdbiDao<T extends BaseEntity> {
     }
 
 
-    public List<T> findAllByProperty(String columnName, Object columnValue) {
+    protected List<T> findAllByProperty(String columnName, Object columnValue) {
         if(columnValue == null) {
             return jdbi.withHandle(handle ->
                     handle.createQuery("select * from " + tableName + " where " + columnName + " is null;")
@@ -608,4 +610,7 @@ public abstract class BaseJdbiDao<T extends BaseEntity> {
         return copy;
     }
 
+    public BaseJdbiDao<T> getDao() {
+        return this;
+    }
 }

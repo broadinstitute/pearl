@@ -29,13 +29,13 @@ jobs:
         ports:
           - 5432:5432
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-java@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'adopt'
     - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
+      uses: gradle/gradle-build-action@v3.5.0
     - uses: actions/setup-node@v3
       with:
         node-version: 16
@@ -45,6 +45,22 @@ jobs:
       run: |
         ./scripts/run_dockerized.sh participant
         ./scripts/run_dockerized.sh admin
+    - name: Wait for applications to start
+      run: |
+        for i in {1..30}; do
+          participant_status=$(curl -s http://localhost:8080/status | jq -r '.ok')
+          admin_status=$(curl -s http://localhost:8081/status | jq -r '.ok')
+          if [ "$participant_status" == "true" ] && [ "$admin_status" == "true" ]; then
+            echo "Applications are ready"
+            break
+          fi
+          echo "Waiting for applications to start..."
+          sleep 10
+        done
+        if [ "$participant_status" != "true" ] || [ "$admin_status" != "true" ]; then
+          echo "Application start timed out after 5 minutes"
+          exit 1
+        fi
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
@@ -58,7 +74,7 @@ jobs:
           e2e-tests/playwright-report/**
           e2e-tests/test-results/**
     - name: Notify slack on failure
-      uses: broadinstitute/action-slack@v3.8.0
+      uses: broadinstitute/action-slack@v3.15.0
       if: failure() && github.ref == 'refs/heads/development'
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

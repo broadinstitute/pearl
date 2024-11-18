@@ -1,5 +1,6 @@
 package bio.terra.pearl.core.service.export.formatters;
 
+import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.Family;
 import bio.terra.pearl.core.service.export.EnrolleeExportData;
@@ -25,14 +26,14 @@ public class FamilyFormatterTests {
                 .proband(Enrollee.builder().shortcode("HDPROBAND2").build())
                 .shortcode("F_FAM2")
                 .build();
-        FamilyFormatter familyFormatter = new FamilyFormatter();
-        EnrolleeExportData exportData = new EnrolleeExportData(null, null, null, null, null, null, null, null, List.of(family1, family2));
+        FamilyFormatter familyFormatter = new FamilyFormatter(new ExportOptions());
+        EnrolleeExportData exportData = new EnrolleeExportData(null, null, null, null, null, null, null, null, null, List.of(family1, family2), null);
         Map<String, String> enrolleeMap = familyFormatter.toStringMap(exportData);
 
         assertThat(enrolleeMap.size(), equalTo(4));
         assertThat(enrolleeMap.get("family.shortcode"), equalTo("F_FAM1"));
         assertThat(enrolleeMap.get("family.proband.shortcode"), equalTo("HDPROBAND1"));
-        assertThat(enrolleeMap.get("family.2.shortcode"), equalTo("F_FAM2"));
-        assertThat(enrolleeMap.get("family.2.proband.shortcode"), equalTo("HDPROBAND2"));
+        assertThat(enrolleeMap.get("family[2].shortcode"), equalTo("F_FAM2"));
+        assertThat(enrolleeMap.get("family[2].proband.shortcode"), equalTo("HDPROBAND2"));
     }
 }

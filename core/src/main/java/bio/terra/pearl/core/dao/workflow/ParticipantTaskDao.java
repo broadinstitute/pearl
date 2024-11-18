@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.dao.workflow;
 
 import bio.terra.pearl.core.dao.BaseMutableJdbiDao;
+import bio.terra.pearl.core.dao.StudyEnvAttachedDao;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
@@ -20,7 +21,7 @@ import org.jdbi.v3.core.mapper.reflect.BeanMapper;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> {
+public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> implements StudyEnvAttachedDao<ParticipantTask> {
     public ParticipantTaskDao(Jdbi jdbi) {
         super(jdbi);
     }
@@ -32,10 +33,6 @@ public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> {
 
     public List<ParticipantTask> findByEnrolleeId(UUID enrolleeId) {
         return findAllByProperty("enrollee_id", enrolleeId);
-    }
-
-    public List<ParticipantTask> findByStudyEnvironmentId(UUID studyEnvId) {
-        return findAllByProperty("study_environment_id", studyEnvId);
     }
 
     public List<ParticipantTask> findByStudyEnvironmentIdAndTaskType(UUID studyEnvId, List<TaskType> taskTypes) {
@@ -55,36 +52,58 @@ public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> {
         return findAllByProperty("portal_participant_user_id", ppUserId);
     }
 
-    /** Attempts to find a task for the given activity and study.  If there are multiple, it will return the first */
+    /** Attempts to find a task for the given activity and study.  If there are multiple, it will return the most recently created */
     public Optional<ParticipantTask> findTaskForActivity(UUID ppUserId, UUID studyEnvironmentId, String activityStableId) {
         return jdbi.withHandle(handle ->
-                handle.createQuery("select * from " + tableName + " where portal_participant_user_id = :ppUserId "
-                                + " and target_stable_id = :activityStableId and study_environment_id = :studyEnvironmentId"
+                handle.createQuery("""
+                                select * from %s 
+                                where portal_participant_user_id = :ppUserId
+                                and target_stable_id = :activityStableId 
+                                and study_environment_id = :studyEnvironmentId 
+                                order by created_at desc limit 1""".formatted(tableName)
                         )
                         .bind("ppUserId", ppUserId)
                         .bind("activityStableId", activityStableId)
                         .bind("studyEnvironmentId", studyEnvironmentId)
                         .mapTo(clazz)
-                        .stream().findFirst()
+                        .findOne()
         );
     }
 
-    /** Attempts to find a task for the given activity and study.  If there are multiple, it will return the first */
+    /** Attempts to find a task for the given activity and study, but before the given timestamp.  If there are multiple, it will return the most recently created */
+    public Optional<ParticipantTask> findTaskForActivity(UUID ppUserId, UUID studyEnvironmentId, String activityStableId, Instant createdBefore) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select * from %s where portal_participant_user_id = :ppUserId
+                                and target_stable_id = :activityStableId and study_environment_id = :studyEnvironmentId
+                                and created_at < :createdBefore
+                                order by created_at desc limit 1""".formatted(tableName)
+                        )
+                        .bind("ppUserId", ppUserId)
+                        .bind("activityStableId", activityStableId)
+                        .bind("studyEnvironmentId", studyEnvironmentId)
+                        .bind("createdBefore", createdBefore)
+                        .mapTo(clazz)
+                        .findOne()
+        );
+    }
+
+    /** Attempts to find a task for the given activity and study.  If there are multiple, it will return the most recently created */
     public Optional<ParticipantTask> findTaskForActivity(Enrollee enrollee, UUID studyEnvironmentId, String activityStableId) {
         return jdbi.withHandle(handle ->
-                handle.createQuery("select * from " + tableName + " where enrollee_id = :enrolleeId "
-                                + " and target_stable_id = :activityStableId and study_environment_id = :studyEnvironmentId"
+                handle.createQuery("""
+                                select * from %s 
+                                where enrollee_id = :enrolleeId
+                                and target_stable_id = :activityStableId 
+                                and study_environment_id = :studyEnvironmentId
+                                order by created_at desc limit 1""".formatted(tableName)
                         )
                         .bind("enrolleeId", enrollee.getId())
                         .bind("activityStableId", activityStableId)
                         .bind("studyEnvironmentId", studyEnvironmentId)
                         .mapTo(clazz)
-                        .stream().findFirst()
+                        .findOne()
         );
-    }
-
-    public Optional<ParticipantTask> findByPortalParticipantUserId(UUID taskId, UUID ppUserId) {
-        return findByTwoProperties("id", taskId, "portal_participant_user_id", ppUserId);
     }
 
     public Optional<ParticipantTask> findByConsentResponseId(UUID consentResponseId) {

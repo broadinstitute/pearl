@@ -17,27 +17,37 @@ import static org.jooq.impl.DSL.condition;
  * This term can be used to search for an answer to a question in a survey. Note that using the evaluate method on
  * this term requires a SQL call to the database per enrollee and as such could be slow for a large list of enrollees.
  */
-public class AnswerTerm implements SearchTerm {
+public class AnswerTerm extends SearchTerm {
+    private final String studyName;
     private final String questionStableId;
     private final String surveyStableId;
     private final AnswerDao answerDao;
 
-    public AnswerTerm(AnswerDao answerDao, String surveyStableId, String questionStableId) {
-        if (!isAlphaNumeric(questionStableId) || !isAlphaNumeric(surveyStableId)) {
+    public AnswerTerm(AnswerDao answerDao, String studyName, String surveyStableId, String questionStableId) {
+        if (!isAlphaNumeric(questionStableId) || !isAlphaNumeric(surveyStableId) || !isAlphaNumeric(studyName)) {
             throw new IllegalArgumentException("Invalid stable ids: must be alphanumeric and underscore only");
         }
 
+        this.studyName = studyName;
         this.questionStableId = questionStableId;
         this.surveyStableId = surveyStableId;
         this.answerDao = answerDao;
     }
 
+    public AnswerTerm(AnswerDao answerDao, String surveyStableId, String questionStableId) {
+        this(answerDao, null, surveyStableId, questionStableId);
+    }
+
     @Override
     public SearchValue extract(EnrolleeSearchContext context) {
-        Answer answer = answerDao.findForEnrolleeByQuestion(context.getEnrollee().getId(), surveyStableId, questionStableId);
-        if (Objects.isNull(answer)) {
+        Optional<Answer> answerOpt =
+                this.studyName == null
+                        ? answerDao.findForEnrolleeByQuestion(context.getEnrollee().getId(), surveyStableId, questionStableId)
+                        : answerDao.findByProfileIdStudyAndQuestion(context.getEnrollee().getProfileId(), studyName, surveyStableId, questionStableId);
+        if (answerOpt.isEmpty()) {
             return new SearchValue();
         }
+        Answer answer = answerOpt.get();
         // answerType *shouldn't* be null, but we'll handle it just in case by assuming it's a string
         if (Objects.isNull(answer.getAnswerType())) {
             return new SearchValue(answer.getStringValue());
@@ -53,7 +63,23 @@ public class AnswerTerm implements SearchTerm {
 
     @Override
     public List<EnrolleeSearchQueryBuilder.JoinClause> requiredJoinClauses() {
-        return List.of(new EnrolleeSearchQueryBuilder.JoinClause("answer", alias(), "enrollee.id = %s.enrollee_id".formatted(alias())));
+
+        if (Objects.nonNull(studyName)) {
+            List<EnrolleeSearchQueryBuilder.JoinClause> joinClauses = this
+                    .joinClausesForStudy(studyName);
+
+            joinClauses.add(
+                    new EnrolleeSearchQueryBuilder.JoinClause("answer", alias(), "%s.id = %s.enrollee_id".formatted(
+                            addStudySuffix("enrollee", studyName),
+                            alias()))
+            );
+
+            return joinClauses;
+        }
+
+        return List.of(
+                new EnrolleeSearchQueryBuilder.JoinClause("answer", alias(), "enrollee.id = %s.enrollee_id".formatted(alias()))
+        );
     }
 
     @Override
@@ -89,10 +115,17 @@ public class AnswerTerm implements SearchTerm {
     }
 
     private static boolean isAlphaNumeric(String s) {
+        if (Objects.isNull(s)) {
+            return true;
+        }
         return s.matches("^[a-zA-Z0-9_]*$");
     }
 
     private String alias() {
+        if (Objects.nonNull(studyName)) {
+            return "answer_" + studyName + "_" + questionStableId;
+        }
+
         return "answer_" + questionStableId;
     }
 }

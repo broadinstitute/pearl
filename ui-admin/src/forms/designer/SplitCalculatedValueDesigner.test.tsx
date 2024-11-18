@@ -79,6 +79,8 @@ describe('SplitCalculatedValueDesigner', () => {
     expect(screen.getAllByText('Insert derived value')).toHaveLength(3)
   })
   it('has question preview for calculated values', async () => {
+    // mock the warning console so it's not spammed with surveyJs warnings
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
     const content: FormContent = {
       title: 'title',
       pages: [{

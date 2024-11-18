@@ -27,11 +27,15 @@ public class AnswerService extends CrudService<Answer, AnswerDao> {
         return dao.findByResponseAndQuestions(surveyResponseId, questionStableIds);
     }
 
+    public List<Answer> findByEnrollee(UUID enrolleeID) {
+        return dao.findByEnrollee(enrolleeID);
+    }
+
     public List<Answer> findByEnrolleeAndSurvey(UUID enrolleeID, String surveyStableId) {
         return dao.findByEnrolleeAndSurvey(enrolleeID, surveyStableId);
     }
 
-    public Answer findForEnrolleeByQuestion(UUID enrolleeID, String surveyStableId, String questionStableId) {
+    public Optional<Answer> findForEnrolleeByQuestion(UUID enrolleeID, String surveyStableId, String questionStableId) {
         return dao.findForEnrolleeByQuestion(enrolleeID, surveyStableId, questionStableId);
     }
 

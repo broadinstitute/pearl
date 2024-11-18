@@ -1,20 +1,15 @@
 package bio.terra.pearl.core.service.participant;
 
 import bio.terra.pearl.core.dao.participant.ParticipantUserDao;
-import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.EnvironmentName;
-import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
-import bio.terra.pearl.core.service.ImmutableEntityService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ParticipantUserService extends CrudService<ParticipantUser, ParticipantUserDao> {
@@ -40,7 +35,7 @@ public class ParticipantUserService extends CrudService<ParticipantUser, Partici
     }
 
     public Optional<ParticipantUser> findOneByShortcode(String shortcode) {
-        return dao.findByProperty("shortcode", shortcode);
+        return dao.findOneByShortcode(shortcode);
     }
 
     @Transactional @Override
@@ -63,4 +58,17 @@ public class ParticipantUserService extends CrudService<ParticipantUser, Partici
         return dao.findOne(username, environmentName);
     }
 
+    public Optional<ParticipantUser> findByEnrolleeId(UUID enrolleeId) {
+        return dao.findByEnrolleeId(enrolleeId);
+    }
+
+    public Map<UUID, ParticipantUser> findByParticipantUserIds(List<UUID> participantUserIds) {
+        return dao.findByParticipantUserIds(participantUserIds)
+                .stream()
+                .collect(Collectors.toMap(ParticipantUser::getId, participantUser -> participantUser));
+    }
+
+    public List<ParticipantUser> findAllByPortalEnv(UUID portalId, EnvironmentName envName) {
+        return dao.findAllByPortalEnv(portalId, envName);
+    }
 }

@@ -46,7 +46,7 @@ public class ParticipantTaskService extends ParticipantDataAuditedService<Partic
         return dao.findByPortalParticipantUserId(ppUserId);
     }
 
-    public List<ParticipantTask> findAdminTasksByStudyEnvironmentId(UUID studyEnvId) {
+    public List<ParticipantTask> findByStudyEnvironmentId(UUID studyEnvId) {
         return dao.findByStudyEnvironmentId(studyEnvId);
     }
 
@@ -64,16 +64,12 @@ public class ParticipantTaskService extends ParticipantDataAuditedService<Partic
         return dao.findTaskForActivity(ppUserId, studyEnvironmentId, activityStableId);
     }
 
-    public Optional<ParticipantTask> findTaskForActivity(Enrollee enrollee, UUID studyEnvironmentId, String activityStableId) {
-        return dao.findTaskForActivity(enrollee, studyEnvironmentId, activityStableId);
+    public Optional<ParticipantTask> findTaskForActivity(UUID ppUserId, UUID studyEnvironmentId, String activityStableId, Instant createdBefore) {
+        return dao.findTaskForActivity(ppUserId, studyEnvironmentId, activityStableId, createdBefore);
     }
 
     public Optional<ParticipantTask> findByKitRequestId(UUID kitRequestId) {
         return dao.findByKitRequestId(kitRequestId);
-    }
-
-    public Optional<ParticipantTask> findByConsentResponseId(UUID consentResponseId) {
-        return dao.findByConsentResponseId(consentResponseId);
     }
 
     @Transactional

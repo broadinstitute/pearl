@@ -213,9 +213,6 @@ databaseChangeLog:
       file: changesets/2024_02_23_rename_site_image.yaml
       relativeToChangelogFile: true
   - include:
-      file: changesets/2024_02_09_permission_populate.yaml
-      relativeToChangelogFile: true
-  - include:
       file: changesets/2024_03_05_portal_user_constraints.yaml
       relativeToChangelogFile: true
   - include:
@@ -328,6 +325,36 @@ databaseChangeLog:
       relativeToChangelogFile: true
   - include:
       file: changesets/2024_09_20_export_integration.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_10_02_in_person_kits_env_config.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_09_30_referenced_questions.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_10_08_portal_last_login.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_10_15_adding_export_fields.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_10_16_enrollee_source.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_10_17_withdrawal_reason.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_10_21_survey_assign_rename.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_10_21_recurrence_type.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_10_31_create_participant_file_table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/2024_11_07_create_participant_file_survey_response_table.yaml
       relativeToChangelogFile: true
 
 

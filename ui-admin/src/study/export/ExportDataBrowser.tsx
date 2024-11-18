@@ -3,8 +3,8 @@ import React, {
   useState
 } from 'react'
 import { StudyEnvContextT } from '../StudyEnvironmentRouter'
-import Api, { ExportData } from '../../api/api'
-import LoadingSpinner from '../../util/LoadingSpinner'
+import Api, { ExportData } from 'api/api'
+import LoadingSpinner from 'util/LoadingSpinner'
 import {
   CellContext,
   ColumnDef,
@@ -14,7 +14,7 @@ import {
   useReactTable,
   VisibilityState
 } from '@tanstack/react-table'
-import { basicTableLayout } from '../../util/tableUtils'
+import { basicTableLayout } from 'util/tableUtils'
 import ExportDataModal from './ExportDataModal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDownload } from '@fortawesome/free-solid-svg-icons'
@@ -80,7 +80,7 @@ const ExportDataBrowser = ({ studyEnvContext }: {studyEnvContext: StudyEnvContex
       studyEnvContext.portal.shortcode,
       studyEnvContext.study.shortcode,
       studyEnvContext.currentEnv.environmentName, {
-        fileFormat: 'JSON', rowLimit: 10, filterString: buildFilter()
+        fileFormat: 'JSON', rowLimit: 10, filterString: buildFilter(), includeFields: []
       })
     const result = await response.json()
     if (!response.ok) {

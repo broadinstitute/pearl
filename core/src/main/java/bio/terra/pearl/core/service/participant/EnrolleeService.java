@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,7 +71,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
                            SecureRandom secureRandom,
                            RandomUtilService randomUtilService,
                            EnrolleeRelationService enrolleeRelationService,
-                           PortalParticipantUserService portalParticipantUserService,
+                           @Lazy PortalParticipantUserService portalParticipantUserService,
                            FamilyService familyService, ShortcodeService shortcodeService, FamilyEnrolleeService familyEnrolleeService) {
         super(enrolleeDao);
         this.surveyResponseDao = surveyResponseDao;
@@ -193,7 +194,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
     }
 
     public int countByStudyEnvironmentId(UUID studyEnvironmentId) {
-        return dao.countByStudyEnvironment(studyEnvironmentId);
+        return dao.countByStudyEnvironmentId(studyEnvironmentId);
     }
 
     @Override
@@ -259,6 +260,10 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
         return dao.findUnassignedToTask(studyEnvironmentId, targetStableId, targetAssignedVersion);
     }
 
+    public List<Enrollee> findWithTaskInPast(UUID studyEnvId, String taskTargetStableId, Duration minTimeSinceMostRecent ) {
+        return dao.findWithTaskInPast(studyEnvId, taskTargetStableId, minTimeSinceMostRecent);
+    }
+
     public Optional<Enrollee> findByParticipantUserIdAndStudyEnvId(UUID participantUserId, UUID studyEnvId) {
         return dao.findByParticipantUserIdAndStudyEnvId(participantUserId, studyEnvId);
     }
@@ -307,6 +312,10 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
 
     public List<Enrollee> findAllByFamilyId(UUID id) {
         return dao.findAllByFamilyId(id);
+    }
+
+    public List<Enrollee> findAllByPortalEnv(UUID portalId, EnvironmentName environmentName) {
+        return dao.findAllByPortalEnv(portalId, environmentName);
     }
 
     public enum AllowedCascades implements CascadeProperty {

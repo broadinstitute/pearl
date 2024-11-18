@@ -12,25 +12,29 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.reducing;
 
 /**
  * See https://broad-juniper.zendesk.com/hc/en-us/articles/18259824756123-Participant-List-Export-details
  * for information on the export format of survey questions
  */
 @Slf4j
-public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatter<SurveyResponse>> {
+public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatter<SurveyResponse>> {
     public static String OTHER_DESCRIPTION_KEY_SUFFIX = "_description";
     public static String OTHER_DESCRIPTION_HEADER = "other description";
     public static String SPLIT_OPTION_SELECTED_VALUE = "1";
     public static String SPLIT_OPTION_UNSELECTED_VALUE = "0";
     private ObjectMapper objectMapper;
+    private final List<UUID> surveyIds; // the list of surveyIds that are included in this module -- used for filtering responses
 
     public SurveyFormatter(ExportOptions exportOptions,
                            String stableId,
@@ -38,18 +42,26 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatt
                            List<SurveyQuestionDefinition> questionDefs,
                            List<EnrolleeExportData> data,
                            ObjectMapper objectMapper) {
+        super(exportOptions,
+                stableId,
+                // get the most recent survey by sorting in descending version order
+                surveys.stream().sorted(Comparator.comparingInt(Survey::getVersion).reversed()).findFirst().get().getName());
         this.objectMapper = objectMapper;
-        itemFormatters.add(new PropertyItemFormatter("lastUpdatedAt", SurveyResponse.class));
-        itemFormatters.add(new PropertyItemFormatter("complete", SurveyResponse.class));
-
-        buildItemFormatters(exportOptions, questionDefs, data);
-        // get the most recent survey by sorting in descending version order
-        Survey latestSurvey = surveys.stream().sorted(Comparator.comparingInt(Survey::getVersion).reversed()).findFirst().get();
-        displayName = latestSurvey.getName();
-        moduleName = stableId;
+        this.surveyIds = surveys.stream().map(Survey::getId).toList();
+        generateAnswerItemFormatters(exportOptions, questionDefs, data);
+        filterItemFormatters(exportOptions);
     }
 
-    private void buildItemFormatters(
+    @Override
+    protected List<ItemFormatter<SurveyResponse>> generateItemFormatters(ExportOptions options) {
+        // Note that we generate and add answer formatters to this list later in the constructor
+        List<ItemFormatter<SurveyResponse>> formatters = new ArrayList<>();
+        formatters.add(new PropertyItemFormatter<>("lastUpdatedAt", SurveyResponse.class));
+        formatters.add(new PropertyItemFormatter<>("complete", SurveyResponse.class));
+        return formatters;
+    }
+
+    private void generateAnswerItemFormatters(
             ExportOptions exportOptions,
             List<SurveyQuestionDefinition> questionDefs,
             List<EnrolleeExportData> data) {
@@ -177,8 +189,8 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatt
             if (Objects.nonNull(answerItemFormatter.getRepeatIndex())) {
                 cleanStableId += ExportFormatUtils.formatIndex(answerItemFormatter.getRepeatIndex());
             }
-
-            columnHeader = moduleName + ExportFormatUtils.COLUMN_NAME_DELIMITER + cleanStableId;
+            String moduleRepeatString = moduleRepeatNum > 1 ? ExportFormatUtils.formatIndex(moduleRepeatNum) : "";
+            columnHeader = moduleName + moduleRepeatString + ExportFormatUtils.COLUMN_NAME_DELIMITER + cleanStableId;
             if (isOtherDescription) {
                 columnHeader += OTHER_DESCRIPTION_KEY_SUFFIX;
             } else if (answerItemFormatter.isSplitOptionsIntoColumns() && choice != null) {
@@ -188,7 +200,7 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatt
                 columnHeader += ExportFormatUtils.COLUMN_NAME_DELIMITER + choice.stableId();
             }
         }
-        return columnHeader;
+            return columnHeader;
     }
 
     /**
@@ -240,39 +252,40 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatt
     @Override
     public Map<String, String> toStringMap(EnrolleeExportData exportData) {
         Map<String, String> valueMap = new HashMap<>();
-        String surveyStableId = moduleName;
+        List<SurveyResponse> responses = exportData.getResponses().stream()
+                .filter(response -> surveyIds.contains(response.getSurveyId()))
+                .toList();
+        for (int i = 0; i < responses.size(); i++) {
+            addResponseToMap(responses.get(i), exportData, valueMap, i + 1);
+        }
+        maxNumRepeats = Math.max(maxNumRepeats, responses.size());
+        return valueMap;
+    }
+
+    // note that responseNum is 1-indexed, not zero-index since it goes to moduleRepeatNum
+    protected void addResponseToMap(SurveyResponse surveyResponse, EnrolleeExportData exportData, Map<String, String> valueMap, int responseNum) {
         List<Answer> answers = exportData.getAnswers().stream().filter(ans ->
-                Objects.equals(ans.getSurveyStableId(), surveyStableId)
+                Objects.equals(ans.getSurveyResponseId(), surveyResponse.getId())
         ).toList();
 
         // map the answers by question stable id for easier access
         Map<String, List<Answer>> answerMap = answers.stream().collect(groupingBy(Answer::getQuestionStableId));
-        List<UUID> responseIds = answers.stream().map(Answer::getSurveyResponseId).distinct().toList();
-        if (responseIds.isEmpty()) {
-            return valueMap;
-        }
-        // for now, we only support exporting a single response per survey, so just grab the one that matches the first id
-        SurveyResponse matchedResponse = exportData.getResponses().stream().filter(response ->
-                response.getId().equals(responseIds.get(0))).findAny().orElse(null);
-        if (matchedResponse == null) {
-            return valueMap;
-        }
+
         for (ItemFormatter itemFormatter : getItemFormatters()) {
             if (itemFormatter instanceof PropertyItemFormatter) {
                 // it's a property of the SurveyResponse
-                valueMap.put(getColumnKey(itemFormatter, false, null, 1),
-                        ((PropertyItemFormatter) itemFormatter).getExportString(matchedResponse));
+                valueMap.put(getColumnKey(itemFormatter, false, null, responseNum),
+                        ((PropertyItemFormatter) itemFormatter).getExportString(surveyResponse));
             } else {
                 // it's an answer value
-                addAnswersToMap((AnswerItemFormatter) itemFormatter, answerMap, valueMap);
+                addAnswersToMap((AnswerItemFormatter) itemFormatter, answerMap, valueMap, responseNum);
             }
         }
-        return valueMap;
     }
 
 
     public void addAnswersToMap(AnswerItemFormatter itemFormatter,
-                                Map<String, List<Answer>> answerMap, Map<String, String> valueMap) {
+                                Map<String, List<Answer>> answerMap, Map<String, String> valueMap, int responseNum) {
         String valueStableId = itemFormatter.getQuestionStableId();
 
         // if the question is a child of another question, then we need to get the parent question's value
@@ -294,22 +307,22 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatt
             // just use the current version
             matchedItemFormatter = itemFormatter;
         }
-        addAnswerToMap(matchedItemFormatter, matchedAnswer, valueMap, objectMapper);
+        addAnswerToMap(matchedItemFormatter, matchedAnswer, valueMap, objectMapper, responseNum);
     }
 
     protected void addAnswerToMap(AnswerItemFormatter itemFormatter,
-                                  Answer answer, Map<String, String> valueMap, ObjectMapper objectMapper) {
+                                  Answer answer, Map<String, String> valueMap, ObjectMapper objectMapper, int responseNum) {
         if (itemFormatter.isSplitOptionsIntoColumns()) {
-            addSplitOptionSelectionsToMap(itemFormatter, answer, valueMap, objectMapper);
+            addSplitOptionSelectionsToMap(itemFormatter, answer, valueMap, objectMapper, responseNum);
         } else {
             valueMap.put(
-                    getColumnKey(itemFormatter, false, null, 1),
+                    getColumnKey(itemFormatter, false, null, responseNum),
                     valueAsString(itemFormatter, answer, itemFormatter.getChoices(), itemFormatter.isStableIdsForOptions(), objectMapper)
             );
         }
         if (itemFormatter.isHasOtherDescription() && answer.getOtherDescription() != null) {
             valueMap.put(
-                    getColumnKey(itemFormatter, true, null, 1),
+                    getColumnKey(itemFormatter, true, null, responseNum),
                     answer.getOtherDescription()
             );
         }
@@ -320,7 +333,7 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatt
             // if the question is a child of a parent question, then the answer value is
             // the parent's json object value, so we need to extract the value of this
             // child's stable id from it
-            return extractChildValue(itemFormatter, answer, choices, stableIdForOptions, objectMapper);
+            answer = extractChildAnswer(itemFormatter, answer, choices, stableIdForOptions, objectMapper);
         }
 
         if (answer.getStringValue() != null) {
@@ -335,44 +348,58 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatt
         return "";
     }
 
-    protected static String extractChildValue(AnswerItemFormatter itemFormatter, Answer answer, List<QuestionChoice> choices, boolean stableIdForOptions, ObjectMapper objectMapper) {
+    protected static Answer extractChildAnswer(AnswerItemFormatter itemFormatter, Answer answer, List<QuestionChoice> choices, boolean stableIdForOptions, ObjectMapper objectMapper) {
         Integer repeatIndex = itemFormatter.getRepeatIndex();
+        Answer childAnswer = new Answer();
+        BeanUtils.copyProperties(answer, childAnswer, "objectValue", "stringValue");
 
         try {
-            JsonNode answerNode = objectMapper.readTree(answer.valueAsString());
+            if (answer.getParsedObjectValue() == null) {
+                answer.setParsedObjectValue(objectMapper.readTree(answer.getObjectValue()));
+            }
+            JsonNode answerNode = answer.getParsedObjectValue();
             if (Objects.nonNull(repeatIndex)) {
                 if (!answerNode.has(repeatIndex)) {
-                    return "";
+                    return childAnswer;
                 }
                 answerNode = answerNode.get(repeatIndex);
             }
 
             if (!answerNode.has(itemFormatter.getQuestionStableId())) {
-                return "";
+                return childAnswer;
             }
             answerNode = answerNode.get(itemFormatter.getQuestionStableId());
 
             if (answerNode == null) {
-                return "";
+                return childAnswer;
             }
+            if (answerNode.isArray()) {
+                childAnswer.setObjectValue(answerNode.toString());
 
-            return formatStringValue(answerNode.asText(), choices, stableIdForOptions, answer);
+            } else if (answerNode.isBoolean()) {
+                childAnswer.setBooleanValue(answerNode.asBoolean());
+
+            } else if (answerNode.isNumber()) {
+                childAnswer.setNumberValue(answerNode.asDouble());
+            } else if (answerNode.isTextual()) {
+                childAnswer.setStringValue(answerNode.asText());
+            }
         } catch (Exception e) {
             log.warn("Failed to parse parent answer for child question - enrollee: {}, question: {}, answer: {}",
                     answer.getEnrolleeId(), answer.getQuestionStableId(), answer.getId());
         }
-        return "";
+        return childAnswer;
     }
 
     /**
      * adds an entry to the valueMap for each selected option of a 'splitOptionsIntoColumns' question
      */
     protected void addSplitOptionSelectionsToMap(ItemFormatter itemFormatter,
-                                                 Answer answer, Map<String, String> valueMap, ObjectMapper objectMapper) {
+                                                 Answer answer, Map<String, String> valueMap, ObjectMapper objectMapper, int responseNum) {
         if (answer.getStringValue() != null) {
             // this was a single-select question, so we only need to add the selected option
             valueMap.put(
-                    getColumnKeyChoiceStableId(itemFormatter, false, answer.getStringValue(), 1),
+                    getColumnKeyChoiceStableId(itemFormatter, false, answer.getStringValue(), responseNum),
                     SPLIT_OPTION_SELECTED_VALUE
             );
         } else if (answer.getObjectValue() != null) {
@@ -382,7 +409,7 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatt
                 });
                 for (String answerValue : answerValues) {
                     valueMap.put(
-                            getColumnKeyChoiceStableId(itemFormatter, false, answerValue, 1),
+                            getColumnKeyChoiceStableId(itemFormatter, false, answerValue, responseNum),
                             SPLIT_OPTION_SELECTED_VALUE
                     );
                 }

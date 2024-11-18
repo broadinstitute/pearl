@@ -1,9 +1,10 @@
 package bio.terra.pearl.populate;
 
-import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
+import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.participant.Enrollee;
+import bio.terra.pearl.core.model.participant.EnrolleeWithdrawalReason;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.Study;
@@ -50,7 +51,7 @@ public class PopulateHeartHiveTest extends BasePopulatePortalsTest {
             PortalEnvironment liveEnv = portalEnvironmentService.findOne("hearthive", EnvironmentName.live).get();
             StudyEnvironment liveStudyEnv = studyEnvironmentService.findByStudy(myopathyStudy.getShortcode(), EnvironmentName.live).get();
 
-            EnrolleeFactory.EnrolleeBundle prodEnrollee = enrolleeFactory.buildWithPortalUser("testPopulateHeartHive", liveEnv, liveStudyEnv);
+            EnrolleeBundle prodEnrollee = enrolleeFactory.buildWithPortalUser("testPopulateHeartHive", liveEnv, liveStudyEnv);
             // confirm we can't populate with overwrite if the liveEnrollee isn't withdrawn
             Object savepoint = status.createSavepoint();
             Assertions.assertThrows(UnsupportedOperationException.class, () -> {
@@ -59,7 +60,7 @@ public class PopulateHeartHiveTest extends BasePopulatePortalsTest {
             // the failed populate won't roll back since we're inside a test-wide transaction, so roll it back manually
             status.rollbackToSavepoint(savepoint);
 
-            withdrawnEnrolleeService.withdrawEnrollee(prodEnrollee.enrollee(), DataAuditInfo.builder().build());
+            withdrawnEnrolleeService.withdrawEnrollee(prodEnrollee.enrollee(), EnrolleeWithdrawalReason.PARTICIPANT_REQUEST, DataAuditInfo.builder().build());
             // confirm we can now repopulate with overwrite
             portalPopulator.populate(new FilePopulateContext("portals/hearthive/portal.json"), true);
             // now roll back the whole transaction so that the test doesn't actually persist the changes

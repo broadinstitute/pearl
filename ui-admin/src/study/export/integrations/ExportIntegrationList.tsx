@@ -19,10 +19,10 @@ import { renderPageHeader } from 'util/pageUtils'
 import { paramsFromContext, StudyEnvContextT } from '../../StudyEnvironmentRouter'
 import { faCheck, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { Link } from 'react-router-dom'
-import { Button } from '../../../components/forms/Button'
+import { Button } from 'components/forms/Button'
 import Modal from 'react-bootstrap/Modal'
 import { ExportIntegrationForm } from './ExportIntegrationView'
-import { buildFilter } from '../../../util/exportUtils'
+import { buildFilter } from 'util/exportUtils'
 
 const DEFAULT_EXPORT_INTEGRATION: ExportIntegration = {
   name: 'new',
@@ -36,10 +36,11 @@ const DEFAULT_EXPORT_INTEGRATION: ExportIntegration = {
     splitOptionsIntoColumns: false,
     stableIdsForOptions: false,
     fileFormat: 'CSV',
-    includeSubheaders: false,
+    includeSubHeaders: false,
     onlyIncludeMostRecent: true,
     filterString: buildFilter({ includeProxiesAsRows: false, includeUnconsented: false }),
-    excludeModules: ['surveys']
+    excludeModules: ['surveys'],
+    includeFields: []
   }
 }
 
@@ -120,7 +121,7 @@ export default function ExportIntegrationList({ studyEnvContext }:
         <Button variant="secondary" onClick={() => {
           setShowCreateModal(false)
           setNewIntegration(DEFAULT_EXPORT_INTEGRATION)
-        }}>Create</Button>
+        }}>Cancel</Button>
       </Modal.Footer>
     </Modal>
 

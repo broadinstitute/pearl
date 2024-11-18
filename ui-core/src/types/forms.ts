@@ -38,8 +38,9 @@ export type Survey = VersionedForm & {
   autoAssign: boolean
   assignToExistingEnrollees: boolean
   autoUpdateTaskAssignments: boolean
-  recur: boolean
+  recurrenceType: 'NONE' | 'LONGITUDINAL' | 'UPDATE'
   recurrenceIntervalDays: number
+  daysAfterEligible?: number
   allowAdminEdit: boolean
   allowParticipantStart: boolean
   allowParticipantReedit: boolean
@@ -52,7 +53,7 @@ export const defaultSurvey = {
   autoAssign: true,
   assignToExistingEnrollees: false,
   autoUpdateTaskAssignments: false,
-  recur: false,
+  recurrenceType: 'NONE',
   recurrenceIntervalDays: 0,
   allowAdminEdit: true,
   allowParticipantStart: true,
@@ -154,6 +155,13 @@ export type FormPanel = BaseElement & {
   elements: (HtmlElement | Question)[]
 }
 
+export type FormPanelDynamic = BaseElement & {
+  name: string
+  title: string
+  type: 'paneldynamic'
+  templateElements: (HtmlElement | Question)[]
+}
+
 export type HtmlElement = {
   name: string
   type: 'html'
@@ -237,6 +245,7 @@ export type Question =
   | TemplatedQuestion
   | TextQuestion
   | HtmlQuestion
+  | FormPanelDynamic
 
 export type InteractiveQuestion = Exclude<Question, HtmlQuestion>
 

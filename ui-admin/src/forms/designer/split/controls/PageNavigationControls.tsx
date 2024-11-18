@@ -32,7 +32,7 @@ export const PageNavigationControls = ({ currentPageNo, content, setCurrentPageN
     }
   }
 
-  const numPages = content.pages.length
+  const numPages = content.pages?.length ?? 0
 
   return (
     <div className="d-flex align-items-center">

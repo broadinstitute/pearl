@@ -8,7 +8,6 @@ import Api, {
   Portal,
   Study
 } from 'api/api'
-import { isTaskActive } from './TaskLink'
 import { DocumentTitle } from 'util/DocumentTitle'
 
 import {
@@ -29,6 +28,7 @@ import { useActiveUser } from 'providers/ActiveUserProvider'
 import { useUser } from 'providers/UserProvider'
 import ParticipantSelector from '../participant/ParticipantSelector'
 import { Link } from 'react-router-dom'
+import { isTaskActive } from './task/taskUtils'
 
 
 /** renders the logged-in hub page */
@@ -75,7 +75,7 @@ export default function HubPage() {
     <>
       <DocumentTitle title={i18n('navbarDashboard')}/>
       <div
-        className="hub-dashboard-background flex-grow-1 mb-2"
+        className="hub-dashboard-background flex-grow-1 pb-2"
         style={{ background: 'var(--dashboard-background-color)' }}
       >
         {!hasActiveTasks && hasSubjectEnrollee && noActivitiesAlert && <HubMessageAlert

@@ -1,10 +1,11 @@
 import React from 'react'
-import { emptyStudyEnvChange } from './PortalEnvDiffView'
+import { emptyStudyEnvChange } from 'util/publishUtils'
 import StudyEnvDiff from './StudyEnvDiff'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
+import { mockPortal, renderInPortalRouter } from 'test-utils/mocking-utils'
 
 test('StudyEnvDiff renders the name of the study', () => {
-  render(<StudyEnvDiff studyName="Test Study"
+  renderInPortalRouter(mockPortal(), <StudyEnvDiff studyName="Test Study"
     studyEnvChange={emptyStudyEnvChange}
     selectedChanges={emptyStudyEnvChange}
     setSelectedChanges={jest.fn()}

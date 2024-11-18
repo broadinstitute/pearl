@@ -38,7 +38,8 @@
         "enableFamilyLinkage": true,
         "passwordProtected": false,
         "password": "broad_institute",
-        "initialized": true
+        "initialized": true,
+        "enableInPersonKits": true
       },
       "preEnrollSurveyDto": {
         "populateFileName": "surveys/preEnroll.json"
@@ -103,6 +104,7 @@
         "enrollees/dsalk.json",
         "enrollees/newEnrollee.json",
         "enrollees/consentedEnrollee.json",
+        "enrollees/consentedDupe.json",
         "enrollees/basicsDone.json",
         "enrollees/withdrawn.json",
         "enrollees/oldVersion.json",
@@ -111,7 +113,8 @@
         "enrollees/child2Family2.json",
         "enrollees/invited.json",
         "enrollees/lostInterest.json",
-        "enrollees/lostInterestNo.json"
+        "enrollees/lostInterestNo.json",
+        "enrollees/recurrenceDue.json"
       ],
       "familyFiles": [
         "families/salk.json"
@@ -179,7 +182,8 @@
         "enableFamilyLinkage": true,
         "passwordProtected": false,
         "password": "broad_institute",
-        "initialized": true
+        "initialized": true,
+        "enableInPersonKits": true
       },
       "preEnrollSurveyDto": {
         "populateFileName": "surveys/preEnroll.json"
@@ -228,7 +232,8 @@
         "enableFamilyLinkage": true,
         "passwordProtected": false,
         "password": "broad_institute",
-        "initialized": true
+        "initialized": true,
+        "enableInPersonKits": true
       },
       "preEnrollSurveyDto": {
         "populateFileName": "surveys/preEnroll.json"

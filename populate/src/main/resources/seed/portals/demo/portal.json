@@ -37,6 +37,7 @@
         "participants/dsalk.json",
         "participants/newEnrollee.json",
         "participants/consentedEnrollee.json",
+        "participants/consentedDupe.json",
         "participants/basicsDone.json",
         "participants/withdrawn.json",
         "participants/oldVersion.json",
@@ -45,7 +46,8 @@
         "participants/invited.json",
         "participants/unenrolled.json",
         "participants/lostInterest.json",
-        "participants/lostInterestNo.json"
+        "participants/lostInterestNo.json",
+        "participants/recurrenceDue.json"
       ],
       "mailingListContacts": [
         {

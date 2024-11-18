@@ -30,7 +30,6 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
     private final SurveyQuestionDefinitionDao surveyQuestionDefinitionDao;
     private final LanguageTextDao languageTextDao;
     private final EventDao eventDao;
-    private final SurveyDao surveyDao;
 
     public SurveyService(ObjectMapper objectMapper, SurveyDao surveyDao, AnswerMappingDao answerMappingDao, SurveyQuestionDefinitionDao surveyQuestionDefinitionDao, LanguageTextDao languageTextDao, EventDao eventDao) {
         super(surveyDao);
@@ -39,7 +38,6 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
         this.surveyQuestionDefinitionDao = surveyQuestionDefinitionDao;
         this.languageTextDao = languageTextDao;
         this.eventDao = eventDao;
-        this.surveyDao = surveyDao;
     }
 
     public List<Survey> findByStableIdNoContent(String stableId) {
@@ -57,6 +55,11 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
     public List<Survey> findByStudyEnvironmentIdWithContent(UUID studyId) {
         return dao.findByStudyEnvironmentIdWithContent(studyId);
     }
+
+    public Optional<Survey> findActiveByStudyEnvironmentIdAndStableIdNoContent(UUID studyEnvId, String stableId, Integer version) {
+        return dao.findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvId, stableId, version);
+    }
+
 
     @Transactional
     @Override
@@ -77,6 +80,8 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
         survey.setCreatedAt(now);
         survey.setLastUpdatedAt(now);
         survey.setStableId(survey.getStableId().trim());
+        survey.setReferencedQuestions(SurveyParseUtils.parseReferencedSurveyQuestions(survey).stream().map(Object::toString).toList());
+
         Survey savedSurvey = dao.create(survey);
         for (AnswerMapping answerMapping : survey.getAnswerMappings()) {
             answerMapping.setId(null);
@@ -84,6 +89,7 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
             AnswerMapping savedMapping = answerMappingDao.create(answerMapping);
             savedSurvey.getAnswerMappings().add(savedMapping);
         }
+
         List<LanguageText> texts = SurveyParseUtils.extractLanguageTexts(survey);
         languageTextDao.bulkCreate(texts);
 
@@ -93,7 +99,6 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
 
         return savedSurvey;
     }
-
 
     public List<SurveyQuestionDefinition> getSurveyQuestionDefinitions(Survey survey) {
         ObjectMapper objectMapper = new ObjectMapper();

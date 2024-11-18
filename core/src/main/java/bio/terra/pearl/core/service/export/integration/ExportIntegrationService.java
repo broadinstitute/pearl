@@ -7,11 +7,11 @@ import bio.terra.pearl.core.model.export.ExportDestinationType;
 import bio.terra.pearl.core.model.export.ExportIntegration;
 import bio.terra.pearl.core.model.export.ExportIntegrationJob;
 import bio.terra.pearl.core.model.export.ExportOptions;
-import bio.terra.pearl.core.model.notification.EmailTemplate;
-import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
-import bio.terra.pearl.core.model.portal.PortalEnvironmentLanguage;
-import bio.terra.pearl.core.model.publishing.*;
+import bio.terra.pearl.core.model.publishing.ConfigChange;
+import bio.terra.pearl.core.model.publishing.ConfigChangeList;
+import bio.terra.pearl.core.model.publishing.ListChange;
+import bio.terra.pearl.core.model.publishing.StudyEnvironmentChange;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
@@ -19,16 +19,13 @@ import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
 import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
 import bio.terra.pearl.core.service.publishing.StudyEnvPublishable;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
 
 @Service
-public class ExportIntegrationService extends CrudService<ExportIntegration, ExportIntegrationDao> implements
-        StudyEnvPublishable {
+public class ExportIntegrationService extends CrudService<ExportIntegration, ExportIntegrationDao> implements StudyEnvPublishable {
     private final ExportIntegrationJobService exportIntegrationJobService;
     private final ExportOptionsDao exportOptionsDao;
     private final EnrolleeSearchExpressionParser enrolleeSearchExpressionParser;
@@ -54,6 +51,20 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
         ExportIntegration newIntegration = super.create(integration);
         newIntegration.setExportOptions(newOptions);
         return newIntegration;
+    }
+
+    public ExportIntegration update(ExportIntegration integration) {
+        ExportOptions updatedOpts = exportOptionsDao.update(integration.getExportOptions());
+        ExportIntegration newIntegration = super.update(integration);
+        newIntegration.setExportOptions(updatedOpts);
+        return newIntegration;
+    }
+
+    public void doAllExports(ResponsibleEntity operator) {
+        List<ExportIntegration> integrations = dao.findAllActiveWithOptions();
+        for (ExportIntegration integration : integrations) {
+            doExport(integration, operator);
+        }
     }
 
     public ExportIntegrationJob doExport(ExportIntegration integration, ResponsibleEntity operator) {

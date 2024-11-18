@@ -10,7 +10,7 @@ import Api, {
   PortalEnvironmentConfig,
   PortalStudy,
   SiteMediaMetadata,
-  StudyEnvironment,
+  StudyEnvironment, StudyEnvironmentConfig,
   SurveyResponse,
   Trigger
 } from 'api/api'
@@ -20,7 +20,7 @@ import {
   EmailTemplate,
   Enrollee,
   Family,
-  KitRequest,
+  KitRequest, KitRequestStatus,
   KitType,
   LocalizedEmailTemplate,
   ParticipantDashboardAlert,
@@ -52,6 +52,10 @@ import { UserContext } from '../user/UserProvider'
 import { PortalEnvContextT } from '@juniper/ui-participant/src/providers/PortalProvider'
 import { mockLocalSiteContent } from 'test-utils/mock-site-content'
 import { ReactNotifications } from 'react-notifications-component'
+
+// add all jest-extended matchers
+import * as matchers from 'jest-extended'
+expect.extend(matchers)
 
 const randomString = (length: number) => {
   return _times(length, () => _random(35).toString(36)).join('')
@@ -178,6 +182,20 @@ export const mockSurveyVersionsList: () => Survey[] = () => ([
   }
 ])
 
+export const mockStudyEnvironmentConfig = (): StudyEnvironmentConfig => {
+  return {
+    initialized: true,
+    password: 'blah',
+    passwordProtected: false,
+    acceptingEnrollment: true,
+    enableFamilyLinkage: false,
+    acceptingProxyEnrollment: false,
+    useDevDsmRealm: false,
+    useStubDsm: false,
+    enableInPersonKits: false
+  }
+}
+
 /** returns a simple studyEnvContext object for use/extension in tests */
 export const mockStudyEnvContext: () => StudyEnvContextT = () => {
   const sandboxEnv: StudyEnvironment = {
@@ -185,16 +203,8 @@ export const mockStudyEnvContext: () => StudyEnvContextT = () => {
     id: 'studyEnvId',
     configuredSurveys: [mockConfiguredSurvey()],
     triggers: [],
-    studyEnvironmentConfig: {
-      initialized: true,
-      password: 'blah',
-      passwordProtected: false,
-      acceptingEnrollment: true,
-      enableFamilyLinkage: false,
-      acceptingProxyEnrollment: false,
-      useDevDsmRealm: false,
-      useStubDsm: false
-    }
+    studyEnvironmentConfig: mockStudyEnvironmentConfig(),
+    kitTypes: []
   }
   return {
     study: {
@@ -273,11 +283,12 @@ export const mockExternalKitRequest = (): PepperKit => {
 /** returns a mock kit request */
 export const mockKitRequest: (args?: {
   enrolleeShortcode?: string,
-  status?: string
+  status?: KitRequestStatus
 }) => KitRequest = ({ enrolleeShortcode, status } = {}) => ({
   id: 'kitRequestId',
   createdAt: 1704393045,
   kitType: mockKitType(),
+  distributionMethod: 'MAILED',
   status: status || 'CREATED',
   // This is intentionally a little different from the enrollee's current mailing address to show that sentToAddress
   // is a capture of the mailing address at the time the kit was sent.
@@ -366,12 +377,13 @@ export const mockFamily = (): Family => {
 }
 
 /** helper function to generate a ParticipantTask object for a survey and enrollee */
-export const taskForForm = (form: Survey, enrolleeId: string, taskType: ParticipantTaskType):
+export const taskForForm = (form: Survey, enrolleeId: string, taskType: ParticipantTaskType
+  , createdAt = 0, surveyResponseId?: string):
     ParticipantTask => {
   return {
     id: randomString(10),
     blocksHub: false,
-    createdAt: 0,
+    createdAt,
     enrolleeId,
     portalParticipantUserId: randomString(10),
     status: 'NEW',
@@ -380,6 +392,7 @@ export const taskForForm = (form: Survey, enrolleeId: string, taskType: Particip
     targetName: form.name,
     targetStableId: form.stableId,
     targetAssignedVersion: form.version,
+    surveyResponseId,
     taskOrder: 1
   }
 }
@@ -635,5 +648,5 @@ export const renderInPortalRouter = (portal: Portal,
         <ReactNotifications/>
       </UserContext.Provider>
     </AdminUserContext.Provider>, [`/${portal.shortcode}/studies/${studyShortcode}/${opts.envName}`],
-    ':portalShortcode/studies/:studyShortcode/:studyEnv')
+    ':portalShortcode/studies/:studyShortcode/:studyEnv/*')
 }

@@ -4,6 +4,7 @@ import bio.terra.pearl.core.dao.survey.SurveyResponseDao;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.audit.ParticipantDataChange;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
+import bio.terra.pearl.core.model.fileupload.ParticipantFile;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.survey.*;
@@ -12,12 +13,14 @@ import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.CascadeProperty;
-import bio.terra.pearl.core.service.ImmutableEntityService;
+import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.exception.NotFoundException;
+import bio.terra.pearl.core.service.fileupload.ParticipantFileService;
+import bio.terra.pearl.core.service.fileupload.ParticipantFileSurveyResponseService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
 import bio.terra.pearl.core.service.survey.event.EnrolleeSurveyEvent;
-import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
 import bio.terra.pearl.core.service.workflow.EventService;
+import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-public class SurveyResponseService extends ImmutableEntityService<SurveyResponse, SurveyResponseDao> {
+public class SurveyResponseService extends CrudService<SurveyResponse, SurveyResponseDao> {
     private final AnswerService answerService;
     private final SurveyService surveyService;
     private final ParticipantTaskService participantTaskService;
@@ -34,13 +37,16 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
     private final ParticipantDataChangeService participantDataChangeService;
     private final EventService eventService;
     public static final String CONSENTED_ANSWER_STABLE_ID = "consented";
+    private final ParticipantFileSurveyResponseService participantFileSurveyResponseService;
+    private final ParticipantFileService participantFileService;
 
-    public SurveyResponseService(SurveyResponseDao dao, AnswerService answerService,
+    public SurveyResponseService(SurveyResponseDao dao,
+                                 AnswerService answerService,
                                  SurveyService surveyService,
                                  ParticipantTaskService participantTaskService,
                                  StudyEnvironmentSurveyService studyEnvironmentSurveyService,
                                  AnswerProcessingService answerProcessingService,
-                                 ParticipantDataChangeService participantDataChangeService, EventService eventService) {
+                                 ParticipantDataChangeService participantDataChangeService, EventService eventService, ParticipantFileSurveyResponseService participantFileSurveyResponseService, ParticipantFileService participantFileService) {
         super(dao);
         this.answerService = answerService;
         this.surveyService = surveyService;
@@ -49,10 +55,16 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
         this.answerProcessingService = answerProcessingService;
         this.participantDataChangeService = participantDataChangeService;
         this.eventService = eventService;
+        this.participantFileSurveyResponseService = participantFileSurveyResponseService;
+        this.participantFileService = participantFileService;
     }
 
     public List<SurveyResponse> findByEnrolleeId(UUID enrolleeId) {
         return dao.findByEnrolleeId(enrolleeId);
+    }
+
+    public Map<UUID, List<SurveyResponse>> findByEnrolleeIds(List<UUID> enrolleeIds) {
+        return dao.findByEnrolleeIds(enrolleeIds);
     }
 
     public Optional<SurveyResponse> findOneWithAnswers(UUID responseId) {
@@ -83,7 +95,7 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
 
     /**
      * will load the survey and the surveyResponse associated with the task,
-     * or the most recent survey response, with answers attached
+     * if no task is specified, will return the survey with no response
      */
     public SurveyWithResponse findWithActiveResponse(UUID studyEnvId, UUID portalId, String stableId, Integer version,
                                                      Enrollee enrollee, UUID taskId) {
@@ -94,22 +106,35 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
             ParticipantTask task = participantTaskService.find(taskId).get();
             // if there is an associated task, try to find an associated response
             lastResponse = dao.findOneWithAnswers(task.getSurveyResponseId()).orElse(null);
-        }
-
-        if (lastResponse == null) {
-            // if there's no response already associated with the task, grab the most recently created
+        }  else {
+            // if there's no task specified, grab the most recently created response
             lastResponse = dao.findMostRecent(enrollee.getId(), form.getId()).orElse(null);
             if (lastResponse != null) {
                 dao.attachAnswers(lastResponse);
             }
         }
+
         StudyEnvironmentSurvey configSurvey = studyEnvironmentSurveyService
                 .findActiveBySurvey(studyEnvId, stableId)
                 .stream().findFirst().orElseThrow(() -> new NotFoundException("no active survey found"));
         configSurvey.setSurvey(form);
         return new SurveyWithResponse(
-                configSurvey, lastResponse
+                configSurvey, lastResponse, getReferencedAnswers(enrollee, form)
         );
+    }
+
+    private List<Answer> getReferencedAnswers(Enrollee enrollee, Survey survey) {
+        List<Answer> answers = new ArrayList<>();
+
+        List<SurveyParseUtils.QuestionReference> referencedQuestions = survey.getReferencedQuestions().stream().map(SurveyParseUtils.QuestionReference::fromString).toList();
+
+        for (SurveyParseUtils.QuestionReference referencedQuestion : referencedQuestions) {
+            answerService
+                    .findForEnrolleeByQuestion(enrollee.getId(), referencedQuestion.surveyStableId(), referencedQuestion.questionStableId())
+                    .ifPresent(answers::add);
+        }
+
+        return answers;
     }
 
     /**
@@ -137,6 +162,9 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
         allAnswers.addAll(existingAnswers);
         response.setAnswers(allAnswers);
 
+        List<ParticipantFile> updatedFiles = updateParticipantFileLinks(response, responseDto.getParticipantFiles(), operator);
+        response.setParticipantFiles(updatedFiles);
+
         DataAuditInfo auditInfo = DataAuditInfo.builder()
                 .enrolleeId(enrollee.getId())
                 .surveyId(survey.getId())
@@ -155,7 +183,7 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
                 auditInfo);
 
         // now update the task status and response id
-        task = updateTaskToResponse(task, response, updatedAnswers, auditInfo);
+        task = updateTaskToResponse(task, response, updatedAnswers, updatedFiles, auditInfo);
         EnrolleeSurveyEvent event = eventService.publishEnrolleeSurveyEvent(enrollee, response, ppUser, task);
 
         logger.info("SurveyResponse received -- enrollee: {}, surveyStabledId: {}", enrollee.getShortcode(), survey.getStableId());
@@ -198,9 +226,9 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
     }
 
     protected ParticipantTask updateTaskToResponse(ParticipantTask task, SurveyResponse response,
-                                                   List<Answer> updatedAnswers, DataAuditInfo auditInfo) {
+                                                   List<Answer> updatedAnswers, List<ParticipantFile> updatedFiles, DataAuditInfo auditInfo) {
         task.setSurveyResponseId(response.getId());
-        TaskStatus updatedStatus = computeNewStatus(task, response, updatedAnswers);
+        TaskStatus updatedStatus = computeNewStatus(task, response, updatedAnswers, updatedFiles);
         if (task.getStatus() != updatedStatus || task.getSurveyResponseId() != response.getId()) {
             task.setStatus(updatedStatus);
             task.setSurveyResponseId(response.getId());
@@ -209,7 +237,7 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
         return task;
     }
 
-    protected static TaskStatus computeNewStatus(ParticipantTask task, SurveyResponse response, List<Answer> updatedAnswers) {
+    protected static TaskStatus computeNewStatus(ParticipantTask task, SurveyResponse response, List<Answer> updatedAnswers, List<ParticipantFile> files) {
         if (task.getStatus() == TaskStatus.COMPLETE) {
             // task statuses shouldn't ever change from complete to not
             return TaskStatus.COMPLETE;
@@ -223,10 +251,10 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
             } else {
                 return TaskStatus.COMPLETE;
             }
-        } else if (task.getStatus() == TaskStatus.NEW && updatedAnswers.size() == 0) {
+        } else if (task.getStatus() == TaskStatus.NEW && updatedAnswers.size() == 0 && files.size() == 0) {
             // if the task is new and no answers we submitted, this is just indicating the survey was viewed
             return TaskStatus.VIEWED;
-        } else if (updatedAnswers.size() > 0) {
+        } else if (updatedAnswers.size() > 0 || files.size() > 0) {
             return TaskStatus.IN_PROGRESS;
         }
         // nothing has changed, so keep the status the same
@@ -283,6 +311,7 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
         ParticipantDataChange change = ParticipantDataChange.fromAuditInfo(auditInfo)
                 .operationId(response.getId())
                 .modelName(survey.getStableId())
+                .modelId(response.getId())
                 .fieldName(existing.getQuestionStableId())
                 .oldValue(existing.valueAsString())
                 .newValue(updated.valueAsString())
@@ -318,6 +347,39 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
         answer.setEnrolleeId(response.getEnrolleeId());
         answer.inferTypeIfMissing();
         return answerService.create(answer);
+    }
+
+    /**
+     * Manages the links between participant files and survey responses; does not actually create or delete files, only
+     * references to the files. Creating and deleting files from the frontend will happen before this method is called
+     * via the participant file controller.
+     */
+    @Transactional
+    protected List<ParticipantFile> updateParticipantFileLinks(SurveyResponse response, List<ParticipantFile> participantFiles, ResponsibleEntity operator) {
+        List<ParticipantFileSurveyResponse> existingParticipantFileSurveyResponses = participantFileSurveyResponseService.findBySurveyResponseId(response.getId());
+
+        // delete links to any files no longer in list (does not delete underlying participant file)
+        for (ParticipantFileSurveyResponse existingResponse : existingParticipantFileSurveyResponses) {
+            if (!participantFiles.stream().anyMatch(pf -> pf.getId().equals(existingResponse.getParticipantFileId()))) {
+                participantFileSurveyResponseService.delete(existingResponse.getId(), Set.of());
+            }
+        }
+
+        // create link to any new files
+        for (ParticipantFile file : participantFiles) {
+            if (!existingParticipantFileSurveyResponses.stream().anyMatch(pfsr -> pfsr.getParticipantFileId().equals(file.getId()))) {
+                ParticipantFileSurveyResponse participantFileSurveyResponse = ParticipantFileSurveyResponse.builder()
+                        .participantFileId(file.getId())
+                        .surveyResponseId(response.getId())
+                        .build();
+
+                participantFileSurveyResponse.setResponsibleUser(operator);
+
+                participantFileSurveyResponseService.create(participantFileSurveyResponse);
+            }
+        }
+
+        return participantFileService.findBySurveyResponseId(response.getId());
     }
 
     @Override

@@ -25,10 +25,9 @@ import bio.terra.pearl.core.service.site.SiteContentService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyService;
 import bio.terra.pearl.core.service.survey.SurveyService;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
-
-import org.springframework.stereotype.Service;
 
 @Service
 public class PortalDiffService {

@@ -1,9 +1,11 @@
-import TaskLink, { getTaskPath, isTaskAccessible, isTaskActive } from './TaskLink'
 import { Link } from 'react-router-dom'
 import React from 'react'
 import { ParticipantTask } from 'api/api'
 import { Enrollee, useI18n } from '@juniper/ui-core'
-
+import { getNextTask, getTaskPath, isTaskAccessible, isTaskActive, taskComparator } from './task/taskUtils'
+import TaskLink from './TaskLink'
+import _groupBy from 'lodash/groupBy'
+import _flatten from 'lodash/flatten'
 
 const taskTypeMap: Record<string, string> = {
   CONSENT: 'taskTypeConsent',
@@ -29,24 +31,21 @@ export default function StudyResearchTasks(props: StudyResearchTasksProps) {
 
   const hasStudyTasks = participantTasks.length > 0
 
-  const sortedActiveConsentTasks = participantTasks
-    .filter(task => task.taskType === 'CONSENT' && isTaskActive(task))
-    .sort(taskComparator)
-  const hasActiveConsentTasks = sortedActiveConsentTasks.length > 0
+  const activeConsentTaskGroups =  groupAndSortTasks(participantTasks.filter(task =>
+    task.taskType === 'CONSENT' && isTaskActive(task)))
 
-  const sortedSurveyTasks = participantTasks
-    .filter(task => task.taskType === 'SURVEY')
-    .sort(taskComparator)
-  const hasSurveyTasks = sortedSurveyTasks.length > 0
+  const sortedSurveyTaskGroups = groupAndSortTasks(participantTasks.filter(task =>
+    task.taskType === 'SURVEY'))
 
-  const nextTask = getNextTask(enrollee, [...sortedActiveConsentTasks, ...sortedSurveyTasks])
+  const sortedCurrentTasks = [...activeConsentTaskGroups.map(group => group[0]),
+    ...sortedSurveyTaskGroups.map(group => group[0])]
+  const nextTask = getNextTask(enrollee, sortedCurrentTasks)
   const numTasksOfNextTaskType = nextTask
     ? enrollee.participantTasks.filter(task => task.taskType === nextTask.taskType).length
     : 0
 
-  const completedConsentTasks = enrollee.participantTasks
-    .filter(task => task.status === 'COMPLETE' && task.taskType === 'CONSENT')
-  const hasCompletedConsentTasks = completedConsentTasks.length > 0
+  const completedConsentTaskGroups = groupAndSortTasks(participantTasks.filter(task =>
+    task.taskType === 'CONSENT' && task.status === 'COMPLETE'))
 
   if (!hasStudyTasks) {
     return <div className="fst-italic">{i18n('tasksNoneForStudy')}</div>
@@ -69,45 +68,49 @@ export default function StudyResearchTasks(props: StudyResearchTasksProps) {
         </div>
       )}
 
-      {hasActiveConsentTasks && (
-        <TaskGrouping
-          enrollee={enrollee}
-          studyShortcode={studyShortcode}
-          tasks={sortedActiveConsentTasks}
-          title={i18n('taskTypeConsent')}
-        />
-      )}
-
-      {hasSurveyTasks && (
-        <TaskGrouping
-          enrollee={enrollee}
-          tasks={sortedSurveyTasks}
-          studyShortcode={studyShortcode}
-          title={i18n('taskTypeSurveys')}
-        />
-      )}
-
-      {hasCompletedConsentTasks && (
-        <TaskGrouping
-          enrollee={enrollee}
-          studyShortcode={studyShortcode}
-          tasks={completedConsentTasks}
-          title={i18n('taskTypeForms')}
-        />
-      )}
+      <TaskGrouping
+        enrollee={enrollee}
+        studyShortcode={studyShortcode}
+        taskArrays={activeConsentTaskGroups}
+        title={i18n('taskTypeConsent')}
+      />
+      <TaskGrouping
+        enrollee={enrollee}
+        taskArrays={sortedSurveyTaskGroups}
+        studyShortcode={studyShortcode}
+        title={i18n('taskTypeSurveys')}
+      />
+      <TaskGrouping
+        enrollee={enrollee}
+        studyShortcode={studyShortcode}
+        taskArrays={completedConsentTaskGroups}
+        title={i18n('taskTypeForms')}
+      />
     </>
   )
 }
 
+/** groups and sorts tasks by targetStableId.  within each group, tasks are sorted by recency.
+ * The array of groups returned is sorted by the taskComparator sort across the most recent task in each group. */
+function groupAndSortTasks(tasks: ParticipantTask[]) {
+  const surveyTaskGroups = Object.values(_groupBy(tasks, 'targetStableId'))
+  surveyTaskGroups.forEach(tasks =>
+    tasks.sort((a, b) => b.createdAt - a.createdAt))
+  return surveyTaskGroups
+    .sort((a, b) => taskComparator(a[0], b[0]))
+}
+
 
 /** renders a group like "CONSENTS" or "SURVEYS" */
-function TaskGrouping({ title, tasks, enrollee, studyShortcode }: {
-    title: string, tasks: ParticipantTask[],
+function TaskGrouping({ title, taskArrays, enrollee, studyShortcode }: {
+    title: string, taskArrays: ParticipantTask[][],
     enrollee: Enrollee, studyShortcode: string
 }) {
-  const hasLockedTasks = tasks.some(task => !isTaskAccessible(task, enrollee))
   const { i18n } = useI18n()
-
+  if (taskArrays.length === 0) {
+    return null
+  }
+  const hasLockedTasks = _flatten(taskArrays).some(task => !isTaskAccessible(task, enrollee))
   return (
     <>
       <h2 className="fs-6 text-uppercase mb-0">{title}</h2>
@@ -115,33 +118,11 @@ function TaskGrouping({ title, tasks, enrollee, studyShortcode }: {
         <p className="my-2 text-muted">{i18n('surveysSomeLocked')}</p>
       )}
       <ol className="list-unstyled p-0">
-        {tasks.map(task => <li key={task.id}>
-          <TaskLink task={task} key={task.id} studyShortcode={studyShortcode}
-            enrollee={enrollee}/>
-        </li>)}
+        {taskArrays.map(tasks =>
+          <TaskLink task={tasks[0]} history={tasks.slice(1)}
+            enrollee={enrollee} studyShortcode={studyShortcode} key={tasks[0].id}/>
+        )}
       </ol>
     </>
   )
-}
-
-/** returns the next actionable task for the enrollee, or undefined if there is no remaining task */
-function getNextTask(enrollee: Enrollee, sortedTasks: ParticipantTask[]) {
-  const nextTask = sortedTasks.find(task => isTaskAccessible(task, enrollee) && isTaskActive(task))
-  return nextTask
-}
-
-export const TASK_TYPE_ORDER = ['CONSENT', 'SURVEY']
-export const TASK_STATUS_ORDER = ['IN_PROGRESS', 'NEW', 'COMPLETE']
-
-/** Sorts tasks based on their types, then based on status, and then based on their internal ordering */
-function taskComparator(taskA: ParticipantTask, taskB: ParticipantTask) {
-  const typeOrder = TASK_TYPE_ORDER.indexOf(taskA.taskType) - TASK_TYPE_ORDER.indexOf(taskB.taskType)
-  if (typeOrder != 0) {
-    return typeOrder
-  }
-  const statusOrder = TASK_STATUS_ORDER.indexOf(taskA.status) - TASK_STATUS_ORDER.indexOf(taskB.status)
-  if (statusOrder != 0) {
-    return statusOrder
-  }
-  return taskA.taskOrder - taskB.taskOrder
 }

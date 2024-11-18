@@ -137,7 +137,7 @@ export const SplitCalculatedValueEditor = ({
   }, [calculatedValue.expression])
 
   const onVariableChanged = (_: SurveyModel, options: { name: string, value: string }) => {
-    if (options.name === calculatedValue.name) {
+    if (options.name.toLowerCase() === calculatedValue.name.toLowerCase()) {
       setPreviewResult(toString(options.value))
     }
   }

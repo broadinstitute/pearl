@@ -2,25 +2,31 @@ package bio.terra.pearl.core.service.survey;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.DaoTestUtils;
+import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
+import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
+import bio.terra.pearl.core.factory.fileupload.ParticipantFileFactory;
+import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.factory.participant.PortalParticipantUserFactory;
 import bio.terra.pearl.core.factory.survey.AnswerFactory;
 import bio.terra.pearl.core.factory.survey.SurveyFactory;
 import bio.terra.pearl.core.factory.survey.SurveyResponseFactory;
+import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.audit.ParticipantDataChange;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
+import bio.terra.pearl.core.model.fileupload.ParticipantFile;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
+import bio.terra.pearl.core.service.fileupload.ParticipantFileService;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
 import bio.terra.pearl.core.service.participant.ParticipantUserService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
 import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SurveyResponseServiceTests extends BaseSpringBootTest {
     @Autowired
@@ -63,6 +66,12 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
     private EnrolleeFactory enrolleeFactory;
     @Autowired
     private SurveyTaskDispatcher surveyTaskDispatcher;
+    @Autowired
+    private StudyEnvironmentFactory studyEnvironmentFactory;
+    @Autowired
+    private ParticipantFileFactory participantFileFactory;
+    @Autowired
+    private ParticipantFileService participantFileService;
 
     @Test
     @Transactional
@@ -71,7 +80,7 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
                 .build();
         SurveyResponse savedResponse = surveyResponseService.create(surveyResponse);
         DaoTestUtils.assertGeneratedProperties(savedResponse);
-        Assertions.assertEquals(surveyResponse.getSurveyId(), savedResponse.getSurveyId());
+        assertEquals(surveyResponse.getSurveyId(), savedResponse.getSurveyId());
     }
 
     @Test
@@ -115,6 +124,45 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
 
     @Test
     @Transactional
+    public void testSurveyResponseWithAnswersAttachesReferencesAnswers(TestInfo info) {
+        StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
+
+        Survey survey1 = surveyFactory.buildPersisted(surveyFactory.builder(getTestName(info))
+                .portalId(studyEnvBundle.getPortal().getId())
+                .stableId("survey1")
+                .content("{\"pages\":[{\"elements\":[{\"type\":\"text\",\"name\":\"diagnosis\",\"title\":\"What is your diagnosis?\"}]}]}"));
+
+        surveyFactory.attachToEnv(survey1, studyEnvBundle.getStudyEnv().getId(), true);
+
+        Survey survey2 = surveyFactory.buildPersisted(surveyFactory.builder(getTestName(info))
+                .portalId(studyEnvBundle.getPortal().getId())
+                .stableId("survey2")
+                .content("{\"pages\":[{\"elements\":[{\"type\":\"text\",\"name\":\"diagnosis\",\"title\":\"Tell me more about {survey1.diagnosis}\"}]}]}"));
+
+        surveyFactory.attachToEnv(survey2, studyEnvBundle.getStudyEnv().getId(), true);
+
+        assertEquals(1, survey2.getReferencedQuestions().size());
+        assertEquals("survey1.diagnosis", survey2.getReferencedQuestions().getFirst());
+
+        Enrollee enrollee = enrolleeFactory.buildPersisted(getTestName(info), studyEnvBundle.getStudyEnv());
+
+        surveyResponseFactory.buildWithAnswers(enrollee, survey1, Map.of("diagnosis", "old response, should ignore"));
+        surveyResponseFactory.buildWithAnswers(enrollee, survey1, Map.of("diagnosis", "cancer"));
+
+        SurveyWithResponse surveyWithResponse = surveyResponseService.findWithActiveResponse(studyEnvBundle.getStudyEnv().getId(),
+                studyEnvBundle.getPortal().getId(), survey2.getStableId(), survey2.getVersion(), enrollee, null);
+
+        assertEquals(1, surveyWithResponse.referencedAnswers().size());
+
+        Answer answer = surveyWithResponse.referencedAnswers().get(0);
+
+        assertEquals(answer.getSurveyStableId(), "survey1");
+        assertEquals(answer.getQuestionStableId(), "diagnosis");
+        assertEquals(answer.getStringValue(), "cancer");
+    }
+
+    @Test
+    @Transactional
     public void testSurveyResponseUpdateAnswers(TestInfo testInfo) {
         String testName = getTestName(testInfo);
         List<Answer> answers = AnswerFactory.fromMap(Map.of("foo", "bar", "test1", "ans1"));
@@ -145,6 +193,7 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
                         .portalParticipantUserId(ppUser.getId())
                         .operationId(savedResponse.getId())
                         .modelName(survey.getStableId())
+                        .modelId(savedResponse.getId())
                         .fieldName("foo")
                         .oldValue("bar")
                         .newValue("baz").build(),
@@ -164,11 +213,12 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
     public void testUpdateResponse(TestInfo testInfo) {
         // create a survey and an enrollee with one task to complete that survey
         String testName = getTestName(testInfo);
-        EnrolleeFactory.EnrolleeBundle enrolleeBundle = enrolleeFactory.buildWithPortalUser(testName);
+        EnrolleeBundle enrolleeBundle = enrolleeFactory.buildWithPortalUser(testName);
         Survey survey = surveyFactory.buildPersisted(testName);
         StudyEnvironmentSurvey configuredSurvey = surveyFactory.attachToEnv(survey, enrolleeBundle.enrollee().getStudyEnvironmentId(), true);
+        configuredSurvey.setSurvey(survey);
 
-        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), configuredSurvey, survey);
+        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), new SurveyTaskConfigDto(configuredSurvey));
         task = participantTaskService.create(task, getAuditInfo(testInfo));
         assertThat(task.getStatus(), equalTo(TaskStatus.NEW));
 
@@ -211,14 +261,74 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
 
     @Test
     @Transactional
-    public void testCompletedSurveyResponseCannotBeUpdatedToIncomplete(TestInfo testInfo) {
-        // create a survey and an enrollee with one survey task
+    public void testUpdateResponseWithFile(TestInfo testInfo) {
+        // create a survey and an enrollee with one task to complete that survey
         String testName = getTestName(testInfo);
-        EnrolleeFactory.EnrolleeBundle enrolleeBundle = enrolleeFactory.buildWithPortalUser(testName);
+        EnrolleeBundle enrolleeBundle = enrolleeFactory.buildWithPortalUser(testName);
         Survey survey = surveyFactory.buildPersisted(testName);
         StudyEnvironmentSurvey configuredSurvey = surveyFactory.attachToEnv(survey, enrolleeBundle.enrollee().getStudyEnvironmentId(), true);
 
-        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), configuredSurvey, survey);
+        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), new SurveyTaskConfigDto(configuredSurvey, survey));
+        task = participantTaskService.create(task, getAuditInfo(testInfo));
+        assertThat(task.getStatus(), equalTo(TaskStatus.NEW));
+
+        // create a response with no answers
+        SurveyResponse response = SurveyResponse.builder()
+                .enrolleeId(enrolleeBundle.enrollee().getId())
+                .creatingParticipantUserId(enrolleeBundle.enrollee().getParticipantUserId())
+                .surveyId(survey.getId())
+                .complete(false)
+                .answers(List.of())
+                .build();
+
+        surveyResponseService.updateResponse(response, new ResponsibleEntity(enrolleeBundle.participantUser()), null,
+                enrolleeBundle.portalParticipantUser(), enrolleeBundle.enrollee(), task.getId(), survey.getPortalId());
+
+        // check that the response was created and task status updated to viewed
+        task = participantTaskService.find(task.getId()).orElseThrow();
+        assertThat(task.getStatus(), equalTo(TaskStatus.VIEWED));
+
+        // now an updated response with one Answer
+        ParticipantFile file = participantFileFactory.buildPersisted(enrolleeBundle.enrollee());
+
+        response = SurveyResponse.builder()
+                .enrolleeId(enrolleeBundle.enrollee().getId())
+                .creatingParticipantUserId(enrolleeBundle.enrollee().getParticipantUserId())
+                .surveyId(survey.getId())
+                .complete(false)
+                .participantFiles(List.of(file))
+                .build();
+
+        surveyResponseService.updateResponse(response, new ResponsibleEntity(enrolleeBundle.participantUser()), null,
+                enrolleeBundle.portalParticipantUser(), enrolleeBundle.enrollee(), task.getId(), survey.getPortalId());
+
+        // check that the response was created and task status updated to viewed
+        task = participantTaskService.find(task.getId()).orElseThrow();
+        assertThat(task.getStatus(), equalTo(TaskStatus.IN_PROGRESS));
+        // check that the answers were created
+        SurveyResponse savedResponse = surveyResponseService.findByEnrolleeId(enrolleeBundle.enrollee().getId()).get(0);
+        assertThat(participantFileService.findBySurveyResponseId(savedResponse.getId()), hasSize(1));
+
+
+        savedResponse.setParticipantFiles(List.of());
+        surveyResponseService.updateResponse(savedResponse, new ResponsibleEntity(enrolleeBundle.participantUser()), null,
+                enrolleeBundle.portalParticipantUser(), enrolleeBundle.enrollee(), task.getId(), survey.getPortalId());
+
+        assertThat(participantFileService.findBySurveyResponseId(savedResponse.getId()), hasSize(0));
+
+    }
+
+    @Test
+    @Transactional
+    public void testCompletedSurveyResponseCannotBeUpdatedToIncomplete(TestInfo testInfo) {
+        // create a survey and an enrollee with one survey task
+        String testName = getTestName(testInfo);
+        EnrolleeBundle enrolleeBundle = enrolleeFactory.buildWithPortalUser(testName);
+        Survey survey = surveyFactory.buildPersisted(testName);
+        StudyEnvironmentSurvey configuredSurvey = surveyFactory.attachToEnv(survey, enrolleeBundle.enrollee().getStudyEnvironmentId(), true);
+        configuredSurvey.setSurvey(survey);
+
+        ParticipantTask task = surveyTaskDispatcher.buildTask(enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(), new SurveyTaskConfigDto(configuredSurvey));
         task = participantTaskService.create(task, getAuditInfo(testInfo));
         assertThat(task.getStatus(), equalTo(TaskStatus.NEW));
 

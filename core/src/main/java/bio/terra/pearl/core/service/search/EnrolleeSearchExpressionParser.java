@@ -2,16 +2,18 @@ package bio.terra.pearl.core.service.search;
 
 import bio.terra.pearl.core.antlr.CohortRuleLexer;
 import bio.terra.pearl.core.antlr.CohortRuleParser;
-import bio.terra.pearl.core.dao.kit.KitRequestDao;
-import bio.terra.pearl.core.dao.participant.*;
-import bio.terra.pearl.core.dao.survey.AnswerDao;
-import bio.terra.pearl.core.dao.workflow.ParticipantTaskDao;
+import bio.terra.pearl.core.dao.participant.EnrolleeDao;
+import bio.terra.pearl.core.dao.participant.ProfileDao;
 import bio.terra.pearl.core.model.export.ExportOptions;
+import bio.terra.pearl.core.model.search.SearchValueTypeDefinition;
 import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
 import bio.terra.pearl.core.service.rule.RuleParsingErrorListener;
 import bio.terra.pearl.core.service.rule.RuleParsingException;
 import bio.terra.pearl.core.service.search.expressions.*;
-import bio.terra.pearl.core.service.search.terms.*;
+import bio.terra.pearl.core.service.search.terms.SearchTerm;
+import bio.terra.pearl.core.service.search.terms.SearchTermParser;
+import bio.terra.pearl.core.service.search.terms.SearchValue;
+import bio.terra.pearl.core.service.search.terms.UserInputTerm;
 import bio.terra.pearl.core.service.search.terms.functions.LowerFunction;
 import bio.terra.pearl.core.service.search.terms.functions.MaxFunction;
 import bio.terra.pearl.core.service.search.terms.functions.MinFunction;
@@ -24,7 +26,10 @@ import org.jooq.Operator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Parses a rule expression into a {@link EnrolleeSearchExpression}. The rule expression is a string
@@ -33,25 +38,28 @@ import java.util.List;
 @Component
 public class EnrolleeSearchExpressionParser {
     private final EnrolleeDao enrolleeDao;
-    private final AnswerDao answerDao;
     private final ProfileDao profileDao;
-    private final MailingAddressDao mailingAddressDao;
-    private final ParticipantTaskDao participantTaskDao;
-    private final KitRequestDao kitRequestDao;
-    private final FamilyDao familyDao;
-    private final ParticipantUserDao participantUserDao;
 
-    public EnrolleeSearchExpressionParser(EnrolleeDao enrolleeDao, AnswerDao answerDao, ProfileDao profileDao, MailingAddressDao mailingAddressDao, ParticipantTaskDao participantTaskDao, KitRequestDao kitRequestDao, FamilyDao familyDao, ParticipantUserDao participantUserDao) {
+    private final List<SearchTermParser> searchTermParsers;
+
+    public EnrolleeSearchExpressionParser(EnrolleeDao enrolleeDao,
+                                          ProfileDao profileDao,
+                                          // any subclass of SearchTermParser with @Service annotation
+                                          // will be included
+                                          List<SearchTermParser> parsers) {
         this.enrolleeDao = enrolleeDao;
-        this.answerDao = answerDao;
         this.profileDao = profileDao;
-        this.mailingAddressDao = mailingAddressDao;
-        this.participantTaskDao = participantTaskDao;
-        this.kitRequestDao = kitRequestDao;
-        this.familyDao = familyDao;
-        this.participantUserDao = participantUserDao;
+
+        searchTermParsers = parsers;
     }
 
+    public Map<String, SearchValueTypeDefinition> getFacets(UUID studyEnvId) {
+        Map<String, SearchValueTypeDefinition> fields = new HashMap<>();
+
+        searchTermParsers.stream().forEach(parser -> fields.putAll(parser.getFacets(studyEnvId)));
+
+        return fields;
+    }
 
     public EnrolleeSearchExpression parseRule(String rule) throws RuleParsingException {
         if (StringUtils.isBlank(rule)) {
@@ -185,74 +193,14 @@ public class EnrolleeSearchExpressionParser {
     }
 
     private SearchTerm parseVariableTerm(String variable) {
-        String trimmedVar = variable.substring(1, variable.length() - 1).trim();
-        String model = parseModel(trimmedVar);
-
-        switch (model) {
-            case "profile":
-                String profileField = parseField(trimmedVar);
-
-                return new ProfileTerm(profileDao, mailingAddressDao, profileField);
-            case "answer":
-                String[] answerFields = parseFields(trimmedVar);
-                if (answerFields.length != 2) {
-                    throw new IllegalArgumentException("Invalid answer variable");
-                }
-
-                return new AnswerTerm(answerDao, answerFields[0], answerFields[1]);
-            case "age":
-                if (!trimmedVar.equals(model)) {
-                    throw new IllegalArgumentException("Invalid age variable");
-                }
-
-                return new AgeTerm(profileDao);
-            case "enrollee":
-                String enrolleeField = parseField(trimmedVar);
-
-                return new EnrolleeTerm(enrolleeField);
-            case "task":
-                String[] taskFields = parseFields(trimmedVar);
-                if (taskFields.length != 2) {
-                    throw new IllegalArgumentException("Invalid answer variable");
-                }
-
-                return new TaskTerm(participantTaskDao, taskFields[0], taskFields[1]);
-            case "latestKit":
-                String latestKitField = parseField(trimmedVar);
-
-                return new LatestKitTerm(kitRequestDao, latestKitField);
-            case "family":
-                String familyField = parseField(trimmedVar);
-
-                return new FamilyTerm(familyDao, familyField);
-            case "user":
-                String userField = parseField(trimmedVar);
-
-                return new UserTerm(participantUserDao, userField);
-            default:
-                throw new IllegalArgumentException("Unknown model " + model);
-        }
+        return getTermParser(variable).parseVariable(variable);
     }
 
-    private String parseModel(String variable) {
-        if (variable.contains(".")) {
-            return variable.substring(0, variable.indexOf("."));
-        }
-        return variable;
-    }
-
-    private String parseField(String variable) {
-        if (variable.contains(".")) {
-            return variable.substring(variable.indexOf(".") + 1);
-        }
-        throw new IllegalArgumentException("No field in variable");
-    }
-
-    private String[] parseFields(String variable) {
-        if (variable.contains(".")) {
-            return variable.substring(variable.indexOf(".") + 1).split("\\.");
-        }
-        throw new IllegalArgumentException("No field in variable");
+    private SearchTermParser getTermParser(String variable) {
+        return searchTermParsers.stream()
+                .filter(parser -> parser.match(variable))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Variable does not exist: " + variable));
     }
 
     public ExportOptionsWithExpression parseExportOptions(ExportOptions exportOptions) {

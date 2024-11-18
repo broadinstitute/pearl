@@ -1,0 +1,9 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: admin-cert
+spec:
+  domains:
+    - {{ .Values.adminUrl }}
+    - www.{{ .Values.adminUrl }}
+

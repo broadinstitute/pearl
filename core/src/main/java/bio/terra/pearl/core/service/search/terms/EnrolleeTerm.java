@@ -15,7 +15,7 @@ import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueT
 /**
  * Allows searching on basic properties of the enrollee, e.g. "consented"
  */
-public class EnrolleeTerm implements SearchTerm {
+public class EnrolleeTerm extends SearchTerm {
 
     private final String field;
 
