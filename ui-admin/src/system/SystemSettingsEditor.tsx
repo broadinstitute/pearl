@@ -50,17 +50,18 @@ export default function SystemSettingsEditor() {
               <h5 className={'mb-3'}>Maintenance Mode Settings</h5>
               <Checkbox
                 label={'Enable Maintenance Mode'}
-                description={'When enabled, users will see the maintenance message. ' +
-                      'Study staff and participants will not be allowed' +
-                      ' to log in or use the system.'}
+                description={
+                  `When enabled, users will see the maintenance message. Study staff and 
+                    participants will not be allowed to log in or use the system.`}
                 checked={settings?.maintenanceModeEnabled || false}
                 onChange={e => setSettings({ ...settings, maintenanceModeEnabled: e })}/>
               <Textarea
                 rows={4}
                 disabled={!settings?.maintenanceModeEnabled}
                 label="Maintenance Message"
-                description={'Message to display to study staff and participants' +
-                ' when maintenance mode is enabled. Markdown is supported.'}
+                description={
+                  `Message to display to study staff and participants 
+                    when maintenance mode is enabled. Markdown is supported.`}
                 value={settings?.maintenanceModeMessage} onChange={e =>
                   setSettings({ ...settings, maintenanceModeMessage: e })
                 }
@@ -68,8 +69,9 @@ export default function SystemSettingsEditor() {
               <TextInput
                 label={'Maintenance Bypass Phrase'}
                 disabled={!settings?.maintenanceModeEnabled}
-                description={'Password required to bypass maintenance mode. This is not encrypted in any way and ' +
-                      'is only intended to discourage access to the application.'}
+                description={
+                  `Password required to bypass maintenance mode. This is not encrypted in any way and
+                    is only intended to discourage access to the application.`}
                 value={settings?.maintenanceModeBypassPhrase || ''}
                 onChange={e => setSettings({ ...settings, maintenanceModeBypassPhrase: e })}
               />
@@ -79,8 +81,9 @@ export default function SystemSettingsEditor() {
               <Checkbox
                 className={'mb-3'}
                 label={'Disable Scheduled Jobs'}
-                description={'If checked, scheduled jobs will not run. ' +
-              'This can be toggled independently of maintenance mode.'}
+                description={
+                  `If checked, scheduled jobs will not run.
+                    This can be toggled independently of maintenance mode.`}
                 checked={settings?.disableScheduledJobs || false}
                 onChange={e => setSettings({ ...settings, disableScheduledJobs: e })}
               />
