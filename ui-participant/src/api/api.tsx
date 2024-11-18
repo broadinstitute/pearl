@@ -373,6 +373,22 @@ export default {
     return Promise.resolve(response)
   },
 
+  async deleteParticipantFile({ studyEnvParams, enrolleeShortcode, fileName }: {
+    studyEnvParams: StudyEnvParams, enrolleeShortcode: string, fileName: string
+  }): Promise<Response> {
+    const url = `${
+      baseStudyEnvUrl(false, studyEnvParams.studyShortcode)
+    }/enrollee/${enrolleeShortcode}/file/${fileName}`
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: this.getInitHeaders()
+    })
+    if (!response.ok) {
+      return Promise.reject(response)
+    }
+    return Promise.resolve(response)
+  },
+
   async findProfile(
     {
       ppUserId, alertErrors = true

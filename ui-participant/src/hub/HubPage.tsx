@@ -16,11 +16,9 @@ import {
   useHubUpdate
 } from './hubUpdates'
 import {
-  DocumentRequestUpload,
   Enrollee,
   getJoinLink,
   ParticipantDashboardAlert,
-  ParticipantFile,
   useI18n
 } from '@juniper/ui-core'
 import KitBanner from './kit/KitBanner'
@@ -73,17 +71,6 @@ export default function HubPage() {
   const hasActiveTasks = enrollees.some(enrollee => enrollee.participantTasks.some(task => isTaskActive(task)))
   const hasSubjectEnrollee = enrollees.some(enrollee => enrollee.subject)
 
-  const [selectedFiles, setSelectedFiles] = useState<ParticipantFile[]>([])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const uploadNewFile = async (_: File) => {
-    return {} as ParticipantFile
-  }
-
-  const fetchFileLibrary = async () => {
-    return [{ id: '1', fileName: 'file1.png', fileType: 'image/png' }] as ParticipantFile[]
-  }
-
-
   return (
     <>
       <DocumentTitle title={i18n('navbarDashboard')}/>
@@ -131,19 +118,6 @@ export default function HubPage() {
           <OutreachTasks enrollees={enrollees} studies={portal.portalStudies.map(pStudy => pStudy.study)}/>
         </div>
       </div>
-
-      <div className='d-flex justify-content-center'>
-        <div className='w-50'>
-          <DocumentRequestUpload
-            uploadNewFile={uploadNewFile}
-            fetchFileLibrary={fetchFileLibrary}
-            selectedFiles={selectedFiles}
-            setSelectedFiles={setSelectedFiles}
-          />
-        </div>
-
-      </div>
-
     </>
   )
 }

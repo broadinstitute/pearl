@@ -82,4 +82,19 @@ public class ParticipantFileController implements ParticipantFileApi {
     // todo verify portalShortcode, studyShortcode, envName
     return ResponseEntity.ok(participantFileExtService.list(participantUser, enrolleeShortcode));
   }
+
+  @Override
+  public ResponseEntity<Object> delete(
+      String portalShortcode,
+      String envName,
+      String studyShortcode,
+      String enrolleeShortcode,
+      String fileName) {
+    ParticipantUser participantUser = requestUtilService.requireUser(request);
+
+    // todo verify portalShortcode, studyShortcode, envName
+    participantFileExtService.delete(participantUser, enrolleeShortcode, fileName);
+
+    return ResponseEntity.noContent().build();
+  }
 }

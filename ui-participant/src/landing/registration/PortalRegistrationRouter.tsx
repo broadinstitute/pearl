@@ -1,6 +1,16 @@
-import Api, { Portal, Survey } from 'api/api'
-import { Route, Routes, useNavigate } from 'react-router-dom'
-import React, { useEffect, useState } from 'react'
+import Api, {
+  Portal,
+  Survey
+} from 'api/api'
+import {
+  Route,
+  Routes,
+  useNavigate
+} from 'react-router-dom'
+import React, {
+  useEffect,
+  useState
+} from 'react'
 import { useUser } from 'providers/UserProvider'
 import Ineligible from './Ineligible'
 import PreRegistration from './Preregistration'
@@ -12,7 +22,9 @@ import envVars from 'util/envVars'
 export type RegistrationContextT = {
   preRegSurvey?: Survey,
   preRegResponseId: string | null,
-  updatePreRegResponseId: (newId: string | null) => void
+  updatePreRegResponseId: (newId: string | null) => void,
+  portalShortcode: string,
+  environmentName: string
 }
 
 /**
@@ -72,7 +84,9 @@ export default function PortalRegistrationRouter({
   const registrationContext = {
     preRegSurvey,
     preRegResponseId,
-    updatePreRegResponseId
+    updatePreRegResponseId,
+    portalShortcode: portal.shortcode,
+    environmentName: portalEnv.environmentName
   }
 
   const registrationComponent = envVars.unauthedLogin ?

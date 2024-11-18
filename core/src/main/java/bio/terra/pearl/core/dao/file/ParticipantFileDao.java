@@ -25,8 +25,9 @@ public class ParticipantFileDao extends BaseJdbiDao<ParticipantFile> {
         return jdbi.withHandle(handle ->
                 handle.createQuery("""
                                 select file.* from %s file
-                                inner join answer a on file.file_name = a.string_value and a.format = 'FILE_NAME'
-                                where a.survey_response_id = :surveyResponseId
+                                inner join answer a on file.enrollee_id = a.enrollee_id
+                                where file.file_name = a.string_value and a.format = 'FILE_NAME'
+                                and a.survey_response_id = :surveyResponseId
                                 """.formatted(tableName))
                         .bind("surveyResponseId", surveyResponseId)
                         .mapTo(clazz)

@@ -9,6 +9,7 @@ import {
   faFile,
   faFilePdf,
   faImage,
+  faTrashCan,
   faUpload,
   faX
 } from '@fortawesome/free-solid-svg-icons'
@@ -17,18 +18,23 @@ import { isNil } from 'lodash'
 import { useApiContext } from 'src/participant/ApiProvider'
 import { StudyEnvParams } from 'src/types/study'
 import LoadingSpinner from '@juniper/ui-admin/src/util/LoadingSpinner'
+import { saveBlobAsDownload } from '@juniper/ui-admin/src/util/downloadUtils'
+import Modal from 'react-bootstrap/Modal'
+import { ModalProps } from 'react-bootstrap'
 
 export const DocumentRequestUpload = (
   {
     studyEnvParams,
     enrolleeShortcode,
     selectedFileNames,
-    setSelectedFileNames
+    setSelectedFileNames,
+    ModalComponent
   } : {
     studyEnvParams: StudyEnvParams,
     enrolleeShortcode: string,
     selectedFileNames: string[]
-    setSelectedFileNames: (fileNames: string[]) => void
+    setSelectedFileNames: (fileNames: string[]) => void,
+    ModalComponent: React.ElementType<ModalProps>
   }) => {
   const [files, setFiles] = React.useState<ParticipantFile[]>([])
   const [selectedFiles, setSelectedFiles] = React.useState<ParticipantFile[]>([])
@@ -66,6 +72,19 @@ export const DocumentRequestUpload = (
     selectFile(newFile)
   }
 
+  const deleteFile = async (file: ParticipantFile) => {
+    await Api.deleteParticipantFile({ studyEnvParams, enrolleeShortcode, fileName: file.fileName })
+    setFiles(oldFiles => oldFiles.filter(f => f.id !== file.id))
+    setSelectedFiles(oldFiles => oldFiles.filter(f => f.id !== file.id))
+    setSelectedFileNames(selectedFileNames.filter(f => f !== file.fileName))
+  }
+
+  const downloadFile = async (file: ParticipantFile) => {
+    const response = await Api.downloadParticipantFile({ studyEnvParams, enrolleeShortcode, fileName: file.fileName })
+
+    saveBlobAsDownload(await response.blob(), file.fileName)
+  }
+
   return <div className='p-3'>
     <div className='mb-2'>
       <SelectedFiles selectedFiles={selectedFiles} removeFile={unselectFile}/>
@@ -81,8 +100,16 @@ export const DocumentRequestUpload = (
       </div>
 
     </div>
-    <Library uploadingFile={uploadingFile} files={files} selectFile={selectFile} removeFile={unselectFile}
-      selectedFiles={selectedFiles}/>
+    <Library
+      uploadingFile={uploadingFile}
+      files={files}
+      selectFile={selectFile}
+      unselectFile={unselectFile}
+      selectedFiles={selectedFiles}
+      deleteFile={deleteFile}
+      downloadFile={downloadFile}
+      ModalComponent={ModalComponent}
+    />
   </div>
 }
 
@@ -120,13 +147,19 @@ const Library = (
     files,
     selectedFiles,
     selectFile,
-    removeFile
+    unselectFile,
+    deleteFile,
+    downloadFile,
+    ModalComponent
   }: {
     uploadingFile?: string,
     files: ParticipantFile[],
     selectedFiles: ParticipantFile[],
     selectFile: (file: ParticipantFile) => void,
-    removeFile: (file: ParticipantFile) => void
+    unselectFile: (file: ParticipantFile) => void,
+    deleteFile: (file: ParticipantFile) => void,
+    downloadFile: (file: ParticipantFile) => void,
+    ModalComponent: React.ElementType<ModalProps>
   }
 ) => {
   const isSelected = (file: ParticipantFile) => {
@@ -145,7 +178,7 @@ const Library = (
       </p>
 
       {uploadingFile && <FileRow
-        fileType={'text/plain'}
+        fileType={''}
         fileName={uploadingFile}
         isUploading={true}
         isSelected={false}
@@ -156,8 +189,13 @@ const Library = (
           fileName={file.fileName}
           isUploading={false}
           isSelected={isSelected(file)}
-          onRemove={() => removeFile(file)}
-          onSelect={() => selectFile(file)}/>
+          onUnselect={() => unselectFile(file)}
+          onSelect={() => selectFile(file)}
+          onDelete={() => deleteFile(file)}
+          onDownload={() => downloadFile(file)}
+          ModalComponent={ModalComponent}
+          key={file.id}
+        />
       })}
     </div>
 
@@ -170,35 +208,90 @@ const FileRow = ({
   isUploading,
   isSelected,
   onSelect,
-  onRemove
+  onUnselect,
+  onDelete,
+  onDownload,
+  ModalComponent
 }: {
   fileType: string,
   fileName: string,
   isUploading: boolean,
   isSelected: boolean,
   onSelect?: () => void,
-  onRemove?: () => void
+  onUnselect?: () => void,
+  onDelete?: () => void,
+  onDownload?: () => void,
+  ModalComponent: React.ElementType<ModalProps>
 }) => {
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false)
+
   return <div
     className={'border border-1 rounded-1 bg-light-subtle p-2 d-flex align-items-center justify-content-between'}>
-    <div className='d-flex align-items-center justify-content-start'>
+    <div className='d-flex align-items-center justify-content-between'>
       <FileIcon mimeType={fileType}/>
       <button className='btn btn-link'>{fileName}</button>
 
     </div>
     {isUploading && <LoadingSpinner/>}
-    {isSelected
-      ? <button
-        onClick={onRemove}
+
+    <div className='d-flex justify-content-end'>
+      {onDelete && <button
+        onClick={() => setShowDeleteModal(true)}
         className='float-end btn btn-outline-danger text-decoration-none border-0'>
-        <FontAwesomeIcon icon={faX}/>
-      </button>
-      : <button
-        onClick={onSelect}
-        className='float-end btn btn-outline-primary text-decoration-none border-0'>
-        <FontAwesomeIcon icon={faPlus}/>
+        <FontAwesomeIcon icon={faTrashCan}/>
       </button>}
+      {isSelected
+        ? <button
+          onClick={onUnselect}
+          className='float-end btn btn-outline-primary text-decoration-none border-0'>
+          <FontAwesomeIcon icon={faX}/>
+        </button>
+        : <button
+          onClick={onSelect}
+          className='float-end btn btn-outline-primary text-decoration-none border-0'>
+          <FontAwesomeIcon icon={faPlus}/>
+        </button>}
+    </div>
+
+    {onDelete && showDeleteModal && <DeleteModal
+      fileName={fileName}
+      onDelete={() => {
+        setShowDeleteModal(false)
+        onDelete()
+      }}
+      onClose={() => setShowDeleteModal(false)}
+      ModalComponent={ModalComponent}
+    />}
+
   </div>
+}
+
+const DeleteModal = ({
+  fileName,
+  onDelete,
+  onClose,
+  ModalComponent
+}: {
+  fileName: string,
+  onDelete: () => void,
+  onClose: () => void,
+  ModalComponent: React.ElementType<ModalProps>
+}) => {
+  return <ModalComponent show={true}>
+    <Modal.Header>
+      <Modal.Title>
+        Delete {fileName}
+      </Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <p>Are you sure you want to delete {fileName}? This action cannot be undone.</p>
+    </Modal.Body>
+
+    <Modal.Footer>
+      <button className='btn btn-danger' onClick={onDelete}>Delete</button>
+      <button className='btn btn-link' onClick={onClose}>Cancel</button>
+    </Modal.Footer>
+  </ModalComponent>
 }
 
 const getIcon = (mimeType: string) => {

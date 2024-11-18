@@ -10,7 +10,6 @@ import {
   useI18n,
   useSurveyJSModel
 } from '@juniper/ui-core'
-import { usePortalEnv } from 'providers/PortalProvider'
 
 /** This registration survey is a hardcoded survey--will be deprecated soon */
 const registrationSurvey = {
@@ -48,7 +47,8 @@ const registrationSurveyModel: Survey = {
   createdAt: now,
   lastUpdatedAt: now,
   content: JSON.stringify(registrationSurvey),
-  surveyType: 'RESEARCH'
+  surveyType: 'RESEARCH',
+  recurrenceType: 'NONE'
 }
 
 /**
@@ -59,11 +59,16 @@ export default function RegistrationUnauthed({ registrationContext, returnTo }: 
   registrationContext: RegistrationContextT,
   returnTo: string | null
 }) {
-  const { preRegResponseId } = registrationContext
-  const { portalEnv } = usePortalEnv()
+  const { preRegResponseId, environmentName, portalShortcode } = registrationContext
   // for now, assume registration surveys are a single page
   const pager = { pageNumber: 0, updatePageNumber: () => 0 }
-  const { surveyModel, refreshSurvey } = useSurveyJSModel(registrationSurveyModel, null, onComplete, pager, portalEnv.environmentName as EnvironmentName)
+  const { surveyModel, refreshSurvey } = useSurveyJSModel(
+    registrationSurveyModel,
+    null,
+    onComplete,
+    pager,
+    { envName: environmentName as EnvironmentName, portalShortcode, studyShortcode: '' },
+    '')
   const { loginUser } = useUser()
   const { selectedLanguage } = useI18n()
   const navigate = useNavigate()

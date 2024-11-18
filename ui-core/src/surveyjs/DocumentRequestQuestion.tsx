@@ -5,16 +5,16 @@ import {
   Serializer,
   SurveyModel
 } from 'survey-core'
-import {
-  ReactQuestionFactory,
-  SurveyQuestionElementBase
-} from 'survey-react-ui'
+import { SurveyQuestionElementBase } from 'survey-react-ui'
 import { StudyEnvParams } from 'src/types/study'
 import { DocumentRequestUpload } from 'src/components/DocumentRequestUpload'
 import {
+  isEmpty,
   isNil,
   join
 } from 'lodash'
+import Modal from 'react-bootstrap/Modal'
+import { ModalProps } from 'react-bootstrap'
 
 const DOCUMENT_REQUEST_TYPE = 'documentrequest'
 
@@ -58,20 +58,25 @@ export class SurveyQuestionDocumentRequest extends SurveyQuestionElementBase {
     return fileNames
   }
 
+  get baseModal(): React.ElementType<ModalProps> {
+    return Modal
+  }
+
   renderElement() {
     const survey = this.question.survey as SurveyModel
 
-    const studyEnvParams: StudyEnvParams = {
-      portalShortcode: 'demo',
-      studyShortcode: 'heartdemo',
-      envName: 'sandbox'
-    }//survey.getVariable('studyEnvParams') as StudyEnvParams
-    const enrolleeShortcode = 'HDSALK'//survey.getVariable('enrolleeShortcode') as string
+    const studyEnvParams: StudyEnvParams = survey.getVariable('studyEnvParams') as StudyEnvParams
+    const enrolleeShortcode = survey.getVariable('enrolleeShortcode') as string
+
+    if (isEmpty(enrolleeShortcode)) {
+      return <></>
+    }
 
     return <DocumentRequestUpload
       studyEnvParams={studyEnvParams}
       enrolleeShortcode={enrolleeShortcode}
       selectedFileNames={this.fileNames}
+      ModalComponent={this.baseModal}
       setSelectedFileNames={fileNames => {
         // clear files
         const numOldFiles = this.fileNames.length
@@ -96,7 +101,3 @@ export class SurveyQuestionDocumentRequest extends SurveyQuestionElementBase {
 const formatFileIndex = (stableId: string, index: number) => {
   return `${stableId}[${index}]`
 }
-
-ReactQuestionFactory.Instance.registerQuestion(DOCUMENT_REQUEST_TYPE, props => {
-  return React.createElement(SurveyQuestionDocumentRequest, props)
-})

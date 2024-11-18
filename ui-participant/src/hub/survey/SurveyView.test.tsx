@@ -1,9 +1,10 @@
 import React from 'react'
 
+import { generateThreePageSurvey } from 'test-utils/test-survey-factory'
 import {
-  generateThreePageSurvey
-} from 'test-utils/test-survey-factory'
-import { render, screen } from '@testing-library/react'
+  render,
+  screen
+} from '@testing-library/react'
 import { usePortalEnv } from 'providers/PortalProvider'
 import { useUser } from 'providers/UserProvider'
 import {
@@ -11,9 +12,13 @@ import {
   MockI18nProvider,
   PageNumberControl,
   Survey,
-  SurveyFooter, useSurveyJSModel
+  SurveyFooter,
+  useSurveyJSModel
 } from '@juniper/ui-core'
-import { mockUseActiveUser, mockUseUser } from 'test-utils/user-mocking-utils'
+import {
+  mockUseActiveUser,
+  mockUseUser
+} from 'test-utils/user-mocking-utils'
 import { useActiveUser } from 'providers/ActiveUserProvider'
 
 jest.mock('providers/PortalProvider', () => ({ usePortalEnv: jest.fn() }))
@@ -49,7 +54,11 @@ jest.mock('providers/ActiveUserProvider')
 const FooterTestComponent = ({ pageNum, survey }: {pageNum: number, survey: Survey}) => {
   const pager: PageNumberControl = { pageNumber: pageNum, updatePageNumber: () => 1 }
   const { surveyModel } = useSurveyJSModel(survey, null,
-    () => 1, pager, 'sandbox')
+    () => 1,
+    pager,
+    { portalShortcode: 'demo', studyShortcode: 'test', envName: 'sandbox' },
+    'enrollee'
+  )
   return <SurveyFooter survey={survey} surveyModel={surveyModel}/>
 }
 

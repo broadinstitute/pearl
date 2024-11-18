@@ -138,7 +138,10 @@ export function PagedSurveyView({
     const responseDto = {
       resumeData: getResumeData(surveyModel, adminUserId || enrollee.participantUserId, true),
       enrolleeId: enrollee.id,
-      answers: getUpdatedAnswers(prevSave.current as Record<string, object>, currentModelValues, selectedLanguage),
+      answers: getUpdatedAnswers(surveyModel,
+        prevSave.current as Record<string, object>,
+        currentModelValues,
+        selectedLanguage),
       creatingParticipantId: adminUserId ? null : enrollee.participantUserId,
       creatingAdminUserId: adminUserId,
       surveyId: form.id,
@@ -167,7 +170,15 @@ export function PagedSurveyView({
   }
 
   const { surveyModel, refreshSurvey } = useSurveyJSModel(
-    form, resumableData, onComplete, pager, studyEnvParams.envName, enrollee.profile, proxyProfile, referencedAnswers
+    form,
+    resumableData,
+    onComplete,
+    pager,
+    studyEnvParams,
+    enrollee.shortcode,
+    enrollee.profile,
+    proxyProfile,
+    referencedAnswers
   )
 
   surveyModel.locale = selectedLanguage

@@ -11,6 +11,7 @@ import bio.terra.pearl.core.service.file.backends.FileStorageBackendProvider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -83,5 +84,17 @@ public class ParticipantFileExtService {
     }
     String[] split = fileName.split("\\[/\\\\]");
     return split[split.length - 1];
+  }
+
+  public void delete(ParticipantUser participantUser, String enrolleeShortcode, String fileName) {
+    Enrollee enrollee =
+        authUtilService.authParticipantUserToEnrollee(participantUser.getId(), enrolleeShortcode);
+    ParticipantFile participantFile =
+        participantFileService
+            .findByEnrolleeIdAndFileName(enrollee.getId(), fileName)
+            .orElseThrow(() -> new NotFoundException("Could not find file"));
+
+    participantFileService.delete(participantFile.getId(), Set.of());
+    fileStorageBackend.deleteFile(participantFile.getExternalFileId());
   }
 }

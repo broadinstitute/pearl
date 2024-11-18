@@ -7,7 +7,6 @@ import {
 } from 'src/types/address'
 import { SurveyResponseWithJustification } from 'src/types/forms'
 import { ParticipantFile } from 'src/types/participantFile'
-import { Response } from 'mixpanel-browser'
 
 export type ImageUrlFunc = (cleanFileName: string, version: number) => string
 export type SubmitMailingListContactFunc = (name: string, email: string) => Promise<object>
@@ -34,10 +33,16 @@ export type UploadParticipantFileFunc = ({ studyEnvParams, enrolleeShortcode, fi
   file: File
 }) => Promise<ParticipantFile>
 
-export type DownloadParticipantFileFunc = ({ studyEnvParams, enrolleeShortcode, fileId }: {
+export type DownloadParticipantFileFunc = ({ studyEnvParams, enrolleeShortcode, fileName }: {
   studyEnvParams: StudyEnvParams,
   enrolleeShortcode: string,
-  fileId: string
+  fileName: string
+}) => Promise<Response>
+
+export type DeleteParticipantFileFunc = ({ studyEnvParams, enrolleeShortcode, fileName }: {
+  studyEnvParams: StudyEnvParams,
+  enrolleeShortcode: string,
+  fileName: string
 }) => Promise<Response>
 
 /**
@@ -52,7 +57,8 @@ export type ApiContextT = {
   validateAddress: ValidateAddressFunc,
   getParticipantFiles: GetParticipantFilesFunc,
   uploadParticipantFile: UploadParticipantFileFunc,
-  downloadParticipantFile: DownloadParticipantFileFunc
+  downloadParticipantFile: DownloadParticipantFileFunc,
+  deleteParticipantFile: DeleteParticipantFileFunc
 }
 
 export const emptyApi: ApiContextT = {
@@ -63,7 +69,8 @@ export const emptyApi: ApiContextT = {
   validateAddress: () => Promise.resolve({} as AddressValidationResult),
   getParticipantFiles: () => Promise.resolve([]),
   uploadParticipantFile: () => Promise.resolve({} as ParticipantFile),
-  downloadParticipantFile: () => Promise.resolve({} as Response)
+  downloadParticipantFile: () => Promise.resolve({} as Response),
+  deleteParticipantFile: () => Promise.resolve({} as Response)
 }
 
 const ApiContext = React.createContext<ApiContextT>(emptyApi)

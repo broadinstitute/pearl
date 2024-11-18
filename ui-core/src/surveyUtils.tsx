@@ -34,7 +34,7 @@ import { Markdown } from './participant/landing/Markdown'
 import { useI18n } from './participant/I18nProvider'
 import { createAddressValidator } from './surveyjs/address-validator'
 import { useApiContext } from './participant/ApiProvider'
-import { EnvironmentName } from './types/study'
+import { StudyEnvParams } from './types/study'
 import { Profile } from 'src/types/user'
 import { DefaultLight } from 'survey-core/themes'
 
@@ -238,7 +238,7 @@ const isFileQuestion = (model: SurveyModel, questionStableId: string): boolean =
   }
 
   const questionName = questionStableId.replace(endRegex, '')
-  const question = model.getQuestionByName(questionName)
+  const question = model?.getQuestionByName(questionName)
 
   return question?.getType() === 'documentrequest'
 }
@@ -331,9 +331,11 @@ type UseSurveyJsModelOpts = {
  * survey on completion and display a completion banner.  To continue displaying the form, use the
  * `refreshSurvey` function
  * @param pager the control object for paging the survey
- * @param envName
+ * @param studyEnvParams
+ * @param enrolleeShortcode
  * @param profile
  * @param proxyProfile
+ * @param referencedAnswers
  * @param opts optional configuration for the survey
  * @param opts.extraCssClasses mapping of element to CSS classes to add to that element. See
  * https://surveyjs.io/form-library/examples/survey-customcss/reactjs#content-docs for a list of available elements.
@@ -343,7 +345,8 @@ export function useSurveyJSModel(
   resumeData: SurveyJsResumeData | null,
   onComplete: () => void,
   pager: PageNumberControl,
-  envName: EnvironmentName,
+  studyEnvParams: StudyEnvParams,
+  enrolleeShortcode: string,
   profile?: Profile,
   proxyProfile?: Profile,
   referencedAnswers: Answer[] = [],
@@ -394,7 +397,9 @@ export function useSurveyJSModel(
     newSurveyModel.setVariable('profile', profile)
     newSurveyModel.setVariable('proxyProfile', proxyProfile)
     newSurveyModel.setVariable('isGovernedUser', !isNil(proxyProfile))
-    newSurveyModel.setVariable('portalEnvironmentName', envName)
+    newSurveyModel.setVariable('studyEnvParams', studyEnvParams)
+    newSurveyModel.setVariable('enrolleeShortcode', enrolleeShortcode)
+    newSurveyModel.setVariable('portalEnvironmentName', studyEnvParams.envName)
     referencedAnswers.forEach(answer => {
       newSurveyModel.setVariable(`${answer.surveyStableId}.${answer.questionStableId}`,
         answer.stringValue ?? answer.numberValue ?? answer.booleanValue ?? answer.objectValue)

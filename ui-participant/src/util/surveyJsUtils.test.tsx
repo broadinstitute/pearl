@@ -1,15 +1,27 @@
 import React from 'react'
 
-import { act, render, screen } from '@testing-library/react'
+import {
+  act,
+  render,
+  screen
+} from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { Survey } from 'api/api'
 
 import { Survey as SurveyComponent } from 'survey-react-ui'
-import { generateSurvey, generateThreePageSurvey } from '../test-utils/test-survey-factory'
-import { Model } from 'survey-core'
+import {
+  generateSurvey,
+  generateThreePageSurvey
+} from '../test-utils/test-survey-factory'
+import {
+  Model,
+  SurveyModel
+} from 'survey-core'
 import { usePortalEnv } from 'providers/PortalProvider'
 import {
-  asMockedFn, getSurveyJsAnswerList, getUpdatedAnswers,
+  asMockedFn,
+  getSurveyJsAnswerList,
+  getUpdatedAnswers,
   MockI18nProvider,
   Profile,
   setupRouterTest,
@@ -18,7 +30,10 @@ import {
 } from '@juniper/ui-core'
 import { mockUsePortalEnv } from '../test-utils/test-portal-factory'
 import { useUser } from '../providers/UserProvider'
-import { mockUseActiveUser, mockUseUser } from '../test-utils/user-mocking-utils'
+import {
+  mockUseActiveUser,
+  mockUseUser
+} from '../test-utils/user-mocking-utils'
 import { useActiveUser } from '../providers/ActiveUserProvider'
 
 jest.mock('providers/PortalProvider', () => ({ usePortalEnv: jest.fn() }))
@@ -32,7 +47,11 @@ beforeEach(() => {
 /** does nothing except render a survey using the hooks from surveyJsUtils */
 function PlainSurveyComponent({ formModel, profile }: { formModel: Survey, profile?: Profile }) {
   const pager = useRoutablePageNumber()
-  const { surveyModel } = useSurveyJSModel(formModel, null, () => 1, pager, 'sandbox', profile)
+  const { surveyModel } = useSurveyJSModel(formModel, null, () => 1, pager, {
+    envName: 'sandbox',
+    studyShortcode: 'study',
+    portalShortcode: 'portal'
+  }, 'enrollee', profile)
 
   return <div>
     {surveyModel && <SurveyComponent model={surveyModel}/>}
@@ -218,94 +237,96 @@ test('gets checkbox answers from survey model', () => {
   })
 })
 
+const mockSurveyModel = {} as SurveyModel
+
 test('testGetUpdatedAnswersEmpty', () => {
-  expect(getUpdatedAnswers({}, {})).toEqual([])
+  expect(getUpdatedAnswers(mockSurveyModel, {}, {})).toEqual([])
 })
 
 test('testGetUpdatedAnswersRemovedValue', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': 'bar' }, {})
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': 'bar' }, {})
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo' }])
 })
 
 test('testGetUpdatedAnswersStringNew', () => {
-  const updatedAnswers = getUpdatedAnswers({}, { 'foo': 'bar' })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, {}, { 'foo': 'bar' })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', stringValue: 'bar' }])
 })
 
 
 test('testGetUpdatedAnswersStringUnchanged', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': 'bar' }, { 'foo': 'bar' })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': 'bar' }, { 'foo': 'bar' })
   expect(updatedAnswers).toEqual([])
 })
 
 
 test('testGetUpdatedAnswersStringUpdated', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': 'bar' }, { 'foo': 'baz' })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': 'bar' }, { 'foo': 'baz' })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', stringValue: 'baz' }])
 })
 
 test('testGetUpdatedAnswersOtherAdded', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': 'bar' }, { 'foo': 'baz', 'foo-Comment': 'blah' })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': 'bar' }, { 'foo': 'baz', 'foo-Comment': 'blah' })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', stringValue: 'baz', otherDescription: 'blah' }])
 })
 
 test('testGetUpdatedAnswersOtherRemoved', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': 'bar', 'foo-Comment': 'blah' }, { 'foo': 'baz' })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': 'bar', 'foo-Comment': 'blah' }, { 'foo': 'baz' })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', stringValue: 'baz' }])
 })
 
 test('testGetUpdatedAnswersOtherChanged', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': 'bar', 'foo-Comment': 'blah' },
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': 'bar', 'foo-Comment': 'blah' },
     { 'foo': 'baz', 'foo-Comment': 'blah2' })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', stringValue: 'baz', otherDescription: 'blah2' }])
 })
 
 test('testGetUpdatedAnswersBooleanNew', () => {
-  const updatedAnswers = getUpdatedAnswers({}, { 'foo': false })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, {}, { 'foo': false })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', booleanValue: false }])
 })
 
 test('testGetUpdatedAnswersBooleanUnchanged', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': false }, { 'foo': false })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': false }, { 'foo': false })
   expect(updatedAnswers).toEqual([])
 })
 
 test('testGetUpdatedAnswersBooleanChanged', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': true }, { 'foo': false })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': true }, { 'foo': false })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', booleanValue: false }])
 })
 
 test('testGetUpdatedAnswersObjectNew', () => {
-  const updatedAnswers = getUpdatedAnswers({}, { 'foo': ['bleck'] })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, {}, { 'foo': ['bleck'] })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', objectValue: JSON.stringify(['bleck']) }])
 })
 
 test('testGetUpdatedAnswersObjectChanged', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': ['blah'] }, { 'foo': ['bleck'] })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': ['blah'] }, { 'foo': ['bleck'] })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', objectValue: JSON.stringify(['bleck']) }])
 })
 
 test('testGetUpdatedAnswersObjectUnchanged', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': ['blah'] }, { 'foo': ['blah'] })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': ['blah'] }, { 'foo': ['blah'] })
   expect(updatedAnswers).toEqual([])
 })
 
 test('testGetUpdatedAnswersNumberNew', () => {
-  const updatedAnswers = getUpdatedAnswers({}, { 'foo': 2 })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, {}, { 'foo': 2 })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', numberValue: 2 }])
 })
 
 test('testGetUpdatedAnswersNumberNewZero', () => {
-  const updatedAnswers = getUpdatedAnswers({}, { 'foo': 0 })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, {}, { 'foo': 0 })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', numberValue: 0 }])
 })
 
 test('testGetUpdatedAnswersNumberChanged', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': 2 }, { 'foo': 3 })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': 2 }, { 'foo': 3 })
   expect(updatedAnswers).toEqual([{ questionStableId: 'foo', numberValue: 3 }])
 })
 
 test('testGetUpdatedAnswersNumberUnchanged', () => {
-  const updatedAnswers = getUpdatedAnswers({ 'foo': 4 }, { 'foo': 4 })
+  const updatedAnswers = getUpdatedAnswers(mockSurveyModel, { 'foo': 4 }, { 'foo': 4 })
   expect(updatedAnswers).toEqual([])
 })
