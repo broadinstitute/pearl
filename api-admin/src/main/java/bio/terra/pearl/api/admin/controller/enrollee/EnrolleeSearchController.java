@@ -2,6 +2,7 @@ package bio.terra.pearl.api.admin.controller.enrollee;
 
 import bio.terra.pearl.api.admin.api.EnrolleeSearchApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.api.admin.service.enrollee.EnrolleeSearchExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -27,10 +28,11 @@ public class EnrolleeSearchController implements EnrolleeSearchApi {
   @Override
   public ResponseEntity<Object> getExpressionSearchFacets(
       String portalShortcode, String studyShortcode, String envName) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     return ResponseEntity.ok(
         this.enrolleeSearchExtService.getExpressionSearchFacets(
-            user, portalShortcode, studyShortcode, EnvironmentName.valueOf(envName)));
+            PortalStudyEnvAuthContext.of(
+                operator, portalShortcode, studyShortcode, EnvironmentName.valueOf(envName))));
   }
 
   @Override
@@ -40,13 +42,11 @@ public class EnrolleeSearchController implements EnrolleeSearchApi {
       String envName,
       String expression,
       Integer limit) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     return ResponseEntity.ok(
         this.enrolleeSearchExtService.executeSearchExpression(
-            user,
-            portalShortcode,
-            studyShortcode,
-            EnvironmentName.valueOf(envName),
+            PortalStudyEnvAuthContext.of(
+                operator, portalShortcode, studyShortcode, EnvironmentName.valueOf(envName)),
             expression,
             limit));
   }
