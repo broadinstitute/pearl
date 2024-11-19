@@ -16,6 +16,7 @@ updates:
       time: "08:00"
       timezone: "America/New_York"
     directories:
+      - "/"
       - "ui-admin"
       - "ui-participant"
       - "ui-core"
@@ -28,6 +29,7 @@ updates:
       time: "08:00"
       timezone: "America/New_York"
     directories:
+      - "/"
       - "api-admin"
       - "api-participant"
       - "core"
