@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ParticipantUserService extends CrudService<ParticipantUser, ParticipantUserDao> {
@@ -60,12 +59,6 @@ public class ParticipantUserService extends CrudService<ParticipantUser, Partici
 
     public Optional<ParticipantUser> findByEnrolleeId(UUID enrolleeId) {
         return dao.findByEnrolleeId(enrolleeId);
-    }
-
-    public Map<UUID, ParticipantUser> findByParticipantUserIds(List<UUID> participantUserIds) {
-        return dao.findByParticipantUserIds(participantUserIds)
-                .stream()
-                .collect(Collectors.toMap(ParticipantUser::getId, participantUser -> participantUser));
     }
 
     public List<ParticipantUser> findAllByPortalEnv(UUID portalId, EnvironmentName envName) {

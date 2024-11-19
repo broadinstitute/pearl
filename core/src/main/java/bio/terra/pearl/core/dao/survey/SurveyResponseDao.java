@@ -9,7 +9,6 @@ import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class SurveyResponseDao extends BaseMutableJdbiDao<SurveyResponse> {
@@ -30,11 +29,6 @@ public class SurveyResponseDao extends BaseMutableJdbiDao<SurveyResponse> {
 
     public List<SurveyResponse> findByEnrolleeId(UUID enrolleeId) {
         return findAllByProperty("enrollee_id", enrolleeId);
-    }
-
-    public Map<UUID, List<SurveyResponse>> findByEnrolleeIds(Collection<UUID> enrolleeIds) {
-        return findAllByPropertyCollection("enrollee_id", enrolleeIds)
-                .stream().collect(Collectors.groupingBy(SurveyResponse::getEnrolleeId, Collectors.toList()));
     }
 
     /**

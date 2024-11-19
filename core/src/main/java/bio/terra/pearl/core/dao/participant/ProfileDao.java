@@ -5,7 +5,6 @@ import bio.terra.pearl.core.model.participant.Profile;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,15 +29,5 @@ public class ProfileDao extends BaseMutableJdbiDao<Profile> {
             }
         });
         return profileOpt;
-    }
-
-    public List<Profile> loadAllWithMailingAddress(List<UUID> profileIds) {
-        List<Profile> profiles = findAll(profileIds);
-        profiles.forEach(profile -> {
-            if (profile.getMailingAddressId() != null) {
-                profile.setMailingAddress(mailingAddressDao.find(profile.getMailingAddressId()).get());
-            }
-        });
-        return profiles;
     }
 }
