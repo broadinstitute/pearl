@@ -6,8 +6,8 @@ import LoadingSpinner from 'util/LoadingSpinner'
 import { failureNotification, successNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
 import { Enrollee, StudyEnvParams } from '@juniper/ui-core'
-import { TextInput } from '../../../components/forms/TextInput'
-import { Button } from '../../../components/forms/Button'
+import { TextInput } from 'components/forms/TextInput'
+import { Button } from 'components/forms/Button'
 
 /** Renders a modal for an admin to submit a sample collection kit request. */
 export default function SurveyAssignModal({

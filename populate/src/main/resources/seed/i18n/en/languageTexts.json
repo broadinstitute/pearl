@@ -12,6 +12,8 @@
   {"keyName": "taskRemoved", "text": "Removed", "language": "en"},
   {"keyName": "taskLocked", "text": "Locked", "language": "en"},
   {"keyName": "tasksNoneForStudy", "text": "No tasks for this study", "language": "en"},
+  {"keyName": "taskHistory", "text": "history", "language": "en"},
+  {"keyName": "taskNew", "text": "NEW", "language": "en"},
   {"keyName": "surveysSomeLocked", "text": "Some surveys are locked until other required tasks are completed.", "language": "en"},
   {"keyName": "taskTypeSurvey", "text": "Survey", "language": "en"},
   {"keyName": "taskTypeSurveys", "text": "Surveys", "language": "en"},

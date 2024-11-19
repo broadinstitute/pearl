@@ -44,7 +44,7 @@ export default function StudyEnvMetricsView({ studyEnvContext }: {studyEnvContex
     return prev
   }, {})
   return <div className="container-fluid px-4 py-2">
-    { renderPageHeader('Participant Analytics') }
+    { renderPageHeader('Study Trends') }
     <div className="d-flex align-items-center justify-content-between">
       <h4>{studyEnvContext.study.name} Summary
         <span className="fst-italic text-muted ms-3">({studyEnvContext.currentEnv.environmentName})</span>

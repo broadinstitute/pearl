@@ -62,6 +62,11 @@ export type ErrorEventDetail = {
   responseCode?: number
 }
 
+/** events that are triggered as errors but we want to treat as warnings */
+const warningEvents = [
+  'No matching state found in storage'
+]
+
 /** specific helper function for logging an error */
 export const logError = (detail: ErrorEventDetail, stackTrace: string | undefined, eventName= 'jserror') => {
   if (!isBrowserCompatible()) {
@@ -73,10 +78,12 @@ export const logError = (detail: ErrorEventDetail, stackTrace: string | undefine
     })
   } else {
     log({
-      eventType: 'ERROR',
+      eventType: warningEvents.includes(detail.message) ? 'WARN' : 'ERROR',
       eventName,
       eventDetail: `${stringify(detail)}\n${window.location.href}`,
       stackTrace
     })
   }
 }
+
+

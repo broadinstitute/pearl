@@ -9,6 +9,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class SurveyResponseDao extends BaseMutableJdbiDao<SurveyResponse> {
@@ -32,17 +33,22 @@ public class SurveyResponseDao extends BaseMutableJdbiDao<SurveyResponse> {
     }
 
     /** excludes responses that are associated with removed tasks */
-    public List<SurveyResponse> findByEnrolleeIdNotRemoved(UUID enrolleeId) {
+    public Map<UUID, List<SurveyResponse>> findByEnrolleeIdsNotRemoved(List<UUID> enrolleeIds) {
+        if (enrolleeIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
         return jdbi.withHandle(handle ->
+                // left join to include responses that have no associated task (e.g. pre-enrollment)
+                // "is distinct from" instead of != because != doesn't handle nulls, and we want to include nulls
                 handle.createQuery("""
-                                select * from %s
-                                join task on task.survey_response_id = survey_response.id
-                                where enrollee_id = :enrolleeId"
-                                and task.status != 'REMOVED')
+                                select sr.* from %s sr
+                                left join participant_task task on task.survey_response_id = sr.id
+                                where sr.enrollee_id in (<enrolleeIds>)
+                                and task.status is distinct from 'REMOVED'
                                 """.formatted(tableName))
-                        .bind("enrolleeId", enrolleeId)
+                        .bindList("enrolleeIds", enrolleeIds)
                         .mapTo(clazz)
-                        .list()
+                        .stream().collect(Collectors.groupingBy(SurveyResponse::getEnrolleeId, Collectors.toList()))
         );
     }
 

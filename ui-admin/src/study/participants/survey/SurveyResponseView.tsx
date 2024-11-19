@@ -259,20 +259,21 @@ function surveyTaskStatus(task: ParticipantTask, surveyResponse?: SurveyResponse
 type DropdownButtonProps = {
   onClick: () => void,
   icon?: IconDefinition,
+  className?: string,
   label: string,
   disabled?: boolean,
   description?: string
 }
 
-const DropdownButton = (props: DropdownButtonProps) => {
-  const { onClick, icon, label, disabled, description } = props
+export const DropdownButton = (props: DropdownButtonProps) => {
+  const { onClick, icon, label, disabled, description, className } = props
   return (
     <button
-      className={classNames('dropdown-item d-flex align-items-center', { disabled })}
+      className={classNames('dropdown-item d-flex align-items-center', { disabled }, className)}
       type="button"
       onClick={onClick}>
       {icon && <FontAwesomeIcon icon={icon} className="me-2"/>}
-      <div className="d-flex flex-column">
+      <div className={'d-flex flex-column'}>
         <span>{label}</span>
         {description && <span className="text-muted" style={{ fontSize: '0.75em' }}>{description}</span>}
       </div>

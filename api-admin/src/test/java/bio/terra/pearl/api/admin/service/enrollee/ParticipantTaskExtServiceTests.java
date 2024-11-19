@@ -59,7 +59,8 @@ public class ParticipantTaskExtServiceTests extends BaseSpringBootTest {
         studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
     AdminUser operator =
         portalAdminUserFactory
-            .buildPersistedWithPortals(getTestName(info), List.of(bundle.getPortal()))
+            .buildPersistedWithPermissions(
+                getTestName(info), bundle.getPortal(), List.of("participant_data_edit"))
             .user();
     EnrolleeBundle enrollee1 =
         enrolleeFactory.buildWithPortalUser(

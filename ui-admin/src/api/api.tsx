@@ -1710,8 +1710,10 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async extractPortal(portalShortcode: string) {
-    const url = `${basePopulateUrl()}/portal/${portalShortcode}/extract`
+  async extractPortal(portalShortcode: string, onlyExtractActiveVersions: boolean) {
+    const url = `${
+      basePopulateUrl()
+    }/portal/${portalShortcode}/extract?onlyExtractActiveVersions=${onlyExtractActiveVersions}`
     const response = await fetch(url, this.getGetInit())
     return this.processResponse(response)
   },

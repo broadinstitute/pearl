@@ -56,6 +56,11 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
         return dao.findByStudyEnvironmentIdWithContent(studyId);
     }
 
+    public Optional<Survey> findActiveByStudyEnvironmentIdAndStableIdNoContent(UUID studyEnvId, String stableId, Integer version) {
+        return dao.findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvId, stableId, version);
+    }
+
+
     @Transactional
     @Override
     public void delete(UUID surveyId, Set<CascadeProperty> cascades) {
@@ -213,4 +218,11 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
         survey.setAnswerMappings(answerMappingDao.findBySurveyId(survey.getId()));
     }
 
+    public List<Survey> findActiveSurveysByPortalId(UUID portalId) {
+        List<Survey> surveys = dao.findActiveSurveysByPortalIdNoPreEnrolls(portalId);
+
+        surveys.addAll(dao.findActivePreEnrolleeSurveysByPortalId(portalId));
+
+        return surveys;
+    }
 }

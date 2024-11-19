@@ -3,14 +3,15 @@ import { Portal, PortalEnvironment } from '@juniper/ui-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHistory } from '@fortawesome/free-solid-svg-icons'
 import { Link } from 'react-router-dom'
-import Api from '../../api/api'
+import Api from 'api/api'
 import { faExternalLink } from '@fortawesome/free-solid-svg-icons/faExternalLink'
-import { useConfig } from '../../providers/ConfigProvider'
-import { portalPublishHistoryPath, studyEnvSiteContentPath } from '../../study/StudyEnvironmentRouter'
-import { ENVIRONMENT_ICON_MAP } from '../../util/publishUtils'
-import { studyDiffPath } from '../../study/StudyRouter'
-import { renderPageHeader } from '../../util/pageUtils'
-import { navListItemStyle } from '../../util/subNavStyles'
+import { useConfig } from 'providers/ConfigProvider'
+import { portalPublishHistoryPath } from 'study/StudyEnvironmentRouter'
+import { ENVIRONMENT_ICON_MAP } from 'util/publishUtils'
+import { studyDiffPath } from 'study/StudyRouter'
+import { renderPageHeader } from 'util/pageUtils'
+import { navListItemStyle } from 'util/subNavStyles'
+import { siteContentPath } from 'portal/PortalRouter'
 
 
 const ENV_SORT_ORDER = ['sandbox', 'irb', 'live']
@@ -74,9 +75,8 @@ function PortalEnvPublishingView({ portal, portalEnv, studyShortcode }:
         { isInitialized && <div>
                   Website:
           {portalEnv.siteContent && <span>
-            <Link to={studyEnvSiteContentPath(portal.shortcode, studyShortcode,
-              portalEnv.environmentName)}
-            className="ms-2 fw-normal">
+            <Link to={siteContentPath(portal.shortcode, portalEnv.environmentName)}
+              className="ms-2 fw-normal">
               v{portalEnv.siteContent.version}
             </Link>
           </span>

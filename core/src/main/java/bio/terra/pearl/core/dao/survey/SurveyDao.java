@@ -78,8 +78,54 @@ public class SurveyDao extends BaseVersionedJdbiDao<Survey> {
         );
     }
 
+    public Optional<Survey> findActiveByStudyEnvironmentIdAndStableIdNoContent(UUID studyEnvId, String stableId, Integer version) {
+        return jdbi.withHandle(
+                handle -> handle.createQuery("""
+                                                            SELECT s.* FROM survey s
+                                                                INNER JOIN study_environment_survey ses ON ses.survey_id = s.id
+                                                                WHERE ses.study_environment_id = :studyEnvironmentId
+                                                                AND s.stable_id = :stableId
+                                                                AND s.version = :version
+                                                                AND ses.active = true
+                                """)
+                        .bind("studyEnvironmentId", studyEnvId)
+                        .bind("stableId", stableId)
+                        .bind("version", version)
+                        .mapTo(clazz)
+                        .findOne()
+        );
+    }
+
     @Override
     protected Class<Survey> getClazz() {
         return Survey.class;
+    }
+
+    public List<Survey> findActiveSurveysByPortalIdNoPreEnrolls(UUID portalId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select s.* from survey s
+                                inner join study_environment_survey ses on s.id = ses.survey_id and ses.active = true
+                                where s.portal_id = :portalId
+                                """)
+                        .bind("portalId", portalId)
+                        .mapTo(clazz)
+                        .list()
+        );
+    }
+
+    public List<Survey> findActivePreEnrolleeSurveysByPortalId(UUID portalId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select s.* from survey s
+                                inner join portal on s.portal_id = portal.id
+                                inner join portal_study ps on portal.id = ps.portal_id
+                                inner join study_environment se on ps.study_id = se.study_id
+                                where s.portal_id = :portalId and s.id = se.pre_enroll_survey_id
+                                """)
+                        .bind("portalId", portalId)
+                        .mapTo(clazz)
+                        .list()
+        );
     }
 }
