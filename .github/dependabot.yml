@@ -10,3 +10,39 @@ updates:
     package-ecosystem: "github-actions"
     commit-message:
       prefix: "[JN-1457]"
+  - schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    directories:
+      - "ui-admin"
+      - "ui-participant"
+      - "ui-core"
+    package-ecosystem: "npm"
+    commit-message:
+      prefix: "[JN-1457]"
+  - schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    directories:
+      - "api-admin"
+      - "api-participant"
+      - "core"
+      - "populate"
+      - "pepper-import"
+    package-ecosystem: "gradle"
+    commit-message:
+      prefix: "[JN-1457]"
+  - schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    directories:
+      - "terraform"
+    package-ecosystem: "terraform"
+    commit-message:
+      prefix: "[JN-1457]"
