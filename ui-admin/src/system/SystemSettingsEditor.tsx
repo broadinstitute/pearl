@@ -36,9 +36,7 @@ export default function SystemSettingsEditor() {
   }
 
   return <RequireUserPermission superuser>
-    <div className={'mx-3'}><form onSubmit={e => {
-      e.preventDefault()
-    }}>
+    <div className={'mx-3'}>
       {renderPageHeader('System Settings')}
       <LoadingSpinner isLoading={isSaving}>
         { !settings ?
@@ -93,6 +91,6 @@ export default function SystemSettingsEditor() {
             </Button>
           </>}
       </LoadingSpinner>
-    </form></div>
+    </div>
   </RequireUserPermission>
 }

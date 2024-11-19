@@ -38,7 +38,7 @@ public class SystemSettingsService {
         return settings.getFirst();
     }
 
-    public SystemSettings updateMaintenanceModeSettings(SystemSettings systemSettings) {
+    public SystemSettings updateSystemSettings(SystemSettings systemSettings) {
         if(systemSettings.getId() == null) {
             return systemSettingsDao.create(systemSettings);
         } else {

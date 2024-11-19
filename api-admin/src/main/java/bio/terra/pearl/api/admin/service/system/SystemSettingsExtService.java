@@ -22,6 +22,6 @@ public class SystemSettingsExtService {
     SystemSettings currentSystemSettings = systemSettingsService.getSystemSettings();
     BeanUtils.copyProperties(updatedSystemSettings, currentSystemSettings);
 
-    return systemSettingsService.updateMaintenanceModeSettings(currentSystemSettings);
+    return systemSettingsService.updateSystemSettings(currentSystemSettings);
   }
 }
