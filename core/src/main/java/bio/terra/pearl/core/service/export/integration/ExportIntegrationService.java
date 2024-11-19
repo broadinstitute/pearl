@@ -139,6 +139,7 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
                 addedIntegrations.add(sourceIntegration);
             } else {
                 unmatchedIntegrations.remove(matchedIntegration);
+                // we get changes from both the integration object and the child export options object
                 List<ConfigChange> changes = ConfigChange.allChanges(sourceIntegration, matchedIntegration, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
                 changes.addAll(ConfigChange.allChanges(sourceIntegration.getExportOptions(), matchedIntegration.getExportOptions(),
                         PortalEnvPublishable.CONFIG_IGNORE_PROPS, "exportOptions"));

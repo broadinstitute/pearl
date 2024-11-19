@@ -3,6 +3,7 @@ package bio.terra.pearl.core.service.publishing;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.dashboard.AlertTrigger;
 import bio.terra.pearl.core.model.dashboard.ParticipantDashboardAlert;
+import bio.terra.pearl.core.model.export.ExportIntegration;
 import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.model.notification.EmailTemplate;
 import bio.terra.pearl.core.model.notification.Trigger;
@@ -169,7 +170,6 @@ public class PortalDiffService {
                 PortalEnvPublishable.CONFIG_IGNORE_PROPS);
         ListChange<KitType, KitType> kitTypeChanges = diffKitTypes(sourceEnv.getKitTypes(), destEnv.getKitTypes());
 
-
         StudyEnvironmentChange change = StudyEnvironmentChange.builder()
                 .studyShortcode(studyShortcode)
                 .configChanges(envConfigChanges)
@@ -219,7 +219,9 @@ public class PortalDiffService {
         List<KitType> kitTypes = studyEnvironmentKitTypeService.findKitTypesByStudyEnvironmentId(studyEnvironment.getId());
 
         studyEnvironment.setKitTypes(kitTypes);
-        return studyEnvironmentService.loadWithAllContent(studyEnvironment);
+        studyEnvironmentService.loadWithAllContent(studyEnvironment);
+        exportIntegrationService.loadForDiffing(studyEnvironment);
+        return studyEnvironment;
     }
 
 

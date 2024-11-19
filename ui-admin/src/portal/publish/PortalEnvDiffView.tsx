@@ -187,7 +187,7 @@ export default function PortalEnvDiffView(
       </div>
       <div className="my-2">
         <h2 className="h6">
-          Notification Configs</h2>
+          Triggers</h2>
         <div className="ms-4">
           <ConfigChangeListView configChangeList={changeSet.triggerChanges}
             selectedChanges={selectedChanges.triggerChanges}

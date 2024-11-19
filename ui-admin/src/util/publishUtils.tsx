@@ -21,7 +21,8 @@ export const emptyStudyEnvChange: StudyEnvironmentChange = {
   preEnrollSurveyChanges: { changed: false },
   surveyChanges: { addedItems: [], removedItems: [], changedItems: [] },
   triggerChanges: { addedItems: [], removedItems: [], changedItems: [] },
-  kitTypeChanges: { addedItems: [], removedItems: [], changedItems: [] }
+  kitTypeChanges: { addedItems: [], removedItems: [], changedItems: [] },
+  exportIntegrationChanges: { addedItems: [], removedItems: [], changedItems: [] }
 }
 
 

@@ -1,5 +1,5 @@
 import {
-  ConfigChange,
+  ConfigChange, ConfigChangeList, ExportIntegration,
   ListChange,
   VersionedConfigChange,
   VersionedEntityChange
@@ -101,18 +101,18 @@ export const versionDisplay = (stableId: string, version: number) => {
   return <span>{stableId} v{version}</span>
 }
 
-export type Configable = StudyEnvironmentSurvey | Trigger | PortalEnvironmentLanguage | KitType
-type ConfigChangeListViewProps<T extends Configable> = {
-  configChangeList: ListChange<T, VersionedConfigChange>,
-  selectedChanges: ListChange<T, VersionedConfigChange>,
-  setSelectedChanges: (changes: ListChange<T, VersionedConfigChange>) => void,
+export type Configable = StudyEnvironmentSurvey | Trigger | PortalEnvironmentLanguage | KitType | ExportIntegration
+type ConfigChangeListViewProps<T extends Configable, C extends VersionedConfigChange | ConfigChangeList > = {
+  configChangeList: ListChange<T, C>,
+  selectedChanges: ListChange<T, C>,
+  setSelectedChanges: (changes: ListChange<T, C>) => void,
   renderItemSummary: (item: T) => React.ReactNode
 }
 
 /** Summary of notification config changes -- doesn't show any detail yet */
-export const ConfigChangeListView = <T extends Configable>
+export const ConfigChangeListView = <T extends Configable, C extends VersionedConfigChange | ConfigChangeList>
   ({ configChangeList, renderItemSummary, selectedChanges, setSelectedChanges }:
-                                            ConfigChangeListViewProps<T>) => {
+                                            ConfigChangeListViewProps<T, C>) => {
   if (!configChangeList.addedItems.length &&
     !configChangeList.removedItems.length && !configChangeList.changedItems.length) {
     return <span className="fst-italic text-muted">no changes</span>
@@ -178,19 +178,25 @@ export const ConfigChangeListView = <T extends Configable>
     {configChangeList.changedItems.length > 0 && <li className="ps-4">Changed
       <ul className="list-unstyled">
         {configChangeList.changedItems.map((item, index) => {
-          const matchIndex = selectedChanges.changedItems.findIndex(listItem => listItem.sourceId === item.sourceId)
-          return <li className="ps-4" key={index}>
-            <label className="d-flex align-items-start">
-              <input type="checkbox" className="me-3 mt-1"
-                checked={matchIndex >= 0}
-                onChange={e => {
-                  const updatedItems = makeModifiedArray(selectedChanges.changedItems, item,
-                    { matchIndex, isAdd: e.target.checked })
-                  setSelectedChanges({ ...selectedChanges, changedItems: updatedItems })
-                }}/>
-              {renderVersionedConfigChange(item)}
-            </label>
-          </li>
+          if ((item as ConfigChangeList).entity) {
+            return <span>yo</span>
+          } else {
+            const configChange = item as VersionedConfigChange
+            const matchIndex = selectedChanges.changedItems.findIndex(listItem =>
+              (listItem as VersionedConfigChange).sourceId === configChange.sourceId)
+            return <li className="ps-4" key={index}>
+              <label className="d-flex align-items-start">
+                <input type="checkbox" className="me-3 mt-1"
+                  checked={matchIndex >= 0}
+                  onChange={e => {
+                    const updatedItems = makeModifiedArray(selectedChanges.changedItems, item,
+                      { matchIndex, isAdd: e.target.checked })
+                    setSelectedChanges({ ...selectedChanges, changedItems: updatedItems })
+                  }}/>
+                {renderVersionedConfigChange(configChange)}
+              </label>
+            </li>
+          }
         })}
       </ul>
     </li>}
@@ -237,4 +243,8 @@ export const renderVersionedConfigChange = (change: VersionedConfigChange) => {
       </li>)}
     </ul>
   </div>
+}
+
+export const renderExportIntegration = (change: ExportIntegration) => {
+  return <span>{change.name}</span>
 }
