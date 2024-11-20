@@ -17,18 +17,21 @@ test('can update a task', async () => {
   select(screen.getByLabelText('Status'), 'Complete')
   await userEvent.click(screen.getByText('Save'))
 
-  expect(apiUpdateSpy).toHaveBeenCalledWith('portalCode', 'fakeStudy', 'sandbox', {
-    'assignedAdminUserId': task.assignedAdminUserId,
-    'createdAt': 0,
-    'blocksHub': false,
-    'taskOrder': 1,
-    'enrolleeId': 'enrolleeId1',
-    'portalParticipantUserId': 'ppUserId1',
-    'creatingAdminUserId': task.creatingAdminUserId,
-    'id': task.id,
-    'taskType': 'ADMIN_FORM',
-    'status': 'COMPLETE',
-    'studyEnvironmentId': task.studyEnvironmentId
-  }
+  expect(apiUpdateSpy).toHaveBeenCalledWith(
+    { 'envName': 'sandbox', 'portalShortcode': 'foo', 'studyShortcode': 'bar' }, {
+      task: {
+        'assignedAdminUserId': task.assignedAdminUserId,
+        'createdAt': 0,
+        'blocksHub': false,
+        'taskOrder': 1,
+        'enrolleeId': 'enrolleeId1',
+        'portalParticipantUserId': 'ppUserId1',
+        'creatingAdminUserId': task.creatingAdminUserId,
+        'id': task.id,
+        'taskType': 'ADMIN_FORM',
+        'status': 'COMPLETE',
+        'studyEnvironmentId': task.studyEnvironmentId
+      }, justification: 'admin update'
+    }
   )
 })
