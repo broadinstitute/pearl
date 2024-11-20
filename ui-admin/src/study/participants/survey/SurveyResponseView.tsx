@@ -132,11 +132,17 @@ export function RawEnrolleeSurveyView({
     <div>
       <div className="d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
+          <div className="border rounded-3 p-0">
+            {taskStatusIndicators[task.status]}
+            <Button variant="secondary"
+              tooltip={'Change task status or remove task from participant'}
+              className="badge p-2 rounded-start-0" onClick={() => setShowTaskModal(!showTaskModal)}>
+              <FontAwesomeIcon icon={faPencil}/>
+            </Button>
+          </div>
           {surveyTaskStatus(task, response)}
-          <Button variant="secondary" onClick={() => setShowTaskModal(!showTaskModal)}>
-            change / remove
-          </Button>
         </div>
+
         <div className="d-flex align-items-center">
           <AutosaveStatusIndicator status={autosaveStatus}/>
           <div className="dropdown">
@@ -227,18 +233,21 @@ export function RawEnrolleeSurveyView({
 }
 
 const taskStatusIndicators: Record<ParticipantTaskStatus, React.ReactNode> = {
-  NEW: <span className="badge bg-secondary p-2"><FontAwesomeIcon icon={faEmptyCircle}/> Not Started</span>,
-  VIEWED: <span className="badge bg-secondary p-2">
+  NEW: <span className="badge bg-secondary p-2 rounded-end-0 border border-light">
+    <FontAwesomeIcon icon={faEmptyCircle}/> Not Started</span>,
+  VIEWED: <span className="badge bg-secondary p-2 rounded-end-0">
     <FontAwesomeIcon icon={faCircleHalfStroke}/> Viewed
   </span>,
-  IN_PROGRESS: <span className="badge bg-secondary p-2">
+  IN_PROGRESS: <span className="badge bg-secondary p-2 rounded-end-0">
     <FontAwesomeIcon icon={faCircleHalfStroke}/> In Progress
   </span>,
-  REJECTED: <span className="badge bg-danger p-2">
+  REJECTED: <span className="badge bg-danger p-2 rounded-end-0">
     <FontAwesomeIcon icon={faCircleHalfStroke}/> Declined
   </span>,
-  COMPLETE: <span className="badge bg-success p-2"><FontAwesomeIcon icon={faCircleCheck}/> Complete</span>,
-  REMOVED: <span className="badge bg-secondary p-2"><FontAwesomeIcon icon={faMinus}/> Removed</span>
+  COMPLETE: <span className="badge bg-success p-2 rounded-end-0">
+    <FontAwesomeIcon icon={faCircleCheck}/> Complete</span>,
+  REMOVED: <span className="badge bg-secondary p-2 rounded-end-0">
+    <FontAwesomeIcon icon={faMinus}/> Removed</span>
 }
 
 function surveyTaskStatus(task: ParticipantTask, surveyResponse?: SurveyResponse) {
@@ -249,8 +258,7 @@ function surveyTaskStatus(task: ParticipantTask, surveyResponse?: SurveyResponse
   }
 
   return <div className="d-flex align-items-center">
-    {taskStatusIndicators[task.status]}
-    { surveyResponse && <span>{surveyResponse.complete?
+    { surveyResponse && <span className="ms-2">{surveyResponse.complete?
       'Completed' : 'Last Updated'} {instantToDefaultString(surveyResponse.createdAt)} ({versionString})
     </span> }
   </div>
