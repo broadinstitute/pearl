@@ -7,6 +7,7 @@ import {
   useNavigate
 } from 'react-router-dom'
 import {
+  siteContentPath,
   studyKitsPath,
   studyParticipantsPath
 } from 'portal/PortalRouter'
@@ -96,6 +97,10 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
         }
       </ul>}/>
       <CollapsableMenu header={'Design & Build'} content={<ul className="list-unstyled">
+        <li className="mb-2">
+          <NavLink to={siteContentPath(portalShortcode, 'sandbox')}
+            className={sidebarNavLinkClasses} style={navStyleFunc}>Website</NavLink>
+        </li>
         <li className="mb-2">
           <NavLink to={studyEnvFormsPath(portalShortcode, study.shortcode, 'sandbox')}
             className={sidebarNavLinkClasses} style={navStyleFunc}>Forms &amp; Surveys</NavLink>
