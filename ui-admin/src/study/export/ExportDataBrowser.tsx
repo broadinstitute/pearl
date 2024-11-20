@@ -14,22 +14,23 @@ import {
   useReactTable,
   VisibilityState
 } from '@tanstack/react-table'
-import { basicTableLayout } from 'util/tableUtils'
 import ExportDataModal from './ExportDataModal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDownload } from '@fortawesome/free-solid-svg-icons'
-import { useLoadingEffect } from 'api/api-utils'
+import { faDownload, faInfoCircle } from '@fortawesome/free-solid-svg-icons'
+import { doApiLoad } from 'api/api-utils'
 import { Button } from 'components/forms/Button'
 import {
   renderPageHeader,
   renderTruncatedText
-} from '../../util/pageUtils'
-import { failureNotification } from '../../util/notifications'
+} from 'util/pageUtils'
+import { failureNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
-import { buildFilter } from '../../util/exportUtils'
+import { buildFilter } from 'util/exportUtils'
+import { basicTableLayout } from 'util/tableUtils'
 
 const ExportDataBrowser = ({ studyEnvContext }: {studyEnvContext: StudyEnvContextT}) => {
   const [data, setData] = useState<ExportData | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [showExportModal, setShowExportModal] = useState(false)
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [rowSelection, setRowSelection] = React.useState<Record<string, boolean>>({})
@@ -75,29 +76,26 @@ const ExportDataBrowser = ({ studyEnvContext }: {studyEnvContext: StudyEnvContex
     onRowSelectionChange: setRowSelection
   })
 
-  const { isLoading } = useLoadingEffect(async () => {
-    const response = await Api.exportEnrollees(
-      studyEnvContext.portal.shortcode,
-      studyEnvContext.study.shortcode,
-      studyEnvContext.currentEnv.environmentName, {
-        fileFormat: 'JSON', rowLimit: 10, filterString: buildFilter(), includeFields: []
-      })
-    const result = await response.json()
-    if (!response.ok) {
-      Store.addNotification(failureNotification('Failed to load export data', result.message))
-    } else {
-      setData(result)
-    }
-  }, [studyEnvContext.study.shortcode, studyEnvContext.currentEnv.environmentName])
+  const loadPreview = async ()  => {
+    doApiLoad(async () => {
+      const response = await Api.exportEnrollees(
+        studyEnvContext.portal.shortcode,
+        studyEnvContext.study.shortcode,
+        studyEnvContext.currentEnv.environmentName, {
+          fileFormat: 'JSON', rowLimit: 10, filterString: buildFilter(), includeFields: []
+        })
+      const result = await response.json()
+      if (!response.ok) {
+        Store.addNotification(failureNotification('Failed to load export data', result.message))
+      } else {
+        setData(result)
+      }
+    }, { setIsLoading })
+  }
 
   return <div className="container-fluid px-4 py-2">
     { renderPageHeader('Data Export') }
     <div className="align-items-center justify-content-between">
-      <div>
-        <span className="text-muted fst-italic px-2">
-          (Transposed for readability, the actual export has participants as rows)
-        </span>
-      </div>
       <div >
         <Button onClick={() => setShowExportModal(!showExportModal)}
           variant="light" className="border m-1"
@@ -108,7 +106,25 @@ const ExportDataBrowser = ({ studyEnvContext }: {studyEnvContext: StudyEnvContex
     </div>
     <ExportDataModal studyEnvContext={studyEnvContext} show={showExportModal} setShow={setShowExportModal}/>
     <LoadingSpinner isLoading={isLoading}/>
-    {!isLoading && basicTableLayout(table)}
+    {!data && <div className={'d-flex justify-content-center'}>
+      <Button
+        variant="secondary"
+        onClick={loadPreview}
+      >
+        Click to load data export preview...
+      </Button>
+    </div> }
+    {!isLoading && data &&
+      <>
+        <div className="my-2">
+          <span className="text-muted fst-italic px-2">
+            <FontAwesomeIcon className={'me-2'} icon={faInfoCircle}/>
+             Transposed for readability, the actual export has participants as rows
+          </span>
+        </div>
+        {basicTableLayout(table)}
+      </>
+    }
   </div>
 }
 
