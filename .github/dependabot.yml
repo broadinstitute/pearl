@@ -34,7 +34,6 @@ updates:
       - "api-participant"
       - "core"
       - "populate"
-      - "pepper-import"
     package-ecosystem: "gradle"
     commit-message:
       prefix: "[JN-1457]"
