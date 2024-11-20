@@ -1,16 +1,22 @@
 import { Button } from 'components/forms/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowUpRightFromSquare, faEye, faGear, faImage, faPencil } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faGear, faImage, faPencil } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
-import { Portal } from '@juniper/ui-core'
+import { ApiProvider, HtmlSection, HtmlSectionView, I18nProvider, Portal } from '@juniper/ui-core'
 import { DropdownButton } from 'study/participants/survey/SurveyResponseView'
 import { useNavigate } from 'react-router-dom'
 import { siteContentPath, siteMediaPath } from 'portal/PortalRouter'
 import { InfoCard, InfoCardBody, InfoCardHeader } from 'components/InfoCard'
+import ErrorBoundary from '../../../util/ErrorBoundary'
+import { previewApi } from '../../../util/apiContextUtils'
+import { NavbarPreview } from '../../siteContent/NavbarPreview'
 
 export const WebsiteWidget = ({ portal }: { portal: Portal }) => {
   const livePortalUrl = portal.portalEnvironments.find(env =>
     env.environmentName === 'live')?.portalEnvironmentConfig.participantHostname
+
+  const localContent = portal.portalEnvironments.find(env => env.environmentName === 'live')!
+    .siteContent!.localizedSiteContents[0]
 
   return (
     <InfoCard>
@@ -33,18 +39,37 @@ export const WebsiteWidget = ({ portal }: { portal: Portal }) => {
       <InfoCardBody>
         <div className="container">
           <div className="w-100">
-            <div style={{ minHeight: '200px' }} className="d-flex justify-content-center align-items-center">
+            <div style={{
+              minHeight: '200px'
+            }} className="d-flex justify-content-center align-items-center">
               {livePortalUrl ?
-                <Button
-                  variant="light"
-                  className="border"
-                  onClick={() => {
-                    const url = livePortalUrl?.startsWith('http') ? livePortalUrl : `https://${livePortalUrl}`
-                    window.open(url, '_blank')
-                  }}
-                >
-                  <FontAwesomeIcon icon={faArrowUpRightFromSquare}/> Visit website
-                </Button> :
+                <ErrorBoundary>
+                  <ApiProvider api={previewApi(
+                    portal.shortcode,
+                    'live'
+                  )}>
+                    <I18nProvider defaultLanguage={'en'} portalShortcode={portal.shortcode}>
+                      <div
+                        style={{
+                          transform: 'scale(0.67)', transformOrigin: 'top',
+                          cursor: 'not-allowed', pointerEvents: 'none', height: 'auto', width: 'auto'
+                        }}>
+                        <NavbarPreview
+                          portal={portal}
+                          portalEnv={portal.portalEnvironments.find(env => env.environmentName === 'live')!}
+                          localContent={
+                            localContent
+                          }
+                        />
+                        {localContent.landingPage.sections.slice(0, 2).map((section: HtmlSection) =>
+                          <HtmlSectionView section={section} key={section.id}/>)
+                        }
+                        {/*<SiteFooter footerSection={localContent.footerSection}/>*/}
+                      </div>
+                    </I18nProvider>
+                  </ApiProvider>
+                </ErrorBoundary>
+                :
                 <span className="text-muted bg-gray">Website not yet published</span>
               }
             </div>
