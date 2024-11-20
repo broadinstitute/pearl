@@ -1,0 +1,9 @@
+{{- if .Values.enableMaintenanceMode -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maintenance-html-configmap
+data:
+  index.html: |
+    <span>This site is under maintenance</span>
+{{- end }}
