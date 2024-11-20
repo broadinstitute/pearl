@@ -1,5 +1,5 @@
 import React from 'react'
-import { mockAdminTask, mockStudyEnvContext, mockStudyEnvParams } from 'test-utils/mocking-utils'
+import { mockAdminTask, mockStudyEnvParams } from 'test-utils/mocking-utils'
 import { render, screen } from '@testing-library/react'
 import { mockAdminUser } from 'test-utils/user-mocking-utils'
 import { select } from 'react-select-event'

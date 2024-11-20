@@ -6,7 +6,6 @@ import Select from 'react-select'
 import LoadingSpinner from 'util/LoadingSpinner'
 import AdminUserSelect from 'user/AdminUserSelect'
 import { doApiLoad } from 'api/api-utils'
-import { StudyEnvContextT } from '../StudyEnvironmentRouter'
 import { instantToDefaultString, ParticipantTask, ParticipantTaskStatus, StudyEnvParams } from '@juniper/ui-core'
 
 
@@ -61,7 +60,8 @@ export const AdminTaskEditModal = ({ task, users, onDismiss, studyEnvParams }: {
 
   const saveTask = () => {
     doApiLoad(async () => {
-      const updatedTask = await Api.updateTask(studyEnvParams, workingTask)
+      const updatedTask = await Api.updateTask(studyEnvParams,
+        { task: workingTask, justification: 'admin update' })
       onDismiss(updatedTask)
     }, { setIsLoading })
   }
