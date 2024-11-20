@@ -47,3 +47,13 @@ updates:
     package-ecosystem: "terraform"
     commit-message:
       prefix: "[JN-1457]"
+  - schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    directories:
+      - "terraform/gcp/k8s"
+    package-ecosystem: "docker"
+    commit-message:
+      prefix: "[JN-1457]"
