@@ -59,4 +59,3 @@ b2c:
       clientId: does-not-exist
       policyName: does-not-exist
       tenantName: does-not-exist
-enableMaintenanceMode: true
