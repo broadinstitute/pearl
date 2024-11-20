@@ -12,6 +12,7 @@ import { DropdownButton } from 'study/participants/survey/SurveyResponseView'
 import DeleteStudyModal from 'study/adminTasks/DeleteStudyModal'
 import { useNavContext } from 'navbar/NavContextProvider'
 import { InfoCard, InfoCardBody, InfoCardHeader } from 'components/InfoCard'
+import { getPinnedOrDefaultEnv } from '../../../navbar/StudySidebar'
 
 export const StudyWidget = ({ portal }: { portal: Portal }) => {
   const [showNewStudyModal, setShowNewStudyModal] = useState(false)
@@ -70,7 +71,7 @@ const StudyControls = ({ portal, study, primaryStudy }: {
       className="list-group-item my-1 border border-secondary-subtle rounded py-1">
       <div className="d-flex justify-content-between align-items-center">
         <div className="py-2">
-          <Link to={studyParticipantsPath(portal.shortcode, study.shortcode, 'live')}>
+          <Link to={studyParticipantsPath(portal.shortcode, study.shortcode, getPinnedOrDefaultEnv('live'))}>
             <img
               src={getMediaUrl(portal.shortcode, 'favicon.ico', 'latest')}
               className="me-2" style={{ maxHeight: '1.5em' }} alt={study.name}/>
