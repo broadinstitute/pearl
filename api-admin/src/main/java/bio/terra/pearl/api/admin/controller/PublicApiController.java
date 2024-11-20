@@ -56,8 +56,11 @@ public class PublicApiController implements PublicApi {
 
   @Override
   public ResponseEntity<Object> getConfig() {
-    Map<String, String> config = configExtService.getConfigMap();
-    return ResponseEntity.ok(config);
+    Map<String, String> configMap = configExtService.getConfigMap();
+    Map<String, Object> configAndSettings = new java.util.HashMap<>(configMap);
+    SystemSettings settings = maintenanceModeService.getSystemSettings();
+    configAndSettings.put("systemSettings", settings);
+    return ResponseEntity.ok(configAndSettings);
   }
 
   @Override

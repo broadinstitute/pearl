@@ -89,7 +89,11 @@ public class PublicApiController implements PublicApi {
     if (portalConfig == null || portalConfig.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    return ResponseEntity.ok(portalConfig);
+
+    Map<String, Object> configAndSettings = new java.util.HashMap<>(portalConfig);
+    SystemSettings settings = maintenanceModeService.getSystemSettings();
+    configAndSettings.put("systemSettings", settings);
+    return ResponseEntity.ok(configAndSettings);
   }
 
   @Override

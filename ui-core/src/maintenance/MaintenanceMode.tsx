@@ -6,8 +6,11 @@ import { SystemSettings } from 'src/types/maintenance'
 import { Markdown } from '../participant/landing/Markdown'
 import { useApiContext } from '../participant/ApiProvider'
 
-export function MaintenanceMode({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<SystemSettings>()
+export function MaintenanceMode({ systemSettings, children }: {
+  systemSettings: SystemSettings
+  children: React.ReactNode
+}) {
+  const [settings, setSettings] = useState<SystemSettings>(systemSettings)
   const [bypassMaintenanceMode, setBypassMaintenanceMode] = useState(false)
   const [password, setPassword] = useState('')
   const Api = useApiContext()
@@ -18,14 +21,17 @@ export function MaintenanceMode({ children }: { children: React.ReactNode }) {
       setSettings(response)
     }
 
-    loadMaintenanceSettings()
+    const initialTimeoutId = setTimeout(loadMaintenanceSettings, 5 * 60 * 1000)
 
     // Poll maintenance status settings every 5 minutes
     // This means that users can actively use the website for up to 5 minutes after maintenance mode is enabled
     // After that, they'll see the maintenance mode message page pop up
     const intervalId = setInterval(loadMaintenanceSettings, 5 * 60 * 1000)
 
-    return () => clearInterval(intervalId)
+    return () => {
+      clearTimeout(initialTimeoutId)
+      clearInterval(intervalId)
+    }
   }, [])
 
   if (!settings?.maintenanceModeEnabled || bypassMaintenanceMode) {

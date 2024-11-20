@@ -31,8 +31,8 @@ import { useCookiesAcknowledged } from './browserPersistentState'
 import { IdleStatusMonitor } from 'login/IdleStatusMonitor'
 import {
   ApiProvider,
-  I18nProvider, initializeMixpanel
-  , MaintenanceMode
+  I18nProvider, initializeMixpanel, MaintenanceMode
+
 } from '@juniper/ui-core'
 import {
   BrandConfiguration,
@@ -122,19 +122,19 @@ function App() {
 
   return (
     <ApiProvider api={Api}>
-      <MaintenanceMode>
-        <EnvironmentAlert portalEnvironment={portal.portalEnvironments[0]}/>
-        <DocumentTitle />
-        <PortalPasswordGate portal={portal}>
-          <div
-            className="App d-flex flex-column min-vh-100 bg-white"
-            style={brandStyles(brandConfig)}
-          >
-            <BrowserRouter>
-              <ScrollToTop />
-              <ConfigProvider>
-                <ConfigConsumer>
-                  {config =>
+      <EnvironmentAlert portalEnvironment={portal.portalEnvironments[0]}/>
+      <DocumentTitle />
+      <PortalPasswordGate portal={portal}>
+        <div
+          className="App d-flex flex-column min-vh-100 bg-white"
+          style={brandStyles(brandConfig)}
+        >
+          <BrowserRouter>
+            <ScrollToTop />
+            <ConfigProvider>
+              <ConfigConsumer>
+                {config =>
+                  <MaintenanceMode systemSettings={config.systemSettings}>
                     <AuthProvider {
                       ...getAuthProviderProps(config.b2cTenantName, config.b2cClientId, config.b2cPolicyName)
                     }>
@@ -170,13 +170,13 @@ function App() {
                         </ActiveUserProvider>
                       </UserProvider>
                     </AuthProvider>
-                  }
-                </ConfigConsumer>
-              </ConfigProvider>
-            </BrowserRouter>
-          </div>
-        </PortalPasswordGate>
-      </MaintenanceMode>
+                  </MaintenanceMode>
+                }
+              </ConfigConsumer>
+            </ConfigProvider>
+          </BrowserRouter>
+        </div>
+      </PortalPasswordGate>
     </ApiProvider>
 
   )

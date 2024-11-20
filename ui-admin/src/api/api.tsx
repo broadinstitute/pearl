@@ -177,6 +177,7 @@ export type Config = {
   adminUiHostname: string,
   adminApiHostname: string,
   deploymentZone: string
+  systemSettings: SystemSettings
 }
 
 export type MailingListContact = {

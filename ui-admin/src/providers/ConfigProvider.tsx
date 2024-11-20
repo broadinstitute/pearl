@@ -10,7 +10,13 @@ const uninitializedConfig = {
   participantApiHostname: 'uninitialized',
   adminUiHostname: 'uninitialized',
   adminApiHostname: 'uninitialized',
-  deploymentZone: 'uninitialized'
+  deploymentZone: 'uninitialized',
+  systemSettings: {
+    maintenanceModeEnabled: false,
+    maintenanceModeMessage: 'uninitialized',
+    maintenanceModeBypassPhrase: 'uninitialized',
+    disableScheduledJobs: false
+  }
 }
 
 const ConfigContext = React.createContext<Config>(uninitializedConfig)

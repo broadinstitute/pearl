@@ -94,6 +94,7 @@ export type Config = {
   b2cClientId: string,
   b2cPolicyName: string,
   b2cChangePasswordPolicyName: string,
+  systemSettings: SystemSettings
 }
 
 let bearerToken: string | null = null

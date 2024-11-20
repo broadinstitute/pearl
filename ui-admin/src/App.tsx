@@ -53,10 +53,10 @@ mixpanel.register({ application: 'ADMIN_UI' })
 function App() {
   return (
     <ApiProvider api={previewApi('', '')}>
-      <MaintenanceMode>
-        <ConfigProvider>
-          <ConfigConsumer>
-            { config =>
+      <ConfigProvider>
+        <ConfigConsumer>
+          { config =>
+            <MaintenanceMode systemSettings={config.systemSettings}>
               <AuthProvider {...getOidcConfig(config.b2cTenantName, config.b2cClientId, config.b2cPolicyName)}>
                 <UserProvider>
                   <div className="App d-flex flex-column min-vh-100">
@@ -90,10 +90,10 @@ function App() {
                   </div>
                 </UserProvider>
               </AuthProvider>
-            }
-          </ConfigConsumer>
-        </ConfigProvider>
-      </MaintenanceMode>
+            </MaintenanceMode>
+          }
+        </ConfigConsumer>
+      </ConfigProvider>
     </ApiProvider>
   )
 }
