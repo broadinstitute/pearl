@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service.export;
 
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyEnvPermission;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
@@ -25,13 +26,13 @@ public class ExportIntegrationExtService {
     this.exportIntegrationJobService = exportIntegrationJobService;
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<ExportIntegration> list(PortalStudyEnvAuthContext authContext) {
     return exportIntegrationService.findByStudyEnvironmentId(
         authContext.getStudyEnvironment().getId());
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public ExportIntegration find(PortalStudyEnvAuthContext authContext, UUID id) {
     ExportIntegration integration =
         exportIntegrationService
@@ -79,7 +80,7 @@ public class ExportIntegrationExtService {
     return exportIntegrationService.update(exportIntegration);
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<ExportIntegrationJob> listJobs(PortalStudyEnvAuthContext authContext) {
     return exportIntegrationJobService.findByStudyEnvironment(
         authContext.getStudyEnvironment().getId());

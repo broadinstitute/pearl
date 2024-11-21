@@ -1,4 +1,4 @@
-package bio.terra.pearl.api.admin.service.forms;
+package bio.terra.pearl.api.admin.service.enrollee;
 
 import bio.terra.pearl.api.admin.AuthAnnotationSpec;
 import bio.terra.pearl.api.admin.AuthTestUtils;
@@ -7,14 +7,13 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class SurveyResponseExtServiceTests extends BaseSpringBootTest {
-  @Autowired private SurveyResponseExtService surveyResponseExtService;
+public class ParticipantNoteExtServiceTests extends BaseSpringBootTest {
+  @Autowired private ParticipantNoteExtService participantNoteExtService;
 
   @Test
   public void testAuthentication() {
     AuthTestUtils.assertAllMethodsAnnotated(
-        surveyResponseExtService,
-        Map.of(
-            "updateResponse", AuthAnnotationSpec.withPortalEnrolleePerm("participant_data_edit")));
+        participantNoteExtService,
+        Map.of("create", AuthAnnotationSpec.withPortalEnrolleePerm("participant_data_edit")));
   }
 }

@@ -33,7 +33,7 @@ public class PortalPublishingExtService {
   }
 
   /** anyone can see the difference between two environments */
-  @EnforcePortalPermission(permission = "BASE")
+  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
   public PortalEnvironmentChange diff(
       PortalAuthContext authContext, EnvironmentName destEnv, EnvironmentName sourceEnv) {
     return portalDiffService.diffPortalEnvs(authContext.getPortalShortcode(), destEnv, sourceEnv);
@@ -49,7 +49,7 @@ public class PortalPublishingExtService {
         authContext.getOperator());
   }
 
-  @EnforcePortalPermission(permission = "BASE")
+  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<PortalEnvironmentChangeRecord> getChangeRecords(PortalAuthContext authContext) {
     return portalEnvironmentChangeRecordService.findByPortalId(authContext.getPortal().getId());
   }

@@ -1,11 +1,9 @@
 package bio.terra.pearl.api.admin.service.forms;
 
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
-import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyEnvPermission;
-import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
-import bio.terra.pearl.core.model.admin.AdminUser;
+import bio.terra.pearl.api.admin.service.auth.EnforcePortalEnrolleePermission;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnrolleeAuthContext;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
-import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.survey.SurveyResponseWithJustification;
@@ -30,25 +28,23 @@ public class SurveyResponseExtService {
     this.surveyResponseService = surveyResponseService;
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "participant_data_edit")
+  @EnforcePortalEnrolleePermission(permission = "participant_data_edit")
   public HubResponse updateResponse(
-      PortalStudyEnvAuthContext authContext,
-      AdminUser user,
+      PortalEnrolleeAuthContext authContext,
       SurveyResponseWithJustification responseDto,
-      String enrolleeShortcode,
       UUID taskId) {
     Portal portal = authContext.getPortal();
-    Enrollee enrollee = authUtilService.authAdminUserToEnrollee(user, enrolleeShortcode);
-    PortalParticipantUser ppUser = portalParticipantUserService.findForEnrollee(enrollee);
+    PortalParticipantUser ppUser =
+        portalParticipantUserService.findForEnrollee(authContext.getEnrollee());
     String justification = responseDto.getJustification();
 
     HubResponse result =
         surveyResponseService.updateResponse(
             responseDto,
-            new ResponsibleEntity(user),
+            new ResponsibleEntity(authContext.getOperator()),
             justification,
             ppUser,
-            enrollee,
+            authContext.getEnrollee(),
             taskId,
             portal.getId());
     return result;
