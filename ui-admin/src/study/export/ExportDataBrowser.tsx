@@ -108,16 +108,18 @@ const ExportDataBrowser = ({ studyEnvContext }: {studyEnvContext: StudyEnvContex
     <LoadingSpinner isLoading={isLoading}/>
     {!data && <div className={'d-flex justify-content-center'}>
       <Button
-        variant="secondary"
+        disabled={isLoading}
+        variant="light"
+        className="border"
         onClick={loadPreview}
       >
-        Click to load data export preview...
+        Show export preview
       </Button>
     </div> }
     {!isLoading && data &&
       <>
         <div className="my-2">
-          <span className="text-muted fst-italic px-2">
+          <span className="text-muted fst-italic m-1">
             <FontAwesomeIcon className={'me-2'} icon={faInfoCircle}/>
              Transposed for readability, the actual export has participants as rows
           </span>
