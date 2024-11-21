@@ -47,7 +47,7 @@ export function MaintenanceMode({ systemSettings, children }: {
           <h1><FontAwesomeIcon icon={faScrewdriverWrench}/> This application is currently unavailable</h1>
           <Markdown className={'py-2'}>{settings?.maintenanceModeMessage}</Markdown>
           { settings.maintenanceModeBypassPhrase  && <>
-            <div className={'mt-5 mb-2'}>If you are a system administrator, you may login below:</div>
+            <div className={'mt-5 mb-2'}>If you are a system administrator, you may enter below:</div>
 
             <div className={'d-flex justify-content-center'}>
               <input

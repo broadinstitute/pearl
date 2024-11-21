@@ -15,6 +15,8 @@ import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.site.SiteMediaService;
 import bio.terra.pearl.core.service.system.SystemSettingsService;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,10 +92,10 @@ public class PublicApiController implements PublicApi {
       return ResponseEntity.notFound().build();
     }
 
-    Map<String, Object> configAndSettings = new java.util.HashMap<>(portalConfig);
+    Map<String, Object> configWithSettings = new HashMap<>(portalConfig);
     SystemSettings settings = maintenanceModeService.getSystemSettings();
-    configAndSettings.put("systemSettings", settings);
-    return ResponseEntity.ok(configAndSettings);
+    configWithSettings.put("systemSettings", settings);
+    return ResponseEntity.ok(configWithSettings);
   }
 
   @Override

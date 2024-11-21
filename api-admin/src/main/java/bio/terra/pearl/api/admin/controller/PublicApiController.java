@@ -9,6 +9,8 @@ import bio.terra.pearl.api.admin.service.ConfigExtService;
 import bio.terra.pearl.api.admin.service.StatusService;
 import bio.terra.pearl.core.service.system.SystemSettingsService;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -57,10 +59,10 @@ public class PublicApiController implements PublicApi {
   @Override
   public ResponseEntity<Object> getConfig() {
     Map<String, String> configMap = configExtService.getConfigMap();
-    Map<String, Object> configAndSettings = new java.util.HashMap<>(configMap);
     SystemSettings settings = maintenanceModeService.getSystemSettings();
-    configAndSettings.put("systemSettings", settings);
-    return ResponseEntity.ok(configAndSettings);
+    Map<String, Object> configWithSettings = new HashMap<>(configMap);
+    configWithSettings.put("systemSettings", settings);
+    return ResponseEntity.ok(configWithSettings);
   }
 
   @Override
