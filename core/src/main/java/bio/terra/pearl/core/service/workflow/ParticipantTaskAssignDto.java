@@ -16,7 +16,8 @@ public record ParticipantTaskAssignDto (
         // if true, the tasks will be assigned regardless of any rules on the tasks -- this allows
         // study staff to override duplication or other criteria on the tasks themselves.
         // obviously, this should be used with caution
-        boolean overrideEligibility
+        boolean overrideEligibility,
+        String justification
 ) {}
 
 

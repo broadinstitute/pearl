@@ -63,8 +63,9 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
         return dao.findByEnrolleeId(enrolleeId);
     }
 
-    public Map<UUID, List<SurveyResponse>> findByEnrolleeIds(List<UUID> enrolleeIds) {
-        return dao.findByEnrolleeIds(enrolleeIds);
+
+    public Map<UUID, List<SurveyResponse>> findByEnrolleeIdsNotRemoved(List<UUID> enrolleeIds) {
+        return dao.findByEnrolleeIdsNotRemoved(enrolleeIds);
     }
 
     public Optional<SurveyResponse> findOneWithAnswers(UUID responseId) {
@@ -354,7 +355,6 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
      * references to the files. Creating and deleting files from the frontend will happen before this method is called
      * via the participant file controller.
      */
-    @Transactional
     protected List<ParticipantFile> updateParticipantFileLinks(SurveyResponse response, List<ParticipantFile> participantFiles, ResponsibleEntity operator) {
         List<ParticipantFileSurveyResponse> existingParticipantFileSurveyResponses = participantFileSurveyResponseService.findBySurveyResponseId(response.getId());
 
