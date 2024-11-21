@@ -67,7 +67,7 @@ function wait_for_image () {
     until docker pull $1
     do
         echo "image $1 not found..."
-        sleep 5
+        sleep 30
         echo "attempting to pull $1..."
     done
     echo "found $1!"
