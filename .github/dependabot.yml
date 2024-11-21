@@ -30,10 +30,6 @@ updates:
       timezone: "America/New_York"
     directories:
       - "/"
-      - "api-admin"
-      - "api-participant"
-      - "core"
-      - "populate"
     package-ecosystem: "gradle"
     commit-message:
       prefix: "[JN-1457]"
