@@ -13,15 +13,17 @@ const mockApi = {
 
 describe('MaintenanceMode', () => {
   it('should display maintenance mode message when maintenanceModeEnabled is true', async () => {
-    mockLoadSystemSettings.mockResolvedValue({
+    const mockSettings = {
       maintenanceModeEnabled: true,
       maintenanceModeMessage: 'Maintenance in progress',
-      maintenanceModeBypassPhrase: 'bypass'
-    })
+      maintenanceModeBypassPhrase: 'bypass',
+      disableScheduledJobs: false
+    }
+    mockLoadSystemSettings.mockResolvedValue(mockSettings)
 
     render(
       <ApiProvider api={mockApi}>
-        <MaintenanceMode>
+        <MaintenanceMode systemSettings={mockSettings}>
           <div>Welcome to the Juniper Heart study</div>
         </MaintenanceMode>
       </ApiProvider>
@@ -35,15 +37,17 @@ describe('MaintenanceMode', () => {
   })
 
   it('should display child components when maintenanceModeEnabled is false', async () => {
-    mockLoadSystemSettings.mockResolvedValue({
+    const mockSettings = {
       maintenanceModeEnabled: false,
       maintenanceModeMessage: '',
-      maintenanceModeBypassPhrase: ''
-    })
+      maintenanceModeBypassPhrase: '',
+      disableScheduledJobs: false
+    }
+    mockLoadSystemSettings.mockResolvedValue(mockSettings)
 
     render(
       <ApiProvider api={mockApi}>
-        <MaintenanceMode>
+        <MaintenanceMode systemSettings={mockSettings}>
           <div>Welcome to the Juniper Heart study</div>
         </MaintenanceMode>
       </ApiProvider>
@@ -56,15 +60,17 @@ describe('MaintenanceMode', () => {
   })
 
   it('should bypass maintenance mode with correct pass phrase', async () => {
-    mockLoadSystemSettings.mockResolvedValue({
+    const mockSettings = {
       maintenanceModeEnabled: true,
       maintenanceModeMessage: 'Maintenance in progress',
-      maintenanceModeBypassPhrase: 'bypass'
-    })
+      maintenanceModeBypassPhrase: 'bypass',
+      disableScheduledJobs: false
+    }
+    mockLoadSystemSettings.mockResolvedValue(mockSettings)
 
     render(
       <ApiProvider api={mockApi}>
-        <MaintenanceMode>
+        <MaintenanceMode systemSettings={mockSettings}>
           <div>Welcome to the Juniper Heart study</div>
         </MaintenanceMode>
       </ApiProvider>
