@@ -90,7 +90,7 @@ wait_for_image "us-central1-docker.pkg.dev/broad-juniper-eng-infra/juniper/junip
             <<EOT
 gcloud container clusters get-credentials juniper-cluster --zone us-central1
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-helm upgrade -f environments/$_ENV.yaml juniper . --namespace $_NAMESPACE --set appVersion=$TAG_NAME
+helm upgrade -f environments/$_ENV.yaml juniper . --namespace $_NAMESPACE --set appVersion=$TAG_NAME --atomic --wait
             EOT
         ]
     }
