@@ -32,9 +32,24 @@ public class SurveyResponseDao extends BaseMutableJdbiDao<SurveyResponse> {
         return findAllByProperty("enrollee_id", enrolleeId);
     }
 
-    public Map<UUID, List<SurveyResponse>> findByEnrolleeIds(Collection<UUID> enrolleeIds) {
-        return findAllByPropertyCollection("enrollee_id", enrolleeIds)
-                .stream().collect(Collectors.groupingBy(SurveyResponse::getEnrolleeId, Collectors.toList()));
+    /** excludes responses that are associated with removed tasks */
+    public Map<UUID, List<SurveyResponse>> findByEnrolleeIdsNotRemoved(List<UUID> enrolleeIds) {
+        if (enrolleeIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return jdbi.withHandle(handle ->
+                // left join to include responses that have no associated task (e.g. pre-enrollment)
+                // "is distinct from" instead of != because != doesn't handle nulls, and we want to include nulls
+                handle.createQuery("""
+                                select sr.* from %s sr
+                                left join participant_task task on task.survey_response_id = sr.id
+                                where sr.enrollee_id in (<enrolleeIds>)
+                                and task.status is distinct from 'REMOVED'
+                                """.formatted(tableName))
+                        .bindList("enrolleeIds", enrolleeIds)
+                        .mapTo(clazz)
+                        .stream().collect(Collectors.groupingBy(SurveyResponse::getEnrolleeId, Collectors.toList()))
+        );
     }
 
     /**

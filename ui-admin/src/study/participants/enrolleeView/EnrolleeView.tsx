@@ -244,18 +244,7 @@ const badgeForResponses = (responses: SurveyResponse[], tasks: ParticipantTask[]
     return statusDisplayMap['UNASSIGNED']
   }
   const lastTask = tasks.sort((a, b) => b.createdAt! - a.createdAt!)[0]
-  const lastResponse = responses.find(r => r.id === lastTask.surveyResponseId)
-  if (!lastResponse) {
-    return statusDisplayMap['NEW']
-  } else {
-    if (lastResponse.complete) {
-      return statusDisplayMap['COMPLETE']
-    } else if (lastResponse.answers.length === 0) {
-      return statusDisplayMap['VIEWED']
-    } else {
-      return statusDisplayMap['IN_PROGRESS']
-    }
-  }
+  return statusDisplayMap[lastTask.status]
 }
 
 /** gets classes to apply to nav links */
@@ -291,6 +280,7 @@ export const statusDisplayMap: Record<ParticipantTaskStatus | 'UNASSIGNED', Reac
   'NEW': <FontAwesomeIcon icon={faEmptyCircle} style={{ color: '#888' }} title="No response"/>,
   'VIEWED': <FontAwesomeIcon icon={faEmptyCircle} style={{ color: '#888' }} title="Viewed"/>,
   'REJECTED': <FontAwesomeIcon icon={faCircleXmark} style={{ color: '#888' }} title="Rejected"/>,
+  'REMOVED': <FontAwesomeIcon icon={faMinus} style={{ color: '#888' }} title="Removed"/>,
   'UNASSIGNED': <FontAwesomeIcon icon={faMinus} style={{ color: '#888' }} title="Not assigned"/>
 }
 

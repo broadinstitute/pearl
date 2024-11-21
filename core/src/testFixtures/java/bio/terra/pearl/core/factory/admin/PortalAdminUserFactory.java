@@ -13,6 +13,7 @@ import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.service.admin.PortalAdminUserRoleService;
 import bio.terra.pearl.core.service.admin.PortalAdminUserService;
 import bio.terra.pearl.core.service.exception.UserNotFoundException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,8 @@ public class PortalAdminUserFactory {
     private PortalAdminUserService portalAdminUserService;
     @Autowired
     private PortalAdminUserRoleService portalAdminUserRoleService;
+    @Autowired
+    private RoleFactory roleFactory;
 
     @Autowired
     private PortalFactory portalFactory;
@@ -76,6 +79,13 @@ public class PortalAdminUserFactory {
                     .build(), auditInfo));
         portalAdminUserRoleService.setRoles(portalUsers.get(0).getId(), roleNames, auditInfo);
         return new AdminUserBundle(adminUser, portalUsers);
+    }
+
+    /** auto-creates a custom role with the given permissions and assigns it to the portalUser */
+    public AdminUserBundle buildPersistedWithPermissions(String testName, Portal portal, List<String> permissionNames) {
+        String roleName = testName + RandomStringUtils.randomAlphabetic(4);
+        roleFactory.buildPersistedCreatePermissions(roleName, permissionNames);
+        return buildPersistedWithRoles(testName, portal, List.of(roleName));
     }
 
     /** brute force role check done by reloading the whole user */

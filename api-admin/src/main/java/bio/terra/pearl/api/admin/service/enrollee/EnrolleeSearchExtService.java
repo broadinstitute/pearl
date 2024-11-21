@@ -1,11 +1,10 @@
 package bio.terra.pearl.api.admin.service.enrollee;
 
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
-import bio.terra.pearl.core.model.EnvironmentName;
-import bio.terra.pearl.core.model.admin.AdminUser;
+import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyEnvPermission;
+import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.core.model.search.EnrolleeSearchExpressionResult;
 import bio.terra.pearl.core.model.search.SearchValueTypeDefinition;
-import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.service.search.EnrolleeSearchOptions;
 import bio.terra.pearl.core.service.search.EnrolleeSearchService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
@@ -28,35 +27,20 @@ public class EnrolleeSearchExtService {
     this.studyEnvironmentService = studyEnvironmentService;
   }
 
+  @EnforcePortalStudyEnvPermission(permission = "BASE")
   public Map<String, SearchValueTypeDefinition> getExpressionSearchFacets(
-      AdminUser operator, String portalShortcode, String studyShortcode, EnvironmentName envName) {
-    authUtilService.authUserToStudy(operator, portalShortcode, studyShortcode);
-
-    StudyEnvironment studyEnvironment =
-        studyEnvironmentService
-            .findByStudy(studyShortcode, envName)
-            .orElseThrow(() -> new IllegalStateException("Study environment not found"));
-
+      PortalStudyEnvAuthContext authContext) {
     return this.enrolleeSearchService.getExpressionSearchFacetsForStudyEnv(
-        studyEnvironment.getId());
+        authContext.getStudyEnvironment().getId());
   }
 
+  @EnforcePortalStudyEnvPermission(permission = "participant_data_view")
   public List<EnrolleeSearchExpressionResult> executeSearchExpression(
-      AdminUser operator,
-      String portalShortcode,
-      String studyShortcode,
-      EnvironmentName envName,
-      String expression,
-      Integer limit) {
-
-    authUtilService.authUserToStudy(operator, portalShortcode, studyShortcode);
-
-    StudyEnvironment studyEnvironment =
-        studyEnvironmentService
-            .findByStudy(studyShortcode, envName)
-            .orElseThrow(() -> new IllegalStateException("Study environment not found"));
+      PortalStudyEnvAuthContext authContext, String expression, Integer limit) {
 
     return this.enrolleeSearchService.executeSearchExpression(
-        studyEnvironment.getId(), expression, EnrolleeSearchOptions.builder().limit(limit).build());
+        authContext.getStudyEnvironment().getId(),
+        expression,
+        EnrolleeSearchOptions.builder().limit(limit).build());
   }
 }

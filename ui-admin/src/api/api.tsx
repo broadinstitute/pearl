@@ -340,7 +340,7 @@ export type InternalConfig = {
 
 export type ParticipantTaskUpdateDto = {
   updates: TaskUpdateSpec[]
-  portalParticipantUserIds?: string[]
+  enrolleeIds?: string[]
   updateAll: boolean // if true, the portalParticipantUserIds list will be ignored and all participants will be updated
 }
 
@@ -353,6 +353,7 @@ export type ParticipantTaskAssignDto = {
   // not already having the task in the duplicate window
   assignAllUnassigned: boolean
   overrideEligibility: boolean
+  justification?: string
 }
 
 export type TaskUpdateSpec = {
@@ -764,7 +765,7 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async updateParticipantTaskVersions(studyEnvParams: StudyEnvParams,
+  async updateParticipantTasks(studyEnvParams: StudyEnvParams,
     update: ParticipantTaskUpdateDto): Promise<ParticipantTask[]> {
     const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/participantTasks/updateAll`
     const response = await fetch(url, {
@@ -1453,13 +1454,14 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async updateAdminTask(portalShortcode: string, studyShortcode: string,
-    envName: string, task: ParticipantTask): Promise<ParticipantTask> {
-    const url = `${baseStudyEnvUrl(portalShortcode, studyShortcode, envName)}/adminTasks/${task.id}`
+  async updateTask(studyEnvParams: StudyEnvParams, taskUpdate: {task: ParticipantTask, justification: string}):
+    Promise<ParticipantTask> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/enrollees/` +
+      `${taskUpdate.task.enrolleeId}/participantTasks/${taskUpdate.task.id}`
     const response = await fetch(url, {
       method: 'PATCH',
       headers: this.getInitHeaders(),
-      body: JSON.stringify(task)
+      body: JSON.stringify(taskUpdate)
     })
     return await this.processJsonResponse(response)
   },
@@ -1752,8 +1754,10 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async extractPortal(portalShortcode: string) {
-    const url = `${basePopulateUrl()}/portal/${portalShortcode}/extract`
+  async extractPortal(portalShortcode: string, onlyExtractActiveVersions: boolean) {
+    const url = `${
+      basePopulateUrl()
+    }/portal/${portalShortcode}/extract?onlyExtractActiveVersions=${onlyExtractActiveVersions}`
     const response = await fetch(url, this.getGetInit())
     return this.processResponse(response)
   },
@@ -1827,7 +1831,11 @@ export default {
     if (portalEnvConfig?.participantHostname) {
       return `https://${portalEnvConfig.participantHostname}`
     }
-    const participantHost = `${envName}.${portalShortcode}.${uiHostname}`
+
+    // live is a special case where we don't include the env name in the url
+    const participantHost = envName === 'live' ?
+        `${portalShortcode}.${uiHostname}` :
+        `${envName}.${portalShortcode}.${uiHostname}`
     return `https://${participantHost}`
   },
 

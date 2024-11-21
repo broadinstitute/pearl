@@ -1,0 +1,31 @@
+{{- if .Values.enableMaintenanceMode -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maintenance-deployment
+  labels:
+    app: maintenance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maintenance
+  template:
+    metadata:
+      labels:
+        app: maintenance
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html/index.html
+              name: nginx-conf
+              subPath: index.html
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: maintenance-html-configmap
+{{- end }}

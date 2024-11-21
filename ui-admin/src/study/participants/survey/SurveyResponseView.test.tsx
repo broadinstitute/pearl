@@ -63,6 +63,7 @@ describe('RawEnrolleeSurveyView', () => {
     const printSpy = jest.spyOn(window, 'print').mockImplementation(() => 1)
     const { RoutedComponent } = setupRouterTest(
       <RawEnrolleeSurveyView enrollee={mockEnrollee()}
+        task={mockParticipantTask('SURVEY', 'COMPLETE')}
         updateResponseMap={jest.fn()}
         studyEnvContext={mockStudyEnvContext()} response={mockResponseWithAnswer}
         configSurvey={mockConfiguredSurvey()} onUpdate={jest.fn()}/>)
@@ -75,6 +76,7 @@ describe('RawEnrolleeSurveyView', () => {
   test('Viewing mode shows survey response view', async () => {
     const { RoutedComponent } = setupRouterTest(
       <RawEnrolleeSurveyView enrollee={mockEnrollee()}
+        task={mockParticipantTask('SURVEY', 'COMPLETE')}
         updateResponseMap={jest.fn()}
         studyEnvContext={mockStudyEnvContext()} response={mockResponseWithAnswer}
         configSurvey={mockConfiguredSurvey()} onUpdate={jest.fn()}/>)
@@ -90,6 +92,7 @@ describe('RawEnrolleeSurveyView', () => {
     })
     const { RoutedComponent } = setupRouterTest(
       <RawEnrolleeSurveyView enrollee={mockEnrollee()}
+        task={mockParticipantTask('SURVEY', 'COMPLETE')}
         updateResponseMap={jest.fn()}
         studyEnvContext={mockStudyEnvContext()} response={mockResponseWithAnswer}
         configSurvey={mockConfiguredSurvey()} onUpdate={jest.fn()}/>)

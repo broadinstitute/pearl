@@ -230,7 +230,7 @@ public class EnrolleeExportService {
         Map<UUID, ParticipantUser> participantUsers = participantUserService.findByParticipantUserIds(participantUserIds);
         Map<UUID, List<Answer>> answers = answerDao.findByEnrolleeIds(enrolleeIds);
         Map<UUID, List<ParticipantTask>> tasks = participantTaskService.findByEnrolleeIds(enrolleeIds);
-        Map<UUID, List<SurveyResponse>> surveyResponses = surveyResponseService.findByEnrolleeIds(enrolleeIds);
+        Map<UUID, List<SurveyResponse>> surveyResponses = surveyResponseService.findByEnrolleeIdsNotRemoved(enrolleeIds);
         Map<UUID, List<KitRequestDto>> kitRequests = kitRequestService.findByEnrollees(enrollees);
 
         return enrollees.stream()

@@ -1,0 +1,16 @@
+{{- if .Values.enableMaintenanceMode -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: maintenance-service
+  annotations:
+    cloud.google.com/backend-config: '{"default": "juniper-backendconfig"}'
+spec:
+  type: ClusterIP
+  selector:
+    app: maintenance
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+{{- end }}

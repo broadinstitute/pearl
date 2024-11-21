@@ -7,6 +7,7 @@ import {
   faCheck,
   faCircleHalfStroke,
   faLock,
+  faMinus,
   faPrint
 } from '@fortawesome/free-solid-svg-icons'
 import { faCircle, faCircleXmark } from '@fortawesome/free-regular-svg-icons'
@@ -40,6 +41,10 @@ const statusDisplayMap: Record<ParticipantTaskStatus, StatusDisplayInfo> = {
   'VIEWED': {
     icon: <FontAwesomeIcon icon={faCircle} style={{ color: '#777' }}/>,
     statusDisplayKey: 'taskNotStarted'
+  },
+  'REMOVED': { // this status isn't displayed anywhere in the UI right now, but is included for completness
+    icon: <FontAwesomeIcon icon={faMinus} style={{ color: '#777' }}/>,
+    statusDisplayKey: 'taskRemoved'
   }
 }
 

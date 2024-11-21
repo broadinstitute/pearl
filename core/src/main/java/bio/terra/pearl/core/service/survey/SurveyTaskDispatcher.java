@@ -51,7 +51,6 @@ public class SurveyTaskDispatcher extends TaskDispatcher<SurveyTaskConfigDto> {
                 newEvent.getStableId(),
                 newEvent.getVersion())
                 .orElseThrow(() -> new IllegalStateException("Could not find new survey task config"));
-
         updateTasksForNewTaskConfig(surveyTaskConfigDto);
     }
 
