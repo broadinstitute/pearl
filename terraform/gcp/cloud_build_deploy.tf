@@ -110,26 +110,7 @@ helm upgrade -f environments/$_ENV.yaml juniper . --namespace $_NAMESPACE --set 
     _NAMESPACE = var.k8s_namespace
   }
 
+  approval_config {
+    approval_required = var.environment == "prod" ? true : false
+  }
 }
-#
-# resource "google_cloudbuild_trigger" "prod_manual_deploy" {
-#   count = var.environment == "prod" ? 1 : 0
-#
-#   location = "us-central1"
-#
-#   github {
-#     owner = "broadinstitute"
-#     name = "juniper"
-#   }
-#
-#   substitutions = {
-#     ENV = var.environment
-#     NAMESPACE = var.k8s_namespace
-#   }
-#
-#   approval_config {
-#     approval_required = true
-#   }
-#
-#   filename = "cloud_build_deploy.yaml"
-# }
