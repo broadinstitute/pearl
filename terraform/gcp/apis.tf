@@ -11,6 +11,7 @@ locals {
     "servicenetworking.googleapis.com",
     "cloudkms.googleapis.com",
     "binaryauthorization.googleapis.com",
+    "cloudbuild.googleapis.com"
   ]
 }
 

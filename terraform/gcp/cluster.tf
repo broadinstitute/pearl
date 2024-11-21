@@ -57,6 +57,11 @@ resource "google_container_cluster" "juniper_cluster" {
         display_name = cidr_blocks.value
       }
     }
+
+    cidr_blocks {
+      cidr_block = "${google_compute_global_address.private_ip_address.address}/${google_compute_global_address.private_ip_address.prefix_length}"
+      display_name = "peered-vpc"
+    }
   }
 
   master_auth {
