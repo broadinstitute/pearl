@@ -1785,7 +1785,11 @@ export default {
     if (portalEnvConfig?.participantHostname) {
       return `https://${portalEnvConfig.participantHostname}`
     }
-    const participantHost = `${envName}.${portalShortcode}.${uiHostname}`
+
+    // live is a special case where we don't include the env name in the url
+    const participantHost = envName === 'live' ?
+        `${portalShortcode}.${uiHostname}` :
+        `${envName}.${portalShortcode}.${uiHostname}`
     return `https://${participantHost}`
   },
 
