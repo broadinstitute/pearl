@@ -68,5 +68,23 @@ copyWebApp.dependsOn(rootProject.bundleAdminUI)
 jibDockerBuild.dependsOn('copyWebApp')
 
 test {
-    useJUnitPlatform ()
+    useJUnitPlatform {
+        // By default, exclude `@IntegrationTest`s
+        excludeTags "integration"
+    }
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+    classDirectories.setFrom(
+        files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: ['bio/terra/pearl/api/admin/api'])
+        })
+    )
+}
+
+jacoco {
+    toolVersion = "0.8.9"
+    reportsDirectory = layout.buildDirectory.dir('code-coverage')
 }
