@@ -7,11 +7,20 @@ import { usePinnedEnv } from './usePinnedEnv'
 import { useNavigate } from 'react-router-dom'
 import { ENVIRONMENT_ICON_MAP } from '../util/publishUtils'
 
+const envCodeToName = (envName: string) => {
+  switch (envName) {
+    case 'live': return 'Live'
+    case 'irb': return 'IRB'
+    case 'sandbox': return 'Sandbox'
+    default: return envName
+  }
+}
+
 const envOpts = ['live', 'irb', 'sandbox'].map(env => ({
   label: <div className={'d-flex align-items-center'}>
     <span className={'d-inline-flex me-2 align-items-center justify-content-center'} style={{  width: '1.5ch' }}>
       {ENVIRONMENT_ICON_MAP[env]}</span>
-    {env}
+    {envCodeToName(env)}
   </div>,
   value: env
 }))
@@ -52,7 +61,7 @@ export const EnvironmentSwitcher = ({
   }
 
   return (
-    <NavBreadcrumb value={currentEnvPath + pinnedEnv}>
+    <NavBreadcrumb value={currentEnvPath}>
       <IconButton
         icon={faThumbtack}
         iconClassNames={pinnedEnv ? 'fa-rotate-270' : ''}
@@ -71,7 +80,7 @@ export const EnvironmentSwitcher = ({
         styles={{
           control: baseStyles => ({
             ...baseStyles,
-            minWidth: '9em',
+            minWidth: '10em',
             borderBottomLeftRadius: 0,
             borderTopLeftRadius: 0
           })
