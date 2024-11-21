@@ -34,7 +34,7 @@ dependencies {
     implementation 'org.apache.commons:commons-text:1.12.0'
     implementation 'org.apache.commons:commons-csv:1.12.0'
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
-    implementation 'org.liquibase:liquibase-core:4.21.1'
+    implementation 'org.liquibase:liquibase-core:4.30.0'
     implementation 'org.yaml:snakeyaml:2.3'
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
@@ -54,7 +54,7 @@ dependencies {
     implementation 'com.google.cloud:spring-cloud-gcp-starter:5.6.0'
     implementation 'org.springframework.cloud:spring-cloud-context:4.1.4'
 
-    liquibaseRuntime 'org.liquibase:liquibase-core:4.21.1'
+    liquibaseRuntime 'org.liquibase:liquibase-core:4.30.0'
     liquibaseRuntime 'info.picocli:picocli:4.6.1'
     liquibaseRuntime 'org.postgresql:postgresql'
     liquibaseRuntime 'ch.qos.logback:logback-classic'
