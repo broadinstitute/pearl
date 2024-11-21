@@ -17,9 +17,6 @@ updates:
       timezone: "America/New_York"
     directories:
       - "/"
-      - "ui-admin"
-      - "ui-participant"
-      - "ui-core"
     package-ecosystem: "npm"
     commit-message:
       prefix: "[JN-1457]"
