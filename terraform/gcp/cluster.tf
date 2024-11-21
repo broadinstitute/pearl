@@ -59,8 +59,8 @@ resource "google_container_cluster" "juniper_cluster" {
     }
 
     cidr_blocks {
-      cidr_block = "${google_compute_global_address.private_ip_address.address}/${google_compute_global_address.private_ip_address.prefix_length}"
-      display_name = "peered-vpc"
+      cidr_block = "${google_compute_address.public_cloud_build_ip.address}/32"
+      display_name = "cloudbuild-nat-access"
     }
   }
 

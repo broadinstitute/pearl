@@ -8,7 +8,6 @@ resource "google_service_account" "juniper_cloudbuild_service_account" {
 }
 
 #needs access to the k8s cluster
-
 resource "google_project_iam_binding" "juniper_cloudbuild_service_account_gke_binding" {
   project = var.project
 
@@ -17,15 +16,6 @@ resource "google_project_iam_binding" "juniper_cloudbuild_service_account_gke_bi
     "serviceAccount:${google_service_account.juniper_cloudbuild_service_account.email}"
   ]
 }
-
-# resource "google_project_iam_binding" "juniper_cloudbuild_service_account_cluster_view_binding" {
-#   project = var.project
-#
-#   role    = "roles/container.clusterViewer"
-#   members = [
-#     "serviceAccount:${google_service_account.cluster_service_account.email}"
-#   ]
-# }
 
 resource "google_cloudbuild_worker_pool" "juniper-deployment-worker-pool" {
   name     = "juniper-deployment-worker-pool"
@@ -37,13 +27,15 @@ resource "google_cloudbuild_worker_pool" "juniper-deployment-worker-pool" {
     no_external_ip = true
   }
   network_config {
-    peered_network = google_compute_network.juniper_network.id
+    peered_network = google_compute_network.cloud_build_network.id
   }
   depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 resource "google_cloudbuild_trigger" "dev_auto_deploy_on_tag_push" {
   count = var.environment == "dev" ? 1 : 0
+
+  name = "deploy-juniper"
 
   location = "us-central1"
 
@@ -55,6 +47,62 @@ resource "google_cloudbuild_trigger" "dev_auto_deploy_on_tag_push" {
     }
   }
 
+  build {
+
+    step {
+      name = "gcr.io/cloud-builders/git"
+      id = "Clone repository"
+      args = ["clone", "--depth", "1", "--branch", "$TAG_NAME", "https://github.com/broadinstitute/juniper.git", "/workspace/juniper" ]
+    }
+
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      id = "Wait for images to be published"
+      entrypoint = "bash"
+      args = [
+        "-c",
+        <<EOT
+function wait_for_image () {
+    echo "attempting to pull $1..."
+    until docker pull $1
+    do
+        echo "image $1 not found..."
+        sleep 5
+        echo "attempting to pull $1..."
+    done
+    echo "found $1!"
+}
+
+wait_for_image "us-central1-docker.pkg.dev/broad-juniper-eng-infra/juniper/juniper-admin:$TAG_NAME"
+wait_for_image "us-central1-docker.pkg.dev/broad-juniper-eng-infra/juniper/juniper-participant:$TAG_NAME"
+        EOT
+      ]
+    }
+
+    step {
+      name = "gcr.io/google.com/cloudsdktool/cloud-sdk"
+      id = "Deploy to k8s"
+      dir = "/workspace/juniper/terraform/gcp/k8s"
+      entrypoint = "bash"
+      env = ["CLOUDSDK_COMPUTE_ZONE=us-central1", "CLOUDSDK_CONTAINER_CLUSTER=juniper-cluster"]
+        args = [
+            "-c",
+            <<EOT
+gcloud container clusters get-credentials juniper-cluster --zone us-central1
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+helm upgrade -f environments/$_ENV.yaml juniper . --namespace $_NAMESPACE --set appVersion=$TAG_NAME
+            EOT
+        ]
+    }
+
+    options {
+      logging = "CLOUD_LOGGING_ONLY"
+      worker_pool = google_cloudbuild_worker_pool.juniper-deployment-worker-pool.id
+    }
+
+    timeout = "1500s" # 25 minutes so that the images have time to be built and pushed
+  }
+
   service_account = "projects/${var.project}/serviceAccounts/${google_service_account.juniper_cloudbuild_service_account.email}"
 
   substitutions = {
@@ -62,7 +110,6 @@ resource "google_cloudbuild_trigger" "dev_auto_deploy_on_tag_push" {
     _NAMESPACE = var.k8s_namespace
   }
 
-  filename = "cloudbuild.yaml"
 }
 #
 # resource "google_cloudbuild_trigger" "prod_manual_deploy" {
