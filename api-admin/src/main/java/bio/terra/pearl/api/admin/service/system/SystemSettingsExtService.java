@@ -20,7 +20,8 @@ public class SystemSettingsExtService {
   public SystemSettings updateSystemSettings(
       OperatorAuthContext authContext, SystemSettings updatedSystemSettings) {
     SystemSettings currentSystemSettings = systemSettingsService.getSystemSettings();
-    BeanUtils.copyProperties(updatedSystemSettings, currentSystemSettings);
+    BeanUtils.copyProperties(
+        updatedSystemSettings, currentSystemSettings, "id", "lastUpdatedAt", "createdAt");
 
     return systemSettingsService.updateSystemSettings(currentSystemSettings);
   }
