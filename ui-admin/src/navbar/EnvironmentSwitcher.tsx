@@ -8,7 +8,11 @@ import { useNavigate } from 'react-router-dom'
 import { ENVIRONMENT_ICON_MAP } from '../util/publishUtils'
 
 const envOpts = ['live', 'irb', 'sandbox'].map(env => ({
-  label: <span>{ENVIRONMENT_ICON_MAP[env]} &nbsp; {env}</span>,
+  label: <div className={'d-flex align-items-center'}>
+    <span className={'d-inline-flex me-2 align-items-center justify-content-center'} style={{  width: '1.5ch' }}>
+      {ENVIRONMENT_ICON_MAP[env]}</span>
+    {env}
+  </div>,
   value: env
 }))
 
@@ -53,7 +57,9 @@ export const EnvironmentSwitcher = ({
         icon={faThumbtack}
         iconClassNames={pinnedEnv ? 'fa-rotate-270' : ''}
         aria-label={
-          'Pin this study environment. Pinning an environment will keep it selected when navigating to other pages.'
+          pinnedEnv ?
+            'Unpin this environment' :
+            'Pin this environment to keep it selected when navigating to other pages'
         }
         tooltipPlacement={'bottom'} variant={pinnedEnv ? 'primary' : 'light'}
         className="border border-end-0 rounded-end-0"
