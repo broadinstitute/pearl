@@ -23,7 +23,7 @@ export default function SurveyAssignModal({
   const [isLoading, setIsLoading] = useState(false)
   const [overrideEligibility, setOverrideEligibility] = useState(false)
   const [justification, setJustification] = useState('')
-  const [taskId, setTaskId] = useSingleSearchParam('taskId')
+  const [, setTaskId] = useSingleSearchParam('taskId')
   const handleSubmit = async () => {
     doApiLoad(async () => {
       const tasks = await Api.assignParticipantTasksToEnrollees(studyEnvParams, {
