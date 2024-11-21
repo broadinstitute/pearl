@@ -1841,6 +1841,7 @@ paths:
       operationId: extractPortal
       parameters:
         - *portalShortcodeParam
+        - { name: onlyExtractActiveVersions, in: query, required: false, schema: { type: boolean, default: false } }
       responses:
         '200':
           description: zip file of portal configs
