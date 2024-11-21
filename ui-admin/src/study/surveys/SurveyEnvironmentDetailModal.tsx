@@ -100,7 +100,7 @@ export default function SurveyEnvironmentDetailModal(props: SurveyEnvironmentDet
           { targetStableId: stableId, updateToVersion: mostRecentVersion }
         ]
       }
-      await Api.updateParticipantTaskVersions(studyEnvParams, updateObj)
+      await Api.updateParticipantTasks(studyEnvParams, updateObj)
       Store.addNotification(successNotification('Task versions updated'))
       reload()
     })

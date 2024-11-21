@@ -9,6 +9,7 @@
   {"keyName": "taskInProgress", "text": "DEV_In Progress", "language": "dev"},
   {"keyName": "taskNotStarted", "text": "DEV_Not Started", "language": "dev"},
   {"keyName": "taskDeclined", "text": "DEV_Declined", "language": "dev"},
+  {"keyName": "taskRemoved", "text": "DEV_Removed", "language": "dev"},
   {"keyName": "taskLocked", "text": "DEV_Locked", "language": "dev"},
   {"keyName": "taskHistory", "text": "DEV_history", "language": "dev"},
   {"keyName": "taskNew", "text": "DEV_NEW", "language": "dev"},

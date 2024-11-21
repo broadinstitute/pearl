@@ -76,12 +76,13 @@ public abstract class TaskDispatcher<T extends TaskConfig> {
         if (taskConfigOpt.isEmpty()) {
             throw new IllegalArgumentException("Could not find task config");
         }
-        return assign(enrollees, taskConfigOpt.get(), assignDto.overrideEligibility(), operator);
+        return assign(enrollees, taskConfigOpt.get(), assignDto.overrideEligibility(), assignDto.justification(), operator);
     }
 
     public List<ParticipantTask> assign(List<Enrollee> enrollees,
                                         T taskDispatchConfig,
                                         boolean overrideEligibility,
+                                        String justification,
                                         ResponsibleEntity operator) {
         List<UUID> profileIds = enrollees.stream().map(Enrollee::getProfileId).toList();
         List<PortalParticipantUser> ppUsers = portalParticipantUserService.findByProfileIds(profileIds);
@@ -162,7 +163,8 @@ public abstract class TaskDispatcher<T extends TaskConfig> {
                     newTaskConfig.getVersion(),
                     null,
                     true,
-                    false);
+                    false,
+                    newTaskConfig.getName() + " published");
 
             assign(assignDto, newTaskConfig.getStudyEnvironmentId(),
                     new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "handleNewAssignableTask.assignToExistingEnrollees")));
@@ -191,7 +193,8 @@ public abstract class TaskDispatcher<T extends TaskConfig> {
                 taskConfig.getStudyEnvironmentId(),
                 taskConfig.getStableId(),
                 Duration.of(taskConfig.getRecurrenceIntervalDays(), ChronoUnit.DAYS));
-        assign(enrollees, taskConfig, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignRecurringSurvey")));
+        assign(enrollees, taskConfig, false, "scheduled",
+                new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignRecurringSurvey")));
     }
 
     /**
@@ -202,7 +205,7 @@ public abstract class TaskDispatcher<T extends TaskConfig> {
         enrollees = enrollees.stream().filter(enrollee ->
                 enrollee.getCreatedAt().plus(taskConfig.getDaysAfterEligible(), ChronoUnit.DAYS)
                         .isBefore(Instant.now())).toList();
-        assign(enrollees, taskConfig, false, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignDelayedSurvey")));
+        assign(enrollees, taskConfig, false, "scheduled", new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "assignDelayedSurvey")));
     }
 
     private void createTaskIfApplicable(T taskDispatchConfig,

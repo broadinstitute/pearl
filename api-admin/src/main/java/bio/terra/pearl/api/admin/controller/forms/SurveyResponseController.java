@@ -2,7 +2,7 @@ package bio.terra.pearl.api.admin.controller.forms;
 
 import bio.terra.pearl.api.admin.api.SurveyResponseApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
-import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnrolleeAuthContext;
 import bio.terra.pearl.api.admin.service.forms.SurveyResponseExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -46,11 +46,11 @@ public class SurveyResponseController implements SurveyResponseApi {
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     SurveyResponseWithJustification responseDto =
         objectMapper.convertValue(body, SurveyResponseWithJustification.class);
-    PortalStudyEnvAuthContext authContext =
-        PortalStudyEnvAuthContext.of(user, portalShortcode, studyShortcode, environmentName);
+    PortalEnrolleeAuthContext authContext =
+        PortalEnrolleeAuthContext.of(
+            user, portalShortcode, studyShortcode, environmentName, enrolleeShortcode);
     HubResponse hubResponse =
-        surveyResponseExtService.updateResponse(
-            authContext, user, responseDto, enrolleeShortcode, taskId);
+        surveyResponseExtService.updateResponse(authContext, responseDto, taskId);
     return ResponseEntity.ok(hubResponse);
   }
 }

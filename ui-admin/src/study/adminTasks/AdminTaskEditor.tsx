@@ -6,8 +6,7 @@ import Select from 'react-select'
 import LoadingSpinner from 'util/LoadingSpinner'
 import AdminUserSelect from 'user/AdminUserSelect'
 import { doApiLoad } from 'api/api-utils'
-import { StudyEnvContextT } from '../StudyEnvironmentRouter'
-import { instantToDefaultString, ParticipantTask, ParticipantTaskStatus } from '@juniper/ui-core'
+import { instantToDefaultString, ParticipantTask, ParticipantTaskStatus, StudyEnvParams } from '@juniper/ui-core'
 
 
 function AdminTaskEditor({ task, workingTask, setWorkingTask, users }: {
@@ -52,19 +51,17 @@ function AdminTaskEditor({ task, workingTask, setWorkingTask, users }: {
  * shows a modal for editing the passed-in task.  this handles saving the task to the server.
  * If the task was saved, the updated task will be passed to the onDismiss handler
  */
-export const AdminTaskEditModal = ({ task, users, onDismiss, studyEnvContext }: {
+export const AdminTaskEditModal = ({ task, users, onDismiss, studyEnvParams }: {
   task: ParticipantTask, users: AdminUser[], onDismiss: (task?: ParticipantTask) => void,
-  studyEnvContext: StudyEnvContextT
+  studyEnvParams: StudyEnvParams
 }) => {
   const [workingTask, setWorkingTask] = useState<ParticipantTask>(task)
   const [isLoading, setIsLoading] = useState(false)
 
   const saveTask = () => {
     doApiLoad(async () => {
-      const updatedTask = await Api.updateAdminTask(
-        studyEnvContext.portal.shortcode, studyEnvContext.study.shortcode,
-        studyEnvContext.currentEnv.environmentName, workingTask
-      )
+      const updatedTask = await Api.updateTask(studyEnvParams,
+        { task: workingTask, justification: 'admin update' })
       onDismiss(updatedTask)
     }, { setIsLoading })
   }

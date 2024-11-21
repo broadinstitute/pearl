@@ -538,7 +538,8 @@ public class EnrolleeImportService {
                     1,
                     List.of(enrollee.getId()),
                     false,
-                    true);
+                    true,
+                    "Imported");
 
             List<ParticipantTask> tasks = surveyTaskDispatcher.assign(
                     assignDto,

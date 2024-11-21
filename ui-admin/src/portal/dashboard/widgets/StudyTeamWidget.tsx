@@ -40,17 +40,21 @@ export const StudyTeamWidget = ({ portal }: { portal: Portal }) => {
       </InfoCardHeader>
       <InfoCardBody>
         <LoadingSpinner isLoading={isLoadingRoles || isLoadingUsers}>
-          { /* filter out superusers; they transcend portals */ }
-          {users.filter(u => !u.superuser).map(user => {
-            return (
-              <div className={'mb-1'} key={user.id}>{user.username}
-                {user.portalAdminUsers![0].portalAdminUserRoles.map(role => {
-                  return <span key={`${user.id}-${role.id}`} className="ms-1 badge bg-primary">
-                    {roles.find(r => r.id === role.roleId)?.displayName}</span>
-                })}
-              </div>
-            )
-          })}
+          {users.length === 0 ?
+            <div className={'text-muted fst-italic'}>No team members</div> :
+            <ul className='list-unstyled mb-0'>
+              { /* filter out superusers; they transcend portals */ }
+              {users.filter(u => !u.superuser).map(user => {
+                return (
+                  <li className={'mb-1'} key={user.id}>{user.username}
+                    {user.portalAdminUsers![0].portalAdminUserRoles.map(role => {
+                      return <span key={`${user.id}-${role.id}`} className="ms-1 badge bg-primary">
+                        {roles.find(r => r.id === role.roleId)?.displayName}</span>
+                    })}
+                  </li>
+                )
+              })}
+            </ul>}
         </LoadingSpinner>
       </InfoCardBody>
     </InfoCard>

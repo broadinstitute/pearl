@@ -9,6 +9,7 @@
   {"keyName": "taskInProgress", "text": "In Progress", "language": "en"},
   {"keyName": "taskNotStarted", "text": "Not Started", "language": "en"},
   {"keyName": "taskDeclined", "text": "Declined", "language": "en"},
+  {"keyName": "taskRemoved", "text": "Removed", "language": "en"},
   {"keyName": "taskLocked", "text": "Locked", "language": "en"},
   {"keyName": "tasksNoneForStudy", "text": "No tasks for this study", "language": "en"},
   {"keyName": "taskHistory", "text": "history", "language": "en"},

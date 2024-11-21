@@ -22,24 +22,24 @@ dependencies {
     implementation project(':core')
     implementation project(':populate')
     implementation 'org.apache.commons:commons-dbcp2'
-    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation 'org.apache.commons:commons-text:1.12.0'
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
     implementation 'org.springframework.boot:spring-boot-starter:3.3.2'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:3.3.2'
     implementation 'org.springframework.boot:spring-boot-starter-web:3.3.2'
-    implementation 'org.yaml:snakeyaml:2.0'
+    implementation 'org.yaml:snakeyaml:2.3'
     implementation 'org.springframework.retry:spring-retry'
     implementation 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
     implementation 'org.postgresql:postgresql'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'com.sendgrid:sendgrid-java:4.0.1'
-    implementation 'org.yaml:snakeyaml:2.0'
+    implementation 'org.yaml:snakeyaml:2.3'
     implementation 'com.auth0:java-jwt:4.2.2'
-    implementation 'org.liquibase:liquibase-core:4.21.1'
+    implementation 'org.liquibase:liquibase-core:4.30.0'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 
     implementation 'net.javacrumbs.shedlock:shedlock-spring:5.2.0'
-    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.2.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.16.0'
 
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5',
             // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
@@ -68,5 +68,23 @@ copyWebApp.dependsOn(rootProject.bundleAdminUI)
 jibDockerBuild.dependsOn('copyWebApp')
 
 test {
-    useJUnitPlatform ()
+    useJUnitPlatform {
+        // By default, exclude `@IntegrationTest`s
+        excludeTags "integration"
+    }
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+    classDirectories.setFrom(
+        files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: ['bio/terra/pearl/api/admin/api'])
+        })
+    )
+}
+
+jacoco {
+    toolVersion = "0.8.9"
+    reportsDirectory = layout.buildDirectory.dir('code-coverage')
 }

@@ -292,7 +292,7 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
                 .getResponse();
         // manually create a second task (this is easier than futzing with dates)
         ParticipantTask task2 = surveyTaskDispatcher.assign(List.of(targetBundle.enrollee()), new SurveyTaskConfigDto(studyEnvSurvey, survey1),
-                true, new ResponsibleEntity(getTestName(info))).get(0);
+                true, "testing", new ResponsibleEntity(getTestName(info))).get(0);
         SurveyResponse responseT2 = surveyResponseFactory.submitStringAnswer(
                         task2, "question1", "target2", true, targetBundle)
                 .getResponse();

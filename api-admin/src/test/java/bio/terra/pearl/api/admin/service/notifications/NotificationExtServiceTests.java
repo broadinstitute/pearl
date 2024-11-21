@@ -4,7 +4,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 
+import bio.terra.pearl.api.admin.AuthAnnotationSpec;
+import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.core.factory.notification.TriggerFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
@@ -41,6 +44,13 @@ public class NotificationExtServiceTests extends BaseSpringBootTest {
   @Autowired private ObjectMapper objectMapper;
 
   @Test
+  public void testAuthentication() {
+    AuthTestUtils.assertAllMethodsAnnotated(
+        notificationExtService,
+        Map.of("sendAdHoc", AuthAnnotationSpec.withPortalStudyEnvPerm("participant_data_edit")));
+  }
+
+  @Test
   @Transactional
   public void testSendAdHocNotification(TestInfo info) throws Exception {
     AdminUser user = AdminUser.builder().superuser(true).build();
@@ -62,10 +72,8 @@ public class NotificationExtServiceTests extends BaseSpringBootTest {
             enrolleeBundle.portalParticipantUser().getPortalEnvironmentId());
     Map<String, String> customMessages = Map.of("adHocMessage", "hello!");
     notificationExtService.sendAdHoc(
-        user,
-        portal.getShortcode(),
-        study.getShortcode(),
-        environmentName,
+        PortalStudyEnvAuthContext.of(
+            user, portal.getShortcode(), study.getShortcode(), environmentName),
         List.of(enrolleeBundle.enrollee().getShortcode()),
         customMessages,
         config.getId());

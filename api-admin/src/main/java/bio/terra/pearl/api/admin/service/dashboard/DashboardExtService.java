@@ -1,16 +1,14 @@
 package bio.terra.pearl.api.admin.service.dashboard;
 
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
-import bio.terra.pearl.core.model.EnvironmentName;
-import bio.terra.pearl.core.model.admin.AdminUser;
+import bio.terra.pearl.api.admin.service.auth.EnforcePortalEnvPermission;
+import bio.terra.pearl.api.admin.service.auth.SandboxOnly;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
 import bio.terra.pearl.core.model.dashboard.AlertTrigger;
 import bio.terra.pearl.core.model.dashboard.ParticipantDashboardAlert;
-import bio.terra.pearl.core.model.portal.Portal;
-import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.portal.PortalDashboardConfigService;
 import bio.terra.pearl.core.service.portal.PortalEnvironmentService;
-import bio.terra.pearl.core.service.portal.exception.PortalEnvironmentMissing;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -30,44 +28,27 @@ public class DashboardExtService {
     this.authUtilService = authUtilService;
   }
 
-  public List<ParticipantDashboardAlert> listPortalEnvAlerts(
-      String portalShortcode, EnvironmentName envName, AdminUser user) {
-    Portal authedPortal = authUtilService.authUserToPortal(user, portalShortcode);
-
-    PortalEnvironment portalEnv =
-        portalEnvironmentService
-            .findOne(authedPortal.getShortcode(), envName)
-            .orElseThrow(PortalEnvironmentMissing::new);
-
-    return portalDashboardConfigService.findByPortalEnvId(portalEnv.getId());
+  @EnforcePortalEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
+  public List<ParticipantDashboardAlert> listPortalEnvAlerts(PortalEnvAuthContext authContext) {
+    return portalDashboardConfigService.findByPortalEnvId(
+        authContext.getPortalEnvironment().getId());
   }
 
+  @EnforcePortalEnvPermission(permission = "study_settings_edit")
+  @SandboxOnly
   public ParticipantDashboardAlert updatePortalEnvAlert(
-      String portalShortcode,
-      EnvironmentName envName,
+      PortalEnvAuthContext authContext,
       AlertTrigger triggerName,
-      ParticipantDashboardAlert newAlert,
-      AdminUser user) {
-    Portal authedPortal = authUtilService.authUserToPortal(user, portalShortcode);
-
-    if (!envName.equals(EnvironmentName.sandbox)) {
-      throw new IllegalArgumentException(
-          "You can only update dashboard alerts in the sandbox environment");
-    }
+      ParticipantDashboardAlert newAlert) {
 
     if (!triggerName.equals(newAlert.getTrigger())) {
       throw new IllegalArgumentException(
           "Trigger name specified in payload does not match trigger name specified in path");
     }
 
-    PortalEnvironment portalEnv =
-        portalEnvironmentService
-            .findOne(authedPortal.getShortcode(), envName)
-            .orElseThrow(PortalEnvironmentMissing::new);
-
     ParticipantDashboardAlert alert =
         portalDashboardConfigService
-            .findByPortalEnvIdAndTrigger(portalEnv.getId(), triggerName)
+            .findByPortalEnvIdAndTrigger(authContext.getPortalEnvironment().getId(), triggerName)
             .orElseThrow(() -> new NotFoundException("The specified alert does not exist"));
 
     alert.setTitle(newAlert.getTitle());
@@ -76,30 +57,19 @@ public class DashboardExtService {
     return portalDashboardConfigService.update(alert);
   }
 
+  @SandboxOnly
+  @EnforcePortalEnvPermission(permission = "study_settings_edit")
   public ParticipantDashboardAlert createPortalEnvAlert(
-      String portalShortcode,
-      EnvironmentName envName,
+      PortalEnvAuthContext authContext,
       AlertTrigger triggerName,
-      ParticipantDashboardAlert newAlert,
-      AdminUser user) {
-    Portal authedPortal = authUtilService.authUserToPortal(user, portalShortcode);
-
-    if (!envName.equals(EnvironmentName.sandbox)) {
-      throw new IllegalArgumentException(
-          "You can only create dashboard alerts in the sandbox environment");
-    }
+      ParticipantDashboardAlert newAlert) {
 
     if (!triggerName.equals(newAlert.getTrigger())) {
       throw new IllegalArgumentException(
           "Trigger name specified in payload does not match trigger name specified in path");
     }
 
-    PortalEnvironment portalEnv =
-        portalEnvironmentService
-            .findOne(authedPortal.getShortcode(), envName)
-            .orElseThrow(PortalEnvironmentMissing::new);
-
-    newAlert.setPortalEnvironmentId(portalEnv.getId());
+    newAlert.setPortalEnvironmentId(authContext.getPortalEnvironment().getId());
     return portalDashboardConfigService.create(newAlert);
   }
 }

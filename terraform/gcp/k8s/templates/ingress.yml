@@ -18,6 +18,13 @@ metadata:
     # If the class annotation is not specified it defaults to "gce".
     kubernetes.io/ingress.class: "gce"
 spec:
+{{ if .Values.enableMaintenanceMode }}
+  defaultBackend:
+    service:
+      name: maintenance-service
+      port:
+          number: 80
+{{ else }}
   rules:
     - host: {{ .Values.adminUrl }}
       http:
@@ -34,3 +41,4 @@ spec:
       name: participant-service
       port:
         number: 80
+{{ end }}

@@ -30,21 +30,22 @@ export default function StudyResearchTasks(props: StudyResearchTasksProps) {
   const { i18n } = useI18n()
 
   const hasStudyTasks = participantTasks.length > 0
+  const viewableParticipantTasks = participantTasks.filter(task => task.status !== 'REMOVED')
 
-  const activeConsentTaskGroups =  groupAndSortTasks(participantTasks.filter(task =>
+  const activeConsentTaskGroups =  groupAndSortTasks(viewableParticipantTasks.filter(task =>
     task.taskType === 'CONSENT' && isTaskActive(task)))
 
-  const sortedSurveyTaskGroups = groupAndSortTasks(participantTasks.filter(task =>
+  const sortedSurveyTaskGroups = groupAndSortTasks(viewableParticipantTasks.filter(task =>
     task.taskType === 'SURVEY'))
 
   const sortedCurrentTasks = [...activeConsentTaskGroups.map(group => group[0]),
     ...sortedSurveyTaskGroups.map(group => group[0])]
   const nextTask = getNextTask(enrollee, sortedCurrentTasks)
   const numTasksOfNextTaskType = nextTask
-    ? enrollee.participantTasks.filter(task => task.taskType === nextTask.taskType).length
+    ? viewableParticipantTasks.filter(task => task.taskType === nextTask.taskType).length
     : 0
 
-  const completedConsentTaskGroups = groupAndSortTasks(participantTasks.filter(task =>
+  const completedConsentTaskGroups = groupAndSortTasks(viewableParticipantTasks.filter(task =>
     task.taskType === 'CONSENT' && task.status === 'COMPLETE'))
 
   if (!hasStudyTasks) {
