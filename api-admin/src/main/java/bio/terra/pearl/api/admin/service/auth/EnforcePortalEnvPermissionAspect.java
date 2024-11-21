@@ -5,10 +5,16 @@ import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.service.portal.PortalEnvironmentService;
 import bio.terra.pearl.core.service.portal.exception.PortalEnvironmentMissing;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.stereotype.Component;
 
+@Component
+@Aspect
+@Slf4j
 public class EnforcePortalEnvPermissionAspect
     extends BaseEnforcePermissionAspect<PortalEnvAuthContext, EnforcePortalEnvPermission> {
   private final AuthUtilService authUtilService;
