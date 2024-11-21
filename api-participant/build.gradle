@@ -89,6 +89,11 @@ test {
 
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
+    classDirectories.setFrom(
+        files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: ['bio/terra/pearl/api/participant/api'])
+        })
+    )
 }
 
 jacoco {
