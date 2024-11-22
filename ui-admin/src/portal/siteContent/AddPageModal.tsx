@@ -85,20 +85,21 @@ const AddPageModal = ({ portalEnv, portalShortcode, insertNewPage, onDismiss }: 
             setPage({ ...page, title: event.target.value })
           }}/>
 
-        <label htmlFor="inputPagePath">Page Path
+        <>
+          <label htmlFor="inputPagePath">Page Path</label>
           <InfoPopup title="Page Path" content={
             <div>
                 The path to the page within your portal. For example, a path of&nbsp;
               <code>my-path</code> will be available at the URL:&nbsp;
               <br/><br/>
-              <code>{portalUrl}/my-path</code>.
+              <code>{portalUrl}/my-path</code>
             </div>
           }/>
-        </label>
+        </>
         <input
           className="form-control"
           id="inputPagePath"
-          value={page.path} aria-describedby="pathPrefix"
+          value={page.path}
           data-testid="page-path-input"
           onChange={event => {
             setPage({ ...page, path: event.target.value })
