@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: "enrollee_referral_source"
+      author: mbemis
+      changes:
+        - addColumn:
+            tableName: enrollee
+            columns:
+              - column: { name: referral_source, type: text }
