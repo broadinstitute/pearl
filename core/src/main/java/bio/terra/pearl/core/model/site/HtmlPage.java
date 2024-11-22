@@ -18,4 +18,6 @@ public class HtmlPage extends BaseEntity {
     private List<HtmlSection> sections = new ArrayList<>();
     private String path;
     private UUID localizedSiteContentId;
+    @Builder.Default
+    private boolean hideNavbar = false;
 }
