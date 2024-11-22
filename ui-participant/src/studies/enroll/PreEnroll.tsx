@@ -3,7 +3,7 @@ import Api, {
   PreEnrollmentResponse,
   Survey
 } from 'api/api'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { StudyEnrollContext } from './StudyEnrollRouter'
 import {
   getResumeData,
@@ -44,6 +44,13 @@ export default function PreEnrollView({ enrollContext, survey }:
     [],
     { extraCssClasses: { container: 'my-0' }, extraVariables: { isProxyEnrollment, isSubjectEnrollment } }
   )
+
+  const [searchParams] = useSearchParams()
+  const referralSource = searchParams.get('referralSource')
+  if (referralSource) {
+    sessionStorage.setItem('REFERRAL_SOURCE', referralSource)
+  }
+  console.log('referralSource', referralSource)
 
   surveyModel.locale = selectedLanguage || 'default'
 

@@ -152,12 +152,13 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
       } else {
         // when preEnroll is satisfied, and we have a user, we're clear to create an Enrollee
         try {
+          const referralSource = sessionStorage.getItem('REFERRAL_SOURCE')
           const hubResponse = isProxyEnrollment
             ? await enrollProxyUserInStudy(
-              studyShortcode, preEnrollResponseId, ppUserId, refreshLoginState
+              studyShortcode, preEnrollResponseId, ppUserId, refreshLoginState, referralSource
             )
             : await enrollCurrentUserInStudy(
-              studyShortcode, preEnrollResponseId, refreshLoginState
+              studyShortcode, preEnrollResponseId, refreshLoginState, referralSource
             )
 
           handleNewStudyEnroll(hubResponse, studyShortcode, navigate, i18n, studyName)
@@ -221,6 +222,7 @@ export function handleNewStudyEnroll(
   studyName: string
 ) {
   const nextConsentTask = getNextConsentTask(hubResponse)
+  sessionStorage.removeItem('REFERRAL_SOURCE')
 
   if (nextConsentTask) {
     const consentTaskPath = getTaskPath(nextConsentTask, hubResponse.enrollee.shortcode, studyShortcode)

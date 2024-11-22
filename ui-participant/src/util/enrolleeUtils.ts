@@ -21,11 +21,13 @@ export function userHasJoinedStudy(study: Study, enrollees: Enrollee[]) {
 export async function enrollCurrentUserInStudy(
   studyShortcode: string,
   preEnrollResponseId: string | null,
-  refreshLogin: () => Promise<void>
+  refreshLogin: () => Promise<void>,
+  referralSource: string | null
 ): Promise<HubResponse> {
   const hubResponse = await Api.createEnrollee({
     studyShortcode,
-    preEnrollResponseId
+    preEnrollResponseId,
+    referralSource
   })
   await refreshLogin()
   return hubResponse
@@ -39,12 +41,14 @@ export async function enrollProxyUserInStudy(
   studyShortcode: string,
   preEnrollResponseId: string | null,
   governedPpUserId: string | null,
-  refreshLogin: () => Promise<void>
+  refreshLogin: () => Promise<void>,
+  referralSource: string | null
 ): Promise<HubResponse> {
   const hubResponse = await Api.createGovernedEnrollee({
     studyShortcode,
     preEnrollResponseId,
-    governedPpUserId
+    governedPpUserId,
+    referralSource
   })
   await refreshLogin()
   return hubResponse
