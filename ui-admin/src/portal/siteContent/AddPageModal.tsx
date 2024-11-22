@@ -105,13 +105,17 @@ const AddPageModal = ({ portalEnv, portalShortcode, insertNewPage, onDismiss }: 
             setPage({ ...page, path: event.target.value })
           }}/>
 
-        <div className="mt-2">
+        <div className="d-flex mt-2">
           <Checkbox
             label={'Hide Navbar'}
             checked={page.hideNavbar}
             onChange={checked => {
               setPage({ ...page, hideNavbar: checked })
             }}/>
+          <InfoPopup title="Page Path" content={
+            `If checked, navbar content will be hidden on this page and only the logo,
+            login button, and language selector will be displayed in the navbar.`
+          }/>
         </div>
       </form>
     </Modal.Body>
