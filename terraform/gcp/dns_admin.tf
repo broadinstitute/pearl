@@ -1,3 +1,6 @@
+# Creates the DNS records for the admin URL and its subdomains,
+# including subdomains for each portal.
+
 resource "google_compute_global_address" "admin_ip_address" {
   name = "admin-ip"
 
