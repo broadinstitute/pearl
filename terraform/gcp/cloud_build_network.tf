@@ -1,6 +1,8 @@
 # In order for cloud build to access our private GKE instance,
-# we need to create a separate private network and create a
-# VPN tunnel between the two networks.
+# we create a separate network with a VM instance acting as a NAT gateway.
+# This VM instance has a public IP and the GKE cluster allows
+# this public IP to access the master node. All traffic from cloud build
+# runs through the NAT gateway and thus has access to GKE.
 # See: https://cloud.google.com/build/docs/private-pools/accessing-private-gke-clusters-with-cloud-build-private-pools
 
 resource "google_compute_network" "cloud_build_network" {
@@ -12,7 +14,6 @@ resource "google_compute_network" "cloud_build_network" {
     time_sleep.enable_all_services_with_timeout
   ]
 }
-
 
 resource "google_compute_subnetwork" "cloud_build_subnetwork" {
   name = "juniper-cloud-build-subnetwork"
@@ -69,10 +70,6 @@ resource "google_compute_network_peering_routes_config" "service_networking_peer
   ]
 }
 
-
-# 1. create VM instance in the cloud build network, networkt tags: direct-gateway-access, nat-gateway. reserve static ip
-#    add startup script with iptables stuff
-
 resource "google_service_account" "cloudbuild_nat_user" {
   account_id   = "cloudbuild-nat-user"
   display_name = "Custom SA for VM Instance"
@@ -119,8 +116,6 @@ iptables -t nat -A POSTROUTING -o $(ip addr show scope global | head -1 | awk -F
   }
 }
 
-# 2. route all traffic in network through NAT
-
 resource "google_compute_route" "through-cloudbuild-nat1" {
   name        = "through-cloudbuild-nat1"
   dest_range  = "0.0.0.0/1"
@@ -154,8 +149,6 @@ resource "google_compute_route" "cloudbuild-direct-to-gateway2" {
   tags = ["direct-gateway-access"]
   priority    = 10
 }
-
-# 3. create firewall rules
 
 resource "google_compute_firewall" "cloudbuild-allow-pool-to-nat" {
   name    = "cloudbuild-allow-ssh"

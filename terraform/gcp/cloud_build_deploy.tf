@@ -1,3 +1,5 @@
+# creates cloud build triggers to automate our deployment in dev/prod.
+# uses the network created in cloud_build_network to access the GKE cluster.
 
 resource "google_service_account" "juniper_cloudbuild_service_account" {
   account_id   = "juniper-cloudbuild-sa"
@@ -17,6 +19,8 @@ resource "google_project_iam_binding" "juniper_cloudbuild_service_account_gke_bi
   ]
 }
 
+# using this pool makes cloudbuild run on the private network setup to have
+# access to GKE.
 resource "google_cloudbuild_worker_pool" "juniper-deployment-worker-pool" {
   name     = "juniper-deployment-worker-pool"
   project  = var.project
