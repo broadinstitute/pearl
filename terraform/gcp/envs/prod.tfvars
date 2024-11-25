@@ -19,4 +19,4 @@ customer_urls = {
   }
 }
 
-slack_notification_channel = "projects/broad-juniper-prod/notificationChannels/4264320158794755243"
+slack_notification_channel = "projects/broad-juniper-prod/notificationChannels/9072110396476167224"

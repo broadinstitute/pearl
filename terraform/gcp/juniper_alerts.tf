@@ -38,6 +38,8 @@ resource "google_monitoring_alert_policy" "juniper_app_error_alert_policy" {
   combiner = "AND"
   severity = "ERROR"
 
+  alert_strategy {}
+
   depends_on = [
     google_logging_metric.juniper_app_error_logging_metric
   ]
