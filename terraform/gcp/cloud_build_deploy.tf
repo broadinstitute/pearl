@@ -33,8 +33,6 @@ resource "google_cloudbuild_worker_pool" "juniper-deployment-worker-pool" {
 }
 
 resource "google_cloudbuild_trigger" "dev_auto_deploy_on_tag_push" {
-  count = var.environment == "dev" ? 1 : 0
-
   name = "deploy-juniper"
 
   location = "us-central1"
@@ -90,7 +88,7 @@ wait_for_image "us-central1-docker.pkg.dev/broad-juniper-eng-infra/juniper/junip
             <<EOT
 gcloud container clusters get-credentials juniper-cluster --zone us-central1
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-helm upgrade -f environments/$_ENV.yaml juniper . --namespace $_NAMESPACE --set appVersion=$TAG_NAME --atomic --wait
+helm upgrade -f environments/$_ENV.yaml juniper . --namespace $_NAMESPACE --set appVersion=$TAG_NAME --atomic --wait --timeout 15m
             EOT
         ]
     }
