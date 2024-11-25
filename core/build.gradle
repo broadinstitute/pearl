@@ -19,8 +19,8 @@ repositories {
 }
 
 dependencies {
-    antlr "org.antlr:antlr4:4.13.1"
-    compileOnly "org.antlr:antlr4-runtime:4.13.1"
+    antlr "org.antlr:antlr4:4.13.2"
+    compileOnly "org.antlr:antlr4-runtime:4.13.2"
 
     implementation 'org.springframework.boot:spring-boot-starter:3.3.2'
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.4'
