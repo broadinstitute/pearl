@@ -1,6 +1,7 @@
+# Creates the service account that the application uses to access GCP
+# resources, e.g. the database
 
 # Create GSA and assign roles
-
 resource "google_service_account" "junper-app-gsa" {
   account_id = "juniper-app-gsa"
 }

@@ -1,3 +1,7 @@
+# Creates binary authorization policy for the GKE autopilot cluster.
+# This controls what images can be deployed to the cluster.
+# Anything not matching the below whitelist will be blocked.
+
 locals {
   whitelist_patterns = [
     "gcr.io/cloud-sql-connectors/*",

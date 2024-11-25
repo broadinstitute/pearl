@@ -1,3 +1,5 @@
+# Creates the service account for the GKE autopilot cluster.
+
 resource "google_service_account" "cluster_service_account" {
   account_id = "juniper-cluster"
 }

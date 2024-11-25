@@ -1,3 +1,5 @@
+# Creates keys used to encrypt the Kubernetes database
+
 resource "google_kms_key_ring" "juniper_cluster_keyring" {
   location = var.region
   name     = "juniper-cluster-keyring"

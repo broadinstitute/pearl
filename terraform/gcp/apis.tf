@@ -1,3 +1,5 @@
+# Enables all the required APIs for the project
+
 locals {
   enable_services = [
     "container.googleapis.com",

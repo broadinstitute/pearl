@@ -1,3 +1,5 @@
+# Creates DNS records for all customer URLs.
+
 resource "google_dns_managed_zone" "customer_dns_zone" {
   for_each = var.customer_urls
 

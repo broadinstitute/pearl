@@ -1,3 +1,5 @@
+# Creates the GKE autopilot cluster for Juniper
+
 locals {
   # authorize access only to broad networks
   authorized_networks = [
