@@ -6,4 +6,4 @@ databaseChangeLog:
         - addColumn:
             tableName: html_page
             columns:
-              - column: { name: hide_navbar, type: boolean, defaultValueBoolean: false }
+              - column: { name: hide_navbar, type: boolean, defaultValueBoolean: false, constraints: { nullable: false } }
