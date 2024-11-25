@@ -1,3 +1,6 @@
+# Grants cross-project access to the artifact registry
+# for the Juniper cluster & cloudbuild service accounts
+
 resource "google_artifact_registry_repository_iam_binding" "cluster-artifact-registry-reader" {
   role   = "roles/artifactregistry.reader"
   repository = "juniper"

@@ -1,3 +1,4 @@
+# creates the artifact registry repository for all Juniper images
 
 resource "google_artifact_registry_repository" "juniper_repo" {
   location      = var.region
