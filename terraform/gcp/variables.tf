@@ -81,3 +81,9 @@ variable "k8s_namespace" {
   description = "Kubernetes namespace"
   default = "juniper"
 }
+
+variable "slack_notification_channel" {
+  type = string
+  default = ""
+  description = "Slack notification channel"
+}
