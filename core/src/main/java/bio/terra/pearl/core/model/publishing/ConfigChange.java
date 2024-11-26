@@ -3,6 +3,7 @@ package bio.terra.pearl.core.model.publishing;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +15,12 @@ import org.apache.commons.beanutils.PropertyUtils;
 public record ConfigChange(String propertyName, Object oldValue, Object newValue) {
     public ConfigChange(Object source, Object dest, String propertyName) throws ReflectiveOperationException {
         this(propertyName,
+                dest != null ? PropertyUtils.getProperty(dest, propertyName) : null,
+                source != null ? PropertyUtils.getProperty(source, propertyName) : null);
+    }
+
+    public ConfigChange(Object source, Object dest, String propertyName, String prefix) throws ReflectiveOperationException {
+        this(prefix != null ? prefix + "." + propertyName : propertyName,
                 dest != null ? PropertyUtils.getProperty(dest, propertyName) : null,
                 source != null ? PropertyUtils.getProperty(source, propertyName) : null);
     }
@@ -38,8 +45,7 @@ public record ConfigChange(String propertyName, Object oldValue, Object newValue
                     .filter(name -> !ignoreProperties.contains(name)).toList();
             List<ConfigChange> records = new ArrayList<>();
             for (String propertyName : propertyNames) {
-                String recordedName = prefix != null ? prefix + "." + propertyName : propertyName;
-                ConfigChange record = new ConfigChange(source, dest, recordedName);
+                ConfigChange record = new ConfigChange(source, dest, propertyName, prefix);
                 // if the new value is different than the old, add the record
                 if (!Objects.equals(record.newValue, record.oldValue)) {
                     records.add(record);
@@ -53,7 +59,12 @@ public record ConfigChange(String propertyName, Object oldValue, Object newValue
 
     public void apply(Object target) {
         try {
-            PropertyUtils.setProperty(target, propertyName, newValue);
+            PropertyDescriptor descriptor = PropertyUtils.getPropertyDescriptor(target, propertyName);
+            if (Enum.class.isAssignableFrom(descriptor.getPropertyType())) {
+                PropertyUtils.setProperty(target, propertyName, Enum.valueOf((Class<Enum>) descriptor.getPropertyType(), (String) newValue));
+            } else {
+                PropertyUtils.setProperty(target, propertyName, newValue);
+            }
         } catch (Exception e) {
             throw new InternalServerException("Error setting property during config apply " + propertyName, e);
         }

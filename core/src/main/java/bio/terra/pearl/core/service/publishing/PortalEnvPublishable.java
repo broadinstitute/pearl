@@ -4,23 +4,32 @@ import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.Versioned;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.publishing.*;
-import bio.terra.pearl.core.model.study.StudyEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /** For service classes handling object attached to a PortalEnvironment that can be published across environments */
 public interface PortalEnvPublishable {
-     List<String> CONFIG_IGNORE_PROPS = List.of("id", "createdAt", "lastUpdatedAt", "class",
-            "studyEnvironmentId", "portalEnvironmentId", "emailTemplateId", "emailTemplate",
-            "consentFormId", "consentForm", "surveyId", "survey", "versionedEntity", "trigger",
-             "exportOptionsId", "exportOptions");
-     void loadForDiffing(PortalEnvironment portalEnv);
+    List<String> DEFAULT_PUBLISH_IGNORE_PROPS = List.of("id", "createdAt", "lastUpdatedAt", "class",
+            "portalEnvironmentId", "studyEnvironmentId");
+     /** loads the relevant entities onto the environment for diff or apply operations */
+     void loadForPublishing(PortalEnvironment portalEnv);
      void updateDiff(PortalEnvironmentChange change, PortalEnvironment sourceEnv, PortalEnvironment destEnv);
      void applyDiff(PortalEnvironmentChange change, PortalEnvironment destEnv);
 
-    public static <C extends VersionedEntityConfig, T extends BaseEntity & Versioned> ListChange<C, VersionedConfigChange<T>> diffConfigLists(
+
+    default List<String> getPublishIgnoreProps() {
+        return Stream.concat(List.of("id", "createdAt", "lastUpdatedAt", "class",
+                "portalEnvironmentId", "studyEnvironmentId").stream(), getAdditionalPublishIgnoreProps().stream()).toList();
+    }
+
+    default List<String> getAdditionalPublishIgnoreProps() {
+        return List.of();
+    }
+
+     static <C extends VersionedEntityConfig, T extends BaseEntity & Versioned> ListChange<C, VersionedConfigChange<T>> diffConfigLists(
             List<C> sourceConfigs,
             List<C> destConfigs,
             List<String> ignoreProps) {
@@ -52,7 +61,7 @@ public interface PortalEnvPublishable {
     }
 
     /** for now, just checks to see if they reference the same versioned document */
-    public static boolean isVersionedConfigMatch(VersionedEntityConfig configA, VersionedEntityConfig configB) {
+    static boolean isVersionedConfigMatch(VersionedEntityConfig configA, VersionedEntityConfig configB) {
         if (configA == null || configB == null) {
             return configA == configB;
         }
@@ -61,4 +70,5 @@ public interface PortalEnvPublishable {
         }
         return Objects.equals(configA.versionedEntity().getStableId(), configB.versionedEntity().getStableId());
     }
+
 }

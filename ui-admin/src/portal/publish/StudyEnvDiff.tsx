@@ -23,7 +23,7 @@ const StudyEnvDiff = ({ studyName, studyEnvChange, selectedChanges, setSelectedC
         <ConfigChanges configChanges={studyEnvChange.configChanges}
           selectedChanges={selectedChanges.configChanges}
           updateSelectedChanges={configChanges => setSelectedChanges({
-            ...studyEnvChange,
+            ...selectedChanges,
             configChanges
           })}/>
       </div>

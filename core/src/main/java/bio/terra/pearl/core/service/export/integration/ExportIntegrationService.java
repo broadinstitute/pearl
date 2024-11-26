@@ -16,10 +16,10 @@ import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
-import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
 import bio.terra.pearl.core.service.publishing.StudyEnvPublishable;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
@@ -120,7 +120,7 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
     }
 
     @Override
-    public void loadForDiffing(StudyEnvironment studyEnv) {
+    public void loadForPublishing(StudyEnvironment studyEnv) {
         List<ExportIntegration> integrations = findByStudyEnvironmentId(studyEnv.getId());
         attachOptions(integrations);
         studyEnv.setExportIntegrations(integrations);
@@ -140,9 +140,12 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
             } else {
                 unmatchedIntegrations.remove(matchedIntegration);
                 // we get changes from both the integration object and the child export options object
-                List<ConfigChange> changes = ConfigChange.allChanges(sourceIntegration, matchedIntegration, PortalEnvPublishable.CONFIG_IGNORE_PROPS);
-                changes.addAll(ConfigChange.allChanges(sourceIntegration.getExportOptions(), matchedIntegration.getExportOptions(),
-                        PortalEnvPublishable.CONFIG_IGNORE_PROPS, "exportOptions"));
+                List<ConfigChange> changes = ConfigChange.allChanges(sourceIntegration, matchedIntegration, getPublishIgnoreProps());
+                changes.addAll(ConfigChange.allChanges(
+                        sourceIntegration.getExportOptions(),
+                        matchedIntegration.getExportOptions(),
+                        getPublishIgnoreProps(),
+                        "exportOptions"));
                 if (!changes.isEmpty()) {
                     changedIntegrations.add(new ConfigChangeList<>(matchedIntegration, changes));
                 }
@@ -152,6 +155,7 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
     }
 
     @Override
+    @Transactional
     public void applyDiff(StudyEnvironmentChange change, StudyEnvironment destEnv, PortalEnvironment destPortalEnv) {
         for (ExportIntegration integration : change.getExportIntegrationChanges().addedItems()) {
             integration.cleanForCopying();
@@ -168,5 +172,10 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
             }
             update(destIntegration);
         }
+    }
+
+    @Override
+    public List<String> getAdditionalPublishIgnoreProps() {
+        return List.of("exportOptions", "exportOptionsId", "destinationUrl");
     }
 }

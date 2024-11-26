@@ -13,11 +13,13 @@ import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.notification.email.EmailTemplateService;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
 import bio.terra.pearl.core.service.publishing.PublishingUtils;
 import bio.terra.pearl.core.service.publishing.StudyEnvPublishable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TriggerService extends CrudService<Trigger, TriggerDao> implements PortalEnvPublishable, StudyEnvPublishable {
@@ -66,7 +68,7 @@ public class TriggerService extends CrudService<Trigger, TriggerDao> implements 
     }
 
     @Override
-    public void loadForDiffing(PortalEnvironment portalEnv) {
+    public void loadForPublishing(PortalEnvironment portalEnv) {
         List<Trigger> triggers = findByPortalEnvironmentId(portalEnv.getId());
         attachTemplates(triggers);
         portalEnv.setTriggers(triggers);
@@ -77,12 +79,12 @@ public class TriggerService extends CrudService<Trigger, TriggerDao> implements 
         ListChange<Trigger, VersionedConfigChange<EmailTemplate>> triggerChanges = PortalEnvPublishable.diffConfigLists(
                 sourceEnv.getTriggers(),
                 destEnv.getTriggers(),
-                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
+                getPublishIgnoreProps());
         change.setTriggerChanges(triggerChanges);
     }
 
     @Override
-    public void loadForDiffing(StudyEnvironment studyEnv) {
+    public void loadForPublishing(StudyEnvironment studyEnv) {
         List<Trigger> triggers = findByStudyEnvironmentId(studyEnv.getId(), true);
         attachTemplates(triggers);
         studyEnv.setTriggers(triggers);
@@ -93,7 +95,7 @@ public class TriggerService extends CrudService<Trigger, TriggerDao> implements 
         ListChange<Trigger, VersionedConfigChange<EmailTemplate>> triggerChanges = PortalEnvPublishable.diffConfigLists(
                 sourceEnv.getTriggers(),
                 destEnv.getTriggers(),
-                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
+                getPublishIgnoreProps());
         change.setTriggerChanges(triggerChanges);
     }
 
@@ -118,6 +120,7 @@ public class TriggerService extends CrudService<Trigger, TriggerDao> implements 
     }
 
     @Override
+    @Transactional
     public void applyDiff(StudyEnvironmentChange change, StudyEnvironment destEnv, PortalEnvironment destPortalEnv) {
         ListChange<Trigger, VersionedConfigChange<EmailTemplate>> listChange = change.getTriggerChanges();
         for (Trigger config : listChange.addedItems()) {
@@ -136,5 +139,16 @@ public class TriggerService extends CrudService<Trigger, TriggerDao> implements 
         for (VersionedConfigChange<EmailTemplate> configChange : listChange.changedItems()) {
             PublishingUtils.applyChangesToVersionedConfig(configChange, this, emailTemplateService, destEnv.getEnvironmentName(), destPortalEnv.getPortalId());
         }
+    }
+
+    @Override
+    public List<String> getAdditionalPublishIgnoreProps() {
+        return List.of("emailTemplateId", "emailTemplate", "versionedEntity");
+    }
+
+    @Override
+    /** we have to re-implement this method since this class implements both interfaces, and otherwise the default methods collide */
+    public List<String> getPublishIgnoreProps() {
+        return Stream.concat(DEFAULT_PUBLISH_IGNORE_PROPS.stream(), getAdditionalPublishIgnoreProps().stream()).toList();
     }
 }

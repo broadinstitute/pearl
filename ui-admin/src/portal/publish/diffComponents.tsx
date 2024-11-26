@@ -66,14 +66,15 @@ const IMMUTABLE_CONFIG_PROPS = ['initialized']
 type ConfigChangeViewProps = {
   configChange: ConfigChange,
   selected: boolean,
-  setSelected: (selected: boolean) => void
+  setSelected: (selected: boolean) => void,
+  readOnly?: boolean  // default is false
 }
 /** renders a config change by converting the old and new vals to strings */
-export const ConfigChangeView = ({ configChange, selected, setSelected }: ConfigChangeViewProps) => {
+export const ConfigChangeView = ({ configChange, selected, setSelected, readOnly }: ConfigChangeViewProps) => {
   const noVal = <span className="text-muted fst-italic">none</span>
   const oldVal = valuePresent(configChange.oldValue) ? configChange.oldValue.toString() : noVal
   const newVal = valuePresent(configChange.newValue) ? configChange.newValue.toString() : noVal
-  const readOnly = IMMUTABLE_CONFIG_PROPS.includes(configChange.propertyName)
+  readOnly = IMMUTABLE_CONFIG_PROPS.includes(configChange.propertyName) || readOnly
   return <div>
     <label>
       {!readOnly && <input type="checkbox" className="me-2" checked={selected} readOnly={readOnly}
@@ -179,8 +180,29 @@ export const ConfigChangeListView = <T extends Configable, C extends VersionedCo
       <ul className="list-unstyled">
         {configChangeList.changedItems.map((item, index) => {
           if ((item as ConfigChangeList).entity) {
-            return <span>yo</span>
+            // for now, this path is only for ExportIntegrations
+            const configChange = item as ConfigChangeList
+            const matchIndex = selectedChanges.changedItems.findIndex(listItem =>
+              (listItem as ConfigChangeList).entity === configChange.entity)
+            return <li className="ps-4" key={index}>
+              <label className="d-flex align-items-start">
+                <input type="checkbox" className="me-3 mt-1"
+                  checked={matchIndex >= 0}
+                  onChange={e => {
+                    const updatedItems = makeModifiedArray(selectedChanges.changedItems, item,
+                      { matchIndex, isAdd: e.target.checked })
+                    setSelectedChanges({ ...selectedChanges, changedItems: updatedItems })
+                  }}/>{ (configChange.entity as ExportIntegration).name }
+                <ul className="list-unstyled">
+                  {(item as ConfigChangeList).changes.map((configChange, index) =>
+                    <ConfigChangeView configChange={configChange} selected={false} setSelected={() => false}
+                      readOnly={true} key={index}/>
+                  )}
+                </ul>
+              </label>
+            </li>
           } else {
+            // this path is for triggers, surveys, languages, and kit types
             const configChange = item as VersionedConfigChange
             const matchIndex = selectedChanges.changedItems.findIndex(listItem =>
               (listItem as VersionedConfigChange).sourceId === configChange.sourceId)

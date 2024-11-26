@@ -17,8 +17,7 @@ import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.portal.PortalEnvironmentService;
-import bio.terra.pearl.core.service.publishing.PortalDiffService;
-import bio.terra.pearl.core.service.publishing.StudyPublishingService;
+import bio.terra.pearl.core.service.publishing.PortalPublishingService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyService;
 import bio.terra.pearl.core.service.survey.SurveyService;
@@ -44,8 +43,7 @@ public class StudyPopulator extends BasePopulator<Study, StudyPopDto, PortalPopu
     private final SurveyService surveyService;
     private final EmailTemplatePopulator emailTemplatePopulator;
     private final PreEnrollmentResponseDao preEnrollmentResponseDao;
-    private final PortalDiffService portalDiffService;
-    private final StudyPublishingService studyPublishingService;
+    private final PortalPublishingService portalPublishingService;
     private final PortalEnvironmentService portalEnvironmentService;
     private final KitTypeDao kitTypeDao;
     private final StudyEnvironmentKitTypeDao studyEnvironmentKitTypeDao;
@@ -56,8 +54,7 @@ public class StudyPopulator extends BasePopulator<Study, StudyPopDto, PortalPopu
                           SurveyPopulator surveyPopulator, SurveyService surveyService,
                           EmailTemplatePopulator emailTemplatePopulator,
                           PreEnrollmentResponseDao preEnrollmentResponseDao,
-                          PortalDiffService portalDiffService, StudyPublishingService studyPublishingService,
-                          PortalEnvironmentService portalEnvironmentService, KitTypeDao kitTypeDao,
+                          PortalPublishingService portalPublishingService, PortalEnvironmentService portalEnvironmentService, KitTypeDao kitTypeDao,
                           StudyEnvironmentKitTypeDao studyEnvironmentKitTypeDao,
                           ExportIntegrationPopulator exportIntegrationPopulator) {
         this.studyService = studyService;
@@ -68,8 +65,7 @@ public class StudyPopulator extends BasePopulator<Study, StudyPopDto, PortalPopu
         this.surveyService = surveyService;
         this.emailTemplatePopulator = emailTemplatePopulator;
         this.preEnrollmentResponseDao = preEnrollmentResponseDao;
-        this.portalDiffService = portalDiffService;
-        this.studyPublishingService = studyPublishingService;
+        this.portalPublishingService = portalPublishingService;
         this.portalEnvironmentService = portalEnvironmentService;
         this.kitTypeDao = kitTypeDao;
         this.studyEnvironmentKitTypeDao = studyEnvironmentKitTypeDao;
@@ -183,14 +179,14 @@ public class StudyPopulator extends BasePopulator<Study, StudyPopDto, PortalPopu
             StudyEnvironment sourceEnv = popDto.getStudyEnvironmentDtos().stream()
                     .filter(env -> env.getEnvironmentName().equals(EnvironmentName.sandbox))
                     .findFirst().get();
-            StudyEnvironment destEnv = portalDiffService.
+            StudyEnvironment destEnv = portalPublishingService.
                     loadStudyEnvForProcessing(existingStudy.getShortcode(), EnvironmentName.sandbox);
             PortalEnvironment destPortalEnv = portalEnvironmentService
                     .findOne(context.getPortalShortcode(), EnvironmentName.sandbox).get();
             try {
-                StudyEnvironmentChange studyEnvChange = portalDiffService.diffStudyEnvs(existingStudy.getShortcode(),
+                StudyEnvironmentChange studyEnvChange = portalPublishingService.diffStudyEnvs(existingStudy.getShortcode(),
                         sourceEnv, destEnv);
-                studyPublishingService.applyChanges(destEnv, studyEnvChange, destPortalEnv);
+                portalPublishingService.applyChanges(destEnv, studyEnvChange, destPortalEnv);
             } catch (Exception e) {
                 // we probably want to move this to some sort of "PopulateException"
                 throw new IOException(e);

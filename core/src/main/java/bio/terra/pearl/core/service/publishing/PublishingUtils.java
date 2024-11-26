@@ -21,7 +21,14 @@ public class PublishingUtils {
                                     CrudService<C, ?> configService,
                                     VersionedEntityService<T, ?> documentService,
                                     EnvironmentName destEnvName, UUID portalId) {
-        C destConfig = configService.find(versionedConfigChange.destId()).get();
+        // first deactivate the current config
+        C destConfig = configService.find(versionedConfigChange.destId()).orElseThrow();
+        destConfig.setActive(false);
+        configService.update(destConfig);
+
+        // now we'll create a new one
+        destConfig.cleanForCopying();
+        destConfig.setActive(true);
         try {
             for (ConfigChange change : versionedConfigChange.configChanges()) {
                 setPropertyEnumSafe(destConfig, change.propertyName(), change.newValue());
@@ -39,7 +46,7 @@ public class PublishingUtils {
             assignPublishedVersionIfNeeded(destEnvName, portalId, docChange, documentService);
             destConfig.updateVersionedEntityId(newDocumentId);
         }
-        return configService.update(destConfig);
+        return configService.create(destConfig);
     }
 
 

@@ -53,7 +53,7 @@ public class ConfigChangeTests {
                 .participantHostname("bar")
                 .emailSourceAddress("blah@blah.com").build();
         List<ConfigChange> changeRecords = ConfigChange.allChanges(sourceConfig, destConfig,
-                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
+                PortalEnvPublishable.DEFAULT_PUBLISH_IGNORE_PROPS);
         assertThat(changeRecords, hasSize(2));
         assertThat(changeRecords, hasItems(
                 new ConfigChange("acceptingRegistration", false, true),
@@ -69,7 +69,7 @@ public class ConfigChangeTests {
                 .participantHostname("bar")
                 .emailSourceAddress("blah@blah.com").build();
         List<ConfigChange> changeRecords = ConfigChange.allChanges(sourceConfig, destConfig,
-                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
+                PortalEnvPublishable.DEFAULT_PUBLISH_IGNORE_PROPS);
         assertThat(changeRecords, hasSize(7));
         assertThat(changeRecords, hasItems(
                 new ConfigChange("emailSourceAddress", "blah@blah.com", (Object) null),
@@ -90,7 +90,7 @@ public class ConfigChangeTests {
                 .participantHostname("bar")
                 .emailSourceAddress("blah@blah.com").build();
         List<ConfigChange> changeRecords = ConfigChange.allChanges(sourceConfig, destConfig,
-                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
+                PortalEnvPublishable.DEFAULT_PUBLISH_IGNORE_PROPS);
         assertThat(changeRecords, hasSize(7));
         assertThat(changeRecords, hasItems(
                 new ConfigChange("emailSourceAddress", (Object) null, (Object) "blah@blah.com"),
@@ -108,7 +108,7 @@ public class ConfigChangeTests {
         PortalEnvironmentConfig sourceConfig = null;;
         PortalEnvironmentConfig destConfig = null;
         List<ConfigChange> changeRecords = ConfigChange.allChanges(sourceConfig, destConfig,
-                PortalEnvPublishable.CONFIG_IGNORE_PROPS);
+                PortalEnvPublishable.DEFAULT_PUBLISH_IGNORE_PROPS);
         assertThat(changeRecords, hasSize(0));
     }
 }

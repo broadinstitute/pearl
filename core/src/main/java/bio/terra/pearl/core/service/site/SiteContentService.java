@@ -1,9 +1,13 @@
 package bio.terra.pearl.core.service.site;
 
 import bio.terra.pearl.core.dao.site.SiteContentDao;
+import bio.terra.pearl.core.model.portal.PortalEnvironment;
+import bio.terra.pearl.core.model.publishing.PortalEnvironmentChange;
+import bio.terra.pearl.core.model.publishing.VersionedEntityChange;
 import bio.terra.pearl.core.model.site.*;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.VersionedEntityService;
+import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-public class SiteContentService extends VersionedEntityService<SiteContent, SiteContentDao> {
+public class SiteContentService extends VersionedEntityService<SiteContent, SiteContentDao> implements PortalEnvPublishable {
     private LocalizedSiteContentService localizedSiteContentService;
 
     public SiteContentService(SiteContentDao dao, LocalizedSiteContentService localizedSiteContentService) {
@@ -115,5 +119,23 @@ public class SiteContentService extends VersionedEntityService<SiteContent, Site
 
     public List<SiteContent> findActiveContentByPortalId(UUID portalId) {
         return dao.findActiveContentByPortalId(portalId);
+    }
+
+    @Override
+    public void loadForPublishing(PortalEnvironment portalEnv) {
+        if (portalEnv.getSiteContentId() != null) {
+            portalEnv.setSiteContent(find(portalEnv.getSiteContentId()).orElseThrow());
+        }
+    }
+
+    @Override
+    public void updateDiff(PortalEnvironmentChange change, PortalEnvironment sourceEnv, PortalEnvironment destEnv) {
+        VersionedEntityChange<SiteContent> siteContentRecord = new VersionedEntityChange<SiteContent>(sourceEnv.getSiteContent(), destEnv.getSiteContent());
+        change.setSiteContentChange(siteContentRecord);
+    }
+
+    @Override
+    public void applyDiff(PortalEnvironmentChange change, PortalEnvironment destEnv) {
+
     }
 }
