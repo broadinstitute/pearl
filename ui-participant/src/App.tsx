@@ -31,7 +31,8 @@ import { useCookiesAcknowledged } from './browserPersistentState'
 import { IdleStatusMonitor } from 'login/IdleStatusMonitor'
 import {
   ApiProvider,
-  I18nProvider, initializeMixpanel
+  I18nProvider, initializeMixpanel, MaintenanceMode
+
 } from '@juniper/ui-core'
 import {
   BrandConfiguration,
@@ -133,41 +134,43 @@ function App() {
             <ConfigProvider>
               <ConfigConsumer>
                 {config =>
-                  <AuthProvider {
-                    ...getAuthProviderProps(config.b2cTenantName, config.b2cClientId, config.b2cPolicyName)
-                  }>
-                    <UserProvider>
-                      <ActiveUserProvider>
-                        <I18nProvider defaultLanguage={portalEnv.portalEnvironmentConfig.defaultLanguage}
-                          portalShortcode={portal.shortcode}>
-                          <Suspense fallback={<PageLoadingIndicator/>}>
-                            <IdleStatusMonitor
-                              maxIdleSessionDuration={30 * 60 * 1000} idleWarningDuration={5 * 60 * 1000}/>
-                            <Routes>
-                              <Route path="/hub/*" element={<ProtectedRoute><HubRouter/></ProtectedRoute>}/>
-                              <Route path="/studies/:studyShortcode">
-                                <Route path="join/*" element={<StudyEnrollRouter/>}/>
-                                <Route index element={<div>study specific page -- TBD</div>}/>
-                                <Route path="*" element={<div>unmatched study route</div>}/>
-                              </Route>
-                              <Route path="/" element={<LandingPage localContent={localContent}/>}>
-                                {landingRoutes}
-                              </Route>
-                              <Route path="/redirect-from-oauth">
-                                <Route index element={<RedirectFromOAuth/>}/>
-                                <Route path="error" element={<AuthError/>}/>
-                              </Route>
-                              <Route path="/privacy" element={<PrivacyPolicyPage/>}/>
-                              <Route path="/terms/investigator" element={<InvestigatorTermsOfUsePage/>}/>
-                              <Route path="/terms/participant" element={<ParticipantTermsOfUsePage/>}/>
-                              <Route path="*" element={<PageNotFound/>}/>
-                            </Routes>
-                          </Suspense>
-                          {!cookiesAcknowledged && <CookieAlert onDismiss={() => setCookiesAcknowledged()} />}
-                        </I18nProvider>
-                      </ActiveUserProvider>
-                    </UserProvider>
-                  </AuthProvider>
+                  <MaintenanceMode systemSettings={config.systemSettings}>
+                    <AuthProvider {
+                      ...getAuthProviderProps(config.b2cTenantName, config.b2cClientId, config.b2cPolicyName)
+                    }>
+                      <UserProvider>
+                        <ActiveUserProvider>
+                          <I18nProvider defaultLanguage={portalEnv.portalEnvironmentConfig.defaultLanguage}
+                            portalShortcode={portal.shortcode}>
+                            <Suspense fallback={<PageLoadingIndicator/>}>
+                              <IdleStatusMonitor
+                                maxIdleSessionDuration={30 * 60 * 1000} idleWarningDuration={5 * 60 * 1000}/>
+                              <Routes>
+                                <Route path="/hub/*" element={<ProtectedRoute><HubRouter/></ProtectedRoute>}/>
+                                <Route path="/studies/:studyShortcode">
+                                  <Route path="join/*" element={<StudyEnrollRouter/>}/>
+                                  <Route index element={<div>study specific page -- TBD</div>}/>
+                                  <Route path="*" element={<div>unmatched study route</div>}/>
+                                </Route>
+                                <Route path="/" element={<LandingPage localContent={localContent}/>}>
+                                  {landingRoutes}
+                                </Route>
+                                <Route path="/redirect-from-oauth">
+                                  <Route index element={<RedirectFromOAuth/>}/>
+                                  <Route path="error" element={<AuthError/>}/>
+                                </Route>
+                                <Route path="/privacy" element={<PrivacyPolicyPage/>}/>
+                                <Route path="/terms/investigator" element={<InvestigatorTermsOfUsePage/>}/>
+                                <Route path="/terms/participant" element={<ParticipantTermsOfUsePage/>}/>
+                                <Route path="*" element={<PageNotFound/>}/>
+                              </Routes>
+                            </Suspense>
+                            {!cookiesAcknowledged && <CookieAlert onDismiss={() => setCookiesAcknowledged()} />}
+                          </I18nProvider>
+                        </ActiveUserProvider>
+                      </UserProvider>
+                    </AuthProvider>
+                  </MaintenanceMode>
                 }
               </ConfigConsumer>
             </ConfigProvider>

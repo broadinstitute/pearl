@@ -1,6 +1,7 @@
 package bio.terra.pearl.api.admin.service.scheduled;
 
 import bio.terra.pearl.api.admin.service.notifications.SendgridEventService;
+import bio.terra.pearl.api.admin.service.system.CheckDisableScheduledTask;
 import java.util.concurrent.TimeUnit;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,6 +27,7 @@ public class ScheduledSendgridEventFetcher {
       name = "SendgridEventService.saveSendgridActivity",
       lockAtLeastFor = "1m",
       lockAtMostFor = "15m")
+  @CheckDisableScheduledTask
   public void saveSendgridActivity() {
     sendgridEventService.saveSendgridActivity();
   }

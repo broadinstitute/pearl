@@ -27,7 +27,8 @@ import {
   StudyEnvParams,
   Survey,
   SurveyResponse,
-  Trigger
+  Trigger,
+  SystemSettings
 } from '@juniper/ui-core'
 import queryString from 'query-string'
 import {
@@ -176,6 +177,7 @@ export type Config = {
   adminUiHostname: string,
   adminApiHostname: string,
   deploymentZone: string
+  systemSettings: SystemSettings
 }
 
 export type MailingListContact = {
@@ -1770,6 +1772,22 @@ export default {
     const params = queryString.stringify({ eventTypes: eventTypes.join(','), days, limit })
     const url = `${API_ROOT}/logEvents?${params}`
     const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async loadSystemSettings(): Promise<SystemSettings> {
+    const url = `/systemSettings`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async updateSystemSettings(settings: SystemSettings): Promise<SystemSettings> {
+    const url = `${API_ROOT}/systemSettings`
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: this.getInitHeaders(),
+      body: JSON.stringify(settings)
+    })
     return await this.processJsonResponse(response)
   },
 
