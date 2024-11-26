@@ -36,7 +36,7 @@ export const RedirectFromOAuth = () => {
   const { i18n } = useI18n()
 
   const defaultEnrollStudy = findDefaultEnrollmentStudy(returnToStudy, portal.portalStudies)
-
+  const referralSource = sessionStorage.getItem('referralSource')
 
   useEffect(() => {
     const handleRedirectFromOauth = async () => {
@@ -93,7 +93,7 @@ export const RedirectFromOAuth = () => {
             // Enroll in the study if not already enrolled in any other study
             if (defaultEnrollStudy && !loginResult.enrollees.length) {
               const hubResponse = await enrollCurrentUserInStudy(
-                defaultEnrollStudy.shortcode, preEnrollResponseId, refreshLoginState)
+                defaultEnrollStudy.shortcode, preEnrollResponseId, refreshLoginState, referralSource)
 
               handleNewStudyEnroll(hubResponse, defaultEnrollStudy.shortcode, navigate, i18n, defaultEnrollStudy.name)
             } else {

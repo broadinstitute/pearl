@@ -7,8 +7,7 @@ import {
   Route,
   Routes,
   useNavigate,
-  useParams,
-  useSearchParams
+  useParams, useSearchParams
 } from 'react-router-dom'
 import { usePortalEnv } from 'providers/PortalProvider'
 import Api, {
@@ -39,6 +38,7 @@ import {
 } from 'util/enrolleeUtils'
 import { logError } from 'util/loggingUtils'
 import { getNextConsentTask, getTaskPath } from 'hub/task/taskUtils'
+import { useEnrollmentParams } from './useEnrollmentParams'
 
 export type StudyEnrollContext = {
   user: ParticipantUser | null,
@@ -83,8 +83,10 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
   const { i18n } = useI18n()
 
   const [searchParams] = useSearchParams()
-  const isProxyEnrollment = searchParams.get('isProxyEnrollment') === 'true'
-  const ppUserId = searchParams.get('ppUserId')
+  const { skipPreEnroll, referralSource, isProxyEnrollment, ppUserId, preFilledAnswers } = useEnrollmentParams()
+
+  console.log('skipPreEnroll', skipPreEnroll)
+  console.log('referralSource', referralSource)
 
   const { user, ppUsers, enrollees, refreshLoginState } = useUser()
 
@@ -146,13 +148,12 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
     if (mustProvidePassword) {
       return
     }
-    if (preEnrollSatisfied) {
+    if (preEnrollSatisfied || skipPreEnroll) {
       if (!user) {
         navigate('register', { replace: true })
       } else {
         // when preEnroll is satisfied, and we have a user, we're clear to create an Enrollee
         try {
-          const referralSource = sessionStorage.getItem('REFERRAL_SOURCE')
           const hubResponse = isProxyEnrollment
             ? await enrollProxyUserInStudy(
               studyShortcode, preEnrollResponseId, ppUserId, refreshLoginState, referralSource
@@ -203,6 +204,8 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
         />
       ) : (
         <Routes>
+          {skipPreEnroll &&
+            <Route path="preEnroll/*" element={<PortalRegistrationRouter portal={portal} returnTo={null}/>}/>}
           {hasPreEnroll && <Route path="preEnroll" element={
             <PreEnrollView enrollContext={enrollContext} survey={enrollContext.studyEnv.preEnrollSurvey as Survey}/>
           }/>}
@@ -222,7 +225,6 @@ export function handleNewStudyEnroll(
   studyName: string
 ) {
   const nextConsentTask = getNextConsentTask(hubResponse)
-  sessionStorage.removeItem('REFERRAL_SOURCE')
 
   if (nextConsentTask) {
     const consentTaskPath = getTaskPath(nextConsentTask, hubResponse.enrollee.shortcode, studyShortcode)

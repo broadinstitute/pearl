@@ -17,6 +17,7 @@ import {
 } from '@juniper/ui-core'
 import envVars from 'util/envVars'
 import mixpanel from 'mixpanel-browser'
+import { useEnrollmentParams } from '../studies/enroll/useEnrollmentParams'
 
 /**
  * The user provide contains the _raw_ user context, which is more or less directly derived
@@ -76,6 +77,7 @@ export default function UserProvider({ children }: { children: React.ReactNode }
   const [loginState, setLoginState] = useState<LoginResult | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const auth = useAuth()
+  useEnrollmentParams()
 
   /**
    * Sign in to the UI based on the result of signing in to the API.

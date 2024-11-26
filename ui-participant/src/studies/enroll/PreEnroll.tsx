@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { StudyEnrollContext } from './StudyEnrollRouter'
 import {
   getResumeData,
-  getSurveyJsAnswerList,
+  getSurveyJsAnswerList, makeSurveyJsData,
   SurveyAutoCompleteButton,
   SurveyReviewModeButton,
   useI18n,
@@ -15,6 +15,7 @@ import {
 } from '@juniper/ui-core'
 import { useUser } from '../../providers/UserProvider'
 import { useActiveUser } from '../../providers/ActiveUserProvider'
+import { useEnrollmentParams } from './useEnrollmentParams'
 
 /**
  * pre-enrollment surveys are expected to have a calculated value that indicates
@@ -33,9 +34,13 @@ export default function PreEnrollView({ enrollContext, survey }:
   const navigate = useNavigate()
   // for now, we assume all pre-screeners are a single page
   const pager = { pageNumber: 0, updatePageNumber: () => 0 }
+
+  const { preFilledAnswers } = useEnrollmentParams()
+  const resumeData = makeSurveyJsData(undefined, preFilledAnswers, user?.id)
+
   const { surveyModel, refreshSurvey, SurveyComponent } = useSurveyJSModel(
     survey,
-    null,
+    resumeData,
     handleComplete,
     pager,
     studyEnv.environmentName,
@@ -48,9 +53,8 @@ export default function PreEnrollView({ enrollContext, survey }:
   const [searchParams] = useSearchParams()
   const referralSource = searchParams.get('referralSource')
   if (referralSource) {
-    sessionStorage.setItem('REFERRAL_SOURCE', referralSource)
+    sessionStorage.setItem('referralSource', referralSource)
   }
-  console.log('referralSource', referralSource)
 
   surveyModel.locale = selectedLanguage || 'default'
 
