@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service.portal;
 
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalPermission;
 import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
