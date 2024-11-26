@@ -1,4 +1,4 @@
-# create google secret manager db secrets
+# Creates the secrets that our application uses to access the database.
 
 resource "google_secret_manager_secret" "d2p_db_user" {
   secret_id = "d2p-db-user"

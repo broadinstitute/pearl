@@ -1,3 +1,6 @@
+# Creates private network and subnetwork for the Juniper cluster
+# including a router and cloud nat for internet access and cloud armor policies
+
 resource "google_compute_network" "juniper_network" {
   name = "juniper-cluster-network"
 

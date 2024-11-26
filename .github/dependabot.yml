@@ -17,9 +17,6 @@ updates:
       timezone: "America/New_York"
     directories:
       - "/"
-      - "ui-admin"
-      - "ui-participant"
-      - "ui-core"
     package-ecosystem: "npm"
     commit-message:
       prefix: "[JN-1457]"
@@ -30,10 +27,6 @@ updates:
       timezone: "America/New_York"
     directories:
       - "/"
-      - "api-admin"
-      - "api-participant"
-      - "core"
-      - "populate"
     package-ecosystem: "gradle"
     commit-message:
       prefix: "[JN-1457]"

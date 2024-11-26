@@ -1,8 +1,7 @@
-# this file allows github to create artifacts in the artifact registry
-
+# this file creates the bindings needed to allow images to uploaded from our github
+# repository. See "attribute_condition" for how we restrict access.
 
 # terraform translation of https://gist.github.com/palewire/12c4b2b974ef735d22da7493cf7f4d37
-
 # 0. create service account
 resource "google_service_account" "github_actions" {
   account_id = "github-actions"
@@ -33,7 +32,9 @@ resource "google_iam_workload_identity_pool_provider" "github_actions_pool_provi
     "attribute.repository_owner_id" = "assertion.repository_owner_id"
   }
 
-  # NOTE: this is what restricts external access, this ids are from github
+  # NOTE: this is what restricts external access, this ids are from github.
+  #       does not restrict any specific branches, but this is OK because
+  #       only trusted users can create pull requests / trigger actions
   attribute_condition = "assertion.repository_owner_id == '393552' && assertion.repository_id == '566938309'"
   oidc {
     allowed_audiences = []

@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service.kit;
 
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalEnrolleePermission;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyEnvPermission;
 import bio.terra.pearl.api.admin.service.auth.context.PortalEnrolleeAuthContext;
@@ -60,7 +61,7 @@ public class KitExtService {
     }
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Collection<KitRequestDto> getKitRequestsByStudyEnvironment(
       PortalStudyEnvAuthContext authContext) {
     StudyEnvironment studyEnvironment =
@@ -69,7 +70,7 @@ public class KitExtService {
     return kitRequestService.getKitsByStudyEnvironment(studyEnvironment);
   }
 
-  @EnforcePortalEnrolleePermission(permission = "BASE")
+  @EnforcePortalEnrolleePermission(permission = AuthUtilService.BASE_PERMISSION)
   public KitRequestDto requestKit(
       PortalEnrolleeAuthContext authContext,
       KitRequestService.KitRequestCreationDto kitRequestCreationDto) {
@@ -80,7 +81,7 @@ public class KitExtService {
         kitRequestCreationDto);
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public KitRequestListResponse requestKits(
       PortalStudyEnvAuthContext authContext,
       List<String> enrolleeShortcodes,
@@ -112,7 +113,7 @@ public class KitExtService {
     return response;
   }
 
-  @EnforcePortalEnrolleePermission(permission = "BASE")
+  @EnforcePortalEnrolleePermission(permission = AuthUtilService.BASE_PERMISSION)
   public KitRequest collectKit(
       PortalEnrolleeAuthContext authContext, KitRequestService.KitCollectionDto kitCollectionDto) {
 
@@ -126,12 +127,12 @@ public class KitExtService {
         authContext.getOperator(), authContext.getStudyShortcode(), kitRequest);
   }
 
-  @EnforcePortalEnrolleePermission(permission = "BASE")
+  @EnforcePortalEnrolleePermission(permission = AuthUtilService.BASE_PERMISSION)
   public Collection<KitRequestDto> getKitRequests(PortalEnrolleeAuthContext authContext) {
     return kitRequestService.findByEnrollee(authContext.getEnrollee());
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public void refreshKitStatuses(PortalStudyEnvAuthContext authContext)
       throws PepperApiException, PepperParseException {
     Study study = studyService.find(authContext.getPortalStudy().getStudyId()).get();

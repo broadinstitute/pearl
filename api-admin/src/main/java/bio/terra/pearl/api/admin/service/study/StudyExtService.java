@@ -91,7 +91,7 @@ public class StudyExtService {
   }
 
   /** gets all the studies for a portal, with the environments attached */
-  @EnforcePortalPermission(permission = "BASE")
+  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<Study> getStudiesWithEnvs(PortalAuthContext authContext, EnvironmentName envName) {
     List<Study> studies = studyService.findByPortalId(authContext.getPortal().getId());
     studies.forEach(

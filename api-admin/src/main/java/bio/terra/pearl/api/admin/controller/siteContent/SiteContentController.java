@@ -2,6 +2,8 @@ package bio.terra.pearl.api.admin.controller.siteContent;
 
 import bio.terra.pearl.api.admin.api.SiteContentApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
 import bio.terra.pearl.api.admin.service.siteContent.SiteContentExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -35,7 +37,8 @@ public class SiteContentController implements SiteContentApi {
   public ResponseEntity<Object> get(String portalShortcode, String stableId, Integer version) {
     AdminUser operator = authUtilService.requireAdminUser(request);
     Optional<SiteContent> siteContent =
-        siteContentExtService.get(portalShortcode, stableId, version, operator);
+        siteContentExtService.get(
+            PortalAuthContext.of(operator, portalShortcode), stableId, version);
     return ResponseEntity.of(siteContent.map(content -> content));
   }
 
@@ -44,7 +47,8 @@ public class SiteContentController implements SiteContentApi {
     AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     Optional<SiteContent> siteContent =
-        siteContentExtService.getCurrent(portalShortcode, environmentName, operator);
+        siteContentExtService.getCurrent(
+            PortalEnvAuthContext.of(operator, portalShortcode, environmentName));
     return ResponseEntity.of(siteContent.map(content -> content));
   }
 
@@ -53,7 +57,8 @@ public class SiteContentController implements SiteContentApi {
     AdminUser operator = authUtilService.requireAdminUser(request);
     SiteContent siteContent = objectMapper.convertValue(body, SiteContent.class);
     SiteContent savedContent =
-        siteContentExtService.create(portalShortcode, stableId, siteContent, operator);
+        siteContentExtService.create(
+            PortalAuthContext.of(operator, portalShortcode), stableId, siteContent);
     return ResponseEntity.ok(savedContent);
   }
 
@@ -61,7 +66,8 @@ public class SiteContentController implements SiteContentApi {
   public ResponseEntity<Object> versionList(String portalShortcode, String stableId) {
     AdminUser operator = authUtilService.requireAdminUser(request);
     List<SiteContent> contents =
-        siteContentExtService.versionList(portalShortcode, stableId, operator);
+        siteContentExtService.versionList(
+            PortalAuthContext.of(operator, portalShortcode), stableId);
     return ResponseEntity.ok(contents);
   }
 }

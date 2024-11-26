@@ -1,11 +1,10 @@
 package bio.terra.pearl.api.admin.service.notifications;
 
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
-import bio.terra.pearl.core.model.EnvironmentName;
-import bio.terra.pearl.core.model.admin.AdminUser;
+import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyEnvPermission;
+import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.participant.Enrollee;
-import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.service.notification.NotificationContextInfo;
 import bio.terra.pearl.core.service.notification.NotificationDispatcher;
 import bio.terra.pearl.core.service.notification.TriggerService;
@@ -52,21 +51,16 @@ public class NotificationExtService {
     this.studyService = studyService;
   }
 
+  @EnforcePortalStudyEnvPermission(permission = "participant_data_edit")
   public Trigger sendAdHoc(
-      AdminUser user,
-      String portalShortcode,
-      String studyShortcode,
-      EnvironmentName envName,
+      PortalStudyEnvAuthContext authContext,
       List<String> enrolleeShortcodes,
       Map<String, String> customMessages,
       UUID configId) {
-    authUtilService.authUserToPortal(user, portalShortcode);
-    authUtilService.authUserToStudy(user, portalShortcode, studyShortcode);
-    StudyEnvironment studyEnv = studyEnvironmentService.findByStudy(studyShortcode, envName).get();
 
     List<Enrollee> enrollees = enrolleeService.findAllByShortcodes(enrolleeShortcodes);
     for (Enrollee enrollee : enrollees) {
-      authUtilService.checkEnrolleeInStudyEnv(enrollee, studyEnv);
+      authUtilService.checkEnrolleeInStudyEnv(enrollee, authContext.getStudyEnvironment());
     }
 
     Trigger config = triggerService.find(configId).get();

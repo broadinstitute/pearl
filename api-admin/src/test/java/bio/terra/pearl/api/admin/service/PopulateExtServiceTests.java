@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.hasSize;
 import bio.terra.pearl.api.admin.AuthAnnotationSpec;
 import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
@@ -49,7 +50,8 @@ public class PopulateExtServiceTests extends BaseSpringBootTest {
             "populateSurvey", AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
             "populateSiteContent",
                 AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
-            "populateEnrollee", AuthAnnotationSpec.withPortalStudyEnvPerm("BASE"),
+            "populateEnrollee",
+                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "bulkPopulateEnrollees",
                 AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
             "extractPortal", AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
