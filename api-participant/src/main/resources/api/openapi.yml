@@ -296,6 +296,7 @@ paths:
         - { name: envName, in: path, required: true, schema: { type: string } }
         - { name: studyShortcode, in: path, required: true, schema: { type: string } }
         - { name: preEnrollResponseId, in: query, required: false, schema: { type: string, format: uuid } }
+        - { name: referralSource, in: query, required: false, schema: { type: string } }
       responses:
         '200':
           description: hub response with enrollee
@@ -315,6 +316,7 @@ paths:
         - { name: studyShortcode, in: path, required: true, schema: { type: string } }
         - { name: preEnrollResponseId, in: query, required: false, schema: { type: string, format: uuid } }
         - { name: governedPpUserId, in: query, required: false, schema: { type: string, format: uuid } }
+        - { name: referralSource, in: query, required: false, schema: { type: string } }
       responses:
         '200':
           description: hub response with enrollee

@@ -257,7 +257,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         surveyFactory.attachToEnv(consent, studyEnv.getId(), true);
 
         HubResponse<Enrollee> hubResponse = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode, userBundle.user(), userBundle.ppUser(),
-                null);
+                null, null);
         Enrollee enrollee = hubResponse.getResponse();
         Enrollee proxyEnrollee = hubResponse.getEnrollee();
         assertThat(enrollee.getShortcode(), notNullValue());
@@ -298,10 +298,10 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         surveyFactory.attachToEnv(consent, studyEnv.getId(), true);
 
         HubResponse<Enrollee> hubResponse1 = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode, userBundle.user(), userBundle.ppUser(),
-                 null);
+                 null, null);
         Enrollee proxyEnrollee = hubResponse1.getEnrollee();
         HubResponse<Enrollee> hubResponse2 = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode,userBundle.user(), userBundle.ppUser(),
-                null);
+                null, null);
         Enrollee governedEnrollee1 = hubResponse1.getResponse();
         Enrollee governedEnrollee2 = hubResponse2.getResponse();
 
@@ -369,7 +369,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         Assertions.assertFalse(enrollmentService.isProxyEnrollment(envName, studyShortcode, preEnrollmentResponse.getId()));
 
         HubResponse<Enrollee> hubResponse = enrollmentService.enroll(envName, study.getShortcode(),
-                userProxyBundle.user(), userProxyBundle.ppUser(), preEnrollmentResponseProxy.getId());
+                userProxyBundle.user(), userProxyBundle.ppUser(), preEnrollmentResponseProxy.getId(), null);
         // confirm that two enrollees were created, and only one is a subject
         assertThat(hubResponse.getEnrollee().isSubject(), equalTo(false));
         assertThat(hubResponse.getResponse().isSubject(), equalTo(true));

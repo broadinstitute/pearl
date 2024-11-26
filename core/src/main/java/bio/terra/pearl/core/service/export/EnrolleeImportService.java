@@ -424,7 +424,7 @@ public class EnrolleeImportService {
 
             HubResponse<Enrollee> response = enrollmentService.enroll(regResult.portalParticipantUser(), studyEnv.getEnvironmentName(),
                     studyShortcode, regResult.participantUser(), regResult.portalParticipantUser(),
-                    null, enrolleeInfo.isSubject(), EnrolleeSourceType.IMPORT);
+                    null, enrolleeInfo.isSubject(), EnrolleeSourceType.IMPORT, null);
             Enrollee newEnrollee = response.getEnrollee();
             //update createdAt
             if (enrolleeInfo.getCreatedAt() != null) {
@@ -444,7 +444,7 @@ public class EnrolleeImportService {
 
         Optional<Enrollee> enrollee = enrolleeService.findByParticipantUserIdAndStudyEnvId(registration.participantUser().getId(), studyEnv.getId());
 
-        return enrollee.orElseGet(() -> this.enrollmentService.enroll(registration.portalParticipantUser(), studyEnv.getEnvironmentName(), studyShortcode, registration.participantUser(), registration.portalParticipantUser(), null, false).getEnrollee());
+        return enrollee.orElseGet(() -> this.enrollmentService.enroll(registration.portalParticipantUser(), studyEnv.getEnvironmentName(), studyShortcode, registration.participantUser(), registration.portalParticipantUser(), null, false, null).getEnrollee());
     }
 
     protected Profile importProfile(Map<String, String> enrolleeMap, Profile registrationProfile,

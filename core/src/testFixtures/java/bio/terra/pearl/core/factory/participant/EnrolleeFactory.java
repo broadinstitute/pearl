@@ -140,7 +140,7 @@ public class EnrolleeFactory {
         String studyShortcode = studyService.find(studyEnv.getStudyId()).get().getShortcode();
 
         HubResponse<Enrollee> hubResponse = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode, userBundle.user(), userBundle.ppUser(),
-                null);
+                null, null);
         return new EnrolleeAndProxy(hubResponse.getResponse(), hubResponse.getEnrollee(), userBundle.ppUser(), portalEnv);
     }
 
@@ -149,7 +149,7 @@ public class EnrolleeFactory {
         String studyShortcode = studyService.find(studyEnv.getStudyId()).get().getShortcode();
 
         HubResponse<Enrollee> hubResponse = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode, userBundle.user(), userBundle.ppUser(),
-                null);
+                null, null);
         return new EnrolleeAndProxy(hubResponse.getResponse(), hubResponse.getEnrollee(), userBundle.ppUser(), portalEnv);
     }
 
@@ -157,7 +157,7 @@ public class EnrolleeFactory {
     public EnrolleeBundle enroll(String email, String portalShortcode, String studyShortcode, EnvironmentName environmentName) {
         RegistrationService.RegistrationResult result = registrationService.register(portalShortcode, environmentName, email, null, null);
         Portal portal = portalService.findOneByShortcode(portalShortcode).orElseThrow();
-        HubResponse<Enrollee> response = enrollmentService.enroll(environmentName, studyShortcode, result.participantUser(), result.portalParticipantUser(), null);
+        HubResponse<Enrollee> response = enrollmentService.enroll(environmentName, studyShortcode, result.participantUser(), result.portalParticipantUser(), null, null);
         return new EnrolleeBundle(response.getEnrollee(), result.participantUser(), result.portalParticipantUser(), portal.getId());
     }
 }

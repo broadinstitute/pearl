@@ -69,6 +69,7 @@ class EnrollmentExtServiceTest extends BaseSpringBootTest {
             portalEnv.getEnvironmentName(),
             studyService.find(studyEnvironment.getStudyId()).get().getShortcode(),
             null,
+            null,
             null);
 
     List<EnrolleeRelation> relationsAfter =
@@ -111,7 +112,8 @@ class EnrollmentExtServiceTest extends BaseSpringBootTest {
             portalEnv.getEnvironmentName(),
             studyService.find(studyEnvironment2.getStudyId()).get().getShortcode(),
             null,
-            governedPpUser.getId());
+            governedPpUser.getId(),
+            null);
 
     Enrollee createdProxy =
         enrolleeService

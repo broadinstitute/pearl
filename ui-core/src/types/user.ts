@@ -47,6 +47,7 @@ export type Enrollee = {
     participantUserId: string
     preRegResponse?: PreregistrationResponse
     preEnrollmentResponse?: PreregistrationResponse
+    referralSource?: string
     profile: Profile
     profileId: string
     shortcode: string
