@@ -83,10 +83,7 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
   const { i18n } = useI18n()
 
   const [searchParams] = useSearchParams()
-  const { skipPreEnroll, referralSource, isProxyEnrollment, ppUserId, preFilledAnswers } = useEnrollmentParams()
-
-  console.log('skipPreEnroll', skipPreEnroll)
-  console.log('referralSource', referralSource)
+  const { skipPreEnroll, referralSource, isProxyEnrollment, ppUserId } = useEnrollmentParams()
 
   const { user, ppUsers, enrollees, refreshLoginState } = useUser()
 

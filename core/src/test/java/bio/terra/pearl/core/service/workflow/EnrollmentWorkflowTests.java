@@ -96,7 +96,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         surveyFactory.attachToEnv(consent, studyEnv.getId(), true);
 
         HubResponse hubResponse = enrollmentService.enroll(userBundle.ppUser(), studyEnv.getEnvironmentName(), studyShortcode,
-                userBundle.user(), userBundle.ppUser(), null, true);
+                userBundle.user(), userBundle.ppUser(), null, true, null);
         Enrollee enrollee = hubResponse.getEnrollee();
         assertThat(enrollee.getShortcode(), notNullValue());
         assertThat(enrollee.getParticipantUserId(), equalTo(userBundle.user().getId()));
@@ -128,7 +128,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         surveyFactory.attachToEnv(survey, studyEnv.getId(), true);
 
         HubResponse hubResponse = enrollmentService.enroll(userBundle.ppUser(), studyEnv.getEnvironmentName(), studyShortcode,
-                userBundle.user(), userBundle.ppUser(), null, true);
+                userBundle.user(), userBundle.ppUser(), null, true, null);
         Enrollee enrollee = hubResponse.getEnrollee();
         assertThat(hubResponse.getProfile(), notNullValue());
         // Because the study environment had a consent attached, a consent task should be created on enrollment
@@ -223,7 +223,8 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
                 study.getShortcode(),
                 userBundle.user(),
                 userBundle.ppUser(),
-                preEnrollmentResponse.getId());
+                preEnrollmentResponse.getId(),
+                null);
         // confirm that two enrollees were created, and only one is a subject
         assertThat(hubResponse.getEnrollee().isSubject(), equalTo(true));
 
@@ -483,7 +484,8 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
                 study.getShortcode(),
                 userProxyBundle.user(),
                 userProxyBundle.ppUser(),
-                preEnrollmentResponseProxy.getId());
+                preEnrollmentResponseProxy.getId(),
+                null);
         // confirm that two enrollees were created, and only one is a subject
         assertThat(hubResponse.getEnrollee().isSubject(), equalTo(false));
         assertThat(hubResponse.getResponse().isSubject(), equalTo(true));

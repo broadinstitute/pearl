@@ -97,7 +97,7 @@ public class EnrollmentServiceTests extends BaseSpringBootTest {
                 getTestName(testInfo));
         String portalShortcode = portalService.find(portalEnv.getPortalId()).get().getShortcode();
         HubResponse hubResponse = enrollmentService.enroll(userBundle.ppUser(), studyEnv.getEnvironmentName(), studyShortcode,
-                userBundle.user(), userBundle.ppUser(), savedResponse.getId(), false);
+                userBundle.user(), userBundle.ppUser(), savedResponse.getId(), false, null);
         assertThat(hubResponse.getEnrollee(), notNullValue());
     }
 
@@ -121,7 +121,7 @@ public class EnrollmentServiceTests extends BaseSpringBootTest {
         String portalShortcode = portalService.find(portalEnv.getPortalId()).get().getShortcode();
 
         HubResponse hubResponse = enrollmentService.enroll(userBundle.ppUser(), studyEnv.getEnvironmentName(), studyShortcode,
-                userBundle.user(), userBundle.ppUser(), null, false);
+                userBundle.user(), userBundle.ppUser(), null, false, null);
         assertThat(hubResponse.getEnrollee(), notNullValue());
     }
 
@@ -141,7 +141,7 @@ public class EnrollmentServiceTests extends BaseSpringBootTest {
         String portalShortcode = portalService.find(portalEnv.getPortalId()).get().getShortcode();
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             enrollmentService.enroll(userBundle.ppUser(), studyEnv.getEnvironmentName(), studyShortcode, userBundle.user(), userBundle.ppUser(),
-                   null, false);
+                   null, false, null);
         });
     }
 
@@ -175,7 +175,7 @@ public class EnrollmentServiceTests extends BaseSpringBootTest {
 
         // now, enroll subject as proxy
         enrollmentService.enroll(ppUser, studyEnv.getEnvironmentName(), studyShortcode, user, ppUser,
-                savedResponse.getId(), true);
+                savedResponse.getId(), true, null);
 
         Enrollee proxyAfterSubjectEnroll = enrolleeService.find(proxy.getId()).orElseThrow();
         assertThat(proxyAfterSubjectEnroll.isSubject(), equalTo(true));
