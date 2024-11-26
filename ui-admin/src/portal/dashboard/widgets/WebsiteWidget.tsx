@@ -16,7 +16,7 @@ export const WebsiteWidget = ({ portal }: { portal: Portal }) => {
     env.environmentName === 'live')?.portalEnvironmentConfig.participantHostname
 
   const localContent = portal.portalEnvironments.find(env => env.environmentName === 'live')!
-    .siteContent!.localizedSiteContents[0]
+    .siteContent?.localizedSiteContents[0]
 
   return (
     <InfoCard>
@@ -42,7 +42,7 @@ export const WebsiteWidget = ({ portal }: { portal: Portal }) => {
             <div style={{
               minHeight: '200px'
             }} className="d-flex justify-content-center align-items-center">
-              {livePortalUrl ?
+              {localContent ?
                 <ErrorBoundary>
                   <ApiProvider api={previewApi(
                     portal.shortcode,
@@ -64,7 +64,6 @@ export const WebsiteWidget = ({ portal }: { portal: Portal }) => {
                         {localContent.landingPage.sections.slice(0, 2).map((section: HtmlSection) =>
                           <HtmlSectionView section={section} key={section.id}/>)
                         }
-                        {/*<SiteFooter footerSection={localContent.footerSection}/>*/}
                       </div>
                     </I18nProvider>
                   </ApiProvider>

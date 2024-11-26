@@ -21,17 +21,19 @@ export const TutorialsWidget = () => {
         </div>
       </InfoCardHeader>
       <InfoCardBody>
-        <span>Visit our ZenDesk hub to learn more about how to use Juniper</span>
-        <ul className="mt-2">
-          <HelpTutorialLink docsKey={DocsKey.PREREG_SURVEYS} title="How to create a preregistration survey"/>
-          <HelpTutorialLink docsKey={DocsKey.SURVEY_EDIT} title="Creating and editing surveys"/>
-          <HelpTutorialLink docsKey={DocsKey.SEARCH_EXPRESSIONS} title="Enrollee search expressions"/>
-          <HelpTutorialLink docsKey={DocsKey.WITHDRAWAL} title="Participant withdrawal"/>
-        </ul>
-        <span className="fst-italic text-muted">
+        <div>
+          <span>Visit our ZenDesk hub to learn more about how to use Juniper</span>
+          <ul className="mt-2">
+            <HelpTutorialLink docsKey={DocsKey.PREREG_SURVEYS} title="How to create a preregistration survey"/>
+            <HelpTutorialLink docsKey={DocsKey.SURVEY_EDIT} title="Creating and editing surveys"/>
+            <HelpTutorialLink docsKey={DocsKey.SEARCH_EXPRESSIONS} title="Enrollee search expressions"/>
+            <HelpTutorialLink docsKey={DocsKey.WITHDRAWAL} title="Participant withdrawal"/>
+          </ul>
+          <span className="fst-italic text-muted">
           Have additional questions? Please email <a
-            href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>
-        </span>
+              href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>
+          </span>
+        </div>
       </InfoCardBody>
     </InfoCard>
   )
