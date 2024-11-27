@@ -61,6 +61,9 @@ resource "google_sql_database_instance" "d2p" {
     backup_configuration {
       enabled = true
       start_time = "04:00"
+      backup_retention_settings {
+        retained_backups = 30
+      }
     }
   }
 
