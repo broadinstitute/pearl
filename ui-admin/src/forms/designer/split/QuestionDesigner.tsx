@@ -30,7 +30,7 @@ export type QuestionDesignerProps = {
  * UI for editing a question in a form.
  * Note that this will eventually replace the QuestionDesigner component
  */
-export const FullQuestionDesigner = (props: QuestionDesignerProps) => {
+export const QuestionDesigner = (props: QuestionDesignerProps) => {
   const {
     question, isNewQuestion, readOnly,
     onChange, currentLanguage, supportedLanguages

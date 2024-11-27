@@ -7,7 +7,6 @@ import {
 import {
   AnswerMapping,
   FormContent,
-  Portal,
   PortalEnvironmentLanguage,
   VersionedForm
 } from '@juniper/ui-core'
@@ -25,10 +24,8 @@ import useStateCallback from 'util/useStateCallback'
 import AnswerMappingEditor from 'study/surveys/AnswerMappingEditor'
 import { SplitFormDesigner } from './designer/split/SplitFormDesigner'
 import { SplitCalculatedValueDesigner } from 'forms/designer/SplitCalculatedValueDesigner'
-import { useUser } from 'user/UserProvider'
 
 type FormContentEditorProps = {
-  portal: Portal
   initialContent: string
   initialAnswerMappings: AnswerMapping[]
   visibleVersionPreviews: VersionedForm[]
@@ -41,7 +38,6 @@ type FormContentEditorProps = {
 
 export const FormContentEditor = (props: FormContentEditorProps) => {
   const {
-    portal,
     initialContent,
     initialAnswerMappings,
     supportedLanguages,
@@ -53,7 +49,6 @@ export const FormContentEditor = (props: FormContentEditorProps) => {
 
   const [activeTab, setActiveTab] = useState<string | null>('split')
   const [tabsEnabled, setTabsEnabled] = useState(true)
-  const { user } = useUser()
 
   const [editedContent, setEditedContent] = useStateCallback(() => JSON.parse(initialContent) as FormContent)
 
