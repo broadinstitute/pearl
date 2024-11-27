@@ -61,7 +61,7 @@ public class TriggerExtService {
   @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Optional<Trigger> find(PortalStudyEnvAuthContext authContext, UUID configId) {
 
-    Optional<Trigger> configOpt = triggerService.find(configId);
+    Optional<Trigger> configOpt = triggerService.find(configId).filter(Trigger::isActive);
     configOpt.ifPresent(
         config -> {
           verifyTrigger(authContext, config);
