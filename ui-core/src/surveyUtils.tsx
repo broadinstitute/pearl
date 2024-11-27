@@ -396,11 +396,13 @@ export function useSurveyJSModel(
 
 /** apply markdown to the given surveyJS entity */
 export const applyMarkdown = (sender: SurveyModel, options: TextMarkdownEvent) => {
-  const markdownText = micromark(options.text)
+  const markdownText = micromark(options.text).trim()
   // chop off <p> tags.
   // See https://surveyjs.io/form-library/examples/edit-survey-questions-markdown/reactjs#content-code
   if (markdownText.startsWith('<p>') && markdownText.endsWith('</p>')) {
     options.html = markdownText.substring(3, markdownText.length - 4)
+  } else {
+    options.html = markdownText
   }
 }
 
