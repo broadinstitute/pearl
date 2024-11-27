@@ -9,6 +9,7 @@ import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
 import bio.terra.pearl.api.admin.models.dto.StudyCreationDto;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyAuthContext;
 import bio.terra.pearl.core.factory.admin.AdminUserFactory;
@@ -48,11 +49,13 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
         studyExtService,
         Map.of(
             "create",
-            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
+                AuthAnnotationSpec.withPortalPerm(
+                    AuthUtilService.BASE_PERMISSION, List.of(SuperuserOnly.class)),
             "delete",
-            AuthAnnotationSpec.withPortalStudyPerm(AuthUtilService.BASE_PERMISSION),
+                AuthAnnotationSpec.withPortalStudyPerm(
+                    AuthUtilService.BASE_PERMISSION, List.of(SuperuserOnly.class)),
             "getStudiesWithEnvs",
-            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION)));
+                AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION)));
   }
 
   @Test
