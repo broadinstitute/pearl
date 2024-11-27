@@ -10,12 +10,6 @@ import {
 import { userEvent } from '@testing-library/user-event'
 import { select } from 'react-select-event'
 import clearAllMocks = jest.clearAllMocks
-import { userHasPermission } from 'user/UserProvider'
-
-jest.mock('user/UserProvider', () => ({
-  ...jest.requireActual('user/UserProvider'),
-  userHasPermission: jest.fn()
-}))
 
 describe('SurveyEditorView', () => {
   const mockForm = ():Survey => ({
@@ -27,7 +21,8 @@ describe('SurveyEditorView', () => {
     content: '{}',
     stableId: 'testStableId',
     name: 'Test survey',
-    surveyType: 'RESEARCH'
+    surveyType: 'RESEARCH',
+    recurrenceType: 'NONE'
   })
 
   test('shows the user a LoadedLocalDraftModal when a draft is loaded', async () => {
@@ -41,6 +36,7 @@ describe('SurveyEditorView', () => {
       currentForm={mockForm()}
       onCancel={jest.fn()}
       onSave={jest.fn()}
+      replaceSurvey={jest.fn()}
     />)
 
     //Assert
@@ -61,6 +57,7 @@ describe('SurveyEditorView', () => {
       currentForm={mockForm()}
       onCancel={jest.fn()}
       onSave={jest.fn()}
+      replaceSurvey={jest.fn()}
     />)
 
     //Assert
@@ -75,6 +72,7 @@ describe('SurveyEditorView', () => {
       currentForm={mockForm()}
       onCancel={jest.fn()}
       onSave={jest.fn()}
+      replaceSurvey={jest.fn()}
     />)
     expect(screen.getByLabelText('form options menu')).toBeInTheDocument()
     await userEvent.click(screen.getByLabelText('form options menu'))
@@ -89,6 +87,7 @@ describe('SurveyEditorView', () => {
       currentForm={mockForm()}
       onCancel={jest.fn()}
       onSave={jest.fn()}
+      replaceSurvey={jest.fn()}
     />)
     await userEvent.click(screen.getByLabelText('form options menu'))
     expect(screen.getByText('Download form JSON')).toBeInTheDocument()
@@ -101,6 +100,7 @@ describe('SurveyEditorView', () => {
       currentForm={{ ...mockForm(), stableId }}
       onCancel={jest.fn()}
       onSave={jest.fn()}
+      replaceSurvey={jest.fn()}
     />)
     expect(screen.getByText('testStableId v12')).toBeInTheDocument()
     expect(screen.queryByText('published')).not.toBeInTheDocument()
@@ -113,6 +113,7 @@ describe('SurveyEditorView', () => {
       currentForm={{ ...mockForm(), stableId, publishedVersion: 2 }}
       onCancel={jest.fn()}
       onSave={jest.fn()}
+      replaceSurvey={jest.fn()}
     />)
     expect(screen.getByText('testStableId v12')).toBeInTheDocument()
     expect(screen.getByText('- published v2')).toBeInTheDocument()
@@ -120,9 +121,6 @@ describe('SurveyEditorView', () => {
 
   test('toggles languages', async () => {
     const portal = mockTwoLanguagePortal()
-    ;(userHasPermission as jest.Mock).mockImplementation(() => {
-      return true
-    })
     renderInPortalRouter(portal,
       <SurveyEditorView
         studyEnvContext={mockStudyEnvContext()}
@@ -137,14 +135,15 @@ describe('SurveyEditorView', () => {
         }}
         onCancel={jest.fn()}
         onSave={jest.fn()}
+        replaceSurvey={jest.fn()}
       />)
     await userEvent.click(screen.getAllByText('Designer')[1])
 
     await userEvent.click(screen.getByText('testQ'))
-    expect(screen.getByText('English question')).toBeInTheDocument()
+    expect(screen.getAllByText('English question')).toHaveLength(2)
     expect(screen.queryByText('Español pregunta')).not.toBeInTheDocument()
     await select(screen.getByLabelText('Select a language'), 'Español')
-    expect(screen.queryByText('Español pregunta')).toBeInTheDocument()
+    expect(screen.getAllByText('Español pregunta')).toHaveLength(2)
   })
 })
 
