@@ -45,6 +45,7 @@
         "populateFileName": "surveys/preEnroll.json"
       },
       "configuredSurveyDtos": [
+        {"populateFileName": "surveys/ourHealthConsent.json"},
         {"populateFileName": "surveys/basic.json"},
         {"populateFileName": "surveys/cardioHistory.json"},
         {"populateFileName": "surveys/medicalHistory.json"},
@@ -57,7 +58,6 @@
         {"populateFileName": "surveys/socialHealthV3.json"},
         {"populateFileName": "surveys/lostInterest.json"},
         {"populateFileName": "surveys/depressionOutreach.json"},
-        {"populateFileName": "surveys/ourHealthConsent.json"},
         {"populateFileName": "surveys/massachusettsSurvey.json"}
       ],
       "triggerDtos": [{
