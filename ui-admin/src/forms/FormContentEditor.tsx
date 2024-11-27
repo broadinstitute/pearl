@@ -12,7 +12,6 @@ import {
   VersionedForm
 } from '@juniper/ui-core'
 
-import { FormDesigner } from './FormDesigner'
 import {
   OnChangeAnswerMappings,
   OnChangeFormContent
@@ -26,7 +25,7 @@ import useStateCallback from 'util/useStateCallback'
 import AnswerMappingEditor from 'study/surveys/AnswerMappingEditor'
 import { SplitFormDesigner } from './designer/split/SplitFormDesigner'
 import { SplitCalculatedValueDesigner } from 'forms/designer/SplitCalculatedValueDesigner'
-import { userHasPermission, useUser } from 'user/UserProvider'
+import { useUser } from 'user/UserProvider'
 
 type FormContentEditorProps = {
   portal: Portal
@@ -141,30 +140,6 @@ export const FormContentEditor = (props: FormContentEditorProps) => {
             <FormPreview formContent={editedContent} currentLanguage={currentLanguage} />
           </ErrorBoundary>
         </Tab>
-        {userHasPermission(user, portal.id, 'prototype_tester') &&< Tab
-          disabled={activeTab !== 'designer' && !tabsEnabled}
-          eventKey="designer"
-          title={<>Designer<span className='badge bg-primary fw-light ms-2'>LEGACY</span></>}
-        >
-          <ErrorBoundary>
-            <FormDesigner
-              readOnly={readOnly}
-              content={editedContent}
-              currentLanguage={currentLanguage}
-              supportedLanguages={supportedLanguages}
-              onChange={(newContent, callback?: () => void) => {
-                setEditedContent(newContent, callback)
-                try {
-                  const errors = validateFormContent(newContent)
-                  onFormContentChange(errors, newContent)
-                } catch (err) {
-                  //@ts-ignore
-                  onFormContentChange([err.message], undefined)
-                }
-              }}
-            />
-          </ErrorBoundary>
-        </Tab> }
       </Tabs>
     </div>
   )
