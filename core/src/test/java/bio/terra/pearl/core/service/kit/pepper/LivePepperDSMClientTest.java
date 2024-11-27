@@ -18,9 +18,9 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
@@ -45,7 +45,7 @@ public class LivePepperDSMClientTest extends BaseSpringBootTest {
     private KitRequestFactory kitRequestFactory;
     @Autowired
     private ObjectMapper objectMapper;
-    @MockBean
+    @MockitoBean
     private LivePepperDSMClient.PepperDSMConfig pepperDSMConfig;
 
     // select the LivePepperDSMClient @Component, not PepperDSMClientProvider.getLivePepperDSMClient()

@@ -8,7 +8,7 @@ import bio.terra.pearl.core.service.fileupload.backends.LocalFileStorageBackend;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class ParticipantFileServiceTest extends BaseSpringBootTest {
 
 
-    @MockBean
+    @MockitoBean
     private LocalFileStorageBackend localFileStorageBackend;
 
     @Autowired

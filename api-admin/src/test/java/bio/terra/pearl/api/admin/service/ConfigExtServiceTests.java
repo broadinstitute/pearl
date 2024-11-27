@@ -89,8 +89,10 @@ public class ConfigExtServiceTests {
             testPepperConfig,
             testAddrConfig,
             airtableConfig);
+    @SuppressWarnings("unchecked")
     Map<String, ?> dsmConfigMap =
         (Map<String, ?>) configExtService.getInternalConfigMap(user).get("pepperDsmConfig");
+    @SuppressWarnings("unchecked")
     Map<String, ?> addressValidationConfigMap =
         (Map<String, ?>) configExtService.getInternalConfigMap(user).get("addrValidationConfig");
     assertThat(dsmConfigMap.get("basePath"), equalTo("basePath1"));
