@@ -19,5 +19,5 @@ public class HtmlPage extends BaseEntity {
     private String path;
     private UUID localizedSiteContentId;
     @Builder.Default
-    private boolean hideNavbar = false;
+    private boolean minimalNavbar = false;
 }

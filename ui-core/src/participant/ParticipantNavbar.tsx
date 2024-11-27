@@ -91,7 +91,7 @@ export function ParticipantNavbar(props: NavbarProps) {
   }
 
   const currentPath = useLocation().pathname.replace(/^\/+/, '')
-  const showNavbar = !localContent.pages.find(page => page.path === currentPath)?.hideNavbar
+  const showNavbar = !localContent.pages.find(page => page.path === currentPath)?.minimalNavbar
 
   const dropdownRef = useRef<HTMLDivElement | null>(null)
   const location = useLocation()

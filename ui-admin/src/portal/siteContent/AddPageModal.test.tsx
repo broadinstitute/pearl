@@ -73,7 +73,7 @@ describe('AddPageModal', () => {
     expect(mockInsertNewPageFn).toHaveBeenCalledWith({
       title: 'My New Page',
       path: 'newPage',
-      hideNavbar: false,
+      minimalNavbar: false,
       sections: [{
         'id': '',
         'sectionConfig': '{"title":"My New Page","blurb":"Add content here","blurbAlign":"center","buttons":[]}',

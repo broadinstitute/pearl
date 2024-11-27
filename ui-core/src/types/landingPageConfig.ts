@@ -22,7 +22,7 @@ export type HtmlPage = {
   title: string
   path: string
   sections: HtmlSection[]
-  hideNavbar: boolean
+  minimalNavbar: boolean
 }
 
 export type HtmlSection = {
