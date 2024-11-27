@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 class SmartyInternationalAddressValidationServiceTest extends BaseSpringBootTest {
 
-    @MockBean
+    @MockitoBean
     private SmartyClient mockSmartyClient;
 
     // all the candidates below come from real responses via

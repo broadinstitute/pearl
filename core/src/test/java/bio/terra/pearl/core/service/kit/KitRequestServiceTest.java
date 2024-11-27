@@ -37,8 +37,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -559,11 +559,11 @@ public class KitRequestServiceTest extends BaseSpringBootTest {
     }
 
 
-    @MockBean
+    @MockitoBean
     private StubPepperDSMClient mockPepperDSMClient;
-    @MockBean
+    @MockitoBean
     private LivePepperDSMClient livePepperDSMClient;
-    @MockBean
+    @MockitoBean
     private EventService mockEventService;
     @Autowired
     private AdminUserFactory adminUserFactory;

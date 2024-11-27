@@ -6,7 +6,6 @@ import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.core.model.admin.AdminUser;
-import bio.terra.pearl.core.service.admin.PortalAdminUserRoleService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,21 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class AdminUserController implements AdminUserApi {
-  private AdminUserExtService adminUserExtService;
-  private AuthUtilService authUtilService;
-  private PortalAdminUserRoleService portalAdminUserRoleService;
-  private HttpServletRequest request;
-  private ObjectMapper objectMapper;
+  private final AdminUserExtService adminUserExtService;
+  private final AuthUtilService authUtilService;
+  private final HttpServletRequest request;
+  private final ObjectMapper objectMapper;
 
   public AdminUserController(
       AdminUserExtService adminUserExtService,
       AuthUtilService authUtilService,
-      PortalAdminUserRoleService portalAdminUserRoleService,
       HttpServletRequest request,
       ObjectMapper objectMapper) {
     this.adminUserExtService = adminUserExtService;
     this.authUtilService = authUtilService;
-    this.portalAdminUserRoleService = portalAdminUserRoleService;
     this.request = request;
     this.objectMapper = objectMapper;
   }
@@ -76,7 +72,7 @@ public class AdminUserController implements AdminUserApi {
     AdminUser createdUser =
         adminUserExtService.createSuperuser(
             OperatorAuthContext.of(operator), newUser.getUsername());
-    return new ResponseEntity(createdUser, HttpStatus.CREATED);
+    return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
   }
 
   /**
@@ -91,7 +87,7 @@ public class AdminUserController implements AdminUserApi {
             PortalAuthContext.of(operator, portalShortcode),
             newUser.getUsername(),
             newUser.getRoleNames());
-    return new ResponseEntity(createdUser, HttpStatus.CREATED);
+    return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
   }
 
   @Override
