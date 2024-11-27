@@ -2,6 +2,7 @@ package bio.terra.pearl.api.admin.controller;
 
 import bio.terra.pearl.api.admin.api.SiteMediaApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.api.admin.service.siteContent.SiteMediaExtService;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.site.SiteMedia;
@@ -19,9 +20,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 public class SiteMediaController implements SiteMediaApi {
-  private AuthUtilService authUtilService;
-  private HttpServletRequest request;
-  private SiteMediaExtService siteMediaExtService;
+  private final AuthUtilService authUtilService;
+  private final HttpServletRequest request;
+  private final SiteMediaExtService siteMediaExtService;
 
   public SiteMediaController(
       AuthUtilService authUtilService,
@@ -62,7 +63,8 @@ public class SiteMediaController implements SiteMediaApi {
   @Override
   public ResponseEntity<Object> list(String portalShortcode) {
     AdminUser operator = authUtilService.requireAdminUser(request);
-    return ResponseEntity.ok(siteMediaExtService.list(portalShortcode, operator));
+    return ResponseEntity.ok(
+        siteMediaExtService.list(PortalAuthContext.of(operator, portalShortcode)));
   }
 
   @Override
@@ -72,7 +74,8 @@ public class SiteMediaController implements SiteMediaApi {
     try {
       byte[] imageData = image.getBytes();
       return ResponseEntity.ok(
-          siteMediaExtService.upload(portalShortcode, uploadFileName, imageData, operator));
+          siteMediaExtService.upload(
+              PortalAuthContext.of(operator, portalShortcode), uploadFileName, imageData));
     } catch (IOException e) {
       throw new IllegalArgumentException("could not read image data");
     }
@@ -81,7 +84,7 @@ public class SiteMediaController implements SiteMediaApi {
   @Override
   public ResponseEntity<Void> delete(String portalShortcode, UUID id) {
     AdminUser operator = authUtilService.requireAdminUser(request);
-    siteMediaExtService.delete(portalShortcode, id, operator);
+    siteMediaExtService.delete(PortalAuthContext.of(operator, portalShortcode), id);
 
     return ResponseEntity.ok().build();
   }

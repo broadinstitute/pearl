@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
 import bio.terra.pearl.api.admin.config.B2CConfiguration;
+import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.service.address.AddressValidationConfig;
 import bio.terra.pearl.core.service.exception.PermissionDeniedException;
@@ -62,7 +63,7 @@ public class ConfigExtServiceTests {
     Assertions.assertThrows(
         PermissionDeniedException.class,
         () -> {
-          configExtService.getInternalConfigMap(user);
+          configExtService.getInternalConfigMap(OperatorAuthContext.of(user));
         });
   }
 
@@ -91,10 +92,16 @@ public class ConfigExtServiceTests {
             airtableConfig);
     @SuppressWarnings("unchecked")
     Map<String, ?> dsmConfigMap =
-        (Map<String, ?>) configExtService.getInternalConfigMap(user).get("pepperDsmConfig");
+        (Map<String, ?>)
+            configExtService
+                .getInternalConfigMap(OperatorAuthContext.of(user))
+                .get("pepperDsmConfig");
     @SuppressWarnings("unchecked")
     Map<String, ?> addressValidationConfigMap =
-        (Map<String, ?>) configExtService.getInternalConfigMap(user).get("addrValidationConfig");
+        (Map<String, ?>)
+            configExtService
+                .getInternalConfigMap(OperatorAuthContext.of(user))
+                .get("addrValidationConfig");
     assertThat(dsmConfigMap.get("basePath"), equalTo("basePath1"));
     assertThat(dsmConfigMap.get("issuerClaim"), equalTo("issuerClaim1"));
     assertThat(dsmConfigMap.get("secret"), equalTo("su..."));

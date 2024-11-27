@@ -1,9 +1,9 @@
 package bio.terra.pearl.api.admin.service;
 
 import bio.terra.pearl.api.admin.config.B2CConfiguration;
-import bio.terra.pearl.core.model.admin.AdminUser;
+import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
+import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.core.service.address.AddressValidationConfig;
-import bio.terra.pearl.core.service.exception.PermissionDeniedException;
 import bio.terra.pearl.core.service.export.integration.AirtableExporter;
 import bio.terra.pearl.core.service.kit.pepper.LivePepperDSMClient;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
@@ -65,10 +65,8 @@ public class ConfigExtService {
    * returns non-public configuration information -- note that this still should not return actual
    * secrets
    */
-  public Map<String, ?> getInternalConfigMap(AdminUser user) {
-    if (!user.isSuperuser()) {
-      throw new PermissionDeniedException("You do not have permission to view this config");
-    }
+  @SuperuserOnly
+  public Map<String, ?> getInternalConfigMap(OperatorAuthContext authContext) {
     Map<String, Map<String, String>> internalConfigMap =
         Map.of(
             "pepperDsmConfig",

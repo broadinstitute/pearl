@@ -1,12 +1,12 @@
 package bio.terra.pearl.api.admin.service.study;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-
+import bio.terra.pearl.api.admin.AuthAnnotationSpec;
+import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
 import bio.terra.pearl.api.admin.models.dto.StudyCreationDto;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
+import bio.terra.pearl.api.admin.service.auth.context.PortalStudyAuthContext;
 import bio.terra.pearl.core.factory.admin.AdminUserFactory;
 import bio.terra.pearl.core.factory.portal.PortalEnvironmentFactory;
 import bio.terra.pearl.core.factory.portal.PortalFactory;
@@ -15,18 +15,23 @@ import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
-import bio.terra.pearl.core.service.exception.PermissionDeniedException;
 import bio.terra.pearl.core.service.notification.TriggerService;
 import bio.terra.pearl.core.service.study.PortalStudyService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyService;
-import java.util.List;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 
 public class StudyExtServiceTests extends BaseSpringBootTest {
   @Autowired private StudyExtService studyExtService;
@@ -37,6 +42,19 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
   @Autowired private StudyService studyService;
   @Autowired private PortalStudyService portalStudyService;
   @Autowired private TriggerService triggerService;
+
+  @Test
+  public void allMethodsAuthed(TestInfo info) {
+    AuthTestUtils.assertAllMethodsAnnotated(
+            studyExtService,
+            Map.of(
+                    "create",
+                    AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
+                    "delete",
+                    AuthAnnotationSpec.withPortalStudyPerm(AuthUtilService.BASE_PERMISSION),
+                    "getStudiesWithEnvs",
+                    AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION)));
+  }
 
   @Test
   @Transactional
@@ -56,54 +74,20 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
 
   @Test
   @Transactional
-  public void testStudyCreationRequiresSuperuser(TestInfo testInfo) {
-    AdminUser operator = adminUserFactory.buildPersisted(getTestName(testInfo), false);
-    Portal portal = portalFactory.buildPersisted(getTestName(testInfo));
-    String newStudyShortcode = "newStudy" + RandomStringUtils.randomAlphabetic(5);
-    StudyCreationDto studyDto = new StudyCreationDto(newStudyShortcode, "the new study");
-    Assertions.assertThrows(
-        PermissionDeniedException.class,
-        () -> {
-          studyExtService.create(portal.getShortcode(), studyDto, operator);
-        });
-  }
-
-  @Test
-  @Transactional
   public void testStudyDeletion(TestInfo testInfo) {
     AdminUser operator = adminUserFactory.buildPersisted(getTestName(testInfo), true);
     Portal portal = portalFactory.buildPersisted(getTestName(testInfo));
     String newStudyShortcode = "newStudy" + RandomStringUtils.randomAlphabetic(5);
     StudyCreationDto studyDto = new StudyCreationDto(newStudyShortcode, "the new study");
-    studyExtService.create(portal.getShortcode(), studyDto, operator);
+    studyExtService.create(PortalAuthContext.of(operator, portal.getShortcode()), studyDto);
 
     // confirm study was deleted
-    studyExtService.delete(portal.getShortcode(), newStudyShortcode, operator);
+    studyExtService.delete(PortalStudyAuthContext.of(operator, portal.getShortcode(), newStudyShortcode));
     assertThat(studyService.findByShortcode(newStudyShortcode).isEmpty(), equalTo(true));
     // confirm that the corresponding portalService was also deleted
     assertThat(portalStudyService.findByPortalId(portal.getId()), empty());
   }
 
-  @Test
-  @Transactional
-  public void testStudyDeletionNeedsSuperUser(TestInfo testInfo) {
-    AdminUser operator = adminUserFactory.buildPersisted(getTestName(testInfo), true);
-    Portal portal = portalFactory.buildPersisted(getTestName(testInfo));
-    String newStudyShortcode = "newStudy" + RandomStringUtils.randomAlphabetic(5);
-    StudyCreationDto studyDto = new StudyCreationDto(newStudyShortcode, "the new study");
-    studyExtService.create(portal.getShortcode(), studyDto, operator);
-    AdminUser deleteOperator = adminUserFactory.buildPersisted(getTestName(testInfo), false);
-    // confirm study was not deleted
-    Assertions.assertThrows(
-        PermissionDeniedException.class,
-        () -> {
-          studyExtService.delete(portal.getShortcode(), newStudyShortcode, deleteOperator);
-        });
-
-    assertThat(studyService.findByShortcode(newStudyShortcode).isEmpty(), equalTo(false));
-    // confirm that the corresponding portalService also deleted
-    assertThat(portalStudyService.findByPortalId(portal.getId()), not(empty()));
-  }
 
   @Test
   @Transactional
