@@ -58,7 +58,7 @@ public class SurveyPopulator extends BasePopulator<Survey, SurveyPopDto, PortalP
     }
 
     public StudyEnvironmentSurvey convertConfiguredSurvey(StudyEnvironmentSurveyPopDto configuredSurveyDto,
-                                                          int index, FilePopulateContext context, String portalShortcode) {
+                                                          FilePopulateContext context, String portalShortcode) {
         StudyEnvironmentSurvey configuredSurvey = new StudyEnvironmentSurvey();
         BeanUtils.copyProperties(configuredSurveyDto, configuredSurvey);
         Survey survey;
@@ -70,7 +70,6 @@ public class SurveyPopulator extends BasePopulator<Survey, SurveyPopDto, PortalP
         }
         configuredSurvey.setSurveyId(survey.getId());
         configuredSurvey.setSurvey(survey);
-        configuredSurvey.setSurveyOrder(index);
         return configuredSurvey;
     }
 

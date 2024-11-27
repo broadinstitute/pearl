@@ -9,6 +9,11 @@ import {
 import { sectionTemplates } from 'portal/siteContent/sectionTemplates'
 import Api from 'api/api'
 import { useConfig } from 'providers/ConfigProvider'
+import InfoPopup from 'components/forms/InfoPopup'
+import { Checkbox } from 'components/forms/Checkbox'
+import { Button } from '../../components/forms/Button'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 
 const createDefaultSection = (title: string): HtmlSection => {
   return {
@@ -25,7 +30,8 @@ const createDefaultSection = (title: string): HtmlSection => {
 const EMPTY_PAGE: HtmlPage = {
   path: '',
   title: '',
-  sections: []
+  sections: [],
+  minimalNavbar: false
 }
 
 
@@ -36,6 +42,7 @@ const AddPageModal = ({ portalEnv, portalShortcode, insertNewPage, onDismiss }: 
   onDismiss: () => void
 }) => {
   const [page, setPage] = useState(EMPTY_PAGE)
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
 
   const addPage = async () => {
     insertNewPage({
@@ -82,21 +89,43 @@ const AddPageModal = ({ portalEnv, portalShortcode, insertNewPage, onDismiss }: 
             setPage({ ...page, title: event.target.value })
           }}/>
 
-        <label htmlFor="inputPagePath">Page Path</label>
-        <div className="input-group">
-          <div className="input-group-prepend">
-            <span className="input-group-text" style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-              id="pathPrefix">{portalUrl}/</span>
-          </div>
-          <input type="text"
-            className="form-control"
-            id="inputPagePath"
-            value={page.path} aria-describedby="pathPrefix"
-            data-testid="page-path-input"
-            onChange={event => {
-              setPage({ ...page, path: event.target.value })
-            }}/>
+        <>
+          <label htmlFor="inputPagePath">Page Path</label>
+          <InfoPopup title="Page Path" content={
+            <div>
+              The path to the page within your portal. For example, a path of&nbsp;
+              <code>my-path</code> will be available at the URL:&nbsp;
+              <br/><br/>
+              <code>{portalUrl}/my-path</code>
+            </div>
+          }/>
+        </>
+        <input
+          className="form-control"
+          id="inputPagePath"
+          value={page.path}
+          data-testid="page-path-input"
+          onChange={event => {
+            setPage({ ...page, path: event.target.value })
+          }}/>
+
+        <div className="py-2">
+          <Button variant="secondary" onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>
+            <FontAwesomeIcon icon={showAdvancedOptions ? faChevronDown : faChevronUp}/> Advanced Options
+          </Button>
         </div>
+        { showAdvancedOptions && <div className="d-flex mt-2">
+          <Checkbox
+            label={'Hide Navbar'}
+            checked={page.minimalNavbar}
+            onChange={checked => {
+              setPage({ ...page, minimalNavbar: checked })
+            }}/>
+          <InfoPopup title="Page Path" content={
+            `If checked, most navbar content will be hidden on this page and only the logo,
+            login button, and language selector will be displayed in the navbar.`
+          }/>
+        </div> }
       </form>
     </Modal.Body>
     <Modal.Footer>
@@ -104,7 +133,8 @@ const AddPageModal = ({ portalEnv, portalShortcode, insertNewPage, onDismiss }: 
         className="btn btn-primary"
         disabled={!isItemValid(page)}
         onClick={addPage}
-      >Create</button>
+      >Create
+      </button>
       <button className="btn btn-secondary" onClick={() => {
         onDismiss()
         clearFields()

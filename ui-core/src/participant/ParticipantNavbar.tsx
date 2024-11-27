@@ -90,6 +90,9 @@ export function ParticipantNavbar(props: NavbarProps) {
     updatePreferredLanguage(languageCode)
   }
 
+  const currentPath = useLocation().pathname.replace(/^\/+/, '')
+  const showNavbar = !localContent.pages.find(page => page.path === currentPath)?.minimalNavbar
+
   const dropdownRef = useRef<HTMLDivElement | null>(null)
   const location = useLocation()
   useEffect(() => {
@@ -120,11 +123,11 @@ export function ParticipantNavbar(props: NavbarProps) {
         <span className="navbar-toggler-icon"/>
       </button>
       <div ref={dropdownRef} className="collapse navbar-collapse mt-2 mt-lg-0" id={dropdownId}>
-        <ul className="navbar-nav">
+        {showNavbar && <ul className="navbar-nav">
           {navLinks.map((navLink: NavbarItem, index: number) => <li key={index} className="nav-item">
             <CustomNavLink navLink={navLink}/>
           </li>)}
-        </ul>
+        </ul> }
         <ul className="navbar-nav ms-auto">
           <LanguageDropdown
             languageOptions={portalEnv.supportedLanguages}
@@ -147,7 +150,7 @@ export function ParticipantNavbar(props: NavbarProps) {
                   {i18n('navbarLogin')}
                 </NavLink>
               </li>
-              <li className="nav-item">
+              { showNavbar && <li className="nav-item">
                 <NavLink
                   className={classNames(
                     'btn btn-lg btn-primary',
@@ -158,7 +161,7 @@ export function ParticipantNavbar(props: NavbarProps) {
                 >
                   {i18n('navbarJoin')}
                 </NavLink>
-              </li>
+              </li> }
             </>
           )}
           {user && <>

@@ -15,6 +15,7 @@ import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.PreEnrollmentResponse;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
+import bio.terra.pearl.core.model.survey.SurveyType;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.portal.PortalEnvironmentService;
 import bio.terra.pearl.core.service.publishing.PortalDiffService;
@@ -32,7 +33,11 @@ import bio.terra.pearl.populate.service.contexts.StudyPopulateContext;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Service
 public class StudyPopulator extends BasePopulator<Study, StudyPopDto, PortalPopulateContext> {
@@ -78,10 +83,19 @@ public class StudyPopulator extends BasePopulator<Study, StudyPopDto, PortalPopu
 
     /** takes a dto and hydrates it with already-populated objects (surveys, consents, etc...) */
     private void initializeStudyEnvironmentDto(StudyEnvironmentPopDto studyEnv, PortalPopulateContext context) {
-        for (int i = 0; i < studyEnv.getConfiguredSurveyDtos().size(); i++) {
-            StudyEnvironmentSurveyPopDto configSurveyDto = studyEnv.getConfiguredSurveyDtos().get(i);
-            StudyEnvironmentSurvey configSurvey = surveyPopulator.convertConfiguredSurvey(configSurveyDto, i, context, context.getPortalShortcode());
+        // we compute the surveyOrder from the index (by type) of the config in the populate file array, but if there are inactive
+        // versions of a survey in the array too, give those the same sortOrder as their active counterparts
+        Map<SurveyType, Integer> surveyOrders = new HashMap<>();
+        for (SurveyType surveyType : SurveyType.values()) {
+            surveyOrders.put(surveyType, 0);
+        }
+        for (StudyEnvironmentSurveyPopDto configSurveyDto : studyEnv.getConfiguredSurveyDtos()) {
+            StudyEnvironmentSurvey configSurvey = surveyPopulator.convertConfiguredSurvey(configSurveyDto, context, context.getPortalShortcode());
             studyEnv.getConfiguredSurveys().add(configSurvey);
+            configSurvey.setSurveyOrder(surveyOrders.get(configSurvey.getSurvey().getSurveyType()));
+            if (configSurveyDto.isActive()) {
+                surveyOrders.put(configSurvey.getSurvey().getSurveyType(), surveyOrders.get(configSurvey.getSurvey().getSurveyType()) + 1);
+            }
         }
         if (studyEnv.getPreEnrollSurveyDto() != null) {
             Survey preEnrollSurvey = surveyPopulator.findFromDto(studyEnv.getPreEnrollSurveyDto(), context).get();
