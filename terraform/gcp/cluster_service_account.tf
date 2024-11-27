@@ -1,3 +1,5 @@
+# Creates the service account for the GKE autopilot cluster.
+
 resource "google_service_account" "cluster_service_account" {
   account_id = "juniper-cluster"
 }
@@ -22,7 +24,8 @@ resource "google_project_iam_binding" "cluster-log-writer" {
   project = var.project
   role    = "roles/logging.logWriter"
   members = [
-    "serviceAccount:${google_service_account.cluster_service_account.email}"
+    "serviceAccount:${google_service_account.cluster_service_account.email}",
+    "serviceAccount:${google_service_account.juniper_cloudbuild_service_account.email}"
   ]
 }
 

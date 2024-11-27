@@ -1,3 +1,4 @@
+# creates the bucket all terraform state will be stored in
 
 resource "google_storage_bucket" "terraform_remote_state" {
   name     = "broad-juniper-terraform-remote-state"

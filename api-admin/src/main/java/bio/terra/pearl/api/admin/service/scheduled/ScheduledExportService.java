@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service.scheduled;
 
+import bio.terra.pearl.api.admin.service.system.CheckDisableScheduledTask;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.service.export.integration.ExportIntegrationService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class ScheduledExportService {
       name = "ScheduledExportService.runScheduledExports",
       lockAtLeastFor = "1m",
       lockAtMostFor = "360m")
+  @CheckDisableScheduledTask
   public void runExportIntegrations() {
     log.info("Running export integrations");
     exportIntegrationService.doAllExports(

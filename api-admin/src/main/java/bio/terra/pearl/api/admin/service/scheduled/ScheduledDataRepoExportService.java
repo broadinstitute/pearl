@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service.scheduled;
 
+import bio.terra.pearl.api.admin.service.system.CheckDisableScheduledTask;
 import bio.terra.pearl.core.service.datarepo.DataRepoExportService;
 import com.google.common.collect.ImmutableSet;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +28,7 @@ public class ScheduledDataRepoExportService {
   }
 
   @Scheduled(timeUnit = TimeUnit.MINUTES, fixedDelay = 10, initialDelay = 0)
+  @CheckDisableScheduledTask
   public void pingDataRepoStatus() {
     if (isTdrConfigured()) {
       log.info("Pinging Terra Data Repo. Up: " + dataRepoExportService.getServiceStatus());
@@ -40,6 +42,7 @@ public class ScheduledDataRepoExportService {
       name = "DataRepoExportService.pollRunningJobs",
       lockAtMostFor = "5m",
       lockAtLeastFor = "1m")
+  @CheckDisableScheduledTask
   public void pollRunningJobs() {
     if (isTdrConfigured()) {
       log.info("Polling running TDR jobs...");

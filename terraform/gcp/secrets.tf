@@ -1,5 +1,5 @@
-
-
+# Creates the secrets that our application needs to run.
+# These secrets need to be manually populated.
 
 resource "google_secret_manager_secret" "tdr_sa_creds" {
   secret_id = "tdr-sa-creds"

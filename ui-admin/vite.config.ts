@@ -33,7 +33,8 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:8080',
       '/config': 'http://localhost:8080',
-      '/status': 'http://localhost:8080'
+      '/status': 'http://localhost:8080',
+      '/systemSettings': 'http://localhost:8080'
     }
   },
   resolve: {

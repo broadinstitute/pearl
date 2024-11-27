@@ -16,3 +16,5 @@ customer_urls = {
     dnssec = "off"
   }
 }
+
+slack_notification_channel = "projects/broad-juniper-dev/notificationChannels/13069356383599666729"

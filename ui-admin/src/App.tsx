@@ -9,6 +9,7 @@ import { BrowserRouter, Outlet, Route, Routes, useLocation } from 'react-router-
 import { ReactNotifications } from 'react-notifications-component'
 
 import { Config } from 'api/api'
+import { previewApi } from 'util/apiContextUtils'
 
 import { RedirectFromOAuth } from 'login/RedirectFromOAuth'
 import { ProtectedRoute } from 'login/ProtectedRoute'
@@ -29,9 +30,10 @@ import PopulateRouteSelect from './populate/PopulateRouteSelect'
 import IntegrationDashboard from './integration/IntegrationDashboard'
 import AdminUserRouter from './user/AdminUserRouter'
 import LogEventViewer from './health/LogEventViewer'
-import { initializeMixpanel } from '@juniper/ui-core'
+import { ApiProvider, initializeMixpanel, MaintenanceMode } from '@juniper/ui-core'
 import mixpanel from 'mixpanel-browser'
 import { StatusPage } from './status/StatusPage'
+import SystemSettingsEditor from './system/SystemSettingsEditor'
 
 /** auto-scroll-to-top on any navigation */
 const ScrollToTop = () => {
@@ -50,42 +52,49 @@ mixpanel.register({ application: 'ADMIN_UI' })
 /** container for the app including the router  */
 function App() {
   return (
-    <ConfigProvider>
-      <ConfigConsumer>
-        { config =>
-          <AuthProvider {...getOidcConfig(config.b2cTenantName, config.b2cClientId, config.b2cPolicyName)}>
-            <UserProvider>
-              <div className="App d-flex flex-column min-vh-100">
-                <IdleStatusMonitor maxIdleSessionDuration={30 * 60 * 1000} idleWarningDuration={5 * 60 * 1000}/>
-                <ReactNotifications />
-                <BrowserRouter>
-                  <ScrollToTop/>
-                  <Routes>
-                    <Route path="/">
-                      <Route path="/system/status" element={<StatusPage/>}/>
-                      <Route element={<ProtectedRoute>
-                        <NavContextProvider><PageFrame config={config}/></NavContextProvider>
-                      </ProtectedRoute>}>
-                        <Route path="populate/*" element={<PopulateRouteSelect/>}/>
-                        <Route path="logEvents/*" element={<LogEventViewer/>}/>
-                        <Route path="users/*" element={<AdminUserRouter/>}/>
-                        <Route path="integrations/*" element={<IntegrationDashboard/>}/>
-                        <Route path=":portalShortcode/*" element={<PortalProvider><PortalRouter/></PortalProvider>}/>
-                        <Route index element={<HomePage/>}/>
-                      </Route>
-                      <Route path="privacy" element={<PrivacyPolicyPage />} />
-                      <Route path="terms" element={<InvestigatorTermsOfUsePage />} />
-                      <Route path="*" element={<div>Unknown page</div>}/>
-                    </Route>
-                    <Route path='redirect-from-oauth' element={<RedirectFromOAuth/>}/>
-                  </Routes>
-                </BrowserRouter>
-              </div>
-            </UserProvider>
-          </AuthProvider>
-        }
-      </ConfigConsumer>
-    </ConfigProvider>
+    <ApiProvider api={previewApi('', '')}>
+      <ConfigProvider>
+        <ConfigConsumer>
+          { config =>
+            <MaintenanceMode systemSettings={config.systemSettings}>
+              <AuthProvider {...getOidcConfig(config.b2cTenantName, config.b2cClientId, config.b2cPolicyName)}>
+                <UserProvider>
+                  <div className="App d-flex flex-column min-vh-100">
+                    <IdleStatusMonitor maxIdleSessionDuration={30 * 60 * 1000} idleWarningDuration={5 * 60 * 1000}/>
+                    <ReactNotifications />
+                    <BrowserRouter>
+                      <ScrollToTop/>
+                      <Routes>
+                        <Route path="/">
+                          <Route path="/system/status" element={<StatusPage/>}/>
+                          <Route element={<ProtectedRoute>
+                            <NavContextProvider><PageFrame config={config}/></NavContextProvider>
+                          </ProtectedRoute>}>
+                            <Route path="populate/*" element={<PopulateRouteSelect/>}/>
+                            <Route path="logEvents/*" element={<LogEventViewer/>}/>
+                            <Route path="system/settings" element={<SystemSettingsEditor/>}/>
+                            <Route path="users/*" element={<AdminUserRouter/>}/>
+                            <Route path="integrations/*" element={<IntegrationDashboard/>}/>
+                            <Route path=":portalShortcode/*" element={
+                              <PortalProvider><PortalRouter/></PortalProvider>
+                            }/>
+                            <Route index element={<HomePage/>}/>
+                          </Route>
+                          <Route path="privacy" element={<PrivacyPolicyPage />} />
+                          <Route path="terms" element={<InvestigatorTermsOfUsePage />} />
+                          <Route path="*" element={<div>Unknown page</div>}/>
+                        </Route>
+                        <Route path='redirect-from-oauth' element={<RedirectFromOAuth/>}/>
+                      </Routes>
+                    </BrowserRouter>
+                  </div>
+                </UserProvider>
+              </AuthProvider>
+            </MaintenanceMode>
+          }
+        </ConfigConsumer>
+      </ConfigProvider>
+    </ApiProvider>
   )
 }
 

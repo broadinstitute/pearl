@@ -1,12 +1,15 @@
 package bio.terra.pearl.api.admin.controller;
 
+import bio.terra.juniper.core.model.maintenance.SystemSettings;
 import bio.terra.pearl.api.admin.api.PublicApi;
 import bio.terra.pearl.api.admin.config.VersionConfiguration;
 import bio.terra.pearl.api.admin.model.SystemStatus;
 import bio.terra.pearl.api.admin.model.VersionProperties;
 import bio.terra.pearl.api.admin.service.ConfigExtService;
 import bio.terra.pearl.api.admin.service.StatusService;
+import bio.terra.pearl.core.service.system.SystemSettingsService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,16 +22,19 @@ import org.springframework.web.servlet.ModelAndView;
 public class PublicApiController implements PublicApi {
   private final StatusService statusService;
   private final VersionConfiguration versionConfiguration;
-  private ConfigExtService configExtService;
+  private final ConfigExtService configExtService;
+  private final SystemSettingsService maintenanceModeService;
 
   @Autowired
   public PublicApiController(
       StatusService statusService,
       VersionConfiguration versionConfiguration,
-      ConfigExtService configExtService) {
+      ConfigExtService configExtService,
+      SystemSettingsService maintenanceModeService) {
     this.statusService = statusService;
     this.versionConfiguration = versionConfiguration;
     this.configExtService = configExtService;
+    this.maintenanceModeService = maintenanceModeService;
   }
 
   @Override
@@ -51,8 +57,17 @@ public class PublicApiController implements PublicApi {
 
   @Override
   public ResponseEntity<Object> getConfig() {
-    Map<String, String> config = configExtService.getConfigMap();
-    return ResponseEntity.ok(config);
+    Map<String, String> configMap = configExtService.getConfigMap();
+    SystemSettings settings = maintenanceModeService.getSystemSettings();
+    Map<String, Object> configWithSettings = new HashMap<>(configMap);
+    configWithSettings.put("systemSettings", settings);
+    return ResponseEntity.ok(configWithSettings);
+  }
+
+  @Override
+  public ResponseEntity<Object> getSystemSettings() {
+    SystemSettings settings = maintenanceModeService.getSystemSettings();
+    return ResponseEntity.ok(settings);
   }
 
   @GetMapping(value = "/config.json")

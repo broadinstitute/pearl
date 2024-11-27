@@ -19,8 +19,8 @@ repositories {
 }
 
 dependencies {
-    antlr "org.antlr:antlr4:4.13.1"
-    compileOnly "org.antlr:antlr4-runtime:4.13.1"
+    antlr "org.antlr:antlr4:4.13.2"
+    compileOnly "org.antlr:antlr4-runtime:4.13.2"
 
     implementation 'org.springframework.boot:spring-boot-starter:3.3.2'
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.4'
@@ -55,16 +55,16 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-context:4.1.4'
 
     liquibaseRuntime 'org.liquibase:liquibase-core:4.30.0'
-    liquibaseRuntime 'info.picocli:picocli:4.6.1'
+    liquibaseRuntime 'info.picocli:picocli:4.7.6'
     liquibaseRuntime 'org.postgresql:postgresql'
     liquibaseRuntime 'ch.qos.logback:logback-classic'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.3.2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.4.0'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.11.0'
     testImplementation 'com.github.seregamorph:hamcrest-more-matchers:0.1'
 
-    testFixturesImplementation 'org.springframework.boot:spring-boot-starter-test:3.3.2'
+    testFixturesImplementation 'org.springframework.boot:spring-boot-starter-test:3.4.0'
     testFixturesImplementation 'org.apache.commons:commons-text:1.12.0'
     testFixturesImplementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
 }
