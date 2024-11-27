@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: "minimal_navbar"
+      author: mbemis
+      changes:
+        - addColumn:
+            tableName: html_page
+            columns:
+              - column: { name: minimal_navbar, type: boolean, defaultValueBoolean: false, constraints: { nullable: false } }
