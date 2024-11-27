@@ -357,10 +357,10 @@ databaseChangeLog:
       file: changesets/2024_11_07_create_participant_file_survey_response_table.yaml
       relativeToChangelogFile: true
   - include:
-      file: changesets/2024_11_22_hide_navbar.yaml
+      file: changesets/2024_11_14_system_settings.yaml
       relativeToChangelogFile: true
   - include:
-      file: changesets/2024_11_14_system_settings.yaml
+      file: changesets/2024_11_22_minimal_navbar.yaml
       relativeToChangelogFile: true
 
 
