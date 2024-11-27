@@ -55,8 +55,7 @@ public class MailingServiceExtServiceTests extends BaseSpringBootTest {
     mailingListExtService.delete(
         PortalEnvAuthContext.of(
             adminUser, portal.getShortcode(), portalEnvironment.getEnvironmentName()),
-        contact.getId(),
-        adminUser);
+        contact.getId());
     assertThat(mailingListService.find(contact.getId()).isPresent(), equalTo(false));
   }
 
@@ -76,8 +75,7 @@ public class MailingServiceExtServiceTests extends BaseSpringBootTest {
         mailingListExtService.create(
             PortalEnvAuthContext.of(
                 adminUser, portal.getShortcode(), portalEnvironment.getEnvironmentName()),
-            contacts,
-            adminUser);
+            contacts);
 
     assertThat(createdContacts, hasSize(2));
   }

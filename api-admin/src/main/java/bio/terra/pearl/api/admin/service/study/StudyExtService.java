@@ -3,7 +3,7 @@ package bio.terra.pearl.api.admin.service.study;
 import bio.terra.pearl.api.admin.models.dto.StudyCreationDto;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalPermission;
-import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyEnvPermission;
+import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyPermission;
 import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyAuthContext;
@@ -88,7 +88,7 @@ public class StudyExtService {
 
   @Transactional
   @SuperuserOnly
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
+  @EnforcePortalStudyPermission(permission = AuthUtilService.BASE_PERMISSION)
   public void delete(PortalStudyAuthContext authContext) {
     portalStudyService.deleteByStudyId(authContext.getPortalStudy().getStudyId());
     studyService.delete(authContext.getPortalStudy().getStudyId(), CascadeProperty.EMPTY_SET);

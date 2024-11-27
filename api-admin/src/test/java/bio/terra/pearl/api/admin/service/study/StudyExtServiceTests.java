@@ -1,5 +1,9 @@
 package bio.terra.pearl.api.admin.service.study;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+
 import bio.terra.pearl.api.admin.AuthAnnotationSpec;
 import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
@@ -19,19 +23,14 @@ import bio.terra.pearl.core.service.notification.TriggerService;
 import bio.terra.pearl.core.service.study.PortalStudyService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyService;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
 
 public class StudyExtServiceTests extends BaseSpringBootTest {
   @Autowired private StudyExtService studyExtService;
@@ -46,14 +45,14 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
   @Test
   public void allMethodsAuthed(TestInfo info) {
     AuthTestUtils.assertAllMethodsAnnotated(
-            studyExtService,
-            Map.of(
-                    "create",
-                    AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
-                    "delete",
-                    AuthAnnotationSpec.withPortalStudyPerm(AuthUtilService.BASE_PERMISSION),
-                    "getStudiesWithEnvs",
-                    AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION)));
+        studyExtService,
+        Map.of(
+            "create",
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
+            "delete",
+            AuthAnnotationSpec.withPortalStudyPerm(AuthUtilService.BASE_PERMISSION),
+            "getStudiesWithEnvs",
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION)));
   }
 
   @Test
@@ -63,7 +62,7 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
     Portal portal = portalFactory.buildPersisted(getTestName(testInfo));
     String newStudyShortcode = "newStudy" + RandomStringUtils.randomAlphabetic(5);
     StudyCreationDto studyDto = new StudyCreationDto(newStudyShortcode, "the new study");
-    studyExtService.create(portal.getShortcode(), studyDto, operator);
+    studyExtService.create(PortalAuthContext.of(operator, portal.getShortcode()), studyDto);
 
     // confirm study and environments were created
     Study study = studyService.findByShortcode(newStudyShortcode).get();
@@ -82,12 +81,12 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
     studyExtService.create(PortalAuthContext.of(operator, portal.getShortcode()), studyDto);
 
     // confirm study was deleted
-    studyExtService.delete(PortalStudyAuthContext.of(operator, portal.getShortcode(), newStudyShortcode));
+    studyExtService.delete(
+        PortalStudyAuthContext.of(operator, portal.getShortcode(), newStudyShortcode));
     assertThat(studyService.findByShortcode(newStudyShortcode).isEmpty(), equalTo(true));
     // confirm that the corresponding portalService was also deleted
     assertThat(portalStudyService.findByPortalId(portal.getId()), empty());
   }
-
 
   @Test
   @Transactional
@@ -97,13 +96,12 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
     AdminUser operator = adminUserFactory.buildPersisted(getTestName(info), true);
     Study study =
         studyExtService.create(
-            portal.getShortcode(),
+            PortalAuthContext.of(operator, portal.getShortcode()),
             StudyCreationDto.builder()
                 .shortcode("testshortcode")
                 .name("Test Study")
                 .template(StudyCreationDto.StudyTemplate.BASIC)
-                .build(),
-            operator);
+                .build());
 
     Assertions.assertEquals("Test Study", study.getName());
     Assertions.assertEquals("testshortcode", study.getShortcode());

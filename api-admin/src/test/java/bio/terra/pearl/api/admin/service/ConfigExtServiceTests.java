@@ -8,7 +8,6 @@ import bio.terra.pearl.api.admin.config.B2CConfiguration;
 import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.service.address.AddressValidationConfig;
-import bio.terra.pearl.core.service.exception.PermissionDeniedException;
 import bio.terra.pearl.core.service.export.integration.AirtableExporter;
 import bio.terra.pearl.core.service.kit.pepper.LivePepperDSMClient;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
@@ -48,23 +47,6 @@ public class ConfigExtServiceTests {
             airtableConfig);
     Map<String, String> configMap = configExtService.getConfigMap();
     Assertions.assertEquals("something.org", configMap.get("participantUiHostname"));
-  }
-
-  @Test
-  public void testInternalConfigRequiresSuperuser() {
-    AdminUser user = AdminUser.builder().superuser(false).build();
-    ConfigExtService configExtService =
-        new ConfigExtService(
-            b2CConfiguration,
-            applicationRoutingPaths,
-            pepperDSMConfig,
-            addressValidationConfig,
-            airtableConfig);
-    Assertions.assertThrows(
-        PermissionDeniedException.class,
-        () -> {
-          configExtService.getInternalConfigMap(OperatorAuthContext.of(user));
-        });
   }
 
   @Test
