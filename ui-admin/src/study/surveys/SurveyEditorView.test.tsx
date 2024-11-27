@@ -120,6 +120,7 @@ describe('SurveyEditorView', () => {
   })
 
   test('toggles languages', async () => {
+    Element.prototype.scrollIntoView = jest.fn()
     const portal = mockTwoLanguagePortal()
     renderInPortalRouter(portal,
       <SurveyEditorView
