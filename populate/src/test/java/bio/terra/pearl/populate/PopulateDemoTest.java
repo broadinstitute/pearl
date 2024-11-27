@@ -10,6 +10,7 @@ import bio.terra.pearl.core.model.site.SiteContent;
 import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.Answer;
+import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
@@ -19,6 +20,7 @@ import bio.terra.pearl.core.service.export.ExportFileFormat;
 import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
 import bio.terra.pearl.core.service.export.formatters.module.ModuleFormatter;
 import bio.terra.pearl.core.service.publishing.PortalEnvironmentChangeRecordService;
+import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
 import bio.terra.pearl.populate.service.contexts.FilePopulateContext;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
@@ -57,6 +59,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
         List<Enrollee> enrollees = enrolleeService.findByStudyEnvironment(sandboxEnvironmentId);
         Assertions.assertEquals(17, enrollees.size());
 
+        checkSurveyPopulation(sandboxEnvironmentId);
         checkOldVersionEnrollee(enrollees);
         checkKeyedEnrollee(enrollees);
         checkProxyWithOneGovernedEnrollee(enrollees);
@@ -262,8 +265,24 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
                 lifestyleTasks.get(0).getSurveyResponseId() != lifestyleTasks.get(1).getSurveyResponseId(), equalTo(true));
     }
 
+    private void checkSurveyPopulation(UUID studyEnvironmentId) {
+        // confirm the survey ordering is correct
+        List<StudyEnvironmentSurvey> studyEnvironmentSurveys = studyEnvironmentSurveyService.findAllByStudyEnvIdWithSurveyNoContent(studyEnvironmentId, null);
+        List<StudyEnvironmentSurvey> socialHealthSurveys = studyEnvironmentSurveys.stream().filter((ses) -> ses.getSurvey().getStableId().equals("hd_hd_socialHealth")).toList();
+        // check that the past versions of the social health survey are included
+        assertThat(socialHealthSurveys, hasSize(3));
+        assertThat(socialHealthSurveys.stream().map(ses -> ses.getSurvey().getVersion()).toList(), contains(1, 2, 3));
+        // and they all got assigned to the same ordering
+        assertThat(socialHealthSurveys, everyItem(hasProperty("surveyOrder", equalTo(7))));
+        // check that outreach surveys are independently ordered
+        assertThat(studyEnvironmentSurveys.stream().filter((ses) -> ses.getSurvey().getStableId().equals("depressionOutreach")).findFirst().orElseThrow(),
+                hasProperty("surveyOrder", equalTo(0)));
+    }
+
     @Autowired
     private PortalEnvironmentChangeRecordService portalEnvironmentChangeRecordService;
     @Autowired
     private AdminUserService adminUserService;
+    @Autowired
+    private StudyEnvironmentSurveyService studyEnvironmentSurveyService;
 }
