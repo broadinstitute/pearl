@@ -12,6 +12,10 @@ import java.util.stream.Stream;
 
 /** For service classes handling object attached to a PortalEnvironment that can be published across environments */
 public interface PortalEnvPublishable {
+    /**
+     * to avoid the complexities of multiple interface overlap, we include the study environment ignore
+     * properties here, rather than having a DEFAULT_PUBLISH_IGNORE_PROPS in the StudyEnvPublishable interface
+     */
     List<String> DEFAULT_PUBLISH_IGNORE_PROPS = List.of("id", "createdAt", "lastUpdatedAt", "class",
             "portalEnvironmentId", "studyEnvironmentId");
      /** loads the relevant entities onto the environment for diff or apply operations */
