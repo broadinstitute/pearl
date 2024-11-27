@@ -1,7 +1,8 @@
 package bio.terra.pearl.api.admin;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -22,6 +23,7 @@ public class AuthTestUtils {
             .filter(
                 method ->
                     Modifier.isPublic(method.getModifiers())
+                        && !Modifier.isStatic(method.getModifiers())
                         && !excludedMethodNames.contains(method.getName()))
             .toList();
     for (Method method : publicMethods) {

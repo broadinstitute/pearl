@@ -4,7 +4,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
+import bio.terra.pearl.api.admin.AuthAnnotationSpec;
+import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
 import bio.terra.pearl.core.factory.admin.AdminUserFactory;
 import bio.terra.pearl.core.factory.portal.MailingListContactFactory;
@@ -19,6 +22,7 @@ import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +37,19 @@ public class MailingServiceExtServiceTests extends BaseSpringBootTest {
   @Autowired PortalService portalService;
   @Autowired ParticipantDataChangeService participantDataChangeService;
   @Autowired ObjectMapper objectMapper;
+
+  @Test
+  public void testAllMethodsAnnotated() {
+    AuthTestUtils.assertAllMethodsAnnotated(
+        mailingListExtService,
+        Map.of(
+            "getAll",
+            AuthAnnotationSpec.withPortalEnvPerm(AuthUtilService.BASE_PERMISSION),
+            "create",
+            AuthAnnotationSpec.withPortalEnvPerm(AuthUtilService.BASE_PERMISSION),
+            "delete",
+            AuthAnnotationSpec.withPortalEnvPerm(AuthUtilService.BASE_PERMISSION)));
+  }
 
   @Test
   @Transactional

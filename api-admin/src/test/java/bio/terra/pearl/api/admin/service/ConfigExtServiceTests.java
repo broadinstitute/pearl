@@ -4,13 +4,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
+import bio.terra.pearl.api.admin.AuthAnnotationSpec;
+import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.config.B2CConfiguration;
+import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.service.address.AddressValidationConfig;
 import bio.terra.pearl.core.service.export.integration.AirtableExporter;
 import bio.terra.pearl.core.service.kit.pepper.LivePepperDSMClient;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,6 +32,22 @@ public class ConfigExtServiceTests {
   @MockBean private LivePepperDSMClient.PepperDSMConfig pepperDSMConfig;
   @MockBean private AddressValidationConfig addressValidationConfig;
   @MockBean private AirtableExporter.AirtableConfig airtableConfig;
+
+  @Test
+  public void testAllMethodsAnnotated() {
+    AuthTestUtils.assertAllMethodsAnnotated(
+        new ConfigExtService(
+            b2CConfiguration,
+            applicationRoutingPaths,
+            pepperDSMConfig,
+            addressValidationConfig,
+            airtableConfig),
+        Map.of(
+            "getConfigMap",
+            AuthAnnotationSpec.noAnnotations(),
+            "getInternalConfigMap",
+            AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class))));
+  }
 
   @Test
   public void testConfigMap() {
