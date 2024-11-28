@@ -8,7 +8,6 @@ import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.publishing.PortalEnvironmentChange;
 import bio.terra.pearl.core.model.publishing.PortalEnvironmentChangeRecord;
-import bio.terra.pearl.core.service.publishing.PortalDiffService;
 import bio.terra.pearl.core.service.publishing.PortalEnvironmentChangeRecordService;
 import bio.terra.pearl.core.service.publishing.PortalPublishingService;
 import java.util.List;
@@ -16,18 +15,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PortalPublishingExtService {
-  private final AuthUtilService authUtilService;
-  private final PortalDiffService portalDiffService;
   private final PortalPublishingService portalPublishingService;
   private final PortalEnvironmentChangeRecordService portalEnvironmentChangeRecordService;
 
   public PortalPublishingExtService(
-      AuthUtilService authUtilService,
-      PortalDiffService portalDiffService,
       PortalPublishingService portalPublishingService,
       PortalEnvironmentChangeRecordService portalEnvironmentChangeRecordService) {
-    this.authUtilService = authUtilService;
-    this.portalDiffService = portalDiffService;
     this.portalPublishingService = portalPublishingService;
     this.portalEnvironmentChangeRecordService = portalEnvironmentChangeRecordService;
   }
@@ -36,7 +29,8 @@ public class PortalPublishingExtService {
   @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
   public PortalEnvironmentChange diff(
       PortalAuthContext authContext, EnvironmentName destEnv, EnvironmentName sourceEnv) {
-    return portalDiffService.diffPortalEnvs(authContext.getPortalShortcode(), destEnv, sourceEnv);
+    return portalPublishingService.diffPortalEnvs(
+        authContext.getPortalShortcode(), destEnv, sourceEnv);
   }
 
   @EnforcePortalPermission(permission = "publish")

@@ -130,7 +130,7 @@ public class StudyExtService {
 
       studyPopulator.populateFromDto(studyPopDto, config, false);
     } catch (IOException e) {
-      throw new InternalServerException("Failed to pre-populate study.");
+      throw new InternalServerException("Failed to pre-populate study.", e);
     }
   }
 

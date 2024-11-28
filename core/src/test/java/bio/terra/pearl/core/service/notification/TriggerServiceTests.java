@@ -1,12 +1,15 @@
-package bio.terra.pearl.core.service.publishing;
+package bio.terra.pearl.core.service.notification;
 
+import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.model.notification.EmailTemplate;
 import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.notification.TriggerEventType;
 import bio.terra.pearl.core.model.notification.TriggerType;
 import bio.terra.pearl.core.model.publishing.ConfigChange;
 import bio.terra.pearl.core.model.workflow.TaskType;
+import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +17,10 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class PublishableTests {
+public class TriggerServiceTests extends BaseSpringBootTest {
+    @Autowired
+    private TriggerService triggerService;
+
     @Test
     public void testIsVersionedConfigMatch() {
         // configs match if stableID of template is the same
@@ -27,7 +33,7 @@ public class PublishableTests {
                 .triggerType(TriggerType.EVENT)
                 .eventType(TriggerEventType.STUDY_ENROLLMENT)
                 .emailTemplate(EmailTemplate.builder().stableId("foo").build()).build();
-        assertThat(Publishable.isVersionedConfigMatch(config, configWithDifferentTemplate), equalTo(true));
+        assertThat(PortalEnvPublishable.isVersionedConfigMatch(config, configWithDifferentTemplate), equalTo(true));
     }
 
     @Test
@@ -41,22 +47,22 @@ public class PublishableTests {
                 .triggerType(TriggerType.EVENT)
                 .eventType(TriggerEventType.STUDY_CONSENT)
                 .emailTemplate(EmailTemplate.builder().stableId("bar").build()).build();
-        assertThat(Publishable.isVersionedConfigMatch(config, configWithDifferentTemplate), equalTo(false));
+        assertThat(PortalEnvPublishable.isVersionedConfigMatch(config, configWithDifferentTemplate), equalTo(false));
     }
 
     @Test
     public void testDiffNotificationsNoEvents() throws Exception {
         List<Trigger> sourceList = List.of();
         List<Trigger> destList = List.of();
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, triggerService.getPublishIgnoreProps());
         assertThat(diffs.addedItems(), hasSize(0));
         assertThat(diffs.changedItems(), hasSize(0));
         assertThat(diffs.removedItems(), hasSize(0));
     }
 
     @Test
-    public void testDiffNotificationsOneEventMatched() throws Exception {
+    public void testDiffNotificationsOneEventMatched() {
         List<Trigger> sourceList = List.of(
                 Trigger.builder().id(UUID.randomUUID())
                         .triggerType(TriggerType.EVENT)
@@ -69,15 +75,15 @@ public class PublishableTests {
                         .eventType(TriggerEventType.STUDY_CONSENT)
                         .emailTemplate(EmailTemplate.builder().stableId("t1").build())
                         .build());
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, triggerService.getPublishIgnoreProps());
         assertThat(diffs.addedItems(), hasSize(0));
         assertThat(diffs.changedItems(), hasSize(0));
         assertThat(diffs.removedItems(), hasSize(0));
     }
 
     @Test
-    public void testDiffNotificationsOneEventChanged() throws Exception {
+    public void testDiffNotificationsOneEventChanged() {
         List<Trigger> sourceList = List.of(
                 Trigger.builder().id(UUID.randomUUID())
                         .triggerType(TriggerType.TASK_REMINDER)
@@ -92,8 +98,8 @@ public class PublishableTests {
                         .emailTemplate(EmailTemplate.builder().stableId("t1").build())
                         .afterMinutesIncomplete(2000)
                         .build());
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, triggerService.getPublishIgnoreProps());
         assertThat(diffs.addedItems(), hasSize(0));
         assertThat(diffs.changedItems(), hasSize(1));
         assertThat(diffs.changedItems().get(0).configChanges(), hasSize(1));
@@ -104,7 +110,7 @@ public class PublishableTests {
     }
 
     @Test
-    public void testDiffNotificationsOneEventAdded() throws Exception {
+    public void testDiffNotificationsOneEventAdded() {
         Trigger addedConfig = Trigger.builder().id(UUID.randomUUID())
                 .triggerType(TriggerType.TASK_REMINDER)
                 .taskType(TaskType.CONSENT)
@@ -112,8 +118,8 @@ public class PublishableTests {
                 .build();
         List<Trigger> sourceList = List.of(addedConfig);
         List<Trigger> destList = List.of();
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, triggerService.getPublishIgnoreProps());
         assertThat(diffs.addedItems(), hasSize(1));
         assertThat(diffs.addedItems().get(0), samePropertyValuesAs(addedConfig));
         assertThat(diffs.changedItems(), hasSize(0));
@@ -121,7 +127,7 @@ public class PublishableTests {
     }
 
     @Test
-    public void testDiffNotificationsOneEventRemoved() throws Exception {
+    public void testDiffNotificationsOneEventRemoved() {
         Trigger removedConfig = Trigger.builder().id(UUID.randomUUID())
                 .triggerType(TriggerType.TASK_REMINDER)
                 .taskType(TaskType.CONSENT)
@@ -129,8 +135,8 @@ public class PublishableTests {
                 .build();
         List<Trigger> sourceList = List.of();
         List<Trigger> destList = List.of(removedConfig);
-        var diffs = Publishable
-                .diffConfigLists(sourceList, destList, Publishable.CONFIG_IGNORE_PROPS);
+        var diffs = PortalEnvPublishable
+                .diffConfigLists(sourceList, destList, triggerService.getPublishIgnoreProps());
         assertThat(diffs.addedItems(), hasSize(0));
         assertThat(diffs.changedItems(), hasSize(0));
         assertThat(diffs.removedItems(), hasSize(1));

@@ -4,24 +4,36 @@ import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.Versioned;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.publishing.*;
-import bio.terra.pearl.core.model.study.StudyEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
-public interface Publishable {
-    public static final List<String> CONFIG_IGNORE_PROPS = List.of("id", "createdAt", "lastUpdatedAt", "class",
-            "studyEnvironmentId", "portalEnvironmentId", "emailTemplateId", "emailTemplate",
-            "consentFormId", "consentForm", "surveyId", "survey", "versionedEntity", "trigger");
-    public void loadForDiffing(PortalEnvironment portalEnv);
-    public void loadForDiffing(StudyEnvironment studyEnv);
-    public void updateDiff(PortalEnvironment sourceEnv, PortalEnvironment destEnv, PortalEnvironmentChange change);
-    public void updateDiff(StudyEnvironment sourceEnv, StudyEnvironment destEnv, StudyEnvironmentChange change);
-    public void applyDiff(PortalEnvironment sourceEnv, PortalEnvironment destEnv, PortalEnvironmentChange change);
-    public void applyDiff( StudyEnvironmentChange change, StudyEnvironment destEnv, PortalEnvironment destPortalEnv);
+/** For service classes handling object attached to a PortalEnvironment that can be published across environments */
+public interface PortalEnvPublishable {
+    /**
+     * to avoid the complexities of multiple interface overlap, we include the study environment ignore
+     * properties here, rather than having a DEFAULT_PUBLISH_IGNORE_PROPS in the StudyEnvPublishable interface
+     */
+    List<String> DEFAULT_PUBLISH_IGNORE_PROPS = List.of("id", "createdAt", "lastUpdatedAt", "class",
+            "portalEnvironmentId", "studyEnvironmentId");
+     /** loads the relevant entities onto the environment for diff or apply operations */
+     void loadForPublishing(PortalEnvironment portalEnv);
+     void updateDiff(PortalEnvironmentChange change, PortalEnvironment sourceEnv, PortalEnvironment destEnv);
+     void applyDiff(PortalEnvironmentChange change, PortalEnvironment destEnv);
 
-    public static <C extends VersionedEntityConfig, T extends BaseEntity & Versioned> ListChange<C, VersionedConfigChange<T>> diffConfigLists(
+
+    default List<String> getPublishIgnoreProps() {
+        return Stream.concat(List.of("id", "createdAt", "lastUpdatedAt", "class",
+                "portalEnvironmentId", "studyEnvironmentId").stream(), getAdditionalPublishIgnoreProps().stream()).toList();
+    }
+
+    default List<String> getAdditionalPublishIgnoreProps() {
+        return List.of();
+    }
+
+     static <C extends VersionedEntityConfig, T extends BaseEntity & Versioned> ListChange<C, VersionedConfigChange<T>> diffConfigLists(
             List<C> sourceConfigs,
             List<C> destConfigs,
             List<String> ignoreProps) {
@@ -53,7 +65,7 @@ public interface Publishable {
     }
 
     /** for now, just checks to see if they reference the same versioned document */
-    public static boolean isVersionedConfigMatch(VersionedEntityConfig configA, VersionedEntityConfig configB) {
+    static boolean isVersionedConfigMatch(VersionedEntityConfig configA, VersionedEntityConfig configB) {
         if (configA == null || configB == null) {
             return configA == configB;
         }
@@ -62,4 +74,5 @@ public interface Publishable {
         }
         return Objects.equals(configA.versionedEntity().getStableId(), configB.versionedEntity().getStableId());
     }
+
 }

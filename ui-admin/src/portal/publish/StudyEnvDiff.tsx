@@ -2,7 +2,7 @@ import React from 'react'
 import { StudyEnvironmentChange } from 'api/api'
 import {
   ConfigChangeListView,
-  ConfigChanges, renderKitType, renderNotificationConfig,
+  ConfigChanges, renderExportIntegration, renderKitType, renderNotificationConfig,
   renderStudyEnvironmentSurvey,
   VersionChangeView
 } from './diffComponents'
@@ -23,7 +23,7 @@ const StudyEnvDiff = ({ studyName, studyEnvChange, selectedChanges, setSelectedC
         <ConfigChanges configChanges={studyEnvChange.configChanges}
           selectedChanges={selectedChanges.configChanges}
           updateSelectedChanges={configChanges => setSelectedChanges({
-            ...studyEnvChange,
+            ...selectedChanges,
             configChanges
           })}/>
       </div>
@@ -69,6 +69,16 @@ const StudyEnvDiff = ({ studyName, studyEnvChange, selectedChanges, setSelectedC
           setSelectedChanges={kitTypeChanges =>
             setSelectedChanges({ ...selectedChanges, kitTypeChanges })}
           renderItemSummary={renderKitType}/>
+      </div>
+    </div>
+    <div className="my-1">
+      <h3 className="h6">Export Integrations</h3>
+      <div className="ms-4">
+        <ConfigChangeListView configChangeList={studyEnvChange.exportIntegrationChanges}
+          selectedChanges={selectedChanges.exportIntegrationChanges}
+          setSelectedChanges={exportIntegrationChanges =>
+            setSelectedChanges({ ...selectedChanges, exportIntegrationChanges })}
+          renderItemSummary={renderExportIntegration}/>
       </div>
     </div>
   </div>

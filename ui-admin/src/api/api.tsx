@@ -236,6 +236,12 @@ export type StudyEnvironmentChange = {
   surveyChanges: ListChange<StudyEnvironmentSurvey, VersionedConfigChange>
   triggerChanges: ListChange<Trigger, VersionedConfigChange>
   kitTypeChanges: ListChange<KitType, VersionedConfigChange>
+  exportIntegrationChanges: ListChange<ExportIntegration, ConfigChangeList>
+}
+
+export type ConfigChangeList = {
+  entity: object
+  changes: ConfigChange[]
 }
 
 export type VersionedEntityChange = {
@@ -383,28 +389,6 @@ export type WithdrawnEnrollee = {
   note: string
 }
 
-export type ExportIntegration = {
-  id: string,
-  name: string,
-  createdAt?: number,
-  lastUpdatedAt?: number,
-  destinationType: string,
-  enabled: boolean,
-  exportOptions: ExportOptions,
-  destinationUrl: string
-}
-
-export type ExportIntegrationJob = {
-  id: string,
-  status: string,
-  exportIntegrationId: string,
-  startedAt: number,
-  completedAt?: number,
-  result: string,
-  creatingAdminUserId?: string,
-  systemProcess?: string
-}
-
 export type ParticipantUserMerge = {
   users: MergeAction<ParticipantUser, object>
   ppUsers: MergeAction<PortalParticipantUser, object>
@@ -432,6 +416,28 @@ export type MergeActionAction =
 export type MergePair<T> = {
   source?: T,
   target?: T
+}
+
+export type ExportIntegration = {
+    id: string,
+  name: string,
+    createdAt: number,
+    lastUpdatedAt: number,
+    destinationType: string,
+    enabled: boolean,
+    exportOptions: ExportOptions,
+    destinationUrl: string
+}
+
+export type ExportIntegrationJob = {
+  id: string,
+  status: string,
+  exportIntegrationId: string,
+  startedAt: number,
+  completedAt?: number,
+  result: string,
+  creatingAdminUserId?: string,
+  systemProcess?: string
 }
 
 let bearerToken: string | null = null
@@ -1238,6 +1244,44 @@ export default {
       method: 'PATCH',
       headers: this.getInitHeaders(),
       body: JSON.stringify(integration)
+    })
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchExportIntegrationJobs(studyEnvParams: StudyEnvParams): Promise<ExportIntegrationJob[]> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrationJobs`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchExportIntegrations(studyEnvParams: StudyEnvParams): Promise<ExportIntegration[]> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<ExportIntegration> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async createExportIntegration(studyEnvParams: StudyEnvParams, integration: ExportIntegration):
+    Promise<ExportIntegration> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations`
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getInitHeaders(),
+      body: JSON.stringify(integration)
+    })
+    return await this.processJsonResponse(response)
+  },
+
+  async runExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<ExportIntegrationJob> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}/run`
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getInitHeaders()
     })
     return await this.processJsonResponse(response)
   },

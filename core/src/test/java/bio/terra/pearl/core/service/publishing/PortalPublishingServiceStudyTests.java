@@ -46,7 +46,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 
-public class StudyPublishingServiceTests extends BaseSpringBootTest {
+public class PortalPublishingServiceStudyTests extends BaseSpringBootTest {
     @Test
     @Transactional
     public void testApplyStudyConfigChanges(TestInfo info) throws Exception {
@@ -211,15 +211,15 @@ public class StudyPublishingServiceTests extends BaseSpringBootTest {
     }
 
     private void diffAndApplyChanges(String studyShortcode, PortalEnvironment destPortalEnv, EnvironmentName src, EnvironmentName dest) throws Exception {
-        StudyEnvironmentChange changes = portalDiffService.diffStudyEnvs(studyShortcode, src, dest);
-        StudyEnvironment loadedLiveEnv = portalDiffService.loadStudyEnvForProcessing(studyShortcode, dest);
-        studyPublishingService.applyChanges(loadedLiveEnv, changes, destPortalEnv);
+        StudyEnvironmentChange changes = portalPublishingService.diffStudyEnvs(studyShortcode, src, dest);
+        StudyEnvironment loadedLiveEnv = portalPublishingService.loadStudyEnvForProcessing(studyShortcode, dest);
+        portalPublishingService.applyChanges(loadedLiveEnv, changes, destPortalEnv);
     }
 
     @Autowired
     private StudyFactory studyFactory;
     @Autowired
-    private StudyPublishingService studyPublishingService;
+    private PortalPublishingService portalPublishingService;
     @Autowired
     private StudyEnvironmentFactory studyEnvironmentFactory;
     @Autowired
@@ -232,8 +232,6 @@ public class StudyPublishingServiceTests extends BaseSpringBootTest {
     private SurveyService surveyService;
     @Autowired
     private SurveyFactory surveyFactory;
-    @Autowired
-    private PortalDiffService portalDiffService;
     @Autowired
     private StudyEnvironmentSurveyDao studyEnvironmentSurveyDao;
     @Autowired

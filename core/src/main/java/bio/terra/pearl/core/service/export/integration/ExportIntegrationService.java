@@ -7,22 +7,25 @@ import bio.terra.pearl.core.model.export.ExportDestinationType;
 import bio.terra.pearl.core.model.export.ExportIntegration;
 import bio.terra.pearl.core.model.export.ExportIntegrationJob;
 import bio.terra.pearl.core.model.export.ExportOptions;
-import bio.terra.pearl.core.model.notification.Trigger;
-import bio.terra.pearl.core.model.notification.TriggerType;
+import bio.terra.pearl.core.model.portal.PortalEnvironment;
+import bio.terra.pearl.core.model.publishing.ConfigChange;
+import bio.terra.pearl.core.model.publishing.ConfigChangeList;
+import bio.terra.pearl.core.model.publishing.ListChange;
+import bio.terra.pearl.core.model.publishing.StudyEnvironmentChange;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
+import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
+import bio.terra.pearl.core.service.publishing.StudyEnvPublishable;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
-public class ExportIntegrationService extends CrudService<ExportIntegration, ExportIntegrationDao> {
+public class ExportIntegrationService extends CrudService<ExportIntegration, ExportIntegrationDao> implements StudyEnvPublishable {
     private final ExportIntegrationJobService exportIntegrationJobService;
     private final ExportOptionsDao exportOptionsDao;
     private final EnrolleeSearchExpressionParser enrolleeSearchExpressionParser;
@@ -95,9 +98,16 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
     public Optional<ExportIntegration> findWithOptions(UUID id) {
         Optional<ExportIntegration> integrationOpt = dao.find(id);
         integrationOpt.ifPresent(integration -> {
-            integration.setExportOptions(exportOptionsDao.find(integration.getExportOptionsId()).orElse(null));
+            attachOptions(List.of(integration));
         });
         return integrationOpt;
+    }
+
+    public void attachOptions(List<ExportIntegration> integrations) {
+        List<ExportOptions> options = exportOptionsDao.findAllPreserveOrder(integrations.stream().map(ExportIntegration::getExportOptionsId).toList());
+        for (int i = 0; i < integrations.size(); i++) {
+            integrations.get(i).setExportOptions(options.get(i));
+        }
     }
 
     public void deleteByStudyEnvironmentId(UUID studyEnvId) {
@@ -107,5 +117,65 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
         dao.deleteByStudyEnvironmentId(studyEnvId);
         exportOptionsDao.deleteAll(integrations.stream().map(ExportIntegration::getExportOptionsId).toList());
 
+    }
+
+    @Override
+    public void loadForPublishing(StudyEnvironment studyEnv) {
+        List<ExportIntegration> integrations = findByStudyEnvironmentId(studyEnv.getId());
+        attachOptions(integrations);
+        studyEnv.setExportIntegrations(integrations);
+    }
+
+    @Override
+    public void updateDiff(StudyEnvironmentChange change, StudyEnvironment sourceEnv, StudyEnvironment destEnv) {
+        List<ExportIntegration> unmatchedIntegrations = new ArrayList<>(destEnv.getExportIntegrations());
+        List<ExportIntegration> addedIntegrations = new ArrayList<>();
+        List<ConfigChangeList<ExportIntegration>> changedIntegrations = new ArrayList<>();
+        for (ExportIntegration sourceIntegration : sourceEnv.getExportIntegrations()) {
+            ExportIntegration matchedIntegration = unmatchedIntegrations.stream().filter(
+                            destIntegration -> Objects.equals(destIntegration.getName(), sourceIntegration.getName()))
+                    .findAny().orElse(null);
+            if (matchedIntegration == null) {
+                addedIntegrations.add(sourceIntegration);
+            } else {
+                unmatchedIntegrations.remove(matchedIntegration);
+                // we get changes from both the integration object and the child export options object
+                List<ConfigChange> changes = ConfigChange.allChanges(sourceIntegration, matchedIntegration, getPublishIgnoreProps());
+                changes.addAll(ConfigChange.allChanges(
+                        sourceIntegration.getExportOptions(),
+                        matchedIntegration.getExportOptions(),
+                        getPublishIgnoreProps(),
+                        "exportOptions"));
+                if (!changes.isEmpty()) {
+                    changedIntegrations.add(new ConfigChangeList<>(matchedIntegration, changes));
+                }
+            }
+        }
+        change.setExportIntegrationChanges(new ListChange<>(addedIntegrations, unmatchedIntegrations, changedIntegrations));
+    }
+
+    @Override
+    @Transactional
+    public void applyDiff(StudyEnvironmentChange change, StudyEnvironment destEnv, PortalEnvironment destPortalEnv) {
+        for (ExportIntegration integration : change.getExportIntegrationChanges().addedItems()) {
+            integration.cleanForCopying();
+            integration.setStudyEnvironmentId(destEnv.getId());
+            create(integration);
+        }
+        for (ExportIntegration integration : change.getExportIntegrationChanges().removedItems()) {
+            delete(integration.getId(), CascadeProperty.EMPTY_SET);
+        }
+        for (ConfigChangeList<ExportIntegration> changedIntegration : change.getExportIntegrationChanges().changedItems()) {
+            ExportIntegration destIntegration = changedIntegration.entity();
+            for (ConfigChange configChange : changedIntegration.changes()) {
+                configChange.apply(destIntegration);
+            }
+            update(destIntegration);
+        }
+    }
+
+    @Override
+    public List<String> getAdditionalPublishIgnoreProps() {
+        return List.of("exportOptions", "exportOptionsId", "destinationUrl");
     }
 }

@@ -28,6 +28,8 @@ const DEFAULT_EXPORT_INTEGRATION: ExportIntegration = {
   name: 'new',
   destinationType: 'AIRTABLE',
   enabled: true,
+  createdAt: new Date().getTime(),
+  lastUpdatedAt: new Date().getTime(),
   id: '',
   destinationUrl: '',
   exportOptions: {
