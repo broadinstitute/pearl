@@ -531,6 +531,21 @@ paths:
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/env/{envName}/participantUsers/{id}:
+    get:
+      summary: lists all the participant users for the given portal environment
+      tags: [ participantUser ]
+      operationId: findWithPortalUser
+      parameters:
+        - *portalShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: the participantuser with the portalParticipantUser object included too
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/env/{envName}/participantUsers/merge/plan:
     post:
       summary: gets a merge plan for the given participant users. This does not perform the merge.

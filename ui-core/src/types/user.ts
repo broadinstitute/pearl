@@ -24,6 +24,7 @@ export type ParticipantUser = {
     token: string
     lastLogin: number
     createdAt: number
+    portalParticipantUsers?: PortalParticipantUser[]
 }
 
 export type PortalParticipantUser = {

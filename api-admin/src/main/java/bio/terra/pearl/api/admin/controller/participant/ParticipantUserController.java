@@ -7,6 +7,7 @@ import bio.terra.pearl.api.admin.service.participant.ParticipantUserExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -32,5 +33,16 @@ public class ParticipantUserController implements ParticipantUserApi {
         this.participantUserExtService.list(
             PortalEnvAuthContext.of(
                 user, portalShortcode, EnvironmentName.valueOfCaseInsensitive(envName))));
+  }
+
+  @Override
+  public ResponseEntity<Object> findWithPortalUser(
+      String portalShortcode, String envName, UUID participantUserId) {
+    AdminUser user = authUtilService.requireAdminUser(request);
+    return ResponseEntity.ok(
+        this.participantUserExtService.findWithPortalUser(
+            PortalEnvAuthContext.of(
+                user, portalShortcode, EnvironmentName.valueOfCaseInsensitive(envName)),
+            participantUserId));
   }
 }

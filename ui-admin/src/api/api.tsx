@@ -823,6 +823,12 @@ export default {
     return await this.processJsonResponse(response)
   },
 
+  async fetchParticipantUser(portalShortcode: string, envName: string, id: string): Promise<ParticipantUser> {
+    const response = await fetch(`${basePortalUrl(portalShortcode)}/env/${envName}/participantUsers/${id}`,
+      this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
   async fetchMergePlan(portalShortcode: string, envName: string, sourceEmail: string, targetEmail: string):
     Promise<ParticipantUserMerge> {
     const response = await fetch(`${basePortalUrl(portalShortcode)}/env/${envName}/participantUsers/merge/plan`, {
