@@ -37,11 +37,7 @@ public class EnrollmentController implements EnrollmentApi {
 
   @Override
   public ResponseEntity<Object> createEnrollee(
-      String portalShortcode,
-      String envName,
-      String studyShortcode,
-      UUID preEnrollResponseId,
-      String referralSource) {
+      String portalShortcode, String envName, String studyShortcode, UUID preEnrollResponseId) {
     ParticipantUser user = requestUtilService.requireUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     PortalWithPortalUser portalWithPortalUser =
@@ -52,8 +48,7 @@ public class EnrollmentController implements EnrollmentApi {
             studyShortcode,
             user,
             portalWithPortalUser.ppUser(),
-            preEnrollResponseId,
-            referralSource);
+            preEnrollResponseId);
 
     return ResponseEntity.ok(hubResponse);
   }
@@ -64,8 +59,7 @@ public class EnrollmentController implements EnrollmentApi {
       String envName,
       String studyShortcode,
       UUID preEnrollResponseId,
-      UUID governedPpUserId,
-      String referralSource) {
+      UUID governedPpUserId) {
     ParticipantUser user = requestUtilService.requireUser(request);
 
     HubResponse response =
@@ -75,8 +69,7 @@ public class EnrollmentController implements EnrollmentApi {
             EnvironmentName.valueOfCaseInsensitive(envName),
             studyShortcode,
             preEnrollResponseId,
-            governedPpUserId,
-            referralSource);
+            governedPpUserId);
 
     return ResponseEntity.ok(response);
   }

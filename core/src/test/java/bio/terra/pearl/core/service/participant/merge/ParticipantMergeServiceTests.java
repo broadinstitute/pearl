@@ -151,13 +151,13 @@ public class ParticipantMergeServiceTests extends BaseSpringBootTest {
         RegistrationService.RegistrationResult targetUser = registrationService.register(studyEnvBundle1.getPortal().getShortcode(), studyEnvBundle1.getStudyEnv().getEnvironmentName(),
                 "username2", null, null);
 
-        HubResponse sourceEnrollee1 = enrollmentService.enroll(studyEnvBundle1.getStudyEnv().getEnvironmentName(), studyEnvBundle1.getStudy().getShortcode(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), null, null);
+        HubResponse sourceEnrollee1 = enrollmentService.enroll(studyEnvBundle1.getStudyEnv().getEnvironmentName(), studyEnvBundle1.getStudy().getShortcode(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), null);
         surveyResponseFactory.submitStringAnswer(survey1.getStableId(), "question1", "value1", true, new EnrolleeBundle(sourceEnrollee1.getEnrollee(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), studyEnvBundle1.getPortal().getId()));
-        HubResponse targetEnrollee1 = enrollmentService.enroll(studyEnvBundle1.getStudyEnv().getEnvironmentName(), studyEnvBundle1.getStudy().getShortcode(), targetUser.participantUser(), targetUser.portalParticipantUser(), null, null);
+        HubResponse targetEnrollee1 = enrollmentService.enroll(studyEnvBundle1.getStudyEnv().getEnvironmentName(), studyEnvBundle1.getStudy().getShortcode(), targetUser.participantUser(), targetUser.portalParticipantUser(), null);
         surveyResponseFactory.submitStringAnswer(survey1.getStableId(), "question1", "value2", true, new EnrolleeBundle(targetEnrollee1.getEnrollee(), targetUser.participantUser(), targetUser.portalParticipantUser(), studyEnvBundle1.getPortal().getId()));
-        HubResponse sourceEnrollee2 = enrollmentService.enroll(studyEnvBundle2.getStudyEnv().getEnvironmentName(), studyEnvBundle2.getStudy().getShortcode(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), null, null);
+        HubResponse sourceEnrollee2 = enrollmentService.enroll(studyEnvBundle2.getStudyEnv().getEnvironmentName(), studyEnvBundle2.getStudy().getShortcode(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), null);
         surveyResponseFactory.submitStringAnswer(survey2.getStableId(), "question1", "value3", true, new EnrolleeBundle(sourceEnrollee2.getEnrollee(), sourceUser.participantUser(), sourceUser.portalParticipantUser(), studyEnvBundle1.getPortal().getId()));
-        HubResponse targetEnrollee3 = enrollmentService.enroll(studyEnvBundle3.getStudyEnv().getEnvironmentName(), studyEnvBundle3.getStudy().getShortcode(), targetUser.participantUser(), targetUser.portalParticipantUser(), null, null);
+        HubResponse targetEnrollee3 = enrollmentService.enroll(studyEnvBundle3.getStudyEnv().getEnvironmentName(), studyEnvBundle3.getStudy().getShortcode(), targetUser.participantUser(), targetUser.portalParticipantUser(), null);
         surveyResponseFactory.submitStringAnswer(survey3.getStableId(), "question1", "value4", true, new EnrolleeBundle(targetEnrollee3.getEnrollee(), targetUser.participantUser(), targetUser.portalParticipantUser(), studyEnvBundle1.getPortal().getId()));
 
 

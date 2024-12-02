@@ -122,9 +122,8 @@ public class EnrollmentService {
                                         ParticipantUser user,
                                         PortalParticipantUser ppUser,
                                         UUID preEnrollResponseId,
-                                        boolean isSubject,
-                                        String referralSource) {
-        return enroll(operator, envName, studyShortcode, user, ppUser, preEnrollResponseId, isSubject, EnrolleeSourceType.PORTAL_SITE, referralSource);
+                                        boolean isSubject) {
+        return enroll(operator, envName, studyShortcode, user, ppUser, preEnrollResponseId, isSubject, EnrolleeSourceType.PORTAL_SITE);
     }
 
     @Transactional
@@ -135,8 +134,7 @@ public class EnrollmentService {
                                         PortalParticipantUser ppUser,
                                         UUID preEnrollResponseId,
                                         boolean isSubject,
-                                        EnrolleeSourceType source,
-                                        String referralSource) {
+                                        EnrolleeSourceType source) {
         log.info("creating enrollee for user {}, study {}", user.getId(), studyShortcode);
         StudyEnvironment studyEnv = studyEnvironmentService.findByStudy(studyShortcode, envName)
                 .orElseThrow(() -> new NotFoundException("Study environment %s %s not found".formatted(studyShortcode, envName)));
@@ -149,7 +147,7 @@ public class EnrollmentService {
 
         // if the user is signed up, but not a subject, we can just return the existing enrollee,
         // otherwise create a new one for them
-        Enrollee enrollee = findOrCreateEnrolleeForEnrollment(user, ppUser, studyEnv, studyShortcode, preEnrollResponseId, isSubject, source, referralSource);
+        Enrollee enrollee = findOrCreateEnrolleeForEnrollment(user, ppUser, studyEnv, studyShortcode, preEnrollResponseId, isSubject, source);
 
         if (preEnrollResponse != null) {
             preEnrollResponse.setCreatingParticipantUserId(user.getId());
@@ -169,7 +167,7 @@ public class EnrollmentService {
 
     private Enrollee findOrCreateEnrolleeForEnrollment(ParticipantUser user, PortalParticipantUser ppUser, StudyEnvironment studyEnv,
                                                        String studyShortcode, UUID preEnrollResponseId, boolean isSubjectEnrollment,
-                                                       EnrolleeSourceType source, String referralSource) {
+                                                       EnrolleeSourceType source) {
         return enrolleeService
                 .findByParticipantUserIdAndStudyEnv(user.getId(), studyShortcode, studyEnv.getEnvironmentName())
                 .filter(e -> {
@@ -293,18 +291,18 @@ public class EnrollmentService {
      */
     @Transactional
     public HubResponse<Enrollee> enrollAsProxy(EnvironmentName envName, String studyShortcode, ParticipantUser proxyUser,
-                                               PortalParticipantUser ppUser, UUID preEnrollResponseId, String referralSource) {
+                                               PortalParticipantUser ppUser, UUID preEnrollResponseId) {
         String governedUserName = registrationService.getGovernedUsername(proxyUser.getUsername(), proxyUser.getEnvironmentName());
-        return this.enrollAsProxy(envName, studyShortcode, proxyUser, ppUser, preEnrollResponseId, governedUserName, referralSource);
+        return this.enrollAsProxy(envName, studyShortcode, proxyUser, ppUser, preEnrollResponseId, governedUserName);
     }
 
     @Transactional
     public HubResponse<Enrollee> enrollAsProxy(EnvironmentName envName, String studyShortcode, ParticipantUser proxyUser,
-                                               PortalParticipantUser ppUser, UUID preEnrollResponseId, String governedUsername, String referralSource) {
+                                               PortalParticipantUser ppUser, UUID preEnrollResponseId, String governedUsername) {
         Enrollee proxyEnrollee = enrolleeService.findByParticipantUserIdAndStudyEnv(proxyUser.getId(), studyShortcode, envName)
-                .orElseGet(() -> this.enroll(ppUser, envName, studyShortcode, proxyUser, ppUser, null, false, referralSource).getEnrollee());
+                .orElseGet(() -> this.enroll(ppUser, envName, studyShortcode, proxyUser, ppUser, null, false).getEnrollee());
         HubResponse<Enrollee> governedResponse =
-                this.registerAndEnrollGovernedUser(envName, studyShortcode, proxyEnrollee, proxyUser, ppUser, preEnrollResponseId, governedUsername, referralSource);
+                this.registerAndEnrollGovernedUser(envName, studyShortcode, proxyEnrollee, proxyUser, ppUser, preEnrollResponseId, governedUsername);
         governedResponse.setEnrollee(proxyEnrollee);
 
         return governedResponse;
@@ -317,8 +315,7 @@ public class EnrollmentService {
                                                                ParticipantUser proxyUser,
                                                                PortalParticipantUser proxyPpUser,
                                                                UUID preEnrollResponseId,
-                                                               String governedUserName,
-                                                               String referralSource) {
+                                                               String governedUserName) {
         ParticipantUser governedUserParticipantUserOpt = participantUserService.findOne(governedUserName, envName).orElse(null);
         // Before this, at time of registration we have registered the proxy as a participant user, but now we need to both register and enroll the child they are enrolling
         RegistrationService.RegistrationResult registrationResult =
@@ -332,8 +329,7 @@ public class EnrollmentService {
                 proxyPpUser,
                 registrationResult.participantUser(),
                 registrationResult.portalParticipantUser(),
-                preEnrollResponseId,
-                referralSource);
+                preEnrollResponseId);
     }
 
     public HubResponse enrollGovernedUser(EnvironmentName envName,
@@ -343,8 +339,7 @@ public class EnrollmentService {
                                           PortalParticipantUser proxyPpUser,
                                           ParticipantUser governedUser,
                                           PortalParticipantUser governedPpUser,
-                                          UUID preEnrollResponseId,
-                                          String referralSource) {
+                                          UUID preEnrollResponseId) {
         HubResponse<Enrollee> hubResponse =
                 this.enroll(proxyPpUser,
                         envName,
@@ -352,8 +347,7 @@ public class EnrollmentService {
                         governedUser,
                         governedPpUser,
                         preEnrollResponseId,
-                        true,
-                        referralSource);
+                        true);
 
         EnrolleeRelation relation = EnrolleeRelation.builder()
                 .enrolleeId(governingEnrollee.getId())
@@ -403,10 +397,10 @@ public class EnrollmentService {
      * as a proxy. If they are, it will call the enrollAsProxy method, otherwise it will call the enroll method.
      */
     public HubResponse enroll(EnvironmentName environmentName, String studyShortcode, ParticipantUser user,
-                              PortalParticipantUser portalParticipantUser, UUID preEnrollResponseId, String referralSource) {
+                              PortalParticipantUser portalParticipantUser, UUID preEnrollResponseId) {
         if (preEnrollResponseId != null && isProxyEnrollment(environmentName, studyShortcode, preEnrollResponseId)) {
-            return enrollAsProxy(environmentName, studyShortcode, user, portalParticipantUser, preEnrollResponseId, referralSource);
+            return enrollAsProxy(environmentName, studyShortcode, user, portalParticipantUser, preEnrollResponseId);
         }
-        return enroll(portalParticipantUser, environmentName, studyShortcode, user, portalParticipantUser, preEnrollResponseId, true, referralSource);
+        return enroll(portalParticipantUser, environmentName, studyShortcode, user, portalParticipantUser, preEnrollResponseId, true);
     }
 }

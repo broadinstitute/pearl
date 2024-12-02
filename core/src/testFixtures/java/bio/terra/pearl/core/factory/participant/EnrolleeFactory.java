@@ -157,7 +157,7 @@ public class EnrolleeFactory {
     public EnrolleeBundle enroll(String email, String portalShortcode, String studyShortcode, EnvironmentName environmentName) {
         RegistrationService.RegistrationResult result = registrationService.register(portalShortcode, environmentName, email, null, null);
         Portal portal = portalService.findOneByShortcode(portalShortcode).orElseThrow();
-        HubResponse<Enrollee> response = enrollmentService.enroll(environmentName, studyShortcode, result.participantUser(), result.portalParticipantUser(), null, null);
+        HubResponse<Enrollee> response = enrollmentService.enroll(environmentName, studyShortcode, result.participantUser(), result.portalParticipantUser(), null);
         return new EnrolleeBundle(response.getEnrollee(), result.participantUser(), result.portalParticipantUser(), portal.getId());
     }
 }

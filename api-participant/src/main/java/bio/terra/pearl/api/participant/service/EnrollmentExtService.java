@@ -63,8 +63,7 @@ public class EnrollmentExtService {
       EnvironmentName envName,
       String studyShortcode,
       UUID preEnrollmentId,
-      UUID governedPpUserId, // could be null if a totally new user
-      String referralSource) {
+      UUID governedPpUserId) { // could be null if a totally new user
 
     PortalParticipantUser portalParticipantUser =
         authUtilService
@@ -72,8 +71,7 @@ public class EnrollmentExtService {
             .ppUser();
 
     Enrollee proxy =
-        fetchOrCreateProxyEnrollee(
-            operator, portalParticipantUser, studyShortcode, envName, referralSource);
+        fetchOrCreateProxyEnrollee(operator, portalParticipantUser, studyShortcode, envName);
 
     if (governedPpUserId == null) {
       String governedUserName =
@@ -87,8 +85,7 @@ public class EnrollmentExtService {
           operator,
           portalParticipantUser,
           preEnrollmentId,
-          governedUserName,
-          referralSource);
+          governedUserName);
     } else {
       PortalParticipantUser governedPpUser =
           authUtilService.authParticipantUserToPortalParticipantUser(
@@ -107,8 +104,7 @@ public class EnrollmentExtService {
           portalParticipantUser,
           governedUser,
           governedPpUser,
-          preEnrollmentId,
-          referralSource);
+          preEnrollmentId);
     }
   }
 
@@ -116,15 +112,13 @@ public class EnrollmentExtService {
       ParticipantUser user,
       PortalParticipantUser ppUser,
       String studyShortcode,
-      EnvironmentName envName,
-      String referralSource) {
+      EnvironmentName envName) {
     return enrolleeService
         .findByParticipantUserIdAndStudyEnv(ppUser.getParticipantUserId(), studyShortcode, envName)
         .orElseGet(
             () ->
                 enrollmentService
-                    .enroll(
-                        ppUser, envName, studyShortcode, user, ppUser, null, false, referralSource)
+                    .enroll(ppUser, envName, studyShortcode, user, ppUser, null, false)
                     .getResponse());
   }
 }

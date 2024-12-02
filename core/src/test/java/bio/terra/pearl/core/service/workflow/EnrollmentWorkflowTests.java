@@ -223,8 +223,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
                 study.getShortcode(),
                 userBundle.user(),
                 userBundle.ppUser(),
-                preEnrollmentResponse.getId(),
-                null);
+                preEnrollmentResponse.getId());
         // confirm that two enrollees were created, and only one is a subject
         assertThat(hubResponse.getEnrollee().isSubject(), equalTo(true));
 
@@ -370,7 +369,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         Assertions.assertFalse(enrollmentService.isProxyEnrollment(envName, studyShortcode, preEnrollmentResponse.getId()));
 
         HubResponse<Enrollee> hubResponse = enrollmentService.enroll(envName, study.getShortcode(),
-                userProxyBundle.user(), userProxyBundle.ppUser(), preEnrollmentResponseProxy.getId(), null);
+                userProxyBundle.user(), userProxyBundle.ppUser(), preEnrollmentResponseProxy.getId());
         // confirm that two enrollees were created, and only one is a subject
         assertThat(hubResponse.getEnrollee().isSubject(), equalTo(false));
         assertThat(hubResponse.getResponse().isSubject(), equalTo(true));
@@ -484,8 +483,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
                 study.getShortcode(),
                 userProxyBundle.user(),
                 userProxyBundle.ppUser(),
-                preEnrollmentResponseProxy.getId(),
-                null);
+                preEnrollmentResponseProxy.getId());
         // confirm that two enrollees were created, and only one is a subject
         assertThat(hubResponse.getEnrollee().isSubject(), equalTo(false));
         assertThat(hubResponse.getResponse().isSubject(), equalTo(true));

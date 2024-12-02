@@ -424,7 +424,7 @@ public class EnrolleeImportService {
 
             HubResponse<Enrollee> response = enrollmentService.enroll(regResult.portalParticipantUser(), studyEnv.getEnvironmentName(),
                     studyShortcode, regResult.participantUser(), regResult.portalParticipantUser(),
-                    null, enrolleeInfo.isSubject(), EnrolleeSourceType.IMPORT, null);
+                    null, enrolleeInfo.isSubject(), EnrolleeSourceType.IMPORT);
             Enrollee newEnrollee = response.getEnrollee();
             //update createdAt
             if (enrolleeInfo.getCreatedAt() != null) {
