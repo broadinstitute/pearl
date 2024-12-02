@@ -4,7 +4,6 @@ import Modal from 'react-bootstrap/Modal'
 import LoadingSpinner from 'util/LoadingSpinner'
 import Api, { ExportOptions } from 'api/api'
 import { currentIsoDate } from '@juniper/ui-core'
-import { Link } from 'react-router-dom'
 import { saveBlobAsDownload } from 'util/downloadUtils'
 import { doApiLoad } from 'api/api-utils'
 import { buildFilter } from 'util/exportUtils'
@@ -14,6 +13,7 @@ import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import Select from 'react-select'
 import { useReactMultiSelect } from 'util/react-select-utils'
 import InfoPopup from '../../components/forms/InfoPopup'
+import { DocsKey, ZendeskLink } from '../../util/zendeskUtils'
 
 const FILE_FORMATS = [{
   label: 'Tab-delimited (.tsv)',
@@ -93,7 +93,6 @@ export function ExportOptionsForm({ exportOptions, setExportOptions }:
   { exportOptions: ExportOptions, setExportOptions: (opts: ExportOptions) => void }) {
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
 
-
   const { selectInputId, selectedOptions, options, onChange } = useReactMultiSelect<string>(
     Object.keys(MODULE_EXCLUDE_OPTIONS),
     key => ({ label: MODULE_EXCLUDE_OPTIONS[key], value: key }),
@@ -101,12 +100,15 @@ export function ExportOptionsForm({ exportOptions, setExportOptions }:
     exportOptions.excludeModules
   )
 
-  const includeUnconsented =
-    !exportOptions.filterString?.includes('{enrollee.consented} = true')
+  const enrolledBefore = exportOptions.filterString?.match(/{enrollee.createdAt} < '(.+?)T/)?.[1]
+  const enrolledAfter = exportOptions.filterString?.match(/{enrollee.createdAt} > '(.+?)T/)?.[1]
 
-  const includeProxiesAsRows =
-    !exportOptions.filterString?.includes('{enrollee.subject} = true')
-
+  const filterOpts = {
+    includeProxiesAsRows: !exportOptions.filterString?.includes('{enrollee.subject} = true'),
+    includeUnconsented: !exportOptions.filterString?.includes('{enrollee.consented} = true'),
+    enrolledBefore: enrolledBefore ? new Date(enrolledBefore) : undefined,
+    enrolledAfter: enrolledAfter ? new Date(enrolledAfter) : undefined
+  }
 
   return <div>
     <div className="py-2">
@@ -184,23 +186,49 @@ export function ExportOptionsForm({ exportOptions, setExportOptions }:
           Filter Options
         </p>
         <label className="form-control border-0">
-          <input type="checkbox" name="includeUnconsented" checked={includeUnconsented}
+          <input type="checkbox" name="includeUnconsented" checked={filterOpts.includeUnconsented}
             onChange={e => setExportOptions({
               ...exportOptions,
-              filterString: buildFilter({ includeProxiesAsRows, includeUnconsented: e.target.checked })
+              filterString: buildFilter({ ...filterOpts, includeUnconsented: e.target.checked })
             })}
             className="me-1"/>
           Include enrollees who have not consented
         </label>
         <label className="form-control border-0">
-          <input type="checkbox" name="includeProxiesAsRows" checked={includeProxiesAsRows}
+          <input type="checkbox" name="includeProxiesAsRows" checked={filterOpts.includeProxiesAsRows}
             onChange={e => setExportOptions({
               ...exportOptions,
-              filterString: buildFilter({ includeUnconsented, includeProxiesAsRows: e.target.checked })
+              filterString: buildFilter({ ...filterOpts, includeProxiesAsRows: e.target.checked })
             })}
             className="me-1"/>
           Include proxies as rows
         </label>
+        <div className="d-flex pt-2 my-2">
+          <label className="form-control border-0">
+            Enrolled on/after <input type="date" name="enrolledBeforeDate"
+              value={enrolledAfter || ''}
+              onChange={e => setExportOptions({
+                ...exportOptions,
+                filterString: buildFilter({
+                  ...filterOpts,
+                  enrolledAfter: e.target.value ? new Date(e.target.value) : undefined
+                })
+              })}
+              className="me-1"/>
+          </label>
+          <label className="form-control border-0">
+            Enrolled before <input type="date" name="enrolledAfterDate"
+              value={enrolledBefore || ''}
+              onChange={e => setExportOptions({
+                ...exportOptions,
+                filterString: buildFilter({
+                  ...filterOpts,
+                  enrolledBefore: e.target.value ? new Date(e.target.value) : undefined
+                })
+              })}
+              className="me-1"/>
+          </label>
+        </div>
         <label className="form-control border-0">
           Limit number of enrollees to <input type="number" name="rowLimit"
             onChange={e => setExportOptions({
@@ -243,8 +271,7 @@ export function ExportOptionsForm({ exportOptions, setExportOptions }:
 
     <div>
       For more information about download formats,
-      see the <Link to="https://broad-juniper.zendesk.com/hc/en-us/articles/18259824756123" target="_blank">
-      help page</Link>.
+      see the <ZendeskLink doc={DocsKey.EXPORT_FORMATS}>help page</ZendeskLink>.
     </div>
   </div>
 }

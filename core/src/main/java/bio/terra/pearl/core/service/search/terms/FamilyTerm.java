@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static bio.terra.pearl.core.dao.BaseJdbiDao.toSnakeCase;
 import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.STRING;
 
 /**
@@ -69,7 +70,7 @@ public class FamilyTerm extends SearchTerm {
 
     @Override
     public String termClause() {
-        return "family." + field;
+        return "family." + toSnakeCase(field);
     }
 
     @Override
