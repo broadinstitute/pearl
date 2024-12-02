@@ -1,9 +1,9 @@
 databaseChangeLog:
   - changeSet:
-      id: "enrollee_referral_source"
+      id: "pre_enroll_referral_source"
       author: mbemis
       changes:
         - addColumn:
-            tableName: enrollee
+            tableName: pre_enrollment_response
             columns:
               - column: { name: referral_source, type: text }

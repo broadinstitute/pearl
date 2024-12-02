@@ -1,6 +1,7 @@
 import { KitRequest } from 'src/types/kits'
 import { ParticipantTask } from 'src/types/task'
 import {
+  PreEnrollmentResponse,
   PreregistrationResponse,
   SurveyResponse
 } from 'src/types/forms'
@@ -46,8 +47,7 @@ export type Enrollee = {
     relations?: EnrolleeRelation[]
     participantUserId: string
     preRegResponse?: PreregistrationResponse
-    preEnrollmentResponse?: PreregistrationResponse
-    referralSource?: string
+    preEnrollmentResponse?: PreEnrollmentResponse
     profile: Profile
     profileId: string
     shortcode: string

@@ -110,6 +110,7 @@ public class EnrollmentService {
                 .surveyId(survey.getId())
                 .qualified(parsedResponse.isQualified())
                 .fullData(objectMapper.writeValueAsString(parsedResponse.getAnswers()))
+                .referralSource(parsedResponse.getReferralSource())
                 .studyEnvironmentId(studyEnvironmentId).build();
         return preEnrollmentResponseDao.create(response);
     }
@@ -192,7 +193,6 @@ public class EnrollmentService {
                             .preEnrollmentResponseId(preEnrollResponseId)
                             .subject(isSubjectEnrollment)
                             .source(source)
-                            .referralSource(referralSource)
                             .build();
                     return enrolleeService.create(newEnrollee);
                 });

@@ -79,8 +79,7 @@ function ParticipantListTable({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
     'givenName': false,
     'familyName': false,
-    'contactEmail': false,
-    'referralSource': false
+    'contactEmail': false
   })
 
 
@@ -141,13 +140,6 @@ function ParticipantListTable({
       id: 'givenName',
       header: 'Given name',
       accessorFn: row => row.profile?.givenName,
-      meta: {
-        columnType: 'string'
-      }
-    }, {
-      id: 'referralSource',
-      header: 'Referral source',
-      accessorFn: row => row.enrollee?.referralSource,
       meta: {
         columnType: 'string'
       }

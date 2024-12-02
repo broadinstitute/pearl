@@ -37,7 +37,6 @@ public class Enrollee extends BaseEntity implements StudyEnvAttached {
     private boolean consented;
     @Builder.Default
     private EnrolleeSourceType source = EnrolleeSourceType.PORTAL_SITE;
-    private String referralSource;
 
     @Builder.Default
     private List<FamilyEnrollee> familyEnrollees = new ArrayList<>();

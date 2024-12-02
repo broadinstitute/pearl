@@ -83,7 +83,7 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
   const { i18n } = useI18n()
 
   const [searchParams] = useSearchParams()
-  const { skipPreEnroll, referralSource, isProxyEnrollment, ppUserId } = useEnrollmentParams()
+  const { skipPreEnroll, isProxyEnrollment, ppUserId } = useEnrollmentParams()
 
   const { user, ppUsers, enrollees, refreshLoginState } = useUser()
 
@@ -153,10 +153,10 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
         try {
           const hubResponse = isProxyEnrollment
             ? await enrollProxyUserInStudy(
-              studyShortcode, preEnrollResponseId, ppUserId, refreshLoginState, referralSource
+              studyShortcode, preEnrollResponseId, ppUserId, refreshLoginState
             )
             : await enrollCurrentUserInStudy(
-              studyShortcode, preEnrollResponseId, refreshLoginState, referralSource
+              studyShortcode, preEnrollResponseId, refreshLoginState
             )
 
           handleNewStudyEnroll(hubResponse, studyShortcode, navigate, i18n, studyName)

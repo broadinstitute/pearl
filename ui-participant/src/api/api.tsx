@@ -273,11 +273,11 @@ export default {
   },
 
   /** creates an enrollee for the signed-in user and study.  */
-  async createEnrollee({ studyShortcode, preEnrollResponseId, referralSource }: {
-    studyShortcode: string, preEnrollResponseId: string | null, referralSource: string | null
+  async createEnrollee({ studyShortcode, preEnrollResponseId }: {
+    studyShortcode: string, preEnrollResponseId: string | null
   }):
     Promise<HubResponse> {
-    const params = queryString.stringify({ preEnrollResponseId, referralSource })
+    const params = queryString.stringify({ preEnrollResponseId })
     const url = `${baseStudyEnvUrl(false, studyShortcode)}/enrollee?${params}`
     const response = await fetch(url, {
       method: 'POST',
@@ -286,12 +286,12 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async createGovernedEnrollee({ studyShortcode, preEnrollResponseId, governedPpUserId, referralSource }: {
+  async createGovernedEnrollee({ studyShortcode, preEnrollResponseId, governedPpUserId }: {
     studyShortcode: string, preEnrollResponseId: string | null,
-    governedPpUserId: string | null, referralSource: string | null
+    governedPpUserId: string | null
   }
   ): Promise<HubResponse> {
-    const params = queryString.stringify({ preEnrollResponseId, governedPpUserId, referralSource })
+    const params = queryString.stringify({ preEnrollResponseId, governedPpUserId })
     const url = `${baseStudyEnvUrl(false, studyShortcode)}/enrollee?${params}`
     const response = await fetch(url, {
       method: 'POST',

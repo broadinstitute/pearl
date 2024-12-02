@@ -69,6 +69,7 @@ export default function PreEnrollView({ enrollContext, survey }:
       answers: getSurveyJsAnswerList(surveyModel, selectedLanguage),
       surveyId: survey.id,
       studyEnvironmentId: studyEnv.id,
+      referralSource: sessionStorage.getItem('referralSource') || undefined,
       qualified
     }
 
