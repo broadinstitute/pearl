@@ -1,11 +1,5 @@
 import React, { useState } from 'react'
-import { StudyEnvContextT } from '../StudyEnvironmentRouter'
-import Modal from 'react-bootstrap/Modal'
-import LoadingSpinner from 'util/LoadingSpinner'
-import Api, { ExportOptions } from 'api/api'
-import { currentIsoDate } from '@juniper/ui-core'
-import { saveBlobAsDownload } from 'util/downloadUtils'
-import { doApiLoad } from 'api/api-utils'
+import { ExportOptions } from 'api/api'
 import { buildFilter } from 'util/exportUtils'
 import { Button } from 'components/forms/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -31,7 +25,7 @@ export const FILE_FORMATS = [{
 
 const MODULE_EXCLUDE_OPTIONS: Record<string, string> = { surveys: 'Surveys', profile: 'Profile', account: 'Account' }
 
-export function ExportOptionsForm({ exportOptions, setExportOptions }:
+function ExportOptionsForm({ exportOptions, setExportOptions }:
   { exportOptions: ExportOptions, setExportOptions: (opts: ExportOptions) => void }) {
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
 
