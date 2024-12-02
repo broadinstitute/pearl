@@ -3,7 +3,7 @@ import Api, {
   PreEnrollmentResponse,
   Survey
 } from 'api/api'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { StudyEnrollContext } from './StudyEnrollRouter'
 import {
   getResumeData,
@@ -35,7 +35,7 @@ export default function PreEnrollView({ enrollContext, survey }:
   // for now, we assume all pre-screeners are a single page
   const pager = { pageNumber: 0, updatePageNumber: () => 0 }
 
-  const { preFilledAnswers } = useEnrollmentParams()
+  const { preFilledAnswers, referralSource, clearStoredEnrollmentParams } = useEnrollmentParams()
   const resumeData = makeSurveyJsData(undefined, preFilledAnswers, user?.id)
 
   const { surveyModel, refreshSurvey, SurveyComponent } = useSurveyJSModel(
@@ -50,12 +50,6 @@ export default function PreEnrollView({ enrollContext, survey }:
     { extraCssClasses: { container: 'my-0' }, extraVariables: { isProxyEnrollment, isSubjectEnrollment } }
   )
 
-  const [searchParams] = useSearchParams()
-  const referralSource = searchParams.get('referralSource')
-  if (referralSource) {
-    sessionStorage.setItem('referralSource', referralSource)
-  }
-
   surveyModel.locale = selectedLanguage || 'default'
 
   /** submit the form */
@@ -69,7 +63,7 @@ export default function PreEnrollView({ enrollContext, survey }:
       answers: getSurveyJsAnswerList(surveyModel, selectedLanguage),
       surveyId: survey.id,
       studyEnvironmentId: studyEnv.id,
-      referralSource: sessionStorage.getItem('referralSource') || undefined,
+      referralSource: referralSource || undefined,
       qualified
     }
 
@@ -79,6 +73,9 @@ export default function PreEnrollView({ enrollContext, survey }:
       surveyVersion: survey.version,
       preEnrollResponse: responseDto
     }).then(result => {
+      //clear the stored enrollment params in case someone else uses the same browser
+      //without closing the tab
+      clearStoredEnrollmentParams()
       if (!qualified) {
         navigate('../ineligible')
       } else {

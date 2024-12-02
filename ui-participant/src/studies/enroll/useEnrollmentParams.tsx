@@ -15,14 +15,20 @@ export function useEnrollmentParams() {
   const [preFilledAnswers, setPreFilledAnswers] = useState<Answer[]>(
     parsePreFilledAnswers(sessionStorage.getItem('preFilledAnswers')))
 
-  useEffect(() => {
-    const skipPreEnrollParam = searchParams.get('skipPreEnroll') === 'true'
+  function clearStoredEnrollmentParams() {
+    sessionStorage.removeItem('skipPreEnroll')
+    sessionStorage.removeItem('referralSource')
+    sessionStorage.removeItem('preFilledAnswers')
+  }
+
+  function captureEnrollmentParams() {
+    const skipPreEnrollParam = searchParams.get('skipPreEnroll')
     const referralSourceParam = searchParams.get('referralSource')
-    const proxyEnrollmentParam = searchParams.get('isProxyEnrollment') === 'true'
+    const proxyEnrollmentParam = searchParams.get('isProxyEnrollment')
     const ppUserIdParam = searchParams.get('ppUserId')
     const preFilledAnswersParam = searchParams.get('preFilledAnswers')
 
-    if (proxyEnrollmentParam) {
+    if (proxyEnrollmentParam === 'true') {
       setIsProxyEnrollment(true)
     }
 
@@ -30,7 +36,10 @@ export function useEnrollmentParams() {
       setPpUserId(ppUserIdParam)
     }
 
-    if (skipPreEnrollParam) {
+    // The following three params are stored in sessionStorage, so they persist across page reloads.
+    // We want to do our best to avoid losing any information coming from referring sites
+
+    if (skipPreEnrollParam === 'true') {
       sessionStorage.setItem('skipPreEnroll', 'true')
       setSkipPreEnroll(true)
     }
@@ -45,9 +54,16 @@ export function useEnrollmentParams() {
       sessionStorage.setItem('preFilledAnswers', JSON.stringify(answers))
       setPreFilledAnswers(answers)
     }
+  }
+
+  useEffect(() => {
+    captureEnrollmentParams()
   }, [searchParams])
 
-  return { skipPreEnroll, referralSource, isProxyEnrollment, ppUserId, preFilledAnswers }
+  return {
+    skipPreEnroll, referralSource, isProxyEnrollment, ppUserId, preFilledAnswers,
+    captureEnrollmentParams, clearStoredEnrollmentParams
+  }
 }
 
 const parsePreFilledAnswers = (preFilledAnswers: string | null): Answer[] => {

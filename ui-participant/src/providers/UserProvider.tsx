@@ -77,7 +77,11 @@ export default function UserProvider({ children }: { children: React.ReactNode }
   const [loginState, setLoginState] = useState<LoginResult | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const auth = useAuth()
-  useEnrollmentParams()
+  const { captureEnrollmentParams } = useEnrollmentParams()
+
+  useEffect(() => {
+    captureEnrollmentParams()
+  }, [])
 
   /**
    * Sign in to the UI based on the result of signing in to the API.
