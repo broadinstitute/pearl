@@ -444,7 +444,7 @@ public class EnrolleeImportService {
 
         Optional<Enrollee> enrollee = enrolleeService.findByParticipantUserIdAndStudyEnvId(registration.participantUser().getId(), studyEnv.getId());
 
-        return enrollee.orElseGet(() -> this.enrollmentService.enroll(registration.portalParticipantUser(), studyEnv.getEnvironmentName(), studyShortcode, registration.participantUser(), registration.portalParticipantUser(), null, false, null).getEnrollee());
+        return enrollee.orElseGet(() -> this.enrollmentService.enroll(registration.portalParticipantUser(), studyEnv.getEnvironmentName(), studyShortcode, registration.participantUser(), registration.portalParticipantUser(), null, false).getEnrollee());
     }
 
     protected Profile importProfile(Map<String, String> enrolleeMap, Profile registrationProfile,

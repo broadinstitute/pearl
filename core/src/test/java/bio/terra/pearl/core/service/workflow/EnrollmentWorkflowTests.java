@@ -96,7 +96,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         surveyFactory.attachToEnv(consent, studyEnv.getId(), true);
 
         HubResponse hubResponse = enrollmentService.enroll(userBundle.ppUser(), studyEnv.getEnvironmentName(), studyShortcode,
-                userBundle.user(), userBundle.ppUser(), null, true, null);
+                userBundle.user(), userBundle.ppUser(), null, true);
         Enrollee enrollee = hubResponse.getEnrollee();
         assertThat(enrollee.getShortcode(), notNullValue());
         assertThat(enrollee.getParticipantUserId(), equalTo(userBundle.user().getId()));
@@ -128,7 +128,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         surveyFactory.attachToEnv(survey, studyEnv.getId(), true);
 
         HubResponse hubResponse = enrollmentService.enroll(userBundle.ppUser(), studyEnv.getEnvironmentName(), studyShortcode,
-                userBundle.user(), userBundle.ppUser(), null, true, null);
+                userBundle.user(), userBundle.ppUser(), null, true);
         Enrollee enrollee = hubResponse.getEnrollee();
         assertThat(hubResponse.getProfile(), notNullValue());
         // Because the study environment had a consent attached, a consent task should be created on enrollment
@@ -257,7 +257,7 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         surveyFactory.attachToEnv(consent, studyEnv.getId(), true);
 
         HubResponse<Enrollee> hubResponse = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode, userBundle.user(), userBundle.ppUser(),
-                null, null);
+                null);
         Enrollee enrollee = hubResponse.getResponse();
         Enrollee proxyEnrollee = hubResponse.getEnrollee();
         assertThat(enrollee.getShortcode(), notNullValue());
@@ -298,10 +298,10 @@ public class EnrollmentWorkflowTests extends BaseSpringBootTest {
         surveyFactory.attachToEnv(consent, studyEnv.getId(), true);
 
         HubResponse<Enrollee> hubResponse1 = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode, userBundle.user(), userBundle.ppUser(),
-                 null, null);
+                 null);
         Enrollee proxyEnrollee = hubResponse1.getEnrollee();
         HubResponse<Enrollee> hubResponse2 = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode,userBundle.user(), userBundle.ppUser(),
-                null, null);
+                null);
         Enrollee governedEnrollee1 = hubResponse1.getResponse();
         Enrollee governedEnrollee2 = hubResponse2.getResponse();
 

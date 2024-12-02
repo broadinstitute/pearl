@@ -130,8 +130,7 @@ public class WithdrawnEnrolleeService extends ImmutableEntityService<WithdrawnEn
                 user,
                 ppUser,
                 null,
-                false,
-                null
+                false
         ).getResponse();
 
         for (EnrolleeRelation relation : relations) {

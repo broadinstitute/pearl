@@ -140,7 +140,7 @@ public class EnrolleeFactory {
         String studyShortcode = studyService.find(studyEnv.getStudyId()).get().getShortcode();
 
         HubResponse<Enrollee> hubResponse = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode, userBundle.user(), userBundle.ppUser(),
-                null, null);
+                null);
         return new EnrolleeAndProxy(hubResponse.getResponse(), hubResponse.getEnrollee(), userBundle.ppUser(), portalEnv);
     }
 
@@ -149,7 +149,7 @@ public class EnrolleeFactory {
         String studyShortcode = studyService.find(studyEnv.getStudyId()).get().getShortcode();
 
         HubResponse<Enrollee> hubResponse = enrollmentService.enrollAsProxy(studyEnv.getEnvironmentName(), studyShortcode, userBundle.user(), userBundle.ppUser(),
-                null, null);
+                null);
         return new EnrolleeAndProxy(hubResponse.getResponse(), hubResponse.getEnrollee(), userBundle.ppUser(), portalEnv);
     }
 
