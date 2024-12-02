@@ -21,6 +21,7 @@ export type PortalEnvironmentLanguage = PortalEnvironmentLanguageOpt & {
 
 export type PortalStudy = {
   study: Study
+  createdAt: number
 }
 
 export type PortalEnvironment = {

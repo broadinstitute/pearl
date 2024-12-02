@@ -52,6 +52,7 @@ import ExportIntegrationView from './export/integrations/ExportIntegrationView'
 import ExportIntegrationJobList from './export/integrations/ExportIntegrationJobList'
 import LoadedSettingsView from './settings/SettingsView'
 import { ENVIRONMENT_ICON_MAP } from 'util/publishUtils'
+import SiteContentLoader from '../portal/siteContent/SiteContentLoader'
 
 export type StudyEnvContextT = { study: Study, currentEnv: StudyEnvironment, currentEnvPath: string, portal: Portal }
 
@@ -116,7 +117,10 @@ function StudyEnvironmentRouter({ study }: { study: Study }) {
           <Route path="families/*" element={<FamilyRouter studyEnvContext={studyEnvContext}/>}/>
           <Route path="kits/scan" element={<KitScanner studyEnvContext={studyEnvContext}/>}/>
           <Route path="kits/*" element={<KitsRouter studyEnvContext={studyEnvContext}/>}/>
+          <Route path="siteContent" element={<SiteContentLoader portalEnvContext={portalEnvContext}/>}/>
           <Route path="media" element={<SiteMediaList portalContext={portalContext} portalEnv={portalEnv}/>}/>
+          <Route path="mailingList" element={<MailingListView portalContext={portalContext}
+            portalEnv={portalEnv}/>}/>
           <Route path="alerts" element={<DashboardSettings currentEnv={portalEnv}
             portalContext={portalContext}/>}/>
           <Route path="metrics" element={<StudyEnvMetricsView studyEnvContext={studyEnvContext}/>}/>
@@ -294,6 +298,20 @@ export const familyPath = (portalShortcode: string, studyShortcode: string, envN
 export const portalPublishHistoryPath = (portalShortcode: string, studyShortcode: string) => {
   return `/${portalShortcode}/studies/${studyShortcode}/publishing/history`
 }
+
+/** below are duplicates of portal-level routes, but with the current study preserved */
+export const studyEnvMailingListPath = (studyEnvParams: StudyEnvParams) => {
+  return `${baseStudyEnvPath(studyEnvParams)}/mailingList`
+}
+
+export const studyEnvSiteContentPath = (studyEnvParams: StudyEnvParams) => {
+  return `${baseStudyEnvPath(studyEnvParams)}/siteContent`
+}
+
+export const studyEnvSiteMediaPath = (studyEnvParams: StudyEnvParams) => {
+  return `${baseStudyEnvPath(studyEnvParams)}/media`
+}
+
 
 const baseStudyEnvPath = (params: StudyEnvParams) => {
   return `${studyEnvPath(params.portalShortcode,
