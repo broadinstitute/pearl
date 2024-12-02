@@ -15,7 +15,7 @@ import { useReactMultiSelect } from 'util/react-select-utils'
 import InfoPopup from '../../components/forms/InfoPopup'
 import { DocsKey, ZendeskLink } from '../../util/zendeskUtils'
 
-const FILE_FORMATS = [{
+export const FILE_FORMATS = [{
   label: 'Tab-delimited (.tsv)',
   value: 'TSV',
   fileSuffix: 'tsv'
@@ -29,65 +29,7 @@ const FILE_FORMATS = [{
   fileSuffix: 'xlsx'
 }]
 
-const DEFAULT_EXPORT_OPTS: ExportOptions = {
-  splitOptionsIntoColumns: false,
-  stableIdsForOptions: false,
-  fileFormat: 'TSV',
-  includeSubHeaders: true,
-  onlyIncludeMostRecent: true,
-  filterString: undefined,
-  excludeModules: [],
-  includeFields: []
-}
-
 const MODULE_EXCLUDE_OPTIONS: Record<string, string> = { surveys: 'Surveys', profile: 'Profile', account: 'Account' }
-
-/** form for configuring and downloading enrollee data */
-const ExportDataModal = ({ studyEnvContext, show, setShow }: {studyEnvContext: StudyEnvContextT, show: boolean,
-                           setShow:  React.Dispatch<React.SetStateAction<boolean>>}) => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [exportOptions, setExportOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTS)
-
-  const doExport = () => {
-    doApiLoad(async () => {
-      const response = await Api.exportEnrollees(studyEnvContext.portal.shortcode, studyEnvContext.study.shortcode,
-        studyEnvContext.currentEnv.environmentName, exportOptions)
-      const fileSuffix = FILE_FORMATS.find(format =>
-        exportOptions.fileFormat === format.value)?.fileSuffix
-      const fileName = `${currentIsoDate()}-enrollees.${fileSuffix}`
-      const blob = await response.blob()
-      saveBlobAsDownload(blob, fileName)
-    }, { setIsLoading })
-  }
-
-  const doDictionaryExport = () => {
-    doApiLoad(async () => {
-      const response = await Api.exportDictionary(studyEnvContext.portal.shortcode, studyEnvContext.study.shortcode,
-        studyEnvContext.currentEnv.environmentName, exportOptions)
-      const fileName = `${currentIsoDate()}-DataDictionary.xlsx`
-      const blob = await response.blob()
-      saveBlobAsDownload(blob, fileName)
-    }, { setIsLoading })
-  }
-
-  return <Modal show={show} onHide={() => setShow(false)} size="lg">
-    <Modal.Header closeButton>
-      <Modal.Title>
-        Download
-      </Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <ExportOptionsForm exportOptions={exportOptions} setExportOptions={setExportOptions}/>
-    </Modal.Body>
-    <Modal.Footer>
-      <LoadingSpinner isLoading={isLoading}>
-        <button className="btn btn-primary" onClick={doExport}>Download</button>
-        <button className="btn btn-secondary" onClick={doDictionaryExport}>Download dictionary (.xlsx)</button>
-        <button className="btn btn-secondary" onClick={() => setShow(false)}>Cancel</button>
-      </LoadingSpinner>
-    </Modal.Footer>
-  </Modal>
-}
 
 export function ExportOptionsForm({ exportOptions, setExportOptions }:
   { exportOptions: ExportOptions, setExportOptions: (opts: ExportOptions) => void }) {
@@ -276,4 +218,4 @@ export function ExportOptionsForm({ exportOptions, setExportOptions }:
   </div>
 }
 
-export default ExportDataModal
+export default ExportOptionsForm
