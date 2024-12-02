@@ -35,7 +35,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
     implementation 'org.yaml:snakeyaml:2.3'
-    implementation 'com.typesafe:config:1.4.1'
+    implementation 'com.typesafe:config:1.4.3'
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'org.apache.velocity:velocity-engine-core:2.3'
 
