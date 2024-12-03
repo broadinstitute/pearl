@@ -141,7 +141,7 @@ const ExportDataBrowser = ({ studyEnvContext }: {studyEnvContext: StudyEnvContex
     onRowSelectionChange: setRowSelection
   })
 
-  return <div className="container-fluid px-4 py-2">
+  return <div className="container-fluid px-4 py-2 align-items-start">
     { renderPageHeader('Data Export') }
     <ExportOptionsForm setExportOptions={setExportOptions} exportOptions={exportOptions}/>
     <div className="align-items-center my-4">
