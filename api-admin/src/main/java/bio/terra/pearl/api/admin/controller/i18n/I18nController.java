@@ -7,7 +7,6 @@ import bio.terra.pearl.core.service.portal.PortalService;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -25,12 +24,12 @@ public class I18nController implements I18nApi {
   public ResponseEntity<Object> listLanguageTexts(String language, String portalShortcode) {
     Optional<Portal> portal = portalService.findOneByShortcode(portalShortcode);
 
-    //default to English if no language is provided
+    // default to English if no language is provided
     String lang = Objects.requireNonNullElse(language, "en");
 
     HashMap<String, String> languageTexts;
-    //if the portal is not found or not specified, at least return the global/system language texts
-    //it's possible to need language texts without a loaded portal context in the admin tool
+    // if the portal is not found or not specified, at least return the global/system language texts
+    // it's possible to need language texts without a loaded portal context in the admin tool
     if (portal.isEmpty()) {
       languageTexts = languageTextService.getSystemLanguageTextMap(lang);
     } else {
