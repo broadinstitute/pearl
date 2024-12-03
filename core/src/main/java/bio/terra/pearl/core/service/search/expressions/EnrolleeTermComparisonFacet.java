@@ -26,6 +26,7 @@ public class EnrolleeTermComparisonFacet implements EnrolleeSearchExpression {
     private final SearchTerm leftTermExtractor;
     private final SearchTerm rightTermExtractor;
     private final SearchOperators operator;
+    private final TimeComparisonType comparisonType;
 
     public EnrolleeTermComparisonFacet(EnrolleeDao enrolleeDao, ProfileDao profileDao, SearchTerm leftTermExtractor, SearchTerm rightTermExtractor, SearchOperators operator) {
         this.leftTermExtractor = leftTermExtractor;
@@ -33,12 +34,21 @@ public class EnrolleeTermComparisonFacet implements EnrolleeSearchExpression {
         this.operator = operator;
         this.enrolleeDao = enrolleeDao;
         this.profileDao = profileDao;
+        this.comparisonType = getTimeComparisonType();
     }
 
     @Override
     public boolean evaluate(EnrolleeSearchContext enrolleeCtx) {
         SearchValue leftSearchValue = leftTermExtractor.extract(enrolleeCtx);
         SearchValue rightSearchValue = rightTermExtractor.extract(enrolleeCtx);
+
+        if (comparisonType.equals(TimeComparisonType.TEMPORAL_TO_STRING)) {
+            // If the left value is an instant/date and the right value is a string, we need to parse the right value to an instant
+            rightSearchValue.parseTo(leftSearchValue.getSearchValueType());
+        } else if (comparisonType.equals(TimeComparisonType.STRING_TO_TEMPORAL)) {
+            // If the right value is an instant/date and the left value is a string, we need to parse the right value to an instant
+            leftSearchValue.parseTo(rightSearchValue.getSearchValueType());
+        }
 
         return switch (operator) {
             case EQUALS -> leftSearchValue.equals(rightSearchValue);
@@ -75,10 +85,21 @@ public class EnrolleeTermComparisonFacet implements EnrolleeSearchExpression {
                     boundObjects.toArray()
             );
         } else {
-            whereCondition = condition(
-                    this.leftTermExtractor.termClause() + " " + this.operator.getOperator() + " " + this.rightTermExtractor.termClause(),
-                    boundObjects.toArray());
-
+            if (comparisonType.equals(TimeComparisonType.TEMPORAL_TO_STRING)) {
+                String castType = leftTermExtractor.type().getType().equals(SearchValue.SearchValueType.INSTANT) ? "timestamp" : "date";
+                whereCondition = condition(
+                        "%s %s %s::%s".formatted(this.leftTermExtractor.termClause(), this.operator.getOperator(), this.rightTermExtractor.termClause(), castType),
+                        boundObjects.toArray());
+            } else if (comparisonType.equals(TimeComparisonType.STRING_TO_TEMPORAL)) {
+                String castType = rightTermExtractor.type().getType().equals(SearchValue.SearchValueType.INSTANT) ? "timestamp" : "date";
+                whereCondition = condition(
+                        "%s::%s %s %s".formatted(this.leftTermExtractor.termClause(), castType, this.operator.getOperator(), this.rightTermExtractor.termClause()),
+                        boundObjects.toArray());
+            } else {
+                whereCondition = condition(
+                        "%s %s %s".formatted(leftTermExtractor.termClause(), this.operator.getOperator(), this.rightTermExtractor.termClause()),
+                        boundObjects.toArray());
+            }
         }
 
         if (leftTermExtractor.requiredConditions().isPresent()) {
@@ -92,6 +113,25 @@ public class EnrolleeTermComparisonFacet implements EnrolleeSearchExpression {
         enrolleeSearchQueryBuilder.addCondition(whereCondition);
 
         return enrolleeSearchQueryBuilder;
+    }
+
+    /** We need to do special-case parsing and casting for time comparison, to handle string -> time conversions */
+    private TimeComparisonType getTimeComparisonType() {
+        if ((leftTermExtractor.type().getType().equals(SearchValue.SearchValueType.INSTANT) || leftTermExtractor.type().getType().equals(SearchValue.SearchValueType.DATE)) &&
+                rightTermExtractor.type().getType().equals(SearchValue.SearchValueType.STRING)) {
+            return TimeComparisonType.TEMPORAL_TO_STRING;
+        } else if ((rightTermExtractor.type().getType().equals(SearchValue.SearchValueType.INSTANT) || rightTermExtractor.type().getType().equals(SearchValue.SearchValueType.DATE)) &&
+                leftTermExtractor.type().getType().equals(SearchValue.SearchValueType.STRING)) {
+            return TimeComparisonType.STRING_TO_TEMPORAL;
+        } else {
+            return TimeComparisonType.OTHER;
+        }
+    }
+
+    private enum TimeComparisonType {
+        TEMPORAL_TO_STRING,
+        STRING_TO_TEMPORAL,
+        OTHER
     }
 
 }
