@@ -27,12 +27,12 @@ export default function ConfigProvider({ children }: PropsWithChildren) {
     Api.getConfig().then(fetchedConfig => {
       setConfig(fetchedConfig)
       setIsLoaded(true)
-    }).catch(e => {
-      setError(`Unable to load config: ${e.toString()}`)
+    }).then(() => {
+      setError(`Unable to load config: foo`)
     })
   }, [])
   if (error) {
-    return <p>{error}</p>
+    return <ServiceUnavailable/>
   } else if (!isLoaded) {
     return <PageLoadingIndicator />
   } else {
