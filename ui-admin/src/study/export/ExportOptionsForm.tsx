@@ -46,7 +46,7 @@ function ExportOptionsForm({ exportOptions, setExportOptions }:
     enrolledAfter: enrolledAfter ? new Date(enrolledAfter) : undefined
   }
 
-  return <div>
+  return <div className="container-md ms-0">
     <div className="py-2">
       <p className="fw-bold mb-1">
         Data format
