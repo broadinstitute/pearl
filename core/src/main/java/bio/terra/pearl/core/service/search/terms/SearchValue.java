@@ -21,7 +21,7 @@ public class SearchValue {
     private Boolean booleanValue = null;
     private List<SearchValue> arrayValue = null;
 
-    private final SearchValueType searchValueType;
+    private SearchValueType searchValueType;
 
     public SearchValue(String stringValue) {
         this.stringValue = stringValue;
@@ -194,6 +194,22 @@ public class SearchValue {
         }
 
         return this.stringValue.toLowerCase().contains(rightSearchValue.stringValue.toLowerCase());
+    }
+
+    /** attempts to parse the the value into the given type.
+     * This will do nothing if there is no value to convert, but throw on error on invalid format
+     * */
+    public void parseTo(SearchValueType newType) {
+        if (this.stringValue == null) {
+            return;
+        }
+        if (SearchValueType.INSTANT.equals(newType)) {
+            this.instantValue = Instant.parse(this.stringValue);
+            this.searchValueType = SearchValueType.INSTANT;
+        } else if (SearchValueType.DATE.equals(newType)) {
+            this.dateValue = LocalDate.parse(this.stringValue);
+            this.searchValueType = SearchValueType.DATE;
+        }
     }
 
     public enum SearchValueType {

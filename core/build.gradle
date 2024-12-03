@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:3.3.2'
     implementation 'org.springframework.boot:spring-boot-starter-webflux:3.3.2'
     implementation 'org.springframework.boot:spring-boot-starter-validation:3.3.2'
-    implementation 'org.springframework.retry:spring-retry:1.3.4'
+    implementation 'org.springframework.retry:spring-retry:2.0.10'
     implementation 'org.apache.commons:commons-text:1.12.0'
     implementation 'org.apache.commons:commons-csv:1.12.0'
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
@@ -38,7 +38,7 @@ dependencies {
     implementation 'org.yaml:snakeyaml:2.3'
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
     implementation 'com.sendgrid:sendgrid-java:4.0.1'
     implementation 'com.auth0:java-jwt:4.2.2'
     implementation group: "bio.terra", name: "datarepo-jakarta-client", version: "1.565.0-SNAPSHOT"
@@ -47,7 +47,7 @@ dependencies {
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
     implementation 'com.azure:azure-storage-blob:12.29.0'
     implementation 'com.smartystreets.api:smartystreets-java-sdk:3.16.1'
-    implementation 'org.jooq:jooq:3.19.6'
+    implementation 'org.jooq:jooq:3.19.15'
     implementation 'com.mixpanel:mixpanel-java:1.5.3'
 
     implementation 'com.google.cloud:spring-cloud-gcp-starter-secretmanager:5.6.0'

@@ -2,7 +2,9 @@ import { concatSearchExpressions } from 'util/searchExpressionUtils'
 
 export type ExportFilterOptions = {
   includeProxiesAsRows?: boolean,
-  includeUnconsented?: boolean
+  includeUnconsented?: boolean,
+  enrolledBefore?: Date,
+  enrolledAfter?: Date
 }
 
 /**
@@ -11,7 +13,9 @@ export type ExportFilterOptions = {
 export const buildFilter = (
   opts: ExportFilterOptions = {
     includeProxiesAsRows: false,
-    includeUnconsented: false
+    includeUnconsented: false,
+    enrolledBefore: undefined,
+    enrolledAfter: undefined
   }): string => {
   const facets: string[] = []
   if (!opts.includeProxiesAsRows) {
@@ -19,6 +23,12 @@ export const buildFilter = (
   }
   if (!opts.includeUnconsented) {
     facets.push('{enrollee.consented} = true')
+  }
+  if (opts.enrolledBefore) {
+    facets.push(`{enrollee.createdAt} < '${opts.enrolledBefore.toISOString()}'`)
+  }
+  if (opts.enrolledAfter) {
+    facets.push(`{enrollee.createdAt} > '${opts.enrolledAfter.toISOString()}'`)
   }
   return concatSearchExpressions(facets)
 }
