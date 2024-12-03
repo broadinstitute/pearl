@@ -12,7 +12,7 @@ export default function ContactSupportInfoModal({ onHide }: { onHide: () => void
     </Modal.Header>
     <Modal.Body>
       <p>
-                Email <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>${SUPPORT_EMAIL_ADDRESS}</a>
+                Email <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>
       </p>
       <p>
                 Please include the URL of any page you have a question/problem about in your email.

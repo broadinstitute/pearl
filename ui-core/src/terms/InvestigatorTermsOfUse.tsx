@@ -332,7 +332,7 @@ export const InvestigatorTermsOfUse = () => {
       <p>
         If you have any questions regarding our Platform or these Terms, you can
         contact us at{' '}
-        <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>${SUPPORT_EMAIL_ADDRESS}</a>
+        <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>
         .
       </p>
     </>

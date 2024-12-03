@@ -57,7 +57,7 @@ function HomePage() {
       <div className="d-flex justify-content-center mt-3">
         <div className="alert alert-warning" role="alert">
             You do not have access to any portals or studies. If this is an error, please
-            contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>${SUPPORT_EMAIL_ADDRESS}</a>
+            contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>
         </div>
       </div> :
       <div className='d-flex justify-content-center py-4'>

@@ -24,7 +24,7 @@ export const StatusPage = () => {
     }
     <div className="text-center">
       <div className="text-muted">
-        Please contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>${SUPPORT_EMAIL_ADDRESS}</a> for additional support.
+        Please contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a> for additional support.
       </div>
     </div>
   </div>

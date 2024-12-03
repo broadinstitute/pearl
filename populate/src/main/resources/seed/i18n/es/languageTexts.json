@@ -137,5 +137,7 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Gracias por su participación.", "language": "es"},
   {"keyName": "kitTypeSaliva", "text": "Kit de saliva", "language": "es"},
   {"keyName": "kitTypeStool", "text": "Kit de heces", "language": "es"},
-  {"keyName": "kitTypeBlood", "text": "Kit de sangre", "language": "es"}
+  {"keyName": "kitTypeBlood", "text": "Kit de sangre", "language": "es"},
+  {"keyName": "applicationUnavailable", "text": "Aplicación no disponible", "language": "es"},
+  {"keyName": "applicationUnavailableMessage", "text": "Esta aplicación no está disponible en este momento. Inténtalo de nuevo más tarde. Disculpa las molestias.", "language": "es"}
 ]

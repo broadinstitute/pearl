@@ -90,7 +90,7 @@ export function I18nProvider({ defaultLanguage, portalShortcode, children }: {
     {isError && <div className="bg-white h-100 w-100">
       <div className="position-absolute top-50 start-50 translate-middle text-center">
         There is no Juniper site configured for this url.<br/>
-        If this is an error, contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>${SUPPORT_EMAIL_ADDRESS}</a>.
+        If this is an error, contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>.
       </div>
     </div>}
     {!isLoading && !isError && <I18nContext.Provider value={{ languageTexts, i18n, selectedLanguage, changeLanguage }}>
