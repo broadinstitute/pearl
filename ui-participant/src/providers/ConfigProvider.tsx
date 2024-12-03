@@ -34,8 +34,8 @@ export default function ConfigProvider({ children }: PropsWithChildren) {
     Api.getConfig().then(fetchedConfig => {
       setConfig(fetchedConfig)
       setIsLoaded(true)
-    }).then(() => {
-      setError(`Unable to load config: Syntax Error: Unexpected token '<', "<!DOCTYPE"... is not valid JSON`)
+    }).catch(e => {
+      setError(`Unable to load config: ${e.toString()}`)
     })
   }, [])
   if (error) {
