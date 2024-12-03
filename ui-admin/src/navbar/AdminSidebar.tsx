@@ -38,24 +38,18 @@ const AdminSidebar = ({ config }: { config: Config }) => {
   const { portalList } = useNavContext()
   const studyShortcode = studyShortcodeFromPath(params['*'])
   const portalShortcode = params.portalShortcode
-  const portal = portalList.find(p => p.shortcode === portalShortcode)
   let studyList: Study[] = []
   if (portalList.length) {
     studyList = portalList.flatMap(portal => portal.portalStudies.map(ps => ps.study))
   }
   // if there isn't a study selected, default to the first
-  const currentStudy = studyList.find(study => study.shortcode === studyShortcode) ||
-    portal?.portalStudies.sort((a, b) => a.createdAt - b.createdAt)[0]?.study
-
+  const currentStudy = studyList.find(study => study.shortcode === studyShortcode)
   const color = ZONE_COLORS[config.deploymentZone] || ZONE_COLORS['prod']
 
   // automatically collapse the sidebar for mobile-first routes
   useEffect(() => {
     if (isMobileFirstRoute()) {
       setOpen(false)
-    }
-    if (!studyShortcode && currentStudy) {
-      // reroute to auto-select the first study
     }
   }, [])
 

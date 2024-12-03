@@ -53,6 +53,7 @@ import ExportIntegrationJobList from './export/integrations/ExportIntegrationJob
 import LoadedSettingsView from './settings/SettingsView'
 import { ENVIRONMENT_ICON_MAP } from 'util/publishUtils'
 import SiteContentLoader from '../portal/siteContent/SiteContentLoader'
+import PortalDashboard from '../portal/dashboard/PortalDashboard'
 
 export type StudyEnvContextT = { study: Study, currentEnv: StudyEnvironment, currentEnvPath: string, portal: Portal }
 
@@ -111,6 +112,7 @@ function StudyEnvironmentRouter({ study }: { study: Study }) {
     <ApiProvider api={previewApi(portal.shortcode, currentEnv.environmentName)}>
       <I18nProvider defaultLanguage={'en'} portalShortcode={portal.shortcode}>
         <Routes>
+          <Route path="portalDashboard" element={<PortalDashboard portal={portalContext.portal}/>}/>
           <Route path="notificationContent/*" element={<TriggerList studyEnvContext={studyEnvContext}
             portalContext={portalContext}/>}/>
           <Route path="participants/*" element={<ParticipantsRouter studyEnvContext={studyEnvContext}/>}/>
