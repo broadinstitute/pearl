@@ -33,6 +33,18 @@ public class LanguageTextService extends CrudService<LanguageText, LanguageTextD
         return languageTextMap;
     }
 
+    @Cacheable(value = "languageTexts", key = "#language")
+    public HashMap<String, String> getSystemLanguageTextMap(String language) {
+        List<LanguageText> languageTexts = languageTextDao.findSystemLanguageTexts(language);
+
+        HashMap<String, String> languageTextMap = new HashMap<>();
+        for (LanguageText languageText : languageTexts) {
+            languageTextMap.put(languageText.getKeyName(), languageText.getText());
+        }
+
+        return languageTextMap;
+    }
+
     public void deleteByPortalId(UUID portalId) {
         languageTextDao.deleteByPortalId(portalId);
     }

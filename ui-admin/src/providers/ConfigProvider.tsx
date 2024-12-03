@@ -38,8 +38,8 @@ export default function ConfigProvider({ children }: { children: React.ReactNode
     Api.getConfig().then(fetchedConfig => {
       setConfig(fetchedConfig)
       setIsLoaded(true)
-    }).catch(e => {
-      setError(`Unable to load config: ${e.toString()}`)
+    }).then(() => {
+      setError(`Unable to load config: Syntax Error: Unexpected token '<', "<!DOCTYPE"... is not valid JSON`)
     })
   }, [])
   if (error) {

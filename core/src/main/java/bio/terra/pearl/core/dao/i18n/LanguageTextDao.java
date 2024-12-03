@@ -42,6 +42,19 @@ public class LanguageTextDao extends BaseMutableJdbiDao<LanguageText> {
                     .list());
     }
 
+    //returns all global (non portal-specific) language texts
+    //used for cases where we do not yet have a portal context loaded, but need to display some i18n text
+    public List<LanguageText> findSystemLanguageTexts(String language) {
+        return jdbi.withHandle(
+            handle ->
+                handle
+                    .createQuery(
+                        "SELECT * FROM language_text WHERE portal_id IS NULL AND language = :language")
+                    .bind("language", language)
+                    .mapToBean(LanguageText.class)
+                    .list());
+    }
+
     public void deleteByPortalId(UUID portalId) {
         deleteByProperty("portal_id", portalId);
     }
