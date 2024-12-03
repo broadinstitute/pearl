@@ -5,7 +5,7 @@ import { useNavContext } from './navbar/NavContextProvider'
 import Api, { getMediaUrl } from './api/api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircle, faExternalLink, faList, faSearch, faTableCellsLarge } from '@fortawesome/free-solid-svg-icons'
-import { Portal, instantToDateString } from '@juniper/ui-core'
+import { Portal, instantToDateString, SUPPORT_EMAIL_ADDRESS } from '@juniper/ui-core'
 import { basicTableLayout } from './util/tableUtils'
 import { ColumnDef, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { useConfig } from './providers/ConfigProvider'
@@ -57,7 +57,7 @@ function HomePage() {
       <div className="d-flex justify-content-center mt-3">
         <div className="alert alert-warning" role="alert">
             You do not have access to any portals or studies. If this is an error, please
-            contact <a href="mailto:support@juniper.terra.bio">support@juniper.terra.bio</a>
+            contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>${SUPPORT_EMAIL_ADDRESS}</a>
         </div>
       </div> :
       <div className='d-flex justify-content-center py-4'>

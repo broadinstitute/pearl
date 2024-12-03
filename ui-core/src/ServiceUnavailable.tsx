@@ -1,14 +1,10 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons'
-import { Link } from 'react-router-dom'
 import { useI18n } from '@juniper/ui-core'
+import { SUPPORT_EMAIL_ADDRESS } from 'src/util/supportUtils'
 
-/**
- * Displays when there is an unmatched participant route.
- */
-export default function ServiceUnavailable() {
-  const supportContactEmail = 'support@juniper.terra.bio' //TODO
+export function ServiceUnavailable({ error }: { error: string }) {
   const { i18n } = useI18n()
 
   return (
@@ -17,24 +13,22 @@ export default function ServiceUnavailable() {
         <div className="fs-1 fw-bold d-flex justify-content-center">
           <div>
             <FontAwesomeIcon className="me-2" icon={faCircleExclamation}/>
-            <span>{i18n('pageNotFoundTitle')}</span>
+            <span>{i18n('applicationUnavailable')}</span>
           </div>
         </div>
         <div className="fs-2 fw-light d-flex justify-content-center text-center">
           <div>
             <span>
-              {i18n('pageNotFoundMessage', {
+              {i18n('applicationUnavailableMessage', {
                 substitutions: {
-                  supportContactEmail
+                  SUPPORT_EMAIL_ADDRESS
                 }
               })}
             </span>
-            <div className="d-flex justify-content-center mt-3">
-              <Link className="btn btn-outline-primary" to={'/'}>
-                {i18n('pageNotFoundReturnHome')}
-              </Link>
-            </div>
           </div>
+        </div>
+        <div className="fs-5 fw-light d-flex justify-content-center text-center mt-3 bg-light">
+          <code className="p-3">{error}</code>
         </div>
       </main>
     </div>

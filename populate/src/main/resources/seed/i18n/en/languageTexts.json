@@ -137,5 +137,7 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Thank you for your participation.", "language": "en"},
   {"keyName": "kitTypeSaliva", "text": "Saliva kit", "language": "en"},
   {"keyName": "kitTypeStool", "text": "Stool kit", "language": "en"},
-  {"keyName": "kitTypeBlood", "text": "Blood kit", "language": "en"}
+  {"keyName": "kitTypeBlood", "text": "Blood kit", "language": "en"},
+  {"keyName": "applicationUnavailable", "text": "Application unavailable", "language": "en"},
+  {"keyName": "applicationUnavailableMessage", "text": "This application is currently unavailable. Please try again later. We apologize for the inconvenience.", "language": "en"},
 ]

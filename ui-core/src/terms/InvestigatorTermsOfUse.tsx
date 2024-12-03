@@ -1,6 +1,7 @@
 import classNames from 'classnames'
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { SUPPORT_EMAIL_ADDRESS } from 'src/util/supportUtils'
 
 type SectionHeadingProps = JSX.IntrinsicElements['h2']
 
@@ -331,7 +332,7 @@ export const InvestigatorTermsOfUse = () => {
       <p>
         If you have any questions regarding our Platform or these Terms, you can
         contact us at{' '}
-        <a href="mailto:support@juniper.terra.bio">support@juniper.terra.bio</a>
+        <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>${SUPPORT_EMAIL_ADDRESS}</a>
         .
       </p>
     </>
