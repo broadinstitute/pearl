@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useApiContext } from './ApiProvider'
-import { SUPPORT_EMAIL_ADDRESS } from 'src/util/supportUtils'
+import { SUPPORT_EMAIL_ADDRESS } from '../util/supportUtils'
 
 export const I18nContext = createContext<I18nContextT | null>(null)
 

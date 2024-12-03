@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { SUPPORT_EMAIL_ADDRESS } from 'src/util/supportUtils'
+import { SUPPORT_EMAIL_ADDRESS } from '../util/supportUtils'
 
 type SectionHeadingProps = JSX.IntrinsicElements['h2']
 
