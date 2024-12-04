@@ -1,7 +1,7 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons'
-import { SUPPORT_EMAIL_ADDRESS } from 'src/util/supportUtils'
+import { SUPPORT_EMAIL_ADDRESS } from './util/supportUtils'
 
 export function ServiceUnavailable({ error }: { error?: string }) {
   return (
