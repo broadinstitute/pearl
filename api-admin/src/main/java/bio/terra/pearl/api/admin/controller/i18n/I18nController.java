@@ -6,8 +6,6 @@ import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.i18n.LanguageTextService;
 import bio.terra.pearl.core.service.portal.PortalService;
 import java.util.HashMap;
-import java.util.Objects;
-import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
