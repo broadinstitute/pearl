@@ -23,6 +23,7 @@ import { Button, IconButton } from 'components/forms/Button'
 import Modal from 'react-bootstrap/Modal'
 import { ExportIntegrationForm } from './ExportIntegrationView'
 import { buildFilter } from 'util/exportUtils'
+import { DeleteExportIntegrationModal } from './DeleteExportIntegrationModal'
 
 const DEFAULT_EXPORT_INTEGRATION: ExportIntegration = {
   name: 'new',
@@ -51,8 +52,10 @@ export default function ExportIntegrationList({ studyEnvContext }:
   const [integrations, setIntegrations] = useState<ExportIntegration[]>([])
   const [sorting, setSorting] = React.useState<SortingState>([{ 'id': 'createdAt', 'desc': true }])
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [deleteIntegrationId, setDeleteIntegrationId] = useState<string>()
   const [newIntegration, setNewIntegration] = useState<ExportIntegration>(DEFAULT_EXPORT_INTEGRATION)
   const navigate = useNavigate()
+
   const columns: ColumnDef<ExportIntegration>[] = [{
     header: 'Name',
     accessorKey: 'name',
@@ -81,7 +84,8 @@ export default function ExportIntegrationList({ studyEnvContext }:
         navigate(info.row.original.id)
       }}/>
       <IconButton icon={faTrash} aria-label={'Delete integration'} onClick={() => {
-        Api.deleteExportIntegration(paramsFromContext(studyEnvContext), info.row.original.id)
+        setDeleteIntegrationId(info.row.original.id)
+        // Api.deleteExportIntegration(paramsFromContext(studyEnvContext), info.row.original.id)
       }}/>
     </div>
   }]
@@ -109,6 +113,13 @@ export default function ExportIntegrationList({ studyEnvContext }:
     setNewIntegration(DEFAULT_EXPORT_INTEGRATION)
   }
 
+  const deleteIntegration = async () => {
+    if (!deleteIntegrationId) { return }
+    await Api.deleteExportIntegration(paramsFromContext(studyEnvContext), deleteIntegrationId)
+    setDeleteIntegrationId(undefined)
+    await reload()
+  }
+
   return <div className="container-fluid px-4 py-2">
     { renderPageHeader('Export Integrations') }
     <LoadingSpinner isLoading={isLoading}>
@@ -119,6 +130,11 @@ export default function ExportIntegrationList({ studyEnvContext }:
       { basicTableLayout(table) }
       { renderEmptyMessage(integrations, 'No integrations') }
     </LoadingSpinner>
+    { deleteIntegrationId &&
+        <DeleteExportIntegrationModal
+          onDismiss={() => setDeleteIntegrationId(undefined)}
+          onConfirm={() => { deleteIntegration() }}
+        /> }
     { showCreateModal && <Modal show={true} size={'lg'} onHide={() => setShowCreateModal(false)} >
       <Modal.Header closeButton>
         <Modal.Title>Create new Export Integration</Modal.Title>

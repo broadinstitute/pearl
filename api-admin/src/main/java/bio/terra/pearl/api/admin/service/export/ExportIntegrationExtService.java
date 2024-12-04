@@ -67,6 +67,18 @@ public class ExportIntegrationExtService {
   }
 
   @EnforcePortalStudyEnvPermission(permission = "export_integration")
+  public void delete(PortalStudyEnvAuthContext authContext, UUID id) {
+    ExportIntegration integration =
+        exportIntegrationService
+            .find(id)
+            .orElseThrow(() -> new NotFoundException("Export Integration not found"));
+    if (!integration.getStudyEnvironmentId().equals(authContext.getStudyEnvironment().getId())) {
+      throw new NotFoundException("Export Integration not found");
+    }
+    exportIntegrationService.delete(id);
+  }
+
+  @EnforcePortalStudyEnvPermission(permission = "export_integration")
   public ExportIntegration save(
       PortalStudyEnvAuthContext authContext, ExportIntegration exportIntegration) {
     ExportIntegration loadedIntegration =
