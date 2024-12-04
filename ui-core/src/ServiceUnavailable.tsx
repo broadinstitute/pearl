@@ -13,11 +13,12 @@ export function ServiceUnavailable({ error }: { error?: string }) {
             <span>Application unavailable</span>
           </div>
         </div>
-        <div className="fs-2 fw-light d-flex justify-content-center text-center">
+        <div className="fs-2 fw-light d-flex justify-content-center text-center mt-2">
           <div>
             <span>
               This application is currently unavailable. We apologize for the inconvenience.
-              Please try again later, or contact ${SUPPORT_EMAIL_ADDRESS} if the issue persists.
+              Please try again later, or
+              contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a> if the issue persists.
             </span>
           </div>
         </div>
