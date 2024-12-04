@@ -1329,7 +1329,7 @@ paths:
         - *envNameParam
         - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
       responses:
-        '200':
+        '204':
           description: Successful deletion
         '500':
           $ref: '#/components/responses/ServerError'

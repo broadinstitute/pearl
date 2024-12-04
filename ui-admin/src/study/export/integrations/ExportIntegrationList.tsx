@@ -79,13 +79,11 @@ export default function ExportIntegrationList({ studyEnvContext }:
     enableSorting: false,
     id: 'actions',
     cell: info => <div className={'d-flex align-items-center'}>
-      {/*<Link to={info.row.original.id}>View/Edit</Link>*/}
       <IconButton icon={faPencil} aria-label={'View/edit integration'} onClick={() => {
         navigate(info.row.original.id)
       }}/>
       <IconButton icon={faTrash} aria-label={'Delete integration'} onClick={() => {
         setDeleteIntegrationId(info.row.original.id)
-        // Api.deleteExportIntegration(paramsFromContext(studyEnvContext), info.row.original.id)
       }}/>
     </div>
   }]
