@@ -8,7 +8,7 @@ export function ServiceUnavailable({ error }: { error: string }) {
   const { i18n } = useI18n()
 
   return (
-    <div className="container-fluid bg-white min-vh-100 d-flex flex-column p-0">
+    <div className="container-fluid bg-white min-vh-100 d-flex flex-column p-0 w-75">
       <main className="flex-grow-1 p-2 d-flex flex-column justify-content-center">
         <div className="fs-1 fw-bold d-flex justify-content-center">
           <div>
@@ -21,7 +21,7 @@ export function ServiceUnavailable({ error }: { error: string }) {
             <span>
               {i18n('applicationUnavailableMessage', {
                 substitutions: {
-                  SUPPORT_EMAIL_ADDRESS
+                  supportContactEmail: SUPPORT_EMAIL_ADDRESS
                 }
               })}
             </span>
