@@ -17,9 +17,9 @@ import { useLoadingEffect } from 'api/api-utils'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { renderPageHeader } from 'util/pageUtils'
 import { paramsFromContext, StudyEnvContextT } from '../../StudyEnvironmentRouter'
-import { faCheck, faPlus } from '@fortawesome/free-solid-svg-icons'
-import { Link } from 'react-router-dom'
-import { Button } from 'components/forms/Button'
+import { faCheck, faPencil, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { Link, useNavigate } from 'react-router-dom'
+import { Button, IconButton } from 'components/forms/Button'
 import Modal from 'react-bootstrap/Modal'
 import { ExportIntegrationForm } from './ExportIntegrationView'
 import { buildFilter } from 'util/exportUtils'
@@ -52,9 +52,11 @@ export default function ExportIntegrationList({ studyEnvContext }:
   const [sorting, setSorting] = React.useState<SortingState>([{ 'id': 'createdAt', 'desc': true }])
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [newIntegration, setNewIntegration] = useState<ExportIntegration>(DEFAULT_EXPORT_INTEGRATION)
+  const navigate = useNavigate()
   const columns: ColumnDef<ExportIntegration>[] = [{
     header: 'Name',
-    accessorKey: 'name'
+    accessorKey: 'name',
+    cell: info => <Link to={info.row.original.id}>{info.row.original.name}</Link>
   }, {
     header: 'Destination',
     accessorKey: 'destinationType'
@@ -73,7 +75,15 @@ export default function ExportIntegrationList({ studyEnvContext }:
     header: '',
     enableSorting: false,
     id: 'actions',
-    cell: info => <Link to={info.row.original.id}>View/Edit</Link>
+    cell: info => <div className={'d-flex align-items-center'}>
+      {/*<Link to={info.row.original.id}>View/Edit</Link>*/}
+      <IconButton icon={faPencil} aria-label={'View/edit integration'} onClick={() => {
+        navigate(info.row.original.id)
+      }}/>
+      <IconButton icon={faTrash} aria-label={'Delete integration'} onClick={() => {
+        Api.deleteExportIntegration(paramsFromContext(studyEnvContext), info.row.original.id)
+      }}/>
+    </div>
   }]
 
   const table = useReactTable({
@@ -107,7 +117,7 @@ export default function ExportIntegrationList({ studyEnvContext }:
         <FontAwesomeIcon icon={faPlus}/> Create Integration
       </Button> }
       { basicTableLayout(table) }
-      { renderEmptyMessage(integrations, 'No intgrations') }
+      { renderEmptyMessage(integrations, 'No integrations') }
     </LoadingSpinner>
     { showCreateModal && <Modal show={true} size={'lg'} onHide={() => setShowCreateModal(false)} >
       <Modal.Header closeButton>

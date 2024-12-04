@@ -1319,6 +1319,20 @@ paths:
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
+    delete:
+      summary: deletes the exportIntegration by id
+      tags: [ exportIntegration ]
+      operationId: delete
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Successful deletion
+        '500':
+          $ref: '#/components/responses/ServerError'
     patch:
       summary: saves an exportIntegration
       tags: [ exportIntegration ]
