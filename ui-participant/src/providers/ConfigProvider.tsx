@@ -39,7 +39,7 @@ export default function ConfigProvider({ children }: PropsWithChildren) {
     })
   }, [])
   if (error) {
-    return <ServiceUnavailable error={error}/>
+    return <ServiceUnavailable/>
   } else if (!isLoaded) {
     return <PageLoadingIndicator />
   } else {

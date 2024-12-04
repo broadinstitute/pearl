@@ -131,17 +131,17 @@ function App() {
         >
           <BrowserRouter>
             <ScrollToTop />
-            <I18nProvider defaultLanguage={portalEnv.portalEnvironmentConfig.defaultLanguage}
-              portalShortcode={portal.shortcode}>
-              <ConfigProvider>
-                <ConfigConsumer>
-                  {config =>
-                    <MaintenanceMode systemSettings={config.systemSettings}>
-                      <AuthProvider {
-                        ...getAuthProviderProps(config.b2cTenantName, config.b2cClientId, config.b2cPolicyName)
-                      }>
-                        <UserProvider>
-                          <ActiveUserProvider>
+            <ConfigProvider>
+              <ConfigConsumer>
+                {config =>
+                  <MaintenanceMode systemSettings={config.systemSettings}>
+                    <AuthProvider {
+                      ...getAuthProviderProps(config.b2cTenantName, config.b2cClientId, config.b2cPolicyName)
+                    }>
+                      <UserProvider>
+                        <ActiveUserProvider>
+                          <I18nProvider defaultLanguage={portalEnv.portalEnvironmentConfig.defaultLanguage}
+                            portalShortcode={portal.shortcode}>
                             <Suspense fallback={<PageLoadingIndicator/>}>
                               <IdleStatusMonitor
                                 maxIdleSessionDuration={30 * 60 * 1000} idleWarningDuration={5 * 60 * 1000}/>
@@ -166,14 +166,14 @@ function App() {
                               </Routes>
                             </Suspense>
                             {!cookiesAcknowledged && <CookieAlert onDismiss={() => setCookiesAcknowledged()} />}
-                          </ActiveUserProvider>
-                        </UserProvider>
-                      </AuthProvider>
-                    </MaintenanceMode>
-                  }
-                </ConfigConsumer>
-              </ConfigProvider>
-            </I18nProvider>
+                          </I18nProvider>
+                        </ActiveUserProvider>
+                      </UserProvider>
+                    </AuthProvider>
+                  </MaintenanceMode>
+                }
+              </ConfigConsumer>
+            </ConfigProvider>
           </BrowserRouter>
         </div>
       </PortalPasswordGate>

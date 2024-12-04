@@ -137,7 +137,5 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "DEV_Thank you for your participation.", "language": "dev"},
   {"keyName": "kitTypeSaliva", "text": "DEV_Saliva kit", "language": "dev"},
   {"keyName": "kitTypeStool", "text": "DEV_Stool kit", "language": "dev"},
-  {"keyName": "kitTypeBlood", "text": "DEV_Blood kit", "language": "dev"},
-  {"keyName": "applicationUnavailable", "text": "DEV_Application unavailable", "language": "dev"},
-  {"keyName": "applicationUnavailableMessage", "text": "DEV_This application is currently unavailable. We apologize for the inconvenience. Please try again later, or contact ${supportContactEmail} if the issue persists.", "language": "dev"}
+  {"keyName": "kitTypeBlood", "text": "DEV_Blood kit", "language": "dev"}
 ]

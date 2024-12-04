@@ -2,6 +2,7 @@ package bio.terra.pearl.api.admin.controller.i18n;
 
 import bio.terra.pearl.api.admin.api.I18nApi;
 import bio.terra.pearl.core.model.portal.Portal;
+import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.i18n.LanguageTextService;
 import bio.terra.pearl.core.service.portal.PortalService;
 import java.util.HashMap;
@@ -22,18 +23,17 @@ public class I18nController implements I18nApi {
 
   @Override
   public ResponseEntity<Object> listLanguageTexts(String language, String portalShortcode) {
-    Optional<Portal> portal = portalService.findOneByShortcode(portalShortcode);
-
-    // default to English if no language is provided
-    String lang = Objects.requireNonNullElse(language, "en");
+    Portal portal =
+        portalService
+            .findOneByShortcode(portalShortcode)
+            .orElseThrow(() -> new NotFoundException("Portal not found"));
 
     HashMap<String, String> languageTexts;
-    // if the portal is not found or not specified, at least return the global/system language texts
-    // it's possible to need language texts without a loaded portal context in the admin tool
-    if (portal.isEmpty()) {
-      languageTexts = languageTextService.getSystemLanguageTextMap(lang);
+    if (language != null) {
+      languageTexts = languageTextService.getLanguageTextMapForLanguage(portal.getId(), language);
     } else {
-      languageTexts = languageTextService.getLanguageTextMapForLanguage(portal.get().getId(), lang);
+      // default to English
+      languageTexts = languageTextService.getLanguageTextMapForLanguage(portal.getId(), "en");
     }
     return ResponseEntity.ok(languageTexts);
   }
