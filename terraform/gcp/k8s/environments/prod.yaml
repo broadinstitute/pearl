@@ -2,6 +2,8 @@ gcpProject: broad-juniper-prod
 gcpRegion: us-central1
 adminUrl: juniper-cmi.org
 deploymentZone: prod
+appVersion: 1.4.138
+enableMaintenanceMode: true
 replicas: 3
 # "portals" adds certificates for each portal - both for the admin subdomains and the custom domain
 portals:
@@ -9,13 +11,32 @@ portals:
     customDomain: juniperdemostudy.org
 b2c:
   admin:
-    clientId: 705c09dc-5cca-43d3-ae06-07de78bad29a
-    tenantName: ddpdevb2c
-    policyName: B2C_1A_ddp_admin_signup_signin_dev
+    clientId: f02b3816-af49-4a78-a2a5-b929c78a6c47
+    tenantName: broadjuniperadmin
+    policyName: B2C_1A_ddp_admin_signup_signin_admin-prod
   portals:
+    ourhealth:
+      tenantName: ourhealthstudy
+      clientId: 810055b4-eafc-488e-bc9c-eaa8dd759685
+      policyName: B2C_1A_ddp_participant_signup_signin_ourhealth-prod
+      changePasswordPolicyName: B2C_1A_ddp_participant_change_password_ourhealth-prod
+    hearthive:
+      tenantName: hearthive
+      clientId: ede6cbb1-a2c3-44c0-9a8a-496d48d6f307
+      policyName: B2C_1A_ddp_participant_signup_signin_hearthive-prod
+      changePasswordPolicyName: B2C_1A_ddp_participant_change_password_hearthive-prod
+    gvasc:
+      tenantName: gvascprod
+      clientId: 84192db4-8a68-4f9c-9bd0-b104a24f62f9
+      policyName: B2C_1A_ddp_participant_signup_signin_gvasc-prod
+      changePasswordPolicyName: B2C_1A_ddp_participant_change_password_gvasc-prod
+    atcp:
+      tenantName: does-not-exist
+      clientId: does-not-exist
+      policyName: does-not-exist
+      changePasswordPolicyName: does-not-exist
     demo:
-      changePasswordPolicyName: B2C_1A_ddp_participant_change_password_demo-dev
-      clientId: 37d95cc4-7c71-465e-9fc2-66be9a54c202
-      policyName: B2C_1A_ddp_participant_signup_signin_demo-dev
-      tenantName: juniperdemodev
-
+      tenantName: juniperdemoprod
+      clientId: 895c5f41-5a84-4863-b34c-c84d297006e3
+      policyName: B2C_1A_ddp_participant_signup_signin_demo-prod
+      changePasswordPolicyName: B2C_1A_ddp_participant_change_password_demo-prod

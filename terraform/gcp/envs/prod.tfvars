@@ -7,7 +7,7 @@ dns_ttl = 300
 admin_url = "juniper-cmi.org"
 environment = "prod"
 # note: automatically creates DNS records for these portals under the admin domain
-portals = ["demo"]
+portals = ["demo", "hearthive", "ourhealth", "trccproject", "gvasc"]
 admin_dnssec = "off"
 k8s_namespace = "juniper-prod"
 
@@ -16,6 +16,21 @@ customer_urls = {
   demo = {
     url    = "juniperdemostudy.org"
     dnssec = "off"
+  }
+
+  gvasc = {
+    url    = "gvascstudy.org"
+    dnssec = "off"
+  }
+
+  hearthive = {
+      url    = "thehearthive.org"
+      dnssec = "off"
+  }
+
+  ourhealth = {
+      url    = "ourhealthstudy.org"
+      dnssec = "off"
   }
 }
 
