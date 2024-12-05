@@ -108,6 +108,11 @@ export function ParticipantNavbar(props: NavbarProps) {
     pStudy.study.studyEnvironments.find(studyEnv =>
       studyEnv.environmentName === portalEnv.environmentName))?.study.studyEnvironments[0]
 
+  const mainJoinPath = getMainJoinLink(portal.portalStudies, portalEnv.portalEnvironmentConfig)
+  //we need to note whether the user is in the process of enrolling in a study.
+  //if they are, clicking the register button should keep them on their current page
+  const isUserEnrolling = location.pathname.startsWith(mainJoinPath)
+
   return <nav {...navProps} className={classNames('navbar navbar-expand-lg navbar-light', props.className)}>
     <div className="container-fluid">
       <NavLink to="/" className="navbar-brand">
@@ -157,7 +162,7 @@ export function ParticipantNavbar(props: NavbarProps) {
                     'd-flex justify-content-center',
                     'mb-3 mb-lg-0 ms-lg-3'
                   )}
-                  to={getMainJoinLink(portal.portalStudies, portalEnv.portalEnvironmentConfig)}
+                  to={isUserEnrolling ? '#' : mainJoinPath}
                 >
                   {i18n('navbarJoin')}
                 </NavLink>
