@@ -11,7 +11,7 @@ export const DeleteExportIntegrationModal = ({ onConfirm, onDismiss }: {
         <Modal.Title>Delete export integration</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        Are you sure you want to this export integration? This action cannot be undone.
+        Are you sure you want to delete this export integration? This action cannot be undone.
       </Modal.Body>
       <ModalFooter>
         <Button variant="danger" onClick={() => { onConfirm() }}>
