@@ -32,6 +32,7 @@ import {
   studyPublishingPath
 } from 'study/StudyRouter'
 import { sidebarNavLinkClasses } from './AdminSidebar'
+import { portalUsersPath } from '../user/AdminUserRouter'
 
 
 /** shows menu options related to the current study */
@@ -121,6 +122,12 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
         <li>
           <NavLink to={studyEnvSiteSettingsPath(portalShortcode, study.shortcode, 'live')}
             className={sidebarNavLinkClasses} style={navStyleFunc}>Site Settings</NavLink>
+        </li>
+      </ul>}/>
+      <CollapsableMenu header={'Manage'} content={<ul className="list-unstyled">
+        <li className="mb-2">
+          <NavLink to={portalUsersPath({ portalShortcode, studyShortcode: study.shortcode, envName: 'live' })}
+            className={sidebarNavLinkClasses} style={navStyleFunc}>Team members</NavLink>
         </li>
       </ul>}/>
     </div>

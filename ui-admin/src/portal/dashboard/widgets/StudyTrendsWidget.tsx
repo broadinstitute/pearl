@@ -6,7 +6,7 @@ import { Portal, Study } from '@juniper/ui-core'
 import Api, { BasicMetricDatum } from 'api/api'
 import { useLoadingEffect } from 'api/api-utils'
 import LoadingSpinner from 'util/LoadingSpinner'
-import { studyEnvMetricsPath } from 'study/StudyEnvironmentRouter'
+import { studyEnvMetricsPath, useStudyEnvParamsFromPath } from 'study/StudyEnvironmentRouter'
 import { Link } from 'react-router-dom'
 import classNames from 'classnames'
 import { InfoCard, InfoCardBody, InfoCardHeader } from 'components/InfoCard'
@@ -23,7 +23,7 @@ export const StudyTrendsWidget = ({ portal, study }: { portal: Portal, study: St
   }, [])
 
   const getMetricsLast7Days = async (
-    study: Study, metric: string, setMetricData: (data: BasicMetricDatum[]) => void
+    study: Study, metric: string, setMetricData: (data: BasicMetricDatum[], envName: string) => void
   ) => {
     const result = await Api.fetchMetric(portal.shortcode, study.shortcode, 'live', metric)
     // TODO: api doesn't currently honor time ranges, so we'll filter down after fetching
