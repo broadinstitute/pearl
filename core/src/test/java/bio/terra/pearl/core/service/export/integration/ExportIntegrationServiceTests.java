@@ -68,6 +68,35 @@ public class ExportIntegrationServiceTests extends BaseSpringBootTest {
 
     @Test
     @Transactional
+    public void testExportIntegrationWithJobsDeleted(TestInfo testInfo) {
+        String testName = getTestName(testInfo);
+        StudyEnvironment studyEnv = studyEnvironmentFactory.buildPersisted(testName);
+        enrolleeFactory.buildPersisted(testName, studyEnv, new Profile());
+        enrolleeFactory.buildPersisted(testName, studyEnv, new Profile());
+
+        ExportOptionsWithExpression opts = ExportOptionsWithExpression.builder().rowLimit(2).build();
+
+        ExportIntegration exportIntegration = exportIntegrationService.create(ExportIntegration.builder()
+                .name(getTestName(testInfo))
+                .studyEnvironmentId(studyEnv.getId())
+                .enabled(true)
+                .exportOptions(opts)
+                .destinationType(ExportDestinationType.AIRTABLE)
+                .destinationUrl("badURL")
+                .build());
+        ExportIntegration loadedIntegration = exportIntegrationService.findWithOptions(exportIntegration.getId()).get();
+
+        assertThat(exportIntegrationJobService.findByStudyEnvironment(studyEnv.getId()), hasSize(0));
+        exportIntegrationService.doExport(new MockExporter(), loadedIntegration, new ResponsibleEntity("testExportIntegrationWithJobsDeleted"));
+        List<ExportIntegrationJob> jobs = exportIntegrationJobService.findByStudyEnvironment(studyEnv.getId());
+        assertThat(jobs, hasSize(1));
+        exportIntegrationService.delete(exportIntegration.getId());
+        jobs = exportIntegrationJobService.findByStudyEnvironment(studyEnv.getId());
+        assertThat(jobs, hasSize(0));
+    }
+
+    @Test
+    @Transactional
     public void testExternalExportJobError(TestInfo testInfo) throws InterruptedException {
         String testName = getTestName(testInfo);
         StudyEnvironment studyEnv = studyEnvironmentFactory.buildPersisted(testName);
