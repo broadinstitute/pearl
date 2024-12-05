@@ -91,6 +91,11 @@ public class ExportIntegrationServiceTests extends BaseSpringBootTest {
         List<ExportIntegrationJob> jobs = exportIntegrationJobService.findByStudyEnvironment(studyEnv.getId());
         assertThat(jobs, hasSize(1));
         exportIntegrationService.delete(exportIntegration.getId());
+
+        //confirm export integration deleted
+        assertThat(exportIntegrationService.findWithOptions(exportIntegration.getId()).isPresent(), equalTo(false));
+
+        //confirm jobs deleted
         jobs = exportIntegrationJobService.findByStudyEnvironment(studyEnv.getId());
         assertThat(jobs, hasSize(0));
     }
