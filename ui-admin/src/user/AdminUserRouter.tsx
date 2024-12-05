@@ -3,9 +3,8 @@ import { Link, Route, Routes } from 'react-router-dom'
 import UserList from './UserList'
 import AdminUserDetail from './AdminUserDetail'
 import { NavBreadcrumb } from 'navbar/AdminNavbar'
-import { Portal, StudyEnvParams } from '@juniper/ui-core'
+import { Portal, StudyEnvParams, OptionalStudyEnvParams } from '@juniper/ui-core'
 import RolesList from './RolesList'
-import { OptionalStudyEnvParams } from '@juniper/ui-core/build'
 import { baseStudyEnvPath } from '../study/StudyEnvironmentRouter'
 
 /**

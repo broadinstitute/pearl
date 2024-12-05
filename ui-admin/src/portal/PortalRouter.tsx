@@ -5,7 +5,7 @@ import {
   Routes, useNavigate,
   useParams
 } from 'react-router-dom'
-import StudyRouter from '../study/StudyRouter'
+import StudyRouter, { studyShortcodeFromPath } from '../study/StudyRouter'
 import PortalDashboard from './dashboard/PortalDashboard'
 import {
   LoadedPortalContextT,
@@ -22,10 +22,9 @@ import {
   PortalEnvironment
 } from '@juniper/ui-core'
 import SiteContentLoader from './siteContent/SiteContentLoader'
-import { PortalAdminUserRouter } from 'user/AdminUserRouter'
 import { NavBreadcrumb } from 'navbar/AdminNavbar'
 import Select from 'react-select'
-import { portalEnvPath, useStudyEnvParamsFromPath } from 'study/StudyEnvironmentRouter'
+import { portalEnvPath } from 'study/StudyEnvironmentRouter'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronRight, faHome } from '@fortawesome/free-solid-svg-icons'
 import SiteMediaList from './media/SiteMediaList'
@@ -46,20 +45,20 @@ export default function PortalRouter() {
   const portal = portalContext.portal
 
   // if there isn't a study selected, default to the first
-  const studyEnvParams = useStudyEnvParamsFromPath()
-  const studyShortcode = studyEnvParams.studyShortcode
+  const params = useParams()
+  const studyShortcode = studyShortcodeFromPath(params['*'])
   const navigate = useNavigate()
 
   let effectivePath = portalHomePath(portalContext.portal.shortcode, studyShortcode, 'live')
   const currentStudy = portal.portalStudies.find(pStudy =>
-    pStudy.study.shortcode === studyEnvParams.studyShortcode)?.study ||
+    pStudy.study.shortcode === studyShortcode)?.study ||
     portal?.portalStudies.sort((a, b) => a.createdAt - b.createdAt)[0]?.study
-  if (!studyEnvParams.studyShortcode && currentStudy) {
+  if (!studyShortcode && currentStudy) {
     effectivePath =`/${portal.shortcode}/studies/${currentStudy?.shortcode}/env/live/portalDashboard`
   }
 
   useEffect(() => {
-    if (!studyEnvParams.studyShortcode && currentStudy) {
+    if (!studyShortcode && currentStudy) {
       navigate(effectivePath)
     }
   }, [])
@@ -79,8 +78,6 @@ export default function PortalRouter() {
         <Route path=":studyShortcode/*" element={<StudyRouter portalContext={portalContext}/>}/>
       </Route>
       <Route path="env/:portalEnv/*" element={<PortalEnvRouter portalContext={portalContext}/>}/>
-      <Route path="users/*" element={<PortalAdminUserRouter portal={portalContext.portal}
-        studyEnvParams={studyEnvParams}/>}/>
       <Route index element={<PortalDashboard portal={portalContext.portal}/>}/>
       <Route path="*" element={<div>Unmatched portal route</div>}/>
     </Routes>
