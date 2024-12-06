@@ -23,7 +23,6 @@ public class AuthTestUtils {
             .filter(
                 method ->
                     Modifier.isPublic(method.getModifiers())
-                        && !Modifier.isStatic(method.getModifiers())
                         && !excludedMethodNames.contains(method.getName()))
             .toList();
     for (Method method : publicMethods) {

@@ -1,6 +1,7 @@
 package bio.terra.pearl.api.admin.service;
 
 import bio.terra.pearl.api.admin.config.B2CConfiguration;
+import bio.terra.pearl.api.admin.service.auth.Public;
 import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.core.service.address.AddressValidationConfig;
@@ -36,6 +37,7 @@ public class ConfigExtService {
     configMap = buildConfigMap();
   }
 
+  @Public
   public Map<String, String> getConfigMap() {
     // no auth needed -- the config is all public information sent to the frontend
     return configMap;
@@ -87,6 +89,7 @@ public class ConfigExtService {
     return internalConfigMap;
   }
 
+  @Public
   public static String maskSecret(String secret) {
     if (StringUtils.isBlank(secret)) {
       return "";

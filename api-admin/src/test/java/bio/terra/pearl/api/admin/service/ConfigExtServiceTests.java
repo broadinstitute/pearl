@@ -43,8 +43,10 @@ public class ConfigExtServiceTests {
             addressValidationConfig,
             airtableConfig),
         Map.of(
+            "maskSecret",
+            AuthAnnotationSpec.withPublicAnnotation(),
             "getConfigMap",
-            AuthAnnotationSpec.noAnnotations(),
+            AuthAnnotationSpec.withPublicAnnotation(),
             "getInternalConfigMap",
             AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class))));
   }
