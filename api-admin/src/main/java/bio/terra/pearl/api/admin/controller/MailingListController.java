@@ -3,6 +3,7 @@ package bio.terra.pearl.api.admin.controller;
 import bio.terra.pearl.api.admin.api.MailingListApi;
 import bio.terra.pearl.api.admin.service.MailingListExtService;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.portal.MailingListContact;
@@ -38,7 +39,8 @@ public class MailingListController implements MailingListApi {
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     AdminUser user = authUtilService.requireAdminUser(request);
     List<MailingListContact> contacts =
-        mailingListExtService.getAll(portalShortcode, environmentName, user);
+        mailingListExtService.getAll(
+            PortalEnvAuthContext.of(user, portalShortcode, environmentName));
     return ResponseEntity.ok(contacts);
   }
 
@@ -51,7 +53,8 @@ public class MailingListController implements MailingListApi {
         objectMapper.convertValue(body, new TypeReference<List<MailingListContact>>() {});
 
     List<MailingListContact> createdContacts =
-        mailingListExtService.create(portalShortcode, environmentName, contacts, user);
+        mailingListExtService.create(
+            PortalEnvAuthContext.of(user, portalShortcode, environmentName), contacts);
     return ResponseEntity.ok(createdContacts);
   }
 
@@ -59,7 +62,8 @@ public class MailingListController implements MailingListApi {
   public ResponseEntity<Void> delete(String portalShortcode, String envName, UUID contactId) {
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     AdminUser user = authUtilService.requireAdminUser(request);
-    mailingListExtService.delete(portalShortcode, environmentName, contactId, user);
+    mailingListExtService.delete(
+        PortalEnvAuthContext.of(user, portalShortcode, environmentName), contactId);
     return ResponseEntity.noContent().build();
   }
 }

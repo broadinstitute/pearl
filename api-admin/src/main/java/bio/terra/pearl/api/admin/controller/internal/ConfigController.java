@@ -3,6 +3,7 @@ package bio.terra.pearl.api.admin.controller.internal;
 import bio.terra.pearl.api.admin.api.ConfigApi;
 import bio.terra.pearl.api.admin.service.ConfigExtService;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,6 @@ public class ConfigController implements ConfigApi {
   @Override
   public ResponseEntity<Object> get() {
     AdminUser user = authUtilService.requireAdminUser(request);
-    return ResponseEntity.ok(configExtService.getInternalConfigMap(user));
+    return ResponseEntity.ok(configExtService.getInternalConfigMap(OperatorAuthContext.of(user)));
   }
 }

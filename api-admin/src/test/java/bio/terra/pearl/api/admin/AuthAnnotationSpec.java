@@ -56,4 +56,8 @@ public record AuthAnnotationSpec(
       List<Class<? extends Annotation>> otherAnnotations) {
     return new AuthAnnotationSpec(null, null, otherAnnotations);
   }
+
+  public static AuthAnnotationSpec withPublicAnnotation() {
+    return new AuthAnnotationSpec(null, null, List.of(Public.class));
+  }
 }

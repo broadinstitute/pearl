@@ -4,13 +4,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.when;
 
+import bio.terra.pearl.api.admin.AuthAnnotationSpec;
+import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.config.B2CConfiguration;
+import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
+import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.service.address.AddressValidationConfig;
-import bio.terra.pearl.core.service.exception.PermissionDeniedException;
 import bio.terra.pearl.core.service.export.integration.AirtableExporter;
 import bio.terra.pearl.core.service.kit.pepper.LivePepperDSMClient;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,6 +34,24 @@ public class ConfigExtServiceTests {
   @MockBean private AirtableExporter.AirtableConfig airtableConfig;
 
   @Test
+  public void testAllMethodsAnnotated() {
+    AuthTestUtils.assertAllMethodsAnnotated(
+        new ConfigExtService(
+            b2CConfiguration,
+            applicationRoutingPaths,
+            pepperDSMConfig,
+            addressValidationConfig,
+            airtableConfig),
+        Map.of(
+            "maskSecret",
+            AuthAnnotationSpec.withPublicAnnotation(),
+            "getConfigMap",
+            AuthAnnotationSpec.withPublicAnnotation(),
+            "getInternalConfigMap",
+            AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class))));
+  }
+
+  @Test
   public void testConfigMap() {
     when(applicationRoutingPaths.getParticipantUiHostname()).thenReturn("something.org");
     when(applicationRoutingPaths.getParticipantApiHostname()).thenReturn("something1.org");
@@ -47,23 +69,6 @@ public class ConfigExtServiceTests {
             airtableConfig);
     Map<String, String> configMap = configExtService.getConfigMap();
     Assertions.assertEquals("something.org", configMap.get("participantUiHostname"));
-  }
-
-  @Test
-  public void testInternalConfigRequiresSuperuser() {
-    AdminUser user = AdminUser.builder().superuser(false).build();
-    ConfigExtService configExtService =
-        new ConfigExtService(
-            b2CConfiguration,
-            applicationRoutingPaths,
-            pepperDSMConfig,
-            addressValidationConfig,
-            airtableConfig);
-    Assertions.assertThrows(
-        PermissionDeniedException.class,
-        () -> {
-          configExtService.getInternalConfigMap(user);
-        });
   }
 
   @Test
@@ -91,10 +96,16 @@ public class ConfigExtServiceTests {
             airtableConfig);
     @SuppressWarnings("unchecked")
     Map<String, ?> dsmConfigMap =
-        (Map<String, ?>) configExtService.getInternalConfigMap(user).get("pepperDsmConfig");
+        (Map<String, ?>)
+            configExtService
+                .getInternalConfigMap(OperatorAuthContext.of(user))
+                .get("pepperDsmConfig");
     @SuppressWarnings("unchecked")
     Map<String, ?> addressValidationConfigMap =
-        (Map<String, ?>) configExtService.getInternalConfigMap(user).get("addrValidationConfig");
+        (Map<String, ?>)
+            configExtService
+                .getInternalConfigMap(OperatorAuthContext.of(user))
+                .get("addrValidationConfig");
     assertThat(dsmConfigMap.get("basePath"), equalTo("basePath1"));
     assertThat(dsmConfigMap.get("issuerClaim"), equalTo("issuerClaim1"));
     assertThat(dsmConfigMap.get("secret"), equalTo("su..."));
