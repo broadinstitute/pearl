@@ -2,7 +2,6 @@ gcpProject: broad-juniper-dev
 gcpRegion: us-central1
 adminUrl: juniper-cmi.dev
 deploymentZone: dev
-appVersion: 1.4.63
 replicas: 1
 # "portals" adds certificates for each portal - both for the juniper-cmi.dev subdomains and the custom domain
 portals:
@@ -20,10 +19,10 @@ b2c:
     policyName: B2C_1A_ddp_admin_signup_signin_dev
   portals:
     atcp:
-      changePasswordPolicyName: does-not-exist
-      clientId: does-not-exist
-      policyName: does-not-exist
-      tenantName: does-not-exist
+      changePasswordPolicyName: B2C_1A_ddp_participant_change_password_atcp-dev
+      clientId: 2408089d-2dc5-46f6-bfdd-cb0c8c4c13d1
+      policyName: B2C_1A_ddp_participant_signup_signin_atcp-dev
+      tenantName: juniperatcpdev
     cmi:
       changePasswordPolicyName: B2C_1A_ddp_participant_change_password_cmi-dev
       clientId: 0cdfdafd-75fb-4e36-b6a2-c00e79c86bb0

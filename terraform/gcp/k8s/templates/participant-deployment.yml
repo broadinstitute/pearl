@@ -137,6 +137,8 @@ spec:
               value: tdr-sa-creds
             - name: TDR_EXPORT_STORAGE_ACCOUNT_KEY_SECRET_ID
               value: tdr-storage-account-key
+            - name: MIXPANEL_TOKEN_SECRET_ID
+              value: mixpanel-token
           resources:
             requests:
               memory: "2Gi"
