@@ -104,7 +104,7 @@ resource "google_compute_security_policy" "juniper-cloud-armor-policy" {
     priority = 7444
     match {
       expr {
-        expression = "evaluatePreconfiguredWaf('java-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('lfi-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('nodejs-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('php-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('protocolattack-v33-stable', {'sensitivity':1})"
+        expression = "evaluatePreconfiguredWaf('java-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('lfi-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('nodejs-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('php-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('protocolattack-v33-stable', {'sensitivity':1, 'opt_out_rule_ids': ['owasp-crs-v030301-id921120-protocolattack', 'owasp-crs-v030301-id921150-protocolattack', 'owasp-crs-v030301-id921160-protocolattack'] })"
       }
     }
   }
