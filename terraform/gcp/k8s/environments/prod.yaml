@@ -2,7 +2,6 @@ gcpProject: broad-juniper-prod
 gcpRegion: us-central1
 adminUrl: juniper-cmi.org
 deploymentZone: prod
-appVersion: 1.4.138
 enableMaintenanceMode: true
 replicas: 3
 # "portals" adds certificates for each portal - both for the admin subdomains and the custom domain
