@@ -44,13 +44,6 @@ resource "google_secret_manager_secret" "smarty_auth_token" {
   }
 }
 
-resource "google_secret_manager_secret" "smarty_auth_token" {
-  secret_id = "smarty-auth-token"
-  replication {
-    auto {}
-  }
-}
-
 resource "google_secret_manager_secret" "mixpanel_token" {
   secret_id = "mixpanel-token"
   replication {

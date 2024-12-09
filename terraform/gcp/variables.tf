@@ -66,7 +66,7 @@ variable "customer_urls" {
       name = string
       type = string
       ttl = number
-      value = string
+      record_value = string
     }))
   }))
   description = "Customer URLs"
