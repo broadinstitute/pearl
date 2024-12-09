@@ -62,6 +62,12 @@ variable "customer_urls" {
   type = map(object({
     url = string
     dnssec = string
+    additional_records = list(object({
+      name = string
+      type = string
+      ttl = number
+      value = string
+    }))
   }))
   description = "Customer URLs"
 }
