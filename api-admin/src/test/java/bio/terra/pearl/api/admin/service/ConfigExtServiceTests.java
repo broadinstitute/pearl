@@ -13,6 +13,7 @@ import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.service.address.AddressValidationConfig;
 import bio.terra.pearl.core.service.export.integration.AirtableExporter;
 import bio.terra.pearl.core.service.kit.pepper.LivePepperDSMClient;
+import bio.terra.pearl.core.service.logging.MixpanelService;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class ConfigExtServiceTests {
   @MockBean private LivePepperDSMClient.PepperDSMConfig pepperDSMConfig;
   @MockBean private AddressValidationConfig addressValidationConfig;
   @MockBean private AirtableExporter.AirtableConfig airtableConfig;
+  @MockBean private MixpanelService.MixpanelConfig mixpanelConfig;
 
   @Test
   public void testAllMethodsAnnotated() {
@@ -41,7 +43,8 @@ public class ConfigExtServiceTests {
             applicationRoutingPaths,
             pepperDSMConfig,
             addressValidationConfig,
-            airtableConfig),
+            airtableConfig,
+            mixpanelConfig),
         Map.of(
             "maskSecret",
             AuthAnnotationSpec.withPublicAnnotation(),
@@ -66,7 +69,8 @@ public class ConfigExtServiceTests {
             applicationRoutingPaths,
             pepperDSMConfig,
             addressValidationConfig,
-            airtableConfig);
+            airtableConfig,
+            mixpanelConfig);
     Map<String, String> configMap = configExtService.getConfigMap();
     Assertions.assertEquals("something.org", configMap.get("participantUiHostname"));
   }
@@ -93,7 +97,8 @@ public class ConfigExtServiceTests {
             applicationRoutingPaths,
             testPepperConfig,
             testAddrConfig,
-            airtableConfig);
+            airtableConfig,
+            mixpanelConfig);
     @SuppressWarnings("unchecked")
     Map<String, ?> dsmConfigMap =
         (Map<String, ?>)

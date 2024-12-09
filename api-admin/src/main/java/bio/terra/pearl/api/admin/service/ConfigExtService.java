@@ -7,6 +7,7 @@ import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.core.service.address.AddressValidationConfig;
 import bio.terra.pearl.core.service.export.integration.AirtableExporter;
 import bio.terra.pearl.core.service.kit.pepper.LivePepperDSMClient;
+import bio.terra.pearl.core.service.logging.MixpanelService;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -21,18 +22,21 @@ public class ConfigExtService {
   private final LivePepperDSMClient.PepperDSMConfig pepperDSMConfig;
   private final AddressValidationConfig addressValidationConfig;
   private final AirtableExporter.AirtableConfig airtableConfig;
+  private final MixpanelService.MixpanelConfig mixpanelConfig;
 
   public ConfigExtService(
       B2CConfiguration b2CConfiguration,
       ApplicationRoutingPaths applicationRoutingPaths,
       LivePepperDSMClient.PepperDSMConfig pepperDSMConfig,
       AddressValidationConfig addressValidationConfig,
-      AirtableExporter.AirtableConfig airtableConfig) {
+      AirtableExporter.AirtableConfig airtableConfig,
+      MixpanelService.MixpanelConfig mixpanelConfig) {
     this.b2CConfiguration = b2CConfiguration;
     this.pepperDSMConfig = pepperDSMConfig;
     this.applicationRoutingPaths = applicationRoutingPaths;
     this.addressValidationConfig = addressValidationConfig;
     this.airtableConfig = airtableConfig;
+    this.mixpanelConfig = mixpanelConfig;
 
     configMap = buildConfigMap();
   }
@@ -85,7 +89,11 @@ public class ConfigExtService {
                 "smartyAuthId", addressValidationConfig.getAuthId(),
                 "smartyAuthToken", maskSecret(addressValidationConfig.getAuthToken())),
             "airtable",
-            Map.of("authToken", maskSecret(airtableConfig.getAuthToken())));
+            Map.of("authToken", maskSecret(airtableConfig.getAuthToken())),
+            "mixpanel",
+            Map.of(
+                "enabled", mixpanelConfig.getEnabled(),
+                "token", mixpanelConfig.getToken()));
     return internalConfigMap;
   }
 

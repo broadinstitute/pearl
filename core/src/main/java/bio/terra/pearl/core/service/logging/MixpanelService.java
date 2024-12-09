@@ -3,10 +3,13 @@ package bio.terra.pearl.core.service.logging;
 import com.mixpanel.mixpanelapi.ClientDelivery;
 import com.mixpanel.mixpanelapi.MessageBuilder;
 import com.mixpanel.mixpanelapi.MixpanelAPI;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -83,6 +86,18 @@ public class MixpanelService {
             mixpanel.deliver(delivery);
         } catch (IOException e) {
             log.info("Failed to deliver event to Mixpanel: {}", e.getMessage());
+        }
+    }
+
+    @Component
+    @Getter @Setter
+    public static class MixpanelConfig {
+        private String token;
+        private String enabled;
+
+        public MixpanelConfig(Environment environment) {
+            this.token = environment.getProperty("env.mixpanel.token");
+            this.enabled = environment.getProperty("env.mixpanel.enabled");
         }
     }
 
