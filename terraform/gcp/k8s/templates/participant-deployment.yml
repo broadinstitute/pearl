@@ -139,6 +139,8 @@ spec:
               value: tdr-storage-account-key
             - name: MIXPANEL_TOKEN_SECRET_ID
               value: mixpanel-token
+            - name: MIXPANEL_ENABLED
+              value: 'true'
           resources:
             requests:
               memory: "2Gi"
