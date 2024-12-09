@@ -16,6 +16,10 @@ env:
   addrValidation:
     smartyAuthId: ${sm://${SMARTY_AUTH_ID_SECRET_ID}}
     smartyAuthToken: ${sm://${SMARTY_AUTH_TOKEN_SECRET_ID}}
+  mixpanel:
+    token: ${sm://${MIXPANEL_TOKEN_SECRET_ID}}
+  airtable:
+    authToken: ${sm://${AIRTABLE_AUTH_TOKEN_SECRET_ID}}
 spring:
   cloud:
     gcp:
