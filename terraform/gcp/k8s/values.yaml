@@ -18,3 +18,5 @@ b2c:
       clientId: ""
       changePasswordPolicyName: ""
 enableMaintenanceMode: false
+dsmUrl: https://dsm-dev.datadonationplatform.org/dsm
+dsmIssuer: admin-d2p.ddp-dev.envs.broadinstitute.org

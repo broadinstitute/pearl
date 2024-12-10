@@ -3,6 +3,8 @@ gcpRegion: us-central1
 adminUrl: juniper-cmi.org
 deploymentZone: prod
 replicas: 3
+dsmUrl: https://dsm.datadonationplatform.org/dsm
+dsmIssuer: juniper.terra.bio
 # "portals" adds certificates for each portal - both for the admin subdomains and the custom domain
 portals:
   - name: demo
