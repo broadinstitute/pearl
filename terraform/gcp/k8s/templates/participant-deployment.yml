@@ -141,6 +141,8 @@ spec:
               value: mixpanel-token
             - name: MIXPANEL_ENABLED
               value: 'true'
+            - name: LIQUIBASE_ANALYTICS_ENABLED
+              value: 'false'
           resources:
             requests:
               memory: "2Gi"
