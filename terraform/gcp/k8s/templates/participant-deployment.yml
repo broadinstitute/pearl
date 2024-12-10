@@ -128,7 +128,7 @@ spec:
             - name: SENDGRID_API_KEY_SECRET_ID
               value: sendgrid-api-key
             - name: DSM_JWT_ISSUER
-              value: admin-d2p.ddp-dev.envs.broadinstitute.org
+              value: {{.Values.dsmIssuer}}
             - name: DSM_JWT_SIGNING_SECRET_SECRET_ID
               value: dsm-secret
             - name: DSM_ADDRESS
