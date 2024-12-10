@@ -92,9 +92,10 @@ resource "google_compute_security_policy" "juniper-cloud-armor-policy" {
   rule {
     action = "deny(502)"
     priority = 7555
+    preview = true
     match {
       expr {
-        expression = "evaluatePreconfiguredWaf('rce-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('rfi-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('sessionfixation-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('sqli-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('xss-v33-stable', {'sensitivity':1})"
+        expression = "evaluatePreconfiguredWaf('rfi-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('sessionfixation-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('sqli-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('xss-v33-stable', {'sensitivity':1, 'opt_out_rule_ids': ['owasp-crs-v030301-id941130-xss', 'owasp-crs-v030301-id941160-xss', 'owasp-crs-v030301-id941180-xss', 'owasp-crs-v030301-id941100-xss']})"
       }
     }
   }
@@ -102,9 +103,10 @@ resource "google_compute_security_policy" "juniper-cloud-armor-policy" {
   rule {
     action = "deny(502)"
     priority = 7444
+    preview = true
     match {
       expr {
-        expression = "evaluatePreconfiguredWaf('java-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('lfi-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('nodejs-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('php-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('protocolattack-v33-stable', {'sensitivity':1, 'opt_out_rule_ids': ['owasp-crs-v030301-id921120-protocolattack', 'owasp-crs-v030301-id921150-protocolattack', 'owasp-crs-v030301-id921160-protocolattack'] })"
+        expression = "evaluatePreconfiguredWaf('java-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('lfi-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('nodejs-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('php-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('protocolattack-v33-stable', {'sensitivity':1, 'opt_out_rule_ids': ['owasp-crs-v030301-id921120-protocolattack', 'owasp-crs-v030301-id921130-protocolattack', 'owasp-crs-v030301-id921150-protocolattack', 'owasp-crs-v030301-id921160-protocolattack'] })"
       }
     }
   }
@@ -112,6 +114,7 @@ resource "google_compute_security_policy" "juniper-cloud-armor-policy" {
   rule {
     action = "deny(502)"
     priority = 7111
+    preview = true
     match {
       expr {
         expression = "evaluatePreconfiguredWaf('cve-canary', {'sensitivity':1}) || evaluatePreconfiguredWaf('rfi-v33-stable', {'sensitivity':1}) || evaluatePreconfiguredWaf('scannerdetection-v33-stable', {'sensitivity':1})"
