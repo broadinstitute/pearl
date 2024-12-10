@@ -23,7 +23,7 @@ public class MixpanelServiceTests extends BaseSpringBootTest {
         event.put("properties", properties);
 
         env = mock(Environment.class);
-        when(env.getProperty("mixpanel.token")).thenReturn("test-token");
+        when(env.getProperty("env.mixpanel.token")).thenReturn("test-token");
         MixpanelService mockedMixpanelService = new MixpanelService(env);
 
         JSONObject result = mockedMixpanelService.buildEvent(event);
