@@ -5,6 +5,7 @@ import AddressValidationIntegrationDashboard from './AddressValidationIntegratio
 import { navDivStyle, navLinkStyleFunc, navListItemStyle } from 'util/subNavStyles'
 import { renderPageHeader } from 'util/pageUtils'
 import AirtableIntegrationDashboard from './AirtableIntegrationDashboard'
+import MixpanelIntegrationDashboard from './MixpanelIntegrationDashboard'
 
 /** shows links to the populate control panels, and handles the routing for them */
 export default function IntegrationDashboard() {
@@ -17,6 +18,7 @@ export default function IntegrationDashboard() {
           <li style={navListItemStyle}><NavLink to="addressValidation" style={navLinkStyleFunc}>Address
             Validation</NavLink></li>
           <li style={navListItemStyle}><NavLink to="airtable" style={navLinkStyleFunc}>Airtable</NavLink></li>
+          <li style={navListItemStyle}><NavLink to="mixpanel" style={navLinkStyleFunc}>Mixpanel</NavLink></li>
         </ul>
       </div>
       <div className="px-3">
@@ -24,6 +26,7 @@ export default function IntegrationDashboard() {
           <Route path="kits" element={<KitIntegrationDashboard/>}/>
           <Route path="addressValidation" element={<AddressValidationIntegrationDashboard/>}/>
           <Route path="airtable" element={<AirtableIntegrationDashboard/>}/>
+          <Route path="mixpanel" element={<MixpanelIntegrationDashboard/>}/>
         </Routes>
         <Outlet/>
       </div>
