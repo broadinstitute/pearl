@@ -50,3 +50,8 @@ b2c:
       clientId: 895c5f41-5a84-4863-b34c-c84d297006e3
       policyName: B2C_1A_ddp_participant_signup_signin_demo-prod
       changePasswordPolicyName: B2C_1A_ddp_participant_change_password_demo-prod
+    trccproject:
+      changePasswordPolicyName: does-not-exist
+      clientId: does-not-exist
+      policyName: does-not-exist
+      tenantName: does-not-exist
