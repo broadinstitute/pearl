@@ -69,13 +69,14 @@ public class MixpanelService {
     }
 
     protected JSONObject buildEvent(JSONObject event) {
-        MessageBuilder messageBuilder = new MessageBuilder(env.getProperty("mixpanel.token"));
+        String MIXPANEL_TOKEN_ENV_VAR = "env.mixpanel.token";
+        MessageBuilder messageBuilder = new MessageBuilder(env.getProperty(MIXPANEL_TOKEN_ENV_VAR));
 
         return messageBuilder.event(
                 null,
                 event.getString("event"),
                 event.getJSONObject("properties")
-                        .put("token", env.getProperty("mixpanel.token"))
+                        .put("token", env.getProperty(MIXPANEL_TOKEN_ENV_VAR))
         );
     }
 
