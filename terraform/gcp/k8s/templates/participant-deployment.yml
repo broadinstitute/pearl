@@ -132,7 +132,7 @@ spec:
             - name: DSM_JWT_SIGNING_SECRET_SECRET_ID
               value: dsm-secret
             - name: DSM_ADDRESS
-              value: https://dsm-dev.datadonationplatform.org/dsm
+              value: {{ .Values.dsmUrl }}
             - name: TDR_SA_CREDS_SECRET_ID
               value: tdr-sa-creds
             - name: TDR_EXPORT_STORAGE_ACCOUNT_KEY_SECRET_ID
