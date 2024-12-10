@@ -2,12 +2,21 @@ gcpProject: broad-juniper-prod
 gcpRegion: us-central1
 adminUrl: juniper-cmi.org
 deploymentZone: prod
-enableMaintenanceMode: true
 replicas: 3
 # "portals" adds certificates for each portal - both for the admin subdomains and the custom domain
 portals:
   - name: demo
     customDomain: juniperdemostudy.org
+  - name: ourhealth
+    customDomain: ourhealthstudy.org
+  - name: gvasc
+    customDomain: gvascstudy.org
+  - name: atcp
+  - name: hearthive
+  #    customDomain: thehearthive.org
+  - name: trccproject
+  - name: rgp
+  - name: cmi
 b2c:
   admin:
     clientId: f02b3816-af49-4a78-a2a5-b929c78a6c47
