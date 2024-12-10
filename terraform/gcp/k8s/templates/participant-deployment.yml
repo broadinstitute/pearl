@@ -98,7 +98,7 @@ spec:
             - name: DATABASE_NAME
               value: "d2p"
             - name: DEPLOYMENT_ZONE
-              value: dev
+              value: {{ .Values.deploymentZone }}
             - name: ADMIN_API_HOSTNAME
               value: {{.Values.adminUrl}}
             - name: ADMIN_UI_HOSTNAME
