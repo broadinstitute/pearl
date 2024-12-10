@@ -85,12 +85,16 @@ public class ConfigExtServiceTests {
             .withProperty("env.dsm.secret", "superSecret")
             .withProperty("env.addrValidation.addrValidationServiceClass", "someClass")
             .withProperty("env.addrValidation.smartyAuthId", "sm_id")
-            .withProperty("env.addrValidation.smartyAuthToken", "sm_token");
+            .withProperty("env.addrValidation.smartyAuthToken", "sm_token")
+            .withProperty("env.mixpanel.enabled", "true")
+            .withProperty("env.mixpanel.token", "mp_token");
 
     LivePepperDSMClient.PepperDSMConfig testPepperConfig =
         new LivePepperDSMClient.PepperDSMConfig(mockEnvironment);
 
     AddressValidationConfig testAddrConfig = new AddressValidationConfig(mockEnvironment);
+    MixpanelService.MixpanelConfig testMixpanelConfig =
+        new MixpanelService.MixpanelConfig(mockEnvironment);
     ConfigExtService configExtService =
         new ConfigExtService(
             b2CConfiguration,
@@ -98,7 +102,7 @@ public class ConfigExtServiceTests {
             testPepperConfig,
             testAddrConfig,
             airtableConfig,
-            mixpanelConfig);
+            testMixpanelConfig);
     @SuppressWarnings("unchecked")
     Map<String, ?> dsmConfigMap =
         (Map<String, ?>)
@@ -118,6 +122,9 @@ public class ConfigExtServiceTests {
     assertThat(addressValidationConfigMap.get("addrValidationServiceClass"), equalTo("someClass"));
     assertThat(addressValidationConfigMap.get("smartyAuthId"), equalTo("sm_id"));
     assertThat(addressValidationConfigMap.get("smartyAuthToken"), equalTo("sm..."));
+
+    assertThat(testMixpanelConfig.getEnabled(), equalTo("true"));
+    assertThat(testMixpanelConfig.getToken(), equalTo("mp_token"));
   }
 
   @Test
