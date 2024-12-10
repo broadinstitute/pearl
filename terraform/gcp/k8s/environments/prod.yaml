@@ -10,9 +10,10 @@ portals:
   - name: ourhealth
     customDomain: ourhealthstudy.org
   - name: gvasc
+    customDomain: gvascstudy.org
   - name: atcp
   - name: hearthive
-    customDomain: thehearthive.org
+  #    customDomain: thehearthive.org
   - name: trccproject
   - name: rgp
   - name: cmi
