@@ -13,7 +13,7 @@ k8s_namespace = "juniper-dev"
 customer_urls = {
   demo = {
     url    = "juniperdemostudy.dev"
-    dnssec = "off"
+    dnssec = "on"
     additional_records = []
   }
 }
