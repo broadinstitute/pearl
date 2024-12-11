@@ -1,4 +1,4 @@
-import { setupRouterTest } from '@juniper/ui-core'
+import { renderWithRouter, setupRouterTest } from '@juniper/ui-core'
 import {
   mockEnrolleeSearchExpressionResult,
   mockStudyEnvContext
@@ -45,5 +45,29 @@ describe('Participant List', () => {
     })
 
     expect(window.URL.createObjectURL).toHaveBeenCalled()
+  })
+
+  test('shows expected columns', async () => {
+    renderWithRouter(<ParticipantListTable
+      studyEnvContext={mockStudyEnvContext()}
+      participantList={[
+        mockEnrolleeSearchExpressionResult()
+      ]}
+      reload={jest.fn()}
+    />)
+
+
+    await waitFor(async () => {
+      expect(await screen.findByText('Shortcode')).toBeInTheDocument()
+    })
+    const expectedCols = ['Created', 'Last login', 'Consented']
+    expectedCols.forEach(colName => {
+      expect(screen.getByText(colName)).toBeInTheDocument()
+    })
+
+    const hiddenCols = ['Given Name', 'Family Name', 'Username', 'Contact Email', 'Subject']
+    hiddenCols.forEach(colName => {
+      expect(screen.queryByText(colName)).not.toBeInTheDocument()
+    })
   })
 })
