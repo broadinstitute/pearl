@@ -64,7 +64,7 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
                 AuthUtilService.BASE_PERMISSION, List.of(SuperuserOnly.class)),
             "getStudiesWithEnvs",
             AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
-            "updateStudy",
+            "update",
             AuthAnnotationSpec.withPortalStudyPerm("study_settings_edit")));
   }
 
@@ -129,6 +129,7 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
   }
 
   @Test
+  @Transactional
   public void testOnlySuperuserCanUpdateShortcode(TestInfo info) {
     baseSeedPopulator.populateRolesAndPermissions();
     Portal portal = portalFactory.buildPersistedWithEnvironments(getTestName(info));
@@ -141,7 +142,7 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
     Assertions.assertThrows(
         PermissionDeniedException.class,
         () ->
-            studyExtService.updateStudy(
+            studyExtService.update(
                 PortalStudyAuthContext.of(operator, portal.getShortcode(), study.getShortcode()),
                 Study.builder().shortcode("newShortcode").name("newName").build()));
 
@@ -149,7 +150,7 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
     Study updatedStudy = studyService.findByShortcode(study.getShortcode()).get();
     assertThat(updatedStudy.getShortcode(), equalTo(study.getShortcode()));
 
-    studyExtService.updateStudy(
+    studyExtService.update(
         PortalStudyAuthContext.of(operator, portal.getShortcode(), study.getShortcode()),
         Study.builder().shortcode(study.getShortcode()).name("newName").build());
 
@@ -160,7 +161,7 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
 
     AdminUser superuser = adminUserFactory.buildPersisted(getTestName(info), true);
 
-    studyExtService.updateStudy(
+    studyExtService.update(
         PortalStudyAuthContext.of(superuser, portal.getShortcode(), study.getShortcode()),
         Study.builder().shortcode("newShortcode").name("newName").build());
 

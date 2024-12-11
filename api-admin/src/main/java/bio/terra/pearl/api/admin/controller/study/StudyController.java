@@ -64,7 +64,7 @@ public class StudyController implements StudyApi {
     Study study = objectMapper.convertValue(body, Study.class);
 
     study =
-        studyExtService.updateStudy(
+        studyExtService.update(
             PortalStudyAuthContext.of(operator, portalShortcode, studyShortcode), study);
 
     return ResponseEntity.ok(study);

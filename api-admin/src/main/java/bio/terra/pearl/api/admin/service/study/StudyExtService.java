@@ -139,8 +139,8 @@ public class StudyExtService {
     return studyEnv;
   }
 
-  @EnforcePortalStudyPermission(permission = AuthUtilService.BASE_PERMISSION)
-  public Study updateStudy(PortalStudyAuthContext authContext, Study study) {
+  @EnforcePortalStudyPermission(permission = "study_settings_edit")
+  public Study update(PortalStudyAuthContext authContext, Study study) {
     study.setId(authContext.getPortalStudy().getStudyId());
     if (!study.getShortcode().equals(authContext.getStudyShortcode())
         && !authContext.getOperator().isSuperuser()) {
