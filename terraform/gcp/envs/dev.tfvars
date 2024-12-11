@@ -14,6 +14,7 @@ customer_urls = {
   demo = {
     url    = "juniperdemostudy.dev"
     dnssec = "off"
+    additional_records = []
   }
 }
 

@@ -43,3 +43,17 @@ resource "google_secret_manager_secret" "smarty_auth_token" {
     auto {}
   }
 }
+
+resource "google_secret_manager_secret" "mixpanel_token" {
+  secret_id = "mixpanel-token"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "airtable_auth_token" {
+  secret_id = "airtable-auth-token"
+  replication {
+    auto {}
+  }
+}

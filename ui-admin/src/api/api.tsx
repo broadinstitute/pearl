@@ -338,6 +338,7 @@ export type InternalConfig = {
   pepperDsmConfig: Record<string, string>
   addrValidationConfig: Record<string, string>
   airtable: Record<string, string>
+  mixpanel: Record<string, string>
 }
 
 export type ParticipantTaskUpdateDto = {
