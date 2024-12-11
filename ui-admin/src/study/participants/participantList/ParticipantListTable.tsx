@@ -169,7 +169,7 @@ function ParticipantListTable({
       }
     }, {
       id: 'subject',
-      header: 'Research subject',
+      header: 'Is subject',
       accessorKey: 'enrollee.subject',
       meta: {
         columnType: 'boolean',
