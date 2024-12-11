@@ -140,13 +140,16 @@ public class StudyExtService {
   }
 
   @EnforcePortalStudyPermission(permission = "study_settings_edit")
-  public Study update(PortalStudyAuthContext authContext, Study study) {
-    study.setId(authContext.getPortalStudy().getStudyId());
-    if (!study.getShortcode().equals(authContext.getStudyShortcode())
+  public Study update(PortalStudyAuthContext authContext, Study studyUpdate) {
+    Study study = studyService.find(authContext.getPortalStudy().getStudyId()).orElseThrow();
+
+    if (!study.getShortcode().equals(studyUpdate.getShortcode())
         && !authContext.getOperator().isSuperuser()) {
       throw new PermissionDeniedException("Study shortcode cannot be changed");
     }
 
+    study.setName(studyUpdate.getName());
+    study.setShortcode(studyUpdate.getShortcode());
     return studyService.update(study);
   }
 }
