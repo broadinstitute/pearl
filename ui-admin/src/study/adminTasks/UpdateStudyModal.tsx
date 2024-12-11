@@ -44,7 +44,7 @@ export const UpdateStudyModal = ({
           onChange={e => setName(e.target.value)}
         />
         <RequireUserPermission superuser>
-          <label className="form-label">Shortcode</label>
+          <label className="form-label mt-2">Shortcode</label>
           <input
             className="form-control"
             value={shortcode}
