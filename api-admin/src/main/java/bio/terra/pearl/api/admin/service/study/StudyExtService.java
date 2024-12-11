@@ -12,6 +12,7 @@ import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironmentConfig;
 import bio.terra.pearl.core.service.CascadeProperty;
+import bio.terra.pearl.core.service.exception.PermissionDeniedException;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import bio.terra.pearl.core.service.study.PortalStudyService;
 import bio.terra.pearl.core.service.study.StudyService;
@@ -136,5 +137,16 @@ public class StudyExtService {
                 StudyEnvironmentConfig.builder().initialized(initialized).build())
             .build();
     return studyEnv;
+  }
+
+  @EnforcePortalStudyPermission(permission = AuthUtilService.BASE_PERMISSION)
+  public Study updateStudy(PortalStudyAuthContext authContext, Study study) {
+    study.setId(authContext.getPortalStudy().getStudyId());
+    if (!study.getShortcode().equals(authContext.getStudyShortcode())
+        && !authContext.getOperator().isSuperuser()) {
+      throw new PermissionDeniedException("Study shortcode cannot be changed");
+    }
+
+    return studyService.update(study);
   }
 }

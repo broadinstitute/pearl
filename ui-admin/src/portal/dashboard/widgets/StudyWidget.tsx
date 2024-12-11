@@ -1,17 +1,30 @@
 import { Button } from 'components/forms/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGear, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
+import {
+  faGear,
+  faPencil,
+  faPlus,
+  faTrash
+} from '@fortawesome/free-solid-svg-icons'
 import CreateNewStudyModal from 'study/CreateNewStudyModal'
 import { Link } from 'react-router-dom'
 import { studyParticipantsPath } from 'portal/PortalRouter'
 import { getMediaUrl } from 'api/api'
-import { Portal, Study } from '@juniper/ui-core'
+import {
+  Portal,
+  Study
+} from '@juniper/ui-core'
 import React, { useState } from 'react'
 import { useUser } from 'user/UserProvider'
 import { DropdownButton } from 'study/participants/survey/SurveyResponseView'
 import DeleteStudyModal from 'study/adminTasks/DeleteStudyModal'
 import { useNavContext } from 'navbar/NavContextProvider'
-import { InfoCard, InfoCardBody, InfoCardHeader } from 'components/InfoCard'
+import {
+  InfoCard,
+  InfoCardBody,
+  InfoCardHeader
+} from 'components/InfoCard'
+import { UpdateStudyModal } from 'study/adminTasks/UpdateStudyModal'
 
 export const StudyWidget = ({ portal }: { portal: Portal }) => {
   const [showNewStudyModal, setShowNewStudyModal] = useState(false)
@@ -64,6 +77,7 @@ const StudyControls = ({ portal, study, primaryStudy }: {
 }) => {
   const { reload } = useNavContext()
   const [showDeleteStudyModal, setShowDeleteStudyModal] = useState(false)
+  const [showUpdateStudyModal, setShowUpdateStudyModal] = useState(false)
 
   return (
     <li key={`${portal.shortcode}-${study.shortcode}`}
@@ -93,6 +107,10 @@ const StudyControls = ({ portal, study, primaryStudy }: {
           </Button>
           <div className="dropdown-menu" aria-labelledby={`editStudyMenu-${study.shortcode}`}>
             <DropdownButton
+              onClick={() => setShowUpdateStudyModal(true)}
+              label="Update study"
+              icon={faPencil}/>
+            <DropdownButton
               onClick={() => setShowDeleteStudyModal(true)}
               className="text-danger"
               icon={faTrash}
@@ -104,6 +122,13 @@ const StudyControls = ({ portal, study, primaryStudy }: {
                 portal={portal}
                 reload={reload}
                 onDismiss={() => setShowDeleteStudyModal(false)}/>
+            }
+            {showUpdateStudyModal &&
+                <UpdateStudyModal
+                  study={study}
+                  portal={portal}
+                  reload={reload}
+                  onClose={() => setShowUpdateStudyModal(false)}/>
             }
           </div>
         </div>
