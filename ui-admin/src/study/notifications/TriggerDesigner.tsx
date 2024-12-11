@@ -84,6 +84,10 @@ export const TriggerDesigner = (
   }
 
   return <div>
+    {!workingTrigger.active &&
+        <div className="alert alert-warning mt-0">
+            This trigger is no longer active. Inactive triggers cannot be edited.
+        </div>}
 
     <TriggerDesignerEditor
       studyEnvContext={studyEnvContext}
@@ -93,8 +97,17 @@ export const TriggerDesigner = (
     />
 
     <div className="d-flex justify-content-center mt-2">
-      <button type="button" className="btn btn-primary" onClick={saveConfig}>Save</button>
-      <button type="button" className="btn btn-danger ms-4" onClick={() => setShowDeleteModal(true)}>Delete</button>
+      <button type="button" className="btn btn-primary" disabled={!workingTrigger.active} onClick={saveConfig}>
+        Save
+      </button>
+      <button
+        type="button"
+        className="btn btn-danger ms-4"
+        disabled={!workingTrigger.active}
+        onClick={() => setShowDeleteModal(true)}
+      >
+        Delete
+      </button>
     </div>
 
     {showDeleteModal && (
