@@ -15,7 +15,7 @@ portals:
     customDomain: gvascstudy.org
   - name: atcp
   - name: hearthive
-  #    customDomain: thehearthive.org
+    customDomain: thehearthive.org
   - name: trccproject
   - name: rgp
   - name: cmi
