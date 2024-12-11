@@ -10,19 +10,19 @@ environment = "prod"
 
 portals = ["demo", "atcp", "ourhealth", "hearthive", "rgp", "cmi", "trccproject", "gvasc"]
 
-admin_dnssec = "off"
+admin_dnssec = "on"
 k8s_namespace = "juniper-prod"
 
 # creates DNS records for these customer URLs
 customer_urls = {
   demo = {
     url    = "juniperdemostudy.org"
-    dnssec = "off"
+    dnssec = "on"
     additional_records = []
   }
   hearthive = {
     url    = "thehearthive.org"
-    dnssec = "off"
+    dnssec = "on"
     additional_records = [
       {
         name = "s1._domainkey"
@@ -64,7 +64,7 @@ customer_urls = {
   }
   ourhealth = {
     url    = "ourhealthstudy.org"
-    dnssec = "off"
+    dnssec = "on"
     additional_records = [
       {
         name = "s1._domainkey"
@@ -94,7 +94,7 @@ customer_urls = {
   }
   gvasc = {
     url    = "gvascstudy.org"
-    dnssec = "off"
+    dnssec = "on"
     additional_records = []
   }
 }
