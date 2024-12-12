@@ -27,8 +27,8 @@ import {
   StudyEnvParams,
   Survey,
   SurveyResponse,
-  Trigger,
-  SystemSettings
+  SystemSettings,
+  Trigger
 } from '@juniper/ui-core'
 import queryString from 'query-string'
 import {
@@ -586,6 +586,16 @@ export default {
       headers: this.getInitHeaders()
     })
     return await this.processResponse(response)
+  },
+
+  async updateStudy(portalShortcode: string, studyShortcode: string, study: Study): Promise<Study> {
+    const url = `${basePortalUrl(portalShortcode)}/studies/${studyShortcode}`
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: this.getInitHeaders(),
+      body: JSON.stringify(study)
+    })
+    return await this.processJsonResponse(response)
   },
 
   async downloadParticipantFile(

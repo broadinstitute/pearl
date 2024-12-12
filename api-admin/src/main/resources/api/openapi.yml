@@ -399,6 +399,22 @@ paths:
           description: no content
         '500':
           $ref: '#/components/responses/ServerError'
+    put:
+      summary: updates a study
+      tags: [ study ]
+      operationId: update
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: updated study object
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/kitTypes:
     get:
       summary: Gets the kit types for a study
