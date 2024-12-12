@@ -6,6 +6,7 @@ import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.export.ExportIntegration;
 import bio.terra.pearl.core.model.export.ExportIntegrationJob;
+import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.export.integration.ExportIntegrationJobService;
 import bio.terra.pearl.core.service.export.integration.ExportIntegrationService;
@@ -34,25 +35,12 @@ public class ExportIntegrationExtService {
 
   @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public ExportIntegration find(PortalStudyEnvAuthContext authContext, UUID id) {
-    ExportIntegration integration =
-        exportIntegrationService
-            .findWithOptions(id)
-            .orElseThrow(() -> new NotFoundException("Export Integration not found"));
-    if (!integration.getStudyEnvironmentId().equals(authContext.getStudyEnvironment().getId())) {
-      throw new NotFoundException("Export Integration not found");
-    }
-    return integration;
+    return authToStudyEnv(authContext.getStudyEnvironment(), id);
   }
 
   @EnforcePortalStudyEnvPermission(permission = "participant_data_view")
   public ExportIntegrationJob run(PortalStudyEnvAuthContext authContext, UUID id) {
-    ExportIntegration integration =
-        exportIntegrationService
-            .findWithOptions(id)
-            .orElseThrow(() -> new NotFoundException("Export Integration not found"));
-    if (!integration.getStudyEnvironmentId().equals(authContext.getStudyEnvironment().getId())) {
-      throw new NotFoundException("Export Integration not found");
-    }
+    ExportIntegration integration = authToStudyEnv(authContext.getStudyEnvironment(), id);
     ExportIntegrationJob job =
         exportIntegrationService.doExport(
             integration, new ResponsibleEntity(authContext.getOperator()));
@@ -68,13 +56,7 @@ public class ExportIntegrationExtService {
 
   @EnforcePortalStudyEnvPermission(permission = "export_integration")
   public void delete(PortalStudyEnvAuthContext authContext, UUID id) {
-    ExportIntegration integration =
-        exportIntegrationService
-            .find(id)
-            .orElseThrow(() -> new NotFoundException("Export Integration not found"));
-    if (!integration.getStudyEnvironmentId().equals(authContext.getStudyEnvironment().getId())) {
-      throw new NotFoundException("Export Integration not found");
-    }
+    authToStudyEnv(authContext.getStudyEnvironment(), id);
     exportIntegrationService.delete(id);
   }
 
@@ -96,5 +78,16 @@ public class ExportIntegrationExtService {
   public List<ExportIntegrationJob> listJobs(PortalStudyEnvAuthContext authContext) {
     return exportIntegrationJobService.findByStudyEnvironment(
         authContext.getStudyEnvironment().getId());
+  }
+
+  private ExportIntegration authToStudyEnv(StudyEnvironment studyEnv, UUID integrationId) {
+    ExportIntegration integration =
+        exportIntegrationService
+            .findWithOptions(integrationId)
+            .orElseThrow(() -> new NotFoundException("Export Integration not found"));
+    if (!integration.getStudyEnvironmentId().equals(studyEnv.getId())) {
+      throw new NotFoundException("Export Integration not found");
+    }
+    return integration;
   }
 }
