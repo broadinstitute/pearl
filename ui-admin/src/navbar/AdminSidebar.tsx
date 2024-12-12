@@ -43,9 +43,7 @@ const AdminSidebar = ({ config }: { config: Config }) => {
   if (portalList.length) {
     studyList = portalList.flatMap(portal => portal.portalStudies.map(ps => ps.study))
   }
-
   const currentStudy = studyList.find(study => study.shortcode === studyShortcode)
-
   const color = ZONE_COLORS[config.deploymentZone] || ZONE_COLORS['prod']
 
   // automatically collapse the sidebar for mobile-first routes

@@ -23,7 +23,7 @@ export const StudyTrendsWidget = ({ portal, study }: { portal: Portal, study: St
   }, [])
 
   const getMetricsLast7Days = async (
-    study: Study, metric: string, setMetricData: (data: BasicMetricDatum[]) => void
+    study: Study, metric: string, setMetricData: (data: BasicMetricDatum[], envName: string) => void
   ) => {
     const result = await Api.fetchMetric(portal.shortcode, study.shortcode, 'live', metric)
     // TODO: api doesn't currently honor time ranges, so we'll filter down after fetching
