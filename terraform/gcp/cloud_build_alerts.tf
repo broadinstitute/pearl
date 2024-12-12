@@ -1,8 +1,3 @@
-# NOTE: ANYTIME YOU EDIT ALERTS, MAKE SURE YOU DISABLE
-#       "notify on incident closure" MANUALLY VIA THE UI
-#        There is no way to disable this via terraform
-#        and it adds noise to the channel.
-
 resource "google_logging_metric" "cloud_build_error_logging_metric" {
   name   = "juniper-deploy-failures/metric"
   filter = <<EOT
