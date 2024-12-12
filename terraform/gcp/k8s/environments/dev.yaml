@@ -60,3 +60,8 @@ b2c:
       clientId: does-not-exist
       policyName: does-not-exist
       tenantName: does-not-exist
+    trccproject:
+      tenantName: does-not-exist
+      clientId: does-not-exist
+      policyName: does-not-exist
+      changePasswordPolicyName: does-not-exist
