@@ -3,6 +3,7 @@ import React, {
   useState
 } from 'react'
 import {
+  ParticipantTask,
   StudyEnvironmentSurvey,
   SurveyResponse
 } from 'api/api'
@@ -25,6 +26,7 @@ import {
   Enrollee,
   instantToDateString,
   instantToDefaultString,
+  ParticipantTaskStatus,
   useTaskIdParam
 } from '@juniper/ui-core'
 import DocumentTitle from 'util/DocumentTitle'
@@ -44,6 +46,7 @@ import {
   faCircleCheck,
   faCircleHalfStroke,
   faEye,
+  faMinus,
   faPencil,
   faPrint,
   faSave,
@@ -56,6 +59,7 @@ import { faCircle as faEmptyCircle } from '@fortawesome/free-regular-svg-icons'
 import JustifyChangesModal from '../JustifyChangesModal'
 import { ParticipantFileSurveyResponseView } from 'study/participants/survey/ParticipantFileSurveyResponseView'
 import SurveyAssignModal from './SurveyAssignModal'
+import TaskChangeModal from './TaskChangeModal'
 
 /** Show responses for a survey based on url param */
 export default function SurveyResponseView({ enrollee, responseMap, updateResponseMap, studyEnvContext, onUpdate }: {
@@ -106,6 +110,7 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
       </div>}
       <RawEnrolleeSurveyView key={`${surveyStableId}${taskId}`} enrollee={enrollee} studyEnvContext={studyEnvContext}
         updateResponseMap={updateResponseMap}
+        task={task!}
         configSurvey={surveyAndResponses.survey} response={response} onUpdate={onUpdate}/>
     </>}
     {showAssignModal && <SurveyAssignModal studyEnvParams={paramsFromContext(studyEnvContext)}
@@ -118,10 +123,10 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
 
 /** show responses for a survey */
 export function RawEnrolleeSurveyView({
-  enrollee, configSurvey, response, studyEnvContext, onUpdate,
+  enrollee, configSurvey, task, response, studyEnvContext, onUpdate,
   updateResponseMap
 }: {
-  enrollee: Enrollee, configSurvey: StudyEnvironmentSurvey,
+  enrollee: Enrollee, configSurvey: StudyEnvironmentSurvey, task: ParticipantTask,
   updateResponseMap: (stableId: string, response: SurveyResponse) => void,
   response?: SurveyResponse, studyEnvContext: StudyEnvContextT, onUpdate: () => void
 }) {
@@ -133,11 +138,23 @@ export function RawEnrolleeSurveyView({
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus | undefined>()
   const [showJustificationModal, setShowJustificationModal] = useState(false)
   const [justification, setJustification] = useState<string>('')
+  const [showTaskModal, setShowTaskModal] = useState(false)
 
   return <div>
     <div>
       <div className="d-flex align-items-center justify-content-between">
-        <div>{surveyTaskStatus(response)}</div>
+        <div className="d-flex align-items-center">
+          <div className="border rounded-3 p-0">
+            {taskStatusIndicators[task.status]}
+            <Button variant="secondary"
+              tooltip={'Change task status or remove task from participant'}
+              className="badge p-2 rounded-start-0" onClick={() => setShowTaskModal(!showTaskModal)}>
+              <FontAwesomeIcon icon={faPencil}/>
+            </Button>
+          </div>
+          {surveyTaskStatus(task, response)}
+        </div>
+
         <div className="d-flex align-items-center">
           <AutosaveStatusIndicator status={autosaveStatus}/>
           <div className="dropdown">
@@ -197,7 +214,7 @@ export function RawEnrolleeSurveyView({
         </div>
       </div>
       <hr/>
-      {(!isEditing && (!response?.answers.length && !response?.participantFiles.length)) &&
+      {(!isEditing && (!response?.answers.length && !response?.participantFiles?.length)) &&
           <div>No response for enrollee {enrollee.shortcode}</div>}
       {!isEditing && response?.answers.length !== undefined && response?.answers.length > 0 && <SurveyFullDataView
         responseId={response.id}
@@ -205,7 +222,7 @@ export function RawEnrolleeSurveyView({
         answers={response?.answers || []}
         survey={configSurvey.survey}
         studyEnvContext={studyEnvContext}/>}
-      {!isEditing && (response?.participantFiles.length !== undefined && response.participantFiles.length > 0) &&
+      {!isEditing && (response?.participantFiles?.length !== undefined && response.participantFiles.length > 0) &&
           <ParticipantFileSurveyResponseView
             studyEnvContext={studyEnvContext}
             enrollee={enrollee}
@@ -228,29 +245,42 @@ export function RawEnrolleeSurveyView({
         confirmText={'Continue to edit'}
       />}
     </div>
+    {showTaskModal && <TaskChangeModal studyEnvParams={paramsFromContext(studyEnvContext)}
+      onDismiss={() => setShowTaskModal(false)}
+      task={task} onSubmit={onUpdate}/>}
   </div>
 }
-function surveyTaskStatus(surveyResponse?: SurveyResponse) {
+
+
+const taskStatusIndicators: Record<ParticipantTaskStatus, React.ReactNode> = {
+  NEW: <span className="badge bg-secondary p-2 rounded-end-0 border border-light">
+    <FontAwesomeIcon icon={faEmptyCircle}/> Not Started</span>,
+  VIEWED: <span className="badge bg-secondary p-2 rounded-end-0">
+    <FontAwesomeIcon icon={faCircleHalfStroke}/> Viewed
+  </span>,
+  IN_PROGRESS: <span className="badge bg-secondary p-2 rounded-end-0">
+    <FontAwesomeIcon icon={faCircleHalfStroke}/> In Progress
+  </span>,
+  REJECTED: <span className="badge bg-danger p-2 rounded-end-0">
+    <FontAwesomeIcon icon={faCircleHalfStroke}/> Declined
+  </span>,
+  COMPLETE: <span className="badge bg-success p-2 rounded-end-0">
+    <FontAwesomeIcon icon={faCircleCheck}/> Complete</span>,
+  REMOVED: <span className="badge bg-secondary p-2 rounded-end-0">
+    <FontAwesomeIcon icon={faMinus}/> Removed</span>
+}
+
+function surveyTaskStatus(task: ParticipantTask, surveyResponse?: SurveyResponse) {
   let versionString = ''
   if (surveyResponse && surveyResponse.answers.length) {
     const answerVersions = _uniq(surveyResponse.answers.map(ans => ans.surveyVersion))
     versionString = `${pluralize('version', answerVersions.length)} ${answerVersions.join(', ')}`
   }
 
-  if (!surveyResponse) {
-    return <span className="badge bg-secondary p-2"><FontAwesomeIcon icon={faEmptyCircle}/> Not Started</span>
-  }
   return <div className="d-flex align-items-center">
-    {surveyResponse.complete ?
-      <span className="badge bg-success p-2">
-        <FontAwesomeIcon icon={faCircleCheck}/> Complete
-      </span> :
-      <span className="badge bg-secondary p-2">
-        <FontAwesomeIcon icon={faCircleHalfStroke}/> In Progress
-      </span>}
-    <div className="vr m-3"></div>
-    <span>{surveyResponse.complete?
-      'Completed' : 'Last Updated'} {instantToDefaultString(surveyResponse.createdAt)} ({versionString})</span>
+    {surveyResponse && <span className="ms-2">{surveyResponse.complete ?
+      'Completed' : 'Last Updated'} {instantToDefaultString(surveyResponse.createdAt)} ({versionString})
+    </span>}
   </div>
 }
 

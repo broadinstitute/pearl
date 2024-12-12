@@ -1,31 +1,34 @@
 package bio.terra.pearl.api.admin.service.participant;
 
-import bio.terra.pearl.api.admin.service.auth.EnforcePortalPermission;
+import bio.terra.pearl.api.admin.service.auth.EnforcePortalEnvPermission;
 import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
+import bio.terra.pearl.core.model.participant.PortalParticipantUser;
+import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
 import bio.terra.pearl.core.service.participant.ParticipantUserService;
-import bio.terra.pearl.core.service.study.StudyEnvironmentService;
+import bio.terra.pearl.core.service.participant.PortalParticipantUserService;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ParticipantUserExtService {
   private final ParticipantUserService participantUserService;
   private final EnrolleeService enrolleeService;
-  private final StudyEnvironmentService studyEnvironmentService;
+  private final PortalParticipantUserService portalParticipantUserService;
 
   public ParticipantUserExtService(
       ParticipantUserService participantUserService,
       EnrolleeService enrolleeService,
-      StudyEnvironmentService studyEnvironmentService) {
+      PortalParticipantUserService portalParticipantUserService) {
     this.participantUserService = participantUserService;
     this.enrolleeService = enrolleeService;
-    this.studyEnvironmentService = studyEnvironmentService;
+    this.portalParticipantUserService = portalParticipantUserService;
   }
 
-  @EnforcePortalPermission(permission = "participant_data_view")
+  @EnforcePortalEnvPermission(permission = "participant_data_view")
   public ParticipantUsersWithEnrollees list(PortalEnvAuthContext authContext) {
     List<ParticipantUser> participantUsers =
         participantUserService.findAllByPortalEnv(
@@ -35,5 +38,22 @@ public class ParticipantUserExtService {
             authContext.getPortal().getId(), authContext.getEnvironmentName());
     enrolleeService.attachProfiles(enrollees);
     return new ParticipantUsersWithEnrollees(participantUsers, enrollees);
+  }
+
+  @EnforcePortalEnvPermission(permission = "participant_data_view")
+  public ParticipantUser findWithPortalUser(
+      PortalEnvAuthContext authContext, UUID participantUserId) {
+    ParticipantUser participantUser =
+        participantUserService
+            .find(participantUserId)
+            .orElseThrow(() -> new NotFoundException("Participant user not found"));
+    // we throw the same exception if the PortalParticipantUser isn't found, to prevent
+    // admins from seeing information from other portals
+    PortalParticipantUser portalParticipantUser =
+        portalParticipantUserService
+            .findOne(participantUser.getId(), authContext.getPortalEnvironment().getId())
+            .orElseThrow(() -> new NotFoundException("Participant user not found"));
+    participantUser.setPortalParticipantUsers(List.of(portalParticipantUser));
+    return participantUser;
   }
 }

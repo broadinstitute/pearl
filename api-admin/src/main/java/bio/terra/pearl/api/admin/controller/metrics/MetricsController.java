@@ -3,6 +3,7 @@ package bio.terra.pearl.api.admin.controller.metrics;
 import bio.terra.pearl.api.admin.api.MetricsApi;
 import bio.terra.pearl.api.admin.service.MetricsExtService;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.core.dao.metrics.MetricName;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -35,7 +36,9 @@ public class MetricsController implements MetricsApi {
     AdminUser adminUser = authUtilService.requireAdminUser(request);
     List<BasicMetricDatum> result =
         metricsExtService.loadMetrics(
-            adminUser, portalShortcode, studyShortcode, environmentName, metric);
+            PortalStudyEnvAuthContext.of(
+                adminUser, portalShortcode, studyShortcode, environmentName),
+            metric);
     return ResponseEntity.ok(result);
   }
 }

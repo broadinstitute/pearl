@@ -17,17 +17,20 @@ import { useLoadingEffect } from 'api/api-utils'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { renderPageHeader } from 'util/pageUtils'
 import { paramsFromContext, StudyEnvContextT } from '../../StudyEnvironmentRouter'
-import { faCheck, faPlus } from '@fortawesome/free-solid-svg-icons'
-import { Link } from 'react-router-dom'
-import { Button } from 'components/forms/Button'
+import { faCheck, faPencil, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { Link, useNavigate } from 'react-router-dom'
+import { Button, IconButton } from 'components/forms/Button'
 import Modal from 'react-bootstrap/Modal'
 import { ExportIntegrationForm } from './ExportIntegrationView'
 import { buildFilter } from 'util/exportUtils'
+import { DeleteExportIntegrationModal } from './DeleteExportIntegrationModal'
 
 const DEFAULT_EXPORT_INTEGRATION: ExportIntegration = {
   name: 'new',
   destinationType: 'AIRTABLE',
   enabled: true,
+  createdAt: new Date().getTime(),
+  lastUpdatedAt: new Date().getTime(),
   id: '',
   destinationUrl: '',
   exportOptions: {
@@ -49,10 +52,14 @@ export default function ExportIntegrationList({ studyEnvContext }:
   const [integrations, setIntegrations] = useState<ExportIntegration[]>([])
   const [sorting, setSorting] = React.useState<SortingState>([{ 'id': 'createdAt', 'desc': true }])
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [deleteIntegrationId, setDeleteIntegrationId] = useState<string>()
   const [newIntegration, setNewIntegration] = useState<ExportIntegration>(DEFAULT_EXPORT_INTEGRATION)
+  const navigate = useNavigate()
+
   const columns: ColumnDef<ExportIntegration>[] = [{
     header: 'Name',
-    accessorKey: 'name'
+    accessorKey: 'name',
+    cell: info => <Link to={info.row.original.id}>{info.row.original.name}</Link>
   }, {
     header: 'Destination',
     accessorKey: 'destinationType'
@@ -71,7 +78,14 @@ export default function ExportIntegrationList({ studyEnvContext }:
     header: '',
     enableSorting: false,
     id: 'actions',
-    cell: info => <Link to={info.row.original.id}>View/Edit</Link>
+    cell: info => <div className={'d-flex align-items-center'}>
+      <IconButton icon={faPencil} aria-label={'View/edit integration'} onClick={() => {
+        navigate(info.row.original.id)
+      }}/>
+      <IconButton icon={faTrash} aria-label={'Delete integration'} onClick={() => {
+        setDeleteIntegrationId(info.row.original.id)
+      }}/>
+    </div>
   }]
 
   const table = useReactTable({
@@ -97,6 +111,13 @@ export default function ExportIntegrationList({ studyEnvContext }:
     setNewIntegration(DEFAULT_EXPORT_INTEGRATION)
   }
 
+  const deleteIntegration = async () => {
+    if (!deleteIntegrationId) { return }
+    await Api.deleteExportIntegration(paramsFromContext(studyEnvContext), deleteIntegrationId)
+    setDeleteIntegrationId(undefined)
+    await reload()
+  }
+
   return <div className="container-fluid px-4 py-2">
     { renderPageHeader('Export Integrations') }
     <LoadingSpinner isLoading={isLoading}>
@@ -105,8 +126,13 @@ export default function ExportIntegrationList({ studyEnvContext }:
         <FontAwesomeIcon icon={faPlus}/> Create Integration
       </Button> }
       { basicTableLayout(table) }
-      { renderEmptyMessage(integrations, 'No intgrations') }
+      { renderEmptyMessage(integrations, 'No integrations') }
     </LoadingSpinner>
+    { deleteIntegrationId &&
+        <DeleteExportIntegrationModal
+          onDismiss={() => setDeleteIntegrationId(undefined)}
+          onConfirm={() => { deleteIntegration() }}
+        /> }
     { showCreateModal && <Modal show={true} size={'lg'} onHide={() => setShowCreateModal(false)} >
       <Modal.Header closeButton>
         <Modal.Title>Create new Export Integration</Modal.Title>

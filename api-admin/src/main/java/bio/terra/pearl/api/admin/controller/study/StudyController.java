@@ -4,11 +4,11 @@ import bio.terra.pearl.api.admin.api.StudyApi;
 import bio.terra.pearl.api.admin.models.dto.StudyCreationDto;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
+import bio.terra.pearl.api.admin.service.auth.context.PortalStudyAuthContext;
 import bio.terra.pearl.api.admin.service.study.StudyExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.study.Study;
-import bio.terra.pearl.core.service.study.StudyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -26,7 +26,6 @@ public class StudyController implements StudyApi {
       AuthUtilService requestService,
       HttpServletRequest request,
       StudyExtService studyExtService,
-      StudyService studyService,
       ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
     this.requestService = requestService;
@@ -38,14 +37,14 @@ public class StudyController implements StudyApi {
   public ResponseEntity<Object> create(String portalShortcode, Object body) {
     AdminUser operator = requestService.requireAdminUser(request);
     StudyCreationDto studyDto = objectMapper.convertValue(body, StudyCreationDto.class);
-    Study study = studyExtService.create(portalShortcode, studyDto, operator);
+    Study study = studyExtService.create(PortalAuthContext.of(operator, portalShortcode), studyDto);
     return ResponseEntity.ok(study);
   }
 
   @Override
   public ResponseEntity<Void> delete(String portalShortCode, String studyShortcode) {
     AdminUser operator = requestService.requireAdminUser(request);
-    studyExtService.delete(portalShortCode, studyShortcode, operator);
+    studyExtService.delete(PortalStudyAuthContext.of(operator, portalShortCode, studyShortcode));
     return ResponseEntity.noContent().build();
   }
 

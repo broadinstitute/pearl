@@ -1,11 +1,12 @@
 import { logError } from './loggingUtils'
+import { SUPPORT_EMAIL_ADDRESS } from '@juniper/ui-core'
 
 export type ApiErrorResponse = {
   message: string,
   statusCode: number
 }
 
-const errorSuffix = 'If this error persists, please contact support@juniper.terra.bio'
+const errorSuffix = `If this error persists, please contact ${SUPPORT_EMAIL_ADDRESS}`
 
 /**
  * performs default error message alerting if an error occurs during an API request.

@@ -24,7 +24,6 @@ public class ExportOptions extends BaseEntity {
     private String filterString;
     @Builder.Default
     private ExportFileFormat fileFormat = ExportFileFormat.TSV;
-
     private Integer rowLimit;
     @Builder.Default
     private boolean includeSubHeaders = true;

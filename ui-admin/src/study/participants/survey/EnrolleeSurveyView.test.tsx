@@ -4,7 +4,7 @@ import { RawEnrolleeSurveyView } from './SurveyResponseView'
 import {
   mockAnswer,
   mockConfiguredSurvey,
-  mockEnrollee,
+  mockEnrollee, mockParticipantTask,
   mockStudyEnvContext,
   mockSurveyResponse
 } from 'test-utils/mocking-utils'
@@ -20,6 +20,7 @@ describe('RawEnrolleeSurveyView', () => {
     }
     const { RoutedComponent } = setupRouterTest(
       <RawEnrolleeSurveyView enrollee={mockEnrollee()}
+        task={mockParticipantTask('SURVEY', 'NEW')}
         studyEnvContext={mockStudyEnvContext()}
         configSurvey={mockConfiguredSurvey()}
         updateResponseMap={jest.fn()}
@@ -39,6 +40,7 @@ describe('RawEnrolleeSurveyView', () => {
     }
     const { RoutedComponent } = setupRouterTest(
       <RawEnrolleeSurveyView enrollee={mockEnrollee()}
+        task={mockParticipantTask('SURVEY', 'NEW')}
         studyEnvContext={mockStudyEnvContext()}
         updateResponseMap={jest.fn()}
         configSurvey={mockConfiguredSurvey()}

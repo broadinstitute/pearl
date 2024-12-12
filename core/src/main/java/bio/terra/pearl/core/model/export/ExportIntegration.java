@@ -18,9 +18,18 @@ public class ExportIntegration extends BaseEntity implements StudyEnvAttached {
     private String name;
     private UUID studyEnvironmentId;
     @Builder.Default
+
     private boolean enabled = true;
     private ExportDestinationType destinationType;
     private String destinationUrl;
     private UUID exportOptionsId;
     private ExportOptions exportOptions;
+
+    @Override
+    public ExportIntegration cleanForCopying() {
+        super.cleanForCopying();
+        setExportOptionsId(null);
+        exportOptions.cleanForCopying();
+        return this;
+    }
 }

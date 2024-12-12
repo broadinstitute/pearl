@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Api, { Config } from 'api/api'
 import LoadingSpinner from 'util/LoadingSpinner'
+import { ServiceUnavailable } from '@juniper/ui-core'
 
 const uninitializedConfig = {
   b2cTenantName: 'uninitialized',
@@ -10,7 +11,13 @@ const uninitializedConfig = {
   participantApiHostname: 'uninitialized',
   adminUiHostname: 'uninitialized',
   adminApiHostname: 'uninitialized',
-  deploymentZone: 'uninitialized'
+  deploymentZone: 'uninitialized',
+  systemSettings: {
+    maintenanceModeEnabled: false,
+    maintenanceModeMessage: 'uninitialized',
+    maintenanceModeBypassPhrase: 'uninitialized',
+    disableScheduledJobs: false
+  }
 }
 
 const ConfigContext = React.createContext<Config>(uninitializedConfig)
@@ -36,7 +43,7 @@ export default function ConfigProvider({ children }: { children: React.ReactNode
     })
   }, [])
   if (error) {
-    return <p>{error}</p>
+    return <ServiceUnavailable error={error}/>
   } else {
     return <LoadingSpinner isLoading={!isLoaded}>
       <ConfigContext.Provider value={config}>

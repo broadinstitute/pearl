@@ -90,6 +90,9 @@ export function ParticipantNavbar(props: NavbarProps) {
     updatePreferredLanguage(languageCode)
   }
 
+  const currentPath = useLocation().pathname.replace(/^\/+/, '')
+  const showNavbar = !localContent.pages.find(page => page.path === currentPath)?.minimalNavbar
+
   const dropdownRef = useRef<HTMLDivElement | null>(null)
   const location = useLocation()
   useEffect(() => {
@@ -104,6 +107,11 @@ export function ParticipantNavbar(props: NavbarProps) {
   const studyEnv = portal.portalStudies.find(pStudy =>
     pStudy.study.studyEnvironments.find(studyEnv =>
       studyEnv.environmentName === portalEnv.environmentName))?.study.studyEnvironments[0]
+
+  const mainJoinPath = getMainJoinLink(portal.portalStudies, portalEnv.portalEnvironmentConfig)
+  //we need to note whether the user is in the process of enrolling in a study.
+  //if they are, clicking the register button should keep them on their current page
+  const isUserEnrolling = location.pathname.startsWith(mainJoinPath)
 
   return <nav {...navProps} className={classNames('navbar navbar-expand-lg navbar-light', props.className)}>
     <div className="container-fluid">
@@ -120,11 +128,11 @@ export function ParticipantNavbar(props: NavbarProps) {
         <span className="navbar-toggler-icon"/>
       </button>
       <div ref={dropdownRef} className="collapse navbar-collapse mt-2 mt-lg-0" id={dropdownId}>
-        <ul className="navbar-nav">
+        {showNavbar && <ul className="navbar-nav">
           {navLinks.map((navLink: NavbarItem, index: number) => <li key={index} className="nav-item">
             <CustomNavLink navLink={navLink}/>
           </li>)}
-        </ul>
+        </ul> }
         <ul className="navbar-nav ms-auto">
           <LanguageDropdown
             languageOptions={portalEnv.supportedLanguages}
@@ -147,18 +155,18 @@ export function ParticipantNavbar(props: NavbarProps) {
                   {i18n('navbarLogin')}
                 </NavLink>
               </li>
-              <li className="nav-item">
+              { showNavbar && <li className="nav-item">
                 <NavLink
                   className={classNames(
                     'btn btn-lg btn-primary',
                     'd-flex justify-content-center',
                     'mb-3 mb-lg-0 ms-lg-3'
                   )}
-                  to={getMainJoinLink(portal.portalStudies, portalEnv.portalEnvironmentConfig)}
+                  to={isUserEnrolling ? '#' : mainJoinPath}
                 >
                   {i18n('navbarJoin')}
                 </NavLink>
-              </li>
+              </li> }
             </>
           )}
           {user && <>

@@ -1,6 +1,7 @@
 package bio.terra.pearl.api.admin.service.siteContent;
 
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.core.factory.admin.AdminUserFactory;
 import bio.terra.pearl.core.factory.portal.PortalFactory;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -26,7 +27,7 @@ public class SiteMediaExtServiceTests extends BaseSpringBootTest {
     Assertions.assertThrows(
         NotFoundException.class,
         () -> {
-          siteMediaExtService.list(portal.getShortcode(), operator);
+          siteMediaExtService.list(PortalAuthContext.of(operator, portal.getShortcode()));
         });
   }
 
@@ -39,7 +40,9 @@ public class SiteMediaExtServiceTests extends BaseSpringBootTest {
         NotFoundException.class,
         () -> {
           siteMediaExtService.upload(
-              portal.getShortcode(), "blah", "blah".getBytes(StandardCharsets.UTF_8), operator);
+              PortalAuthContext.of(operator, portal.getShortcode()),
+              "blah",
+              "blah".getBytes(StandardCharsets.UTF_8));
         });
   }
 }

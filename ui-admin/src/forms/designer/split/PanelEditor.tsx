@@ -1,7 +1,7 @@
 import { FormElement, FormPanel, PortalEnvironmentLanguage, Question } from '@juniper/ui-core'
 import React from 'react'
 import { TextInput } from 'components/forms/TextInput'
-import { FullQuestionDesigner } from './FullQuestionDesigner'
+import { QuestionDesigner } from './QuestionDesigner'
 import { Button } from 'components/forms/Button'
 import { baseQuestions } from '../questions/questionTypes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -37,7 +37,7 @@ export const PanelEditor = ({ panel, onChange, currentLanguage, supportedLanguag
                   }}/>
               </div>
             </div>
-            <FullQuestionDesigner
+            <QuestionDesigner
               key={elementIndex}
               question={element as Question}
               isNewQuestion={false}

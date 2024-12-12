@@ -85,6 +85,7 @@ public class ParticipantTaskService extends ParticipantDataAuditedService<Partic
      * applies the task updates to the given environment. Returns a list of the updated tasks This is
      * assumed to be a relatively rare operation, so this is not particularly optimized for
      * performance.
+     * Note that this method only operates on tasks that are in the given study environment
      */
     @Transactional
     public List<ParticipantTask> updateTasks(

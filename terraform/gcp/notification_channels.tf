@@ -1,3 +1,6 @@
+# Creates the notification channels that will be used to alert the dev team
+# including email and slack.
+
 # alerts can send emails to dev team
 resource "google_monitoring_notification_channel" "juniper_dev_team_email" {
   display_name = "Notify Dev Team via Email"

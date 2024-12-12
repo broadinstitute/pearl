@@ -27,7 +27,8 @@ import {
   StudyEnvParams,
   Survey,
   SurveyResponse,
-  Trigger
+  Trigger,
+  SystemSettings
 } from '@juniper/ui-core'
 import queryString from 'query-string'
 import {
@@ -176,6 +177,7 @@ export type Config = {
   adminUiHostname: string,
   adminApiHostname: string,
   deploymentZone: string
+  systemSettings: SystemSettings
 }
 
 export type MailingListContact = {
@@ -234,6 +236,12 @@ export type StudyEnvironmentChange = {
   surveyChanges: ListChange<StudyEnvironmentSurvey, VersionedConfigChange>
   triggerChanges: ListChange<Trigger, VersionedConfigChange>
   kitTypeChanges: ListChange<KitType, VersionedConfigChange>
+  exportIntegrationChanges: ListChange<ExportIntegration, ConfigChangeList>
+}
+
+export type ConfigChangeList = {
+  entity: object
+  changes: ConfigChange[]
 }
 
 export type VersionedEntityChange = {
@@ -330,11 +338,12 @@ export type InternalConfig = {
   pepperDsmConfig: Record<string, string>
   addrValidationConfig: Record<string, string>
   airtable: Record<string, string>
+  mixpanel: Record<string, string>
 }
 
 export type ParticipantTaskUpdateDto = {
   updates: TaskUpdateSpec[]
-  portalParticipantUserIds?: string[]
+  enrolleeIds?: string[]
   updateAll: boolean // if true, the portalParticipantUserIds list will be ignored and all participants will be updated
 }
 
@@ -347,6 +356,7 @@ export type ParticipantTaskAssignDto = {
   // not already having the task in the duplicate window
   assignAllUnassigned: boolean
   overrideEligibility: boolean
+  justification?: string
 }
 
 export type TaskUpdateSpec = {
@@ -380,28 +390,6 @@ export type WithdrawnEnrollee = {
   note: string
 }
 
-export type ExportIntegration = {
-  id: string,
-  name: string,
-  createdAt?: number,
-  lastUpdatedAt?: number,
-  destinationType: string,
-  enabled: boolean,
-  exportOptions: ExportOptions,
-  destinationUrl: string
-}
-
-export type ExportIntegrationJob = {
-  id: string,
-  status: string,
-  exportIntegrationId: string,
-  startedAt: number,
-  completedAt?: number,
-  result: string,
-  creatingAdminUserId?: string,
-  systemProcess?: string
-}
-
 export type ParticipantUserMerge = {
   users: MergeAction<ParticipantUser, object>
   ppUsers: MergeAction<PortalParticipantUser, object>
@@ -429,6 +417,28 @@ export type MergeActionAction =
 export type MergePair<T> = {
   source?: T,
   target?: T
+}
+
+export type ExportIntegration = {
+    id: string,
+  name: string,
+    createdAt: number,
+    lastUpdatedAt: number,
+    destinationType: string,
+    enabled: boolean,
+    exportOptions: ExportOptions,
+    destinationUrl: string
+}
+
+export type ExportIntegrationJob = {
+  id: string,
+  status: string,
+  exportIntegrationId: string,
+  startedAt: number,
+  completedAt?: number,
+  result: string,
+  creatingAdminUserId?: string,
+  systemProcess?: string
 }
 
 let bearerToken: string | null = null
@@ -772,7 +782,7 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async updateParticipantTaskVersions(studyEnvParams: StudyEnvParams,
+  async updateParticipantTasks(studyEnvParams: StudyEnvParams,
     update: ParticipantTaskUpdateDto): Promise<ParticipantTask[]> {
     const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/participantTasks/updateAll`
     const response = await fetch(url, {
@@ -824,6 +834,12 @@ export default {
 
   async fetchParticipantUsers(portalShortcode: string, envName: string): Promise<ParticipantUsersAndEnrollees> {
     const response = await fetch(`${basePortalUrl(portalShortcode)}/env/${envName}/participantUsers`,
+      this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchParticipantUser(portalShortcode: string, envName: string, id: string): Promise<ParticipantUser> {
+    const response = await fetch(`${basePortalUrl(portalShortcode)}/env/${envName}/participantUsers/${id}`,
       this.getGetInit())
     return await this.processJsonResponse(response)
   },
@@ -1233,6 +1249,14 @@ export default {
     return await this.processJsonResponse(response)
   },
 
+  async deleteExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<Response> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}`
+    return await fetch(url, {
+      method: 'DELETE',
+      headers: this.getInitHeaders()
+    })
+  },
+
   async runExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<ExportIntegrationJob> {
     const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}/run`
     const response = await fetch(url, {
@@ -1249,6 +1273,44 @@ export default {
       method: 'PATCH',
       headers: this.getInitHeaders(),
       body: JSON.stringify(integration)
+    })
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchExportIntegrationJobs(studyEnvParams: StudyEnvParams): Promise<ExportIntegrationJob[]> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrationJobs`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchExportIntegrations(studyEnvParams: StudyEnvParams): Promise<ExportIntegration[]> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async fetchExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<ExportIntegration> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async createExportIntegration(studyEnvParams: StudyEnvParams, integration: ExportIntegration):
+    Promise<ExportIntegration> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations`
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getInitHeaders(),
+      body: JSON.stringify(integration)
+    })
+    return await this.processJsonResponse(response)
+  },
+
+  async runExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<ExportIntegrationJob> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}/run`
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: this.getInitHeaders()
     })
     return await this.processJsonResponse(response)
   },
@@ -1423,13 +1485,14 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async updateAdminTask(portalShortcode: string, studyShortcode: string,
-    envName: string, task: ParticipantTask): Promise<ParticipantTask> {
-    const url = `${baseStudyEnvUrl(portalShortcode, studyShortcode, envName)}/adminTasks/${task.id}`
+  async updateTask(studyEnvParams: StudyEnvParams, taskUpdate: {task: ParticipantTask, justification: string}):
+    Promise<ParticipantTask> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/enrollees/` +
+      `${taskUpdate.task.enrolleeId}/participantTasks/${taskUpdate.task.id}`
     const response = await fetch(url, {
       method: 'PATCH',
       headers: this.getInitHeaders(),
-      body: JSON.stringify(task)
+      body: JSON.stringify(taskUpdate)
     })
     return await this.processJsonResponse(response)
   },
@@ -1722,8 +1785,10 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async extractPortal(portalShortcode: string) {
-    const url = `${basePopulateUrl()}/portal/${portalShortcode}/extract`
+  async extractPortal(portalShortcode: string, onlyExtractActiveVersions: boolean) {
+    const url = `${
+      basePopulateUrl()
+    }/portal/${portalShortcode}/extract?onlyExtractActiveVersions=${onlyExtractActiveVersions}`
     const response = await fetch(url, this.getGetInit())
     return this.processResponse(response)
   },
@@ -1783,6 +1848,22 @@ export default {
     return await this.processJsonResponse(response)
   },
 
+  async loadSystemSettings(): Promise<SystemSettings> {
+    const url = `/systemSettings`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async updateSystemSettings(settings: SystemSettings): Promise<SystemSettings> {
+    const url = `${API_ROOT}/systemSettings`
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: this.getInitHeaders(),
+      body: JSON.stringify(settings)
+    })
+    return await this.processJsonResponse(response)
+  },
+
   async getSystemStatus(): Promise<SystemStatus> {
     const url = `/status`
     const response = await fetch(url, {
@@ -1797,7 +1878,11 @@ export default {
     if (portalEnvConfig?.participantHostname) {
       return `https://${portalEnvConfig.participantHostname}`
     }
-    const participantHost = `${envName}.${portalShortcode}.${uiHostname}`
+
+    // live is a special case where we don't include the env name in the url
+    const participantHost = envName === 'live' ?
+        `${portalShortcode}.${uiHostname}` :
+        `${envName}.${portalShortcode}.${uiHostname}`
     return `https://${participantHost}`
   },
 

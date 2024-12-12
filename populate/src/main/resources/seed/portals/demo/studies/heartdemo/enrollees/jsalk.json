@@ -60,7 +60,7 @@
       "surveyStableId": "hd_hd_lifestyle",
       "surveyVersion": 1,
       "answerPopDtos": [
-        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "2days"},
+        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "2Days"},
         { "questionStableId": "hd_hd_lifestyle_vigorousActivityMinutes", "stringValue": "30"}
       ],
       "currentPageNo": 1,
@@ -70,7 +70,7 @@
       "surveyStableId": "hd_hd_lifestyle",
       "surveyVersion": 1,
       "answerPopDtos": [
-        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "3days"},
+        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "3Days"},
         { "questionStableId": "hd_hd_lifestyle_vigorousActivityMinutes", "stringValue": "35"}
       ],
       "currentPageNo": 1,

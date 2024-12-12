@@ -3,6 +3,7 @@ package bio.terra.pearl.api.admin.service.export;
 import bio.terra.pearl.api.admin.AuthAnnotationSpec;
 import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +18,18 @@ public class ExportIntegrationExtServiceTests extends BaseSpringBootTest {
         exportIntegrationExtService,
         Map.of(
             "list",
-            AuthAnnotationSpec.withPortalStudyEnvPerm("BASE"),
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "find",
-            AuthAnnotationSpec.withPortalStudyEnvPerm("BASE"),
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "run",
             AuthAnnotationSpec.withPortalStudyEnvPerm("participant_data_view"),
             "create",
             AuthAnnotationSpec.withPortalStudyEnvPerm("export_integration"),
+            "delete",
+            AuthAnnotationSpec.withPortalStudyEnvPerm("export_integration"),
             "save",
             AuthAnnotationSpec.withPortalStudyEnvPerm("export_integration"),
             "listJobs",
-            AuthAnnotationSpec.withPortalStudyEnvPerm("BASE")));
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION)));
   }
 }

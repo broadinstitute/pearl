@@ -6,7 +6,10 @@ import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.portal.PortalEnvironmentConfig;
+import bio.terra.pearl.core.model.publishing.PortalEnvironmentChange;
+import bio.terra.pearl.core.model.publishing.VersionedEntityChange;
 import bio.terra.pearl.core.model.site.SiteContent;
+import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.notification.TriggerService;
@@ -18,6 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
+import bio.terra.pearl.core.service.publishing.PublishingUtils;
 import bio.terra.pearl.core.service.site.SiteContentService;
 import bio.terra.pearl.core.service.survey.SurveyService;
 import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
@@ -25,7 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class PortalEnvironmentService extends CrudService<PortalEnvironment, PortalEnvironmentDao> {
+public class PortalEnvironmentService extends CrudService<PortalEnvironment, PortalEnvironmentDao> implements PortalEnvPublishable {
     private PortalEnvironmentConfigService portalEnvironmentConfigService;
     private PortalParticipantUserService portalParticipantUserService;
     private ParticipantUserService participantUserService;
@@ -146,6 +151,50 @@ public class PortalEnvironmentService extends CrudService<PortalEnvironment, Por
         portalDashboardConfigService.deleteAlertsByPortalEnvId(id);
         dao.delete(id);
         portalEnvironmentConfigService.delete(envConfigId, cascades);
+    }
+
+    @Override
+    public void loadForPublishing(PortalEnvironment portalEnv) {
+        portalEnv.setSiteContent(siteContentService.find(portalEnv.getSiteContentId()).orElse(null));
+        if (portalEnv.getPreRegSurveyId() != null) {
+            portalEnv.setPreRegSurvey(surveyService.find(portalEnv.getPreRegSurveyId()).get());
+        }
+    }
+
+    @Override
+    public void updateDiff(PortalEnvironmentChange change, PortalEnvironment sourceEnv, PortalEnvironment destEnv) {
+        VersionedEntityChange<SiteContent> siteContentRecord = new VersionedEntityChange<SiteContent>(sourceEnv.getSiteContent(), destEnv.getSiteContent());
+        change.setSiteContentChange(siteContentRecord);
+        VersionedEntityChange<Survey> preRegRecord = new VersionedEntityChange<Survey>(sourceEnv.getPreRegSurvey(), destEnv.getPreRegSurvey());
+        change.setPreRegSurveyChanges(preRegRecord);
+    }
+
+    @Override
+    public void applyDiff(PortalEnvironmentChange change, PortalEnvironment destEnv) {
+        VersionedEntityChange<SiteContent> siteContentChange = change.getSiteContentChange();
+        if (siteContentChange.isChanged()) {
+            UUID newDocumentId = null;
+            if (siteContentChange.newStableId() != null) {
+                newDocumentId = siteContentService.findByStableId(siteContentChange.newStableId(), siteContentChange.newVersion(), destEnv.getPortalId()).orElseThrow().getId();
+            }
+            destEnv.setSiteContentId(newDocumentId);
+            PublishingUtils.assignPublishedVersionIfNeeded(destEnv.getEnvironmentName(), destEnv.getPortalId(), siteContentChange, siteContentService);
+            update(destEnv);
+        }
+        VersionedEntityChange<Survey> preRegSurveyChange = change.getPreRegSurveyChanges();
+        if (preRegSurveyChange.isChanged()) {
+            UUID newSurveyId = null;
+            if (preRegSurveyChange.newStableId() != null) {
+                newSurveyId = surveyService.findByStableId(preRegSurveyChange.newStableId(), preRegSurveyChange.newVersion(), destEnv.getPortalId()).get().getId();
+            }
+            destEnv.setPreRegSurveyId(newSurveyId);
+            PublishingUtils.assignPublishedVersionIfNeeded(destEnv.getEnvironmentName(), destEnv.getPortalId(), preRegSurveyChange, surveyService);
+        }
+
+        if (preRegSurveyChange.isChanged() || siteContentChange.isChanged()) {
+            update(destEnv);
+        }
+
     }
 
     public enum AllowedCascades implements CascadeProperty {

@@ -1,3 +1,5 @@
+# Creates alerts for database metrics (such as CPU usage)
+
 locals {
   utilization_conditions = [
     {

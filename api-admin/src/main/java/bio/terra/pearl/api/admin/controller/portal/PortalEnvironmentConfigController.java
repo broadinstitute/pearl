@@ -2,6 +2,7 @@ package bio.terra.pearl.api.admin.controller.portal;
 
 import bio.terra.pearl.api.admin.api.PortalEnvironmentConfigApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
 import bio.terra.pearl.api.admin.service.portal.PortalExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -31,12 +32,13 @@ public class PortalEnvironmentConfigController implements PortalEnvironmentConfi
 
   @Override
   public ResponseEntity<Object> update(String portalShortcode, String envName, Object configObj) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     PortalEnvironmentConfig config =
         objectMapper.convertValue(configObj, PortalEnvironmentConfig.class);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     PortalEnvironmentConfig updatedConfig =
-        portalExtService.updateConfig(portalShortcode, environmentName, config, user);
+        portalExtService.updateConfig(
+            PortalEnvAuthContext.of(operator, portalShortcode, environmentName), config);
     return ResponseEntity.ok(updatedConfig);
   }
 }

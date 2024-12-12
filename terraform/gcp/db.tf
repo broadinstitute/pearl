@@ -1,4 +1,6 @@
-# Create database
+# Creates the database used by Juniper as well as the user that will access it
+# and secrets to allow the application to read the credentials.
+
 resource "google_sql_database_instance" "d2p" {
   name = "d2p"
   database_version = "POSTGRES_16"
@@ -59,6 +61,9 @@ resource "google_sql_database_instance" "d2p" {
     backup_configuration {
       enabled = true
       start_time = "04:00"
+      backup_retention_settings {
+        retained_backups = 30
+      }
     }
   }
 

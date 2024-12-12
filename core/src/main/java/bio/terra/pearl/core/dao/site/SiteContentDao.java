@@ -104,4 +104,17 @@ public class SiteContentDao extends BaseVersionedJdbiDao<SiteContent> {
                         .one()
         ) + 1;
     }
+
+    public List<SiteContent> findActiveContentByPortalId(UUID portalId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                 select sc.* from site_content sc
+                                 inner join portal_environment pe on sc.id = pe.site_content_id
+                                 where pe.portal_id = :portalId
+                                """)
+                        .bind("portalId", portalId)
+                        .mapTo(getClazz())
+                        .list()
+        );
+    }
 }

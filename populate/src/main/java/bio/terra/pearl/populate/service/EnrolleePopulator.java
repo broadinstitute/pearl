@@ -18,7 +18,11 @@ import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.PreEnrollmentResponse;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
-import bio.terra.pearl.core.model.workflow.*;
+import bio.terra.pearl.core.model.survey.SurveyTaskConfigDto;
+import bio.terra.pearl.core.model.workflow.HubResponse;
+import bio.terra.pearl.core.model.workflow.ParticipantTask;
+import bio.terra.pearl.core.model.workflow.RecurrenceType;
+import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import bio.terra.pearl.core.service.file.ParticipantFileService;
@@ -37,6 +41,7 @@ import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
 import bio.terra.pearl.core.service.survey.AnswerProcessingService;
 import bio.terra.pearl.core.service.survey.SurveyResponseService;
 import bio.terra.pearl.core.service.survey.SurveyService;
+import bio.terra.pearl.core.service.survey.SurveyTaskDispatcher;
 import bio.terra.pearl.core.service.workflow.EnrollmentService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import bio.terra.pearl.populate.dao.ParticipantUserPopulateDao;
@@ -89,7 +94,7 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                              KitRequestService kitRequestService, KitTypeDao kitTypeDao, AdminUserDao adminUserDao,
                              ParticipantNotePopulator participantNotePopulator,
                              ParticipantUserPopulateDao participantUserPopulateDao, PortalParticipantUserPopulator portalParticipantUserPopulator, ObjectMapper objectMapper, PortalService portalService,
-                             ShortcodeService shortcodeService, StudyEnvironmentSurveyService studyEnvironmentSurveyService, EnrolleeResponsePopulator enrolleeResponsePopulator,
+                             ShortcodeService shortcodeService, StudyEnvironmentSurveyService studyEnvironmentSurveyService, EnrolleeResponsePopulator enrolleeResponsePopulator, SurveyTaskDispatcher surveyTaskDispatcher,
                              FileStorageBackendProvider fileStorageBackendProvider, ParticipantFileService participantFileService) {
         this.portalParticipantUserService = portalParticipantUserService;
         this.preEnrollmentResponseDao = preEnrollmentResponseDao;
@@ -119,7 +124,7 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         this.enrolleeResponsePopulator = enrolleeResponsePopulator;
         this.fileStorageBackend = fileStorageBackendProvider.get();
         this.participantFileService = participantFileService;
-
+        this.surveyTaskDispatcher = surveyTaskDispatcher;
     }
 
     private void populateTask(Enrollee enrollee, PortalParticipantUser ppUser, ParticipantTaskPopDto taskDto) {
@@ -533,32 +538,14 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
             if (RecurrenceType.LONGITUDINAL.equals(survey.getRecurrenceType())) {
                 for (int i = 0; i < createdDaysAgo / survey.getRecurrenceIntervalDays(); i++) {
                     Instant taskTime = enrollee.getCreatedAt().plus((i + 1) * survey.getRecurrenceIntervalDays(), DAYS);
-                    ParticipantTask task = ParticipantTask.builder()
-                            .taskType(TaskType.SURVEY)
-                            .enrolleeId(enrollee.getId())
-                            .studyEnvironmentId(enrollee.getStudyEnvironmentId())
-                            .portalParticipantUserId(ppUser.getId())
-                            .targetStableId(survey.getStableId())
-                            .targetAssignedVersion(survey.getVersion())
-                            .targetName(survey.getName())
-                            .status(TaskStatus.NEW)
-                            .build();
+                    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee, ppUser, new SurveyTaskConfigDto(studyEnvSurvey, survey));
                     task = participantTaskService.create(task, auditInfo);
                     timeShiftDao.changeTaskCreationTime(task.getId(), taskTime);
                 }
-            } else if (RecurrenceType.LONGITUDINAL.equals(survey.getRecurrenceType())) {
+            } else if (RecurrenceType.UPDATE.equals(survey.getRecurrenceType())) {
                 if (enrollee.getCreatedAt().plus(survey.getDaysAfterEligible(), ChronoUnit.DAYS).isBefore(Instant.now())) {
                     Instant taskTime = enrollee.getCreatedAt().plus(survey.getDaysAfterEligible(), DAYS);
-                    ParticipantTask task = ParticipantTask.builder()
-                            .taskType(TaskType.SURVEY)
-                            .enrolleeId(enrollee.getId())
-                            .studyEnvironmentId(enrollee.getStudyEnvironmentId())
-                            .portalParticipantUserId(ppUser.getId())
-                            .targetStableId(survey.getStableId())
-                            .targetAssignedVersion(survey.getVersion())
-                            .targetName(survey.getName())
-                            .status(TaskStatus.NEW)
-                            .build();
+                    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee, ppUser, new SurveyTaskConfigDto(studyEnvSurvey, survey));
                     task = participantTaskService.create(task, auditInfo);
                     timeShiftDao.changeTaskCreationTime(task.getId(), taskTime);
                 }
@@ -595,4 +582,5 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
     private final FileStorageBackend fileStorageBackend;
     private final EnrolleeResponsePopulator enrolleeResponsePopulator;
     private final ParticipantFileService participantFileService;
+    private final SurveyTaskDispatcher surveyTaskDispatcher;
 }

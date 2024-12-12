@@ -1,0 +1,22 @@
+ databaseChangeLog:
+   - changeSet:
+       id: "system_settings"
+       author: mbemis
+       changes:
+          - createTable:
+               tableName: system_settings
+               columns:
+                - column:
+                   { name: id, type: uuid, defaultValueComputed: gen_random_uuid(), constraints: { nullable: false, primaryKey: true } }
+                - column:
+                   { name: created_at, type: datetime, constraints: { nullable: false } }
+                - column:
+                   { name: last_updated_at, type: datetime, constraints: { nullable: false } }
+                - column:
+                   { name: maintenance_mode_message, type: text, constraints: { nullable: true } }
+                - column:
+                   { name: maintenance_mode_bypass_phrase, type: text, constraints: { nullable: true } }
+                - column:
+                   { name: maintenance_mode_enabled, type: boolean, constraints: { nullable: false } }
+                - column:
+                   { name: disable_scheduled_jobs, type: boolean, constraints: { nullable: false } }

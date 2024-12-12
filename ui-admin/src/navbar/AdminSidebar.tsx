@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, {
+  useEffect,
+  useState
+} from 'react'
 import { useUser } from '../user/UserProvider'
-import { Link, NavLink, useParams } from 'react-router-dom'
+import {
+  Link,
+  NavLink,
+  useParams
+} from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCaretRight } from '@fortawesome/free-solid-svg-icons'
 import { Study } from '@juniper/ui-core'
@@ -37,9 +44,6 @@ const AdminSidebar = ({ config }: { config: Config }) => {
     studyList = portalList.flatMap(portal => portal.portalStudies.map(ps => ps.study))
   }
 
-  if (!user || (!user.superuser && !portalShortcode)) {
-    return <div></div>
-  }
   const currentStudy = studyList.find(study => study.shortcode === studyShortcode)
 
   const color = ZONE_COLORS[config.deploymentZone] || ZONE_COLORS['prod']
@@ -50,6 +54,10 @@ const AdminSidebar = ({ config }: { config: Config }) => {
       setOpen(false)
     }
   }, [])
+
+  if (!user || (!user.superuser && !portalShortcode)) {
+    return <div></div>
+  }
 
   return <div style={{ backgroundColor: color, minHeight: '100vh', minWidth: open ? '250px' : '50px' }}
     className="p-2 pt-3">
@@ -83,6 +91,9 @@ const AdminSidebar = ({ config }: { config: Config }) => {
             </li>
             <li className="mb-2">
               <NavLink to="/logEvents" className={sidebarNavLinkClasses}>Log Events</NavLink>
+            </li>
+            <li className="mb-2">
+              <NavLink to="/system/settings" className={sidebarNavLinkClasses}>System Settings</NavLink>
             </li>
           </ul>}/>}
       </>}

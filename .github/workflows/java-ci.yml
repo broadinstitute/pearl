@@ -102,7 +102,7 @@ jobs:
 
     steps:
       - name: Trigger Trivy Scan
-        uses: broadinstitute/workflow-dispatch@v1
+        uses: broadinstitute/workflow-dispatch@v4
         with:
           workflow: Trivy
           token: ${{ secrets.BROADBOT_TOKEN }}
@@ -117,7 +117,7 @@ jobs:
 
     steps:
       - name: Trigger Tag Workflow
-        uses: broadinstitute/workflow-dispatch@v1
+        uses: broadinstitute/workflow-dispatch@v4
         with:
           workflow: Tag
           token: ${{ secrets.BROADBOT_TOKEN }}

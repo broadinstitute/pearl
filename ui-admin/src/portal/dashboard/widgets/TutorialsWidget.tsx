@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { Button } from 'components/forms/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowUpRightFromSquare, faBook } from '@fortawesome/free-solid-svg-icons'
-import { DocsKey, SUPPORT_EMAIL_ADDRESS, zendeskUrl } from 'util/zendeskUtils'
+import { DocsKey, zendeskUrl } from 'util/zendeskUtils'
 import { InfoCard, InfoCardBody, InfoCardHeader } from 'components/InfoCard'
+import { SUPPORT_EMAIL_ADDRESS } from '@juniper/ui-core'
 
 export const TutorialsWidget = () => {
   return (

@@ -5,7 +5,7 @@ import ParticipantNotesView from './ParticipantNotesView'
 import {
   dateToDefaultString,
   Enrollee,
-  EnrolleeRelation,
+  EnrolleeRelation, instantToDefaultString, ParticipantUser,
   Profile
 } from '@juniper/ui-core'
 import KitRequests from '../KitRequests'
@@ -24,14 +24,19 @@ import Families from 'study/participants/Families'
 export default function EnrolleeOverview({ enrollee, studyEnvContext, onUpdate }:
         {enrollee: Enrollee, studyEnvContext: StudyEnvContextT, onUpdate: () => void}) {
   const [relations, setRelations] = React.useState<EnrolleeRelation[]>([])
-
+  const [participantUser, setParticipantUser] = React.useState<ParticipantUser>()
   const { isLoading: isLoadingRelations } = useLoadingEffect(async () => {
-    const relations = await Api.findRelationsByTargetShortcode(
-      studyEnvContext.portal.shortcode,
-      studyEnvContext.study.shortcode,
-      studyEnvContext.currentEnv.environmentName,
-      enrollee.shortcode)
+    const [relations, participantUser] = await Promise.all([
+      Api.findRelationsByTargetShortcode(
+        studyEnvContext.portal.shortcode,
+        studyEnvContext.study.shortcode,
+        studyEnvContext.currentEnv.environmentName,
+        enrollee.shortcode),
+      Api.fetchParticipantUser(studyEnvContext.portal.shortcode,
+        studyEnvContext.currentEnv.environmentName, enrollee.participantUserId)
+    ])
     setRelations(relations)
+    setParticipantUser(participantUser)
   })
 
   const familyLinkageEnabled = studyEnvContext.currentEnv.studyEnvironmentConfig.enableFamilyLinkage
@@ -44,11 +49,23 @@ export default function EnrolleeOverview({ enrollee, studyEnvContext, onUpdate }
       <InfoCardBody>
         <InfoCardValue
           title={'Name'}
+          condensed={true}
           values={[formatName(enrollee.profile)]}
         />
         <InfoCardValue
           title={'Birthdate'}
+          condensed={true}
           values={[dateToDefaultString(enrollee.profile.birthDate) || '']}
+        />
+        <InfoCardValue
+          title={'Username'}
+          condensed={true}
+          values={[participantUser?.username || '']}
+        />
+        <InfoCardValue
+          title={'Last login'}
+          condensed={true}
+          values={[instantToDefaultString(participantUser?.portalParticipantUsers?.[0]?.lastLogin)]}
         />
       </InfoCardBody>
     </InfoCard>

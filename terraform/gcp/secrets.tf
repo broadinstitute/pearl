@@ -1,5 +1,5 @@
-
-
+# Creates the secrets that our application needs to run.
+# These secrets need to be manually populated.
 
 resource "google_secret_manager_secret" "tdr_sa_creds" {
   secret_id = "tdr-sa-creds"
@@ -39,6 +39,20 @@ resource "google_secret_manager_secret" "smarty_auth_id" {
 
 resource "google_secret_manager_secret" "smarty_auth_token" {
   secret_id = "smarty-auth-token"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "mixpanel_token" {
+  secret_id = "mixpanel-token"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret" "airtable_auth_token" {
+  secret_id = "airtable-auth-token"
   replication {
     auto {}
   }

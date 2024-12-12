@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.dao.search;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
+import bio.terra.pearl.core.dao.dataimport.TimeShiftDao;
 import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.kit.KitRequestFactory;
@@ -39,43 +40,35 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EnrolleeSearchExpressionDaoTests extends BaseSpringBootTest {
-
     @Autowired
     EnrolleeSearchExpressionDao enrolleeSearchExpressionDao;
-
     @Autowired
     EnrolleeFactory enrolleeFactory;
-
     @Autowired
     StudyEnvironmentFactory studyEnvironmentFactory;
-
     @Autowired
     EnrolleeSearchExpressionParser enrolleeSearchExpressionParser;
-
     @Autowired
     SurveyFactory surveyFactory;
-
     @Autowired
     SurveyResponseFactory surveyResponseFactory;
-
     @Autowired
     ParticipantTaskFactory participantTaskFactory;
-
     @Autowired
     KitRequestFactory kitRequestFactory;
-
     @Autowired
     FamilyFactory familyFactory;
     @Autowired
     PortalParticipantUserService portalParticipantUserService;
     @Autowired
     ProfileService profileService;
+    @Autowired
+    TimeShiftDao timeShiftDao;
 
 
     @Test
@@ -400,15 +393,16 @@ public class EnrolleeSearchExpressionDaoTests extends BaseSpringBootTest {
 
         Enrollee notConsented = enrolleeFactory.buildPersisted(
                 enrolleeFactory.builderWithDependencies(getTestName(info)).consented(false).subject(true).studyEnvironmentId(studyEnvId));
-
+        timeShiftDao.changeEnrolleeCreationTime(notConsented.getId(), Instant.now().minus(5, ChronoUnit.DAYS));
         Enrollee notSubject = enrolleeFactory.buildPersisted(
                 enrolleeFactory.builderWithDependencies(getTestName(info)).consented(false).subject(false).studyEnvironmentId(studyEnvId));
-
+        timeShiftDao.changeEnrolleeCreationTime(notSubject.getId(), Instant.now().minus(4, ChronoUnit.DAYS));
         Enrollee specialShortcode = enrolleeFactory.buildPersisted(
                 enrolleeFactory.builderWithDependencies(getTestName(info)).consented(false).subject(false).shortcode("EXAMPLE").studyEnvironmentId(studyEnvId));
-
+        timeShiftDao.changeEnrolleeCreationTime(specialShortcode.getId(), Instant.now().minus(2, ChronoUnit.DAYS));
         Enrollee consented = enrolleeFactory.buildPersisted(
                 enrolleeFactory.builderWithDependencies(getTestName(info)).consented(true).subject(true).studyEnvironmentId(studyEnvId));
+        timeShiftDao.changeEnrolleeCreationTime(consented.getId(), Instant.now().minus(1, ChronoUnit.DAYS));
 
         List<EnrolleeSearchExpressionResult> resultsConsented = enrolleeSearchExpressionDao.executeSearch(consentedExp, studyEnvBundle.getStudyEnv().getId());
         List<EnrolleeSearchExpressionResult> resultsSubject = enrolleeSearchExpressionDao.executeSearch(subjectExp, studyEnvBundle.getStudyEnv().getId());
@@ -424,6 +418,22 @@ public class EnrolleeSearchExpressionDaoTests extends BaseSpringBootTest {
         assertTrue(resultsSubject.stream().anyMatch(r -> r.getEnrollee().getId().equals(consented.getId())));
 
         assertTrue(resultsShortcode.stream().anyMatch(r -> r.getEnrollee().getId().equals(specialShortcode.getId())));
+
+        // now check time filtering
+        List<EnrolleeSearchExpressionResult> resultsTime = enrolleeSearchExpressionDao.executeSearch(
+                enrolleeSearchExpressionParser.parseRule("{enrollee.createdAt} < '%s'".formatted(Instant.now().minus(3, ChronoUnit.DAYS))),
+                studyEnvBundle.getStudyEnv().getId()
+        );
+        assertThat(resultsTime.stream().map(EnrolleeSearchExpressionResult::getEnrollee).map(Enrollee::getId).toList(),
+                containsInAnyOrder(notConsented.getId(), notSubject.getId()));
+
+        resultsTime = enrolleeSearchExpressionDao.executeSearch(
+                enrolleeSearchExpressionParser.parseRule("{enrollee.createdAt} > '%s'".formatted(Instant.now().minus(3, ChronoUnit.DAYS))),
+                studyEnvBundle.getStudyEnv().getId()
+        );
+        assertThat(resultsTime.stream().map(EnrolleeSearchExpressionResult::getEnrollee).map(Enrollee::getId).toList(),
+                containsInAnyOrder(specialShortcode.getId(), consented.getId()));
+
     }
 
     @Test
