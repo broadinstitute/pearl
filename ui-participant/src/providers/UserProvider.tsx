@@ -80,6 +80,9 @@ export default function UserProvider({ children }: { children: React.ReactNode }
   const { captureEnrollmentParams } = useEnrollmentParams()
 
   useEffect(() => {
+    // we need to capture the enrollment params on page load and store them in session (not local)
+    // storage so that they aren't lost on a page refresh or if there is some sort of page navigation
+    // that causes query params to disappear. important enrollment params include referral source.
     captureEnrollmentParams()
   }, [])
 
