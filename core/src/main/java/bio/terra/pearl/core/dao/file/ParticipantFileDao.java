@@ -4,7 +4,6 @@ import bio.terra.pearl.core.dao.BaseJdbiDao;
 import bio.terra.pearl.core.model.file.ParticipantFile;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +24,8 @@ public class ParticipantFileDao extends BaseJdbiDao<ParticipantFile> {
         return jdbi.withHandle(handle ->
                 handle.createQuery("""
                                 select file.* from %s file
-                                inner join answer a on file.enrollee_id = a.enrollee_id
-                                where file.file_name = a.string_value and a.format = 'FILE_NAME'
-                                and a.survey_response_id = :surveyResponseId
+                                inner join answer a on file.file_name = a.string_value and a.format = 'FILE_NAME'
+                                where a.survey_response_id = :surveyResponseId
                                 """.formatted(tableName))
                         .bind("surveyResponseId", surveyResponseId)
                         .mapTo(clazz)
@@ -61,16 +59,5 @@ public class ParticipantFileDao extends BaseJdbiDao<ParticipantFile> {
                         .stream()
                         .toList()
         );
-    }
-
-    @Transactional
-    public ParticipantFile createOrReplace(ParticipantFile participantFile) {
-        Optional<ParticipantFile> existingFileOpt = findByEnrolleeIdAndFileName(participantFile.getEnrolleeId(), participantFile.getFileName());
-
-        existingFileOpt.ifPresent(existingFile -> {
-            delete(existingFile.getId());
-        });
-
-        return create(participantFile);
     }
 }

@@ -2110,7 +2110,7 @@ paths:
           $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrollees/{enrolleeShortcode}/file/{fileName}:
     get:
-      summary: Returns the binary file data for the file of the given shortcode
+      summary: Returns the binary file data of the given file name
       tags: [ participantFile ]
       operationId: download
       parameters:

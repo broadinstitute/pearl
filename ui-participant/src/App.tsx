@@ -54,7 +54,6 @@ const ParticipantTermsOfUsePage = lazy(() => import('terms/ParticipantTermsOfUse
 const ScrollToTop = () => {
   const location = useLocation()
   useEffect(() => {
-    // @ts-expect-error TS thinks "instant" isn't a valid scroll behavior.
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   }, [location.pathname])
   return null

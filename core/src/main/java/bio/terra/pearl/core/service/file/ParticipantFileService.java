@@ -46,8 +46,4 @@ public class ParticipantFileService extends ImmutableEntityService<ParticipantFi
     public Optional<ParticipantFile> findByEnrolleeIdAndFileName(UUID enrolleeId, String fileName) {
         return dao.findByEnrolleeIdAndFileName(enrolleeId, fileName);
     }
-
-    public List<ParticipantFile> findAllByFileNameForEnrollee(UUID enrolleeId, List<String> participantFileNames) {
-        return dao.findAllByFileNameForEnrollee(enrolleeId, participantFileNames);
-    }
 }
