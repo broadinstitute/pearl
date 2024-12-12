@@ -47,10 +47,9 @@ export default function StudyResearchTasks(props: StudyResearchTasksProps) {
   const sortedSurveyTaskGroups = groupAndSortTasks(viewableParticipantTasks.filter(task =>
     task.taskType === 'SURVEY'))
 
-  const sortedDocumentRequests = participantTasks
-    .filter(task => task.taskType === 'DOCUMENT_REQUEST')
-    .sort(taskComparator)
-  const hasDocumentRequests = sortedDocumentRequests.length > 0
+  const sortedDocumentRequestGroups = groupAndSortTasks(viewableParticipantTasks.filter(task =>
+    task.taskType === 'DOCUMENT_REQUEST'))
+
 
   const sortedCurrentTasks = [...activeConsentTaskGroups.map(group => group[0]),
     ...sortedSurveyTaskGroups.map(group => group[0])]
@@ -83,42 +82,6 @@ export default function StudyResearchTasks(props: StudyResearchTasksProps) {
         </div>
       )}
 
-<<<<<<< HEAD
-      {hasActiveConsentTasks && (
-        <TaskGrouping
-          enrollee={enrollee}
-          studyShortcode={studyShortcode}
-          tasks={sortedActiveConsentTasks}
-          title={i18n('taskTypeConsent')}
-        />
-      )}
-
-      {hasSurveyTasks && (
-        <TaskGrouping
-          enrollee={enrollee}
-          tasks={sortedSurveyTasks}
-          studyShortcode={studyShortcode}
-          title={i18n('taskTypeSurveys')}
-        />
-      )}
-
-      {hasDocumentRequests &&
-          <TaskGrouping
-            enrollee={enrollee}
-            tasks={sortedDocumentRequests}
-            studyShortcode={studyShortcode}
-            title={i18n('taskTypeDocumentRequests')}
-          />}
-
-      {hasCompletedConsentTasks && (
-        <TaskGrouping
-          enrollee={enrollee}
-          studyShortcode={studyShortcode}
-          tasks={completedConsentTasks}
-          title={i18n('taskTypeForms')}
-        />
-      )}
-=======
       <TaskGrouping
         enrollee={enrollee}
         studyShortcode={studyShortcode}
@@ -134,10 +97,15 @@ export default function StudyResearchTasks(props: StudyResearchTasksProps) {
       <TaskGrouping
         enrollee={enrollee}
         studyShortcode={studyShortcode}
+        taskArrays={sortedDocumentRequestGroups}
+        title={i18n('taskTypeDocumentRequests')}
+      />
+      <TaskGrouping
+        enrollee={enrollee}
+        studyShortcode={studyShortcode}
         taskArrays={completedConsentTaskGroups}
         title={i18n('taskTypeForms')}
       />
->>>>>>> cb-doc-request-admin-ux
     </>
   )
 }
