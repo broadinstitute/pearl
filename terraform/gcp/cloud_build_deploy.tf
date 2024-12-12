@@ -52,6 +52,18 @@ resource "google_cloudbuild_trigger" "dev_auto_deploy_on_tag_push" {
   build {
 
     step {
+      name = "gcr.io/cloud-builders/docker"
+      id = "Start build"
+      entrypoint = "bash"
+      args = [
+        "-c",
+        <<EOT
+echo "Starting deployment for tag $TAG_NAME"
+        EOT
+      ]
+    }
+
+    step {
       name = "gcr.io/cloud-builders/git"
       id = "Clone repository"
       args = ["clone", "--depth", "1", "--branch", "$TAG_NAME", "https://github.com/broadinstitute/juniper.git", "/workspace/juniper" ]
@@ -93,6 +105,8 @@ wait_for_image "us-central1-docker.pkg.dev/broad-juniper-eng-infra/juniper/junip
 gcloud container clusters get-credentials juniper-cluster --zone us-central1
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 helm upgrade -f environments/$_ENV.yaml juniper . --namespace $_NAMESPACE --set appVersion=$TAG_NAME --atomic --wait --timeout 15m
+
+echo "Deployment complete for tag $TAG_NAME!"
             EOT
         ]
     }

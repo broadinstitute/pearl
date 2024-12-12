@@ -14,10 +14,6 @@ EOT
   }
 }
 
-# NOTE: ANYTIME YOU EDIT THIS, MAKE SURE YOU DISABLE
-#       "notify on incident closure" MANUALLY VIA THE UI
-#        There is no way to disable this via terraform
-#        and it adds noise to the channel.
 resource "google_monitoring_alert_policy" "juniper_app_error_alert_policy" {
   count = var.slack_notification_channel != "" ? 1 : 0
 
@@ -38,7 +34,9 @@ resource "google_monitoring_alert_policy" "juniper_app_error_alert_policy" {
   combiner = "AND"
   severity = "ERROR"
 
-  alert_strategy {}
+  alert_strategy {
+    notification_prompts = ["OPENED"]
+  }
 
   depends_on = [
     google_logging_metric.juniper_app_error_logging_metric
