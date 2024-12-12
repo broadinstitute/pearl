@@ -12,6 +12,8 @@ export const DeleteExportIntegrationModal = ({ onConfirm, onDismiss }: {
       </Modal.Header>
       <Modal.Body>
         Are you sure you want to delete this export integration? This action cannot be undone.
+        
+        Note you can set integrations to inactive if you just want to pause them from running.
       </Modal.Body>
       <ModalFooter>
         <Button variant="danger" onClick={() => { onConfirm() }}>
