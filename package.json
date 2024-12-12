@@ -52,7 +52,9 @@
   },
   "scripts": {
     "test": "npm -w ui-core test && npm -w ui-admin test && npm -w ui-participant test",
-    "lint": "npm -w ui-core run build && eslint --max-warnings=0 e2e-tests/src ui-admin/src ui-core/src ui-participant/src"
+    "lint": "npm -w ui-core run build && eslint --max-warnings=0 e2e-tests/src ui-admin/src ui-core/src ui-participant/src",
+    "admin-dev-local": "VITE_UNAUTHED_LOGIN=true HTTPS=true DANGEROUSLY_DISABLE_HOST_CHECK=true npm -w ui-admin start",
+    "admin-dev": "HTTPS=true npm -w ui-admin start"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.2.0",

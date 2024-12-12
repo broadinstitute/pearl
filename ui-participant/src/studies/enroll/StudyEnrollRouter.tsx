@@ -7,8 +7,7 @@ import {
   Route,
   Routes,
   useNavigate,
-  useParams,
-  useSearchParams
+  useParams, useSearchParams
 } from 'react-router-dom'
 import { usePortalEnv } from 'providers/PortalProvider'
 import Api, {
@@ -39,6 +38,7 @@ import {
 } from 'util/enrolleeUtils'
 import { logError } from 'util/loggingUtils'
 import { getNextConsentTask, getTaskPath } from 'hub/task/taskUtils'
+import { useEnrollmentParams } from './useEnrollmentParams'
 
 export type StudyEnrollContext = {
   user: ParticipantUser | null,
@@ -83,8 +83,7 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
   const { i18n } = useI18n()
 
   const [searchParams] = useSearchParams()
-  const isProxyEnrollment = searchParams.get('isProxyEnrollment') === 'true'
-  const ppUserId = searchParams.get('ppUserId')
+  const { skipPreEnroll, isProxyEnrollment, ppUserId } = useEnrollmentParams()
 
   const { user, ppUsers, enrollees, refreshLoginState } = useUser()
 
@@ -146,7 +145,7 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
     if (mustProvidePassword) {
       return
     }
-    if (preEnrollSatisfied) {
+    if (preEnrollSatisfied || skipPreEnroll) {
       if (!user) {
         navigate('register', { replace: true })
       } else {
@@ -202,6 +201,8 @@ function StudyEnrollOutletMatched(props: StudyEnrollOutletMatchedProps) {
         />
       ) : (
         <Routes>
+          {skipPreEnroll &&
+            <Route path="preEnroll/*" element={<PortalRegistrationRouter portal={portal} returnTo={null}/>}/>}
           {hasPreEnroll && <Route path="preEnroll" element={
             <PreEnrollView enrollContext={enrollContext} survey={enrollContext.studyEnv.preEnrollSurvey as Survey}/>
           }/>}

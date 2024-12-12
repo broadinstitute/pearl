@@ -363,6 +363,9 @@ databaseChangeLog:
       file: changesets/2024_11_22_minimal_navbar.yaml
       relativeToChangelogFile: true
   - include:
+      file: changesets/2024_12_02_pre_enroll_referral_source.yaml
+      relativeToChangelogFile: true
+  - include:
       file: changesets/2024_11_14_answer_file_format.yaml
       relativeToChangelogFile: true
 

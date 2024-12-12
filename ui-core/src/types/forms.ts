@@ -107,12 +107,17 @@ export type PreregistrationResponse = FormResponse & {
   qualified: boolean
 }
 
+export type ReferralSource = {
+  referringSite: string
+}
+
 export type PreEnrollmentResponse = FormResponse & {
   surveyId: string
   studyEnvironmentId: string
   answers: Answer[]
   fullData: string
   qualified: boolean
+  referralSource?: string
 }
 
 // Survey configuration

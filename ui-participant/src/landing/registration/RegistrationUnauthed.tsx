@@ -48,7 +48,8 @@ const registrationSurveyModel: Survey = {
   createdAt: now,
   lastUpdatedAt: now,
   content: JSON.stringify(registrationSurvey),
-  surveyType: 'RESEARCH'
+  surveyType: 'RESEARCH',
+  recurrenceType: 'NONE'
 }
 
 /**

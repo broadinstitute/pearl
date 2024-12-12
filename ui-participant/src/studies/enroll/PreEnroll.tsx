@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { StudyEnrollContext } from './StudyEnrollRouter'
 import {
   getResumeData,
-  getSurveyJsAnswerList,
+  getSurveyJsAnswerList, makeSurveyJsData,
   SurveyAutoCompleteButton,
   SurveyReviewModeButton,
   useI18n,
@@ -15,6 +15,7 @@ import {
 } from '@juniper/ui-core'
 import { useUser } from '../../providers/UserProvider'
 import { useActiveUser } from '../../providers/ActiveUserProvider'
+import { useEnrollmentParams } from './useEnrollmentParams'
 
 /**
  * pre-enrollment surveys are expected to have a calculated value that indicates
@@ -33,9 +34,13 @@ export default function PreEnrollView({ enrollContext, survey }:
   const navigate = useNavigate()
   // for now, we assume all pre-screeners are a single page
   const pager = { pageNumber: 0, updatePageNumber: () => 0 }
+
+  const { preFilledAnswers, referralSource, clearStoredEnrollmentParams } = useEnrollmentParams()
+  const resumeData = makeSurveyJsData(undefined, preFilledAnswers, user?.id)
+
   const { surveyModel, refreshSurvey, SurveyComponent } = useSurveyJSModel(
     survey,
-    null,
+    resumeData,
     handleComplete,
     pager,
     studyEnv.environmentName,
@@ -58,6 +63,7 @@ export default function PreEnrollView({ enrollContext, survey }:
       answers: getSurveyJsAnswerList(surveyModel, selectedLanguage),
       surveyId: survey.id,
       studyEnvironmentId: studyEnv.id,
+      referralSource: referralSource || undefined,
       qualified
     }
 
@@ -67,6 +73,9 @@ export default function PreEnrollView({ enrollContext, survey }:
       surveyVersion: survey.version,
       preEnrollResponse: responseDto
     }).then(result => {
+      //clear the stored enrollment params in case someone else uses the same browser
+      //without closing the tab
+      clearStoredEnrollmentParams()
       if (!qualified) {
         navigate('../ineligible')
       } else {

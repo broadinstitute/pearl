@@ -17,6 +17,12 @@ export type StudyEnvParams = {
   portalShortcode: string
 }
 
+export type OptionalStudyEnvParams = {
+  studyShortcode?: string
+  envName?: EnvironmentName
+  portalShortcode: string
+}
+
 export type StudyEnvironment = {
   id: string
   environmentName: EnvironmentName
