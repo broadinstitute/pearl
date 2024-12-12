@@ -256,8 +256,14 @@ export type Question =
   | FormPanelDynamic
 
 export type InteractiveQuestion = Exclude<Question, HtmlQuestion>
-
 /** Possible values for the 'type' field of a Question. */
 export type QuestionType = Exclude<Question, TemplatedQuestion>['type']
+
+export type SimpleInteractiveQuestion = Exclude<InteractiveQuestion, FormPanelDynamic | TemplatedQuestion>
+export type SimpleInteractiveQuestionType = SimpleInteractiveQuestion['type']
+
+export type SimpleQuestion = Exclude<Question, FormPanelDynamic | TemplatedQuestion>
+export type SimpleQuestionType = SimpleQuestion['type']
+
 
 export {}

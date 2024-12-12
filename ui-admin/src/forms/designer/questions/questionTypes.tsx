@@ -1,6 +1,6 @@
-import { Question, QuestionType } from '@juniper/ui-core'
+import { SimpleQuestionType, SimpleQuestion } from '@juniper/ui-core'
 
-export const questionTypeLabels: Record<QuestionType, string> = {
+export const questionTypeLabels: Record<SimpleQuestionType, string> = {
   text: 'Text',
   checkbox: 'Checkbox',
   dropdown: 'Dropdown',
@@ -10,7 +10,7 @@ export const questionTypeLabels: Record<QuestionType, string> = {
   html: 'Html'
 }
 
-export const questionTypeDescriptions: Record<QuestionType, string> = {
+export const questionTypeDescriptions: Record<SimpleQuestionType, string> = {
   text: 'Prompts the participant to enter a text response.',
   checkbox: 'Shows choices as checkboxes and prompts the participant to select one or more responses.',
   dropdown: 'Prompts the participant to choose a response from a menu of choices.',
@@ -21,7 +21,7 @@ export const questionTypeDescriptions: Record<QuestionType, string> = {
 }
 
 //Returns an object with all possible fields for each question type
-export const baseQuestions: Record<QuestionType, Question> = {
+export const baseQuestions: Record<SimpleQuestionType, SimpleQuestion> = {
   checkbox: {
     type: 'checkbox',
     name: '',

@@ -1,6 +1,11 @@
 import React from 'react'
 
-import { HtmlQuestion, InteractiveQuestion, PortalEnvironmentLanguage, Question } from '@juniper/ui-core'
+import {
+  HtmlQuestion,
+  PortalEnvironmentLanguage,
+  SimpleInteractiveQuestion,
+  SimpleQuestion
+} from '@juniper/ui-core'
 
 import { Checkbox } from 'components/forms/Checkbox'
 import { Textarea } from 'components/forms/Textarea'
@@ -10,10 +15,10 @@ type BaseFieldsProps = {
   showIsRequired?: boolean
   hideDescription?: boolean
   disabled: boolean
-  question: Question
+  question: SimpleQuestion
   currentLanguage: PortalEnvironmentLanguage
   supportedLanguages: PortalEnvironmentLanguage[]
-  onChange: (newValue: Question) => void
+  onChange: (newValue: SimpleQuestion) => void
 }
 
 /** Controls for editing base question fields. */
@@ -22,7 +27,7 @@ export const BaseFields = (props: BaseFieldsProps) => {
   if ((question as HtmlQuestion).type === 'html') {
     return null
   }
-  const regularQuestion = question as InteractiveQuestion
+  const regularQuestion = question as SimpleInteractiveQuestion
 
   return (
     <>
@@ -42,7 +47,7 @@ export const BaseFields = (props: BaseFieldsProps) => {
                 oldValue: regularQuestion.title,
                 languageCode: props.currentLanguage.languageCode,
                 supportedLanguages: props.supportedLanguages
-              })
+              }) as string
             })
           }}
         />

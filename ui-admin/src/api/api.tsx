@@ -1276,55 +1276,6 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async saveExportIntegration(studyEnvParams: StudyEnvParams, integration: ExportIntegration):
-    Promise<ExportIntegration> {
-    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${integration.id}`
-    const response = await fetch(url, {
-      method: 'PATCH',
-      headers: this.getInitHeaders(),
-      body: JSON.stringify(integration)
-    })
-    return await this.processJsonResponse(response)
-  },
-
-  async fetchExportIntegrationJobs(studyEnvParams: StudyEnvParams): Promise<ExportIntegrationJob[]> {
-    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrationJobs`
-    const response = await fetch(url, this.getGetInit())
-    return await this.processJsonResponse(response)
-  },
-
-  async fetchExportIntegrations(studyEnvParams: StudyEnvParams): Promise<ExportIntegration[]> {
-    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations`
-    const response = await fetch(url, this.getGetInit())
-    return await this.processJsonResponse(response)
-  },
-
-  async fetchExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<ExportIntegration> {
-    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}`
-    const response = await fetch(url, this.getGetInit())
-    return await this.processJsonResponse(response)
-  },
-
-  async createExportIntegration(studyEnvParams: StudyEnvParams, integration: ExportIntegration):
-    Promise<ExportIntegration> {
-    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations`
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: this.getInitHeaders(),
-      body: JSON.stringify(integration)
-    })
-    return await this.processJsonResponse(response)
-  },
-
-  async runExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<ExportIntegrationJob> {
-    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}/run`
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: this.getInitHeaders()
-    })
-    return await this.processJsonResponse(response)
-  },
-
   async fetchExportIntegrationJobs(studyEnvParams: StudyEnvParams): Promise<ExportIntegrationJob[]> {
     const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrationJobs`
     const response = await fetch(url, this.getGetInit())
