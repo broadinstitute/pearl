@@ -1,15 +1,15 @@
 import { unset } from 'lodash/fp'
 import React from 'react'
 
-import { Question } from '@juniper/ui-core'
+import { SimpleQuestion } from '@juniper/ui-core'
 
 import { Checkbox } from 'components/forms/Checkbox'
 import { TextInput } from 'components/forms/TextInput'
 
 type VisibilityFieldsProps = {
   disabled: boolean
-  question: Question
-  onChange: (newValue: Question) => void
+  question: SimpleQuestion
+  onChange: (newValue: SimpleQuestion) => void
 }
 
 /** Controls for making a question conditionally visible. */

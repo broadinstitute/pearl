@@ -1,6 +1,9 @@
 import React from 'react'
 
-import { HtmlQuestion, PortalEnvironmentLanguage, Question } from '@juniper/ui-core'
+import {
+  HtmlQuestion, TemplatedQuestion,
+  PortalEnvironmentLanguage, SimpleQuestion
+} from '@juniper/ui-core'
 
 import { BaseFields } from './questions/BaseFields'
 import { ChoicesList } from './questions/ChoicesList'
@@ -15,14 +18,14 @@ import InfoPopup from '../../components/forms/InfoPopup'
 import { i18nSurveyText } from 'util/juniperSurveyUtils'
 
 export type QuestionDesignerProps = {
-  question: Question
+  question: SimpleQuestion
   isNewQuestion: boolean
   readOnly: boolean
   showName: boolean
   showQuestionTypeHeader?: boolean
   currentLanguage: PortalEnvironmentLanguage
   supportedLanguages: PortalEnvironmentLanguage[]
-  onChange: (newValue: Question) => void
+  onChange: (newValue: SimpleQuestion) => void
   addNextQuestion?: () => void
 }
 
@@ -57,7 +60,8 @@ export const QuestionDesigner = (props: QuestionDesignerProps) => {
         <>
           <p className="fs-4 mb-0">Templated question</p>
           <p>
-            This question uses <span className="fw-bold">{question.questionTemplateName}</span> as a template.
+            This question uses <span className="fw-bold">{(question as TemplatedQuestion).questionTemplateName}</span>
+            as a template.
             Question settings entered here override settings from the template.
           </p>
         </>

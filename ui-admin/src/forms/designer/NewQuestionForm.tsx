@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
 
-import { PortalEnvironmentLanguage, Question, QuestionType, TemplatedQuestion } from '@juniper/ui-core'
+import {
+  PortalEnvironmentLanguage,
+  Question, SimpleInteractiveQuestion,
+  SimpleQuestionType, SimpleQuestion
+} from '@juniper/ui-core'
 
 import { Button } from 'components/forms/Button'
 import { QuestionDesigner } from './QuestionDesigner'
@@ -20,12 +24,12 @@ type NewQuestionFormProps = {
   supportedLanguages: PortalEnvironmentLanguage[]
 }
 
-/** UI for creating a new question. */
+/** UI for creating a new question.  does not support dynamic panels */
 export const NewQuestionForm = (props: NewQuestionFormProps) => {
   const { onCreate, questionTemplates, readOnly } = props
 
-  const [question, setQuestion] = useState<Question>(baseQuestions['text'])
-  const [selectedQuestionType, setSelectedQuestionType] = useState<QuestionType>()
+  const [question, setQuestion] = useState<SimpleQuestion>(baseQuestions['text'])
+  const [selectedQuestionType, setSelectedQuestionType] = useState<SimpleQuestionType>()
   const [selectedQuestionTemplateName, setSelectedQuestionTemplateName] = useState<{value: string, label: string}>()
   const [freetext, setFreetext] = useState<string>('')
   const [freetextMode, setFreetextMode] = useState<boolean>(false)
@@ -57,11 +61,11 @@ export const NewQuestionForm = (props: NewQuestionFormProps) => {
             onChange={newValue => {
               setFreetextMode(false)
               if (newValue) {
-                setQuestion({ name: questionName, questionTemplateName: newValue.value } as Question)
+                setQuestion({ name: questionName, questionTemplateName: newValue.value } as unknown as SimpleQuestion)
                 setSelectedQuestionTemplateName(newValue)
                 //Change the selected question type to match the template
                 const referencedQuestionTemplate = questionTemplates.find(questionTemplate =>
-                  questionTemplate.name === newValue.value) as Exclude<Question, TemplatedQuestion>
+                  questionTemplate.name === newValue.value) as SimpleInteractiveQuestion
                 setSelectedQuestionType(referencedQuestionTemplate.type)
               } else {
                 //Remove the questionTemplateName from the question object
@@ -70,7 +74,7 @@ export const NewQuestionForm = (props: NewQuestionFormProps) => {
                   ...question,
                   name: questionName,
                   type: selectedQuestionType
-                }, ['questionTemplateName']) as Question)
+                }, ['questionTemplateName']) as SimpleQuestion)
                 setSelectedQuestionTemplateName(undefined)
               }
             }}
@@ -89,9 +93,9 @@ export const NewQuestionForm = (props: NewQuestionFormProps) => {
           className="form-select"
           value={selectedQuestionType}
           onChange={e => {
-            const newQuestionType = e.target.value as QuestionType
+            const newQuestionType = e.target.value as SimpleQuestionType
             setSelectedQuestionType(newQuestionType)
-            setQuestion({ ...baseQuestions[newQuestionType], ...question, type: newQuestionType } as Question)
+            setQuestion({ ...baseQuestions[newQuestionType], ...question, type: newQuestionType } as SimpleQuestion)
           }}>
           <option hidden>Select a question type</option>
           <option value="text">Text</option>
@@ -124,7 +128,7 @@ export const NewQuestionForm = (props: NewQuestionFormProps) => {
           onChange={value => {
             setFreetext(value)
             const newQuestionObj = questionFromRawText(value)
-            const newType = newQuestionObj.type as QuestionType
+            const newType = newQuestionObj.type as SimpleQuestionType
             setSelectedQuestionType(newType)
             //questionFromRawText can only reasonably predict the type of question, it's choices, and it's text.
             //We'll pick those three fields out and allow the user to decide the rest of the fields explicitly.
@@ -133,7 +137,7 @@ export const NewQuestionForm = (props: NewQuestionFormProps) => {
               type: newType,
               title: newQuestionObj.title || '',
               choices: newQuestionObj.choices
-            } as Question)
+            } as SimpleQuestion)
           }}
         />
       </div> }
