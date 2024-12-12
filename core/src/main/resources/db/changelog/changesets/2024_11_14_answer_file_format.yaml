@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: "answer_file_format"
+      author: connorlbark
+      changes:
+        - dropTable:
+            tableName: participant_file_survey_response
+        - addColumn:
+            tableName: answer
+            columns:
+              - column:
+                  { name: format, type: text, constraints: { nullable: false}, defaultValue: 'NONE' }

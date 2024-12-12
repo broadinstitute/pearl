@@ -399,6 +399,22 @@ paths:
           description: no content
         '500':
           $ref: '#/components/responses/ServerError'
+    put:
+      summary: updates a study
+      tags: [ study ]
+      operationId: update
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: updated study object
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/kitTypes:
     get:
       summary: Gets the kit types for a study
@@ -1334,6 +1350,20 @@ paths:
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
+    delete:
+      summary: deletes the exportIntegration by id
+      tags: [ exportIntegration ]
+      operationId: delete
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '204':
+          description: Successful deletion
+        '500':
+          $ref: '#/components/responses/ServerError'
     patch:
       summary: saves an exportIntegration
       tags: [ exportIntegration ]
@@ -2073,6 +2103,27 @@ paths:
           description: image data. Note that "version" supports both integers and the string 'latest' to get the most recent
           content:
             image/*: # see https://superuser.com/questions/979135/is-there-a-generic-mime-type-for-all-image-files
+              schema:
+                type: string
+                format: binary
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrollees/{enrolleeShortcode}/file/{fileName}:
+    get:
+      summary: Returns the binary file data of the given file name
+      tags: [ participantFile ]
+      operationId: download
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - *enrolleeShortcodeParam
+        - { name: fileName, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: file data
+          content:
+            application/*: # any file type
               schema:
                 type: string
                 format: binary

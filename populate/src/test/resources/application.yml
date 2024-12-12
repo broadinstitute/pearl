@@ -9,6 +9,9 @@ env:
     user: ${DATABASE_USER:test_dbuser}
 
   populate.populate-from-classpath: true
+  fileUpload:
+    backend: LocalFileStorageBackend
+    localFileStoragePath: ${LOCAL_FILE_STORAGE_PATH:/tmp/juniper/fileupload}
 
 # Below here is non-deployment-specific
 

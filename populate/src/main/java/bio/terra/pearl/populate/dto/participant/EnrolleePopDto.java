@@ -1,12 +1,8 @@
 package bio.terra.pearl.populate.dto.participant;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.populate.dto.TimeShiftable;
+import bio.terra.pearl.populate.dto.fileupload.ParticipantFilePopDto;
 import bio.terra.pearl.populate.dto.kit.KitRequestPopDto;
 import bio.terra.pearl.populate.dto.notifications.NotificationPopDto;
 import bio.terra.pearl.populate.dto.survey.PreEnrollmentResponsePopDto;
@@ -16,6 +12,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Getter @Setter @NoArgsConstructor @SuperBuilder
 public class EnrolleePopDto extends Enrollee implements TimeShiftable {
@@ -47,4 +48,6 @@ public class EnrolleePopDto extends Enrollee implements TimeShiftable {
     private Set<KitRequestPopDto> kitRequestDtos = new HashSet<>();
     @Builder.Default
     private List<ProxyPopDto> proxyPopDtos = new ArrayList<>();
+    @Builder.Default
+    private List<ParticipantFilePopDto> participantFilePopDtos = new ArrayList<>();
 }

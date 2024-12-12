@@ -31,6 +31,7 @@ public class Answer extends BaseEntity {
     private int surveyVersion;
     private String viewedLanguage;
     private AnswerType answerType;
+    private AnswerFormat format;
     private String stringValue;
     // objects are stored as JSON strings
     private String objectValue;

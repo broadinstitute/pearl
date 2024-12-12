@@ -28,4 +28,5 @@ public class PreEnrollmentResponse extends BaseEntity {
     private String fullData;
     @Builder.Default
     private boolean qualified = false; // whether or not the responses meet the criteria for eligibility.
+    private String referralSource;
 }

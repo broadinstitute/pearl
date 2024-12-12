@@ -2,7 +2,7 @@ package bio.terra.pearl.core.model.survey;
 
 import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

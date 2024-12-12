@@ -1,8 +1,8 @@
 package bio.terra.pearl.core.dao.survey;
 
 import bio.terra.pearl.core.dao.BaseMutableJdbiDao;
-import bio.terra.pearl.core.dao.fileupload.ParticipantFileDao;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.core.dao.file.ParticipantFileDao;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.survey.Answer;
 import bio.terra.pearl.core.model.survey.SurveyResponse;
 import org.jdbi.v3.core.Jdbi;
@@ -62,6 +62,7 @@ public class SurveyResponseDao extends BaseMutableJdbiDao<SurveyResponse> {
         Map<UUID, SurveyResponse> responseById = new HashMap<>();
         for (SurveyResponse response : responses) {
             responseById.put(response.getId(), response);
+            attachParticipantFiles(response);
         }
         for (Answer answer : answers) {
             responseById.get(answer.getSurveyResponseId()).getAnswers().add(answer);
@@ -73,6 +74,7 @@ public class SurveyResponseDao extends BaseMutableJdbiDao<SurveyResponse> {
         Optional<SurveyResponse> responseOpt = find(responseId);
         responseOpt.ifPresent(response -> {
             attachAnswers(response);
+            attachParticipantFiles(response);
         });
         return responseOpt;
     }

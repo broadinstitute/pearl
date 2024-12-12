@@ -1,3 +1,5 @@
+import { ParticipantFile } from 'src/types/participantFile'
+
 export const answerMappingTargetTypes = ['PROFILE', 'PROXY', 'PROXY_PROFILE'] as const
 export type AnswerMappingTargetType = typeof answerMappingTargetTypes[number];
 
@@ -28,7 +30,7 @@ export type VersionedForm = {
   footer?: string
 }
 
-export type SurveyType = 'RESEARCH' | 'OUTREACH' | 'CONSENT' | 'ADMIN'
+export type SurveyType = 'RESEARCH' | 'OUTREACH' | 'CONSENT' | 'ADMIN' | 'DOCUMENT_REQUEST'
 
 export type Survey = VersionedForm & {
   surveyType: SurveyType
@@ -90,6 +92,7 @@ export type SurveyResponse = FormResponse & {
   surveyId: string
   enrolleeId: string
   answers: Answer[]
+  participantFiles?: ParticipantFile[]
   complete: boolean
 }
 
@@ -104,12 +107,17 @@ export type PreregistrationResponse = FormResponse & {
   qualified: boolean
 }
 
+export type ReferralSource = {
+  referringSite: string
+}
+
 export type PreEnrollmentResponse = FormResponse & {
   surveyId: string
   studyEnvironmentId: string
   answers: Answer[]
   fullData: string
   qualified: boolean
+  referralSource?: string
 }
 
 // Survey configuration

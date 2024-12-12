@@ -3,8 +3,9 @@ import { Link, Route, Routes } from 'react-router-dom'
 import UserList from './UserList'
 import AdminUserDetail from './AdminUserDetail'
 import { NavBreadcrumb } from 'navbar/AdminNavbar'
-import { Portal } from '@juniper/ui-core'
+import { Portal, StudyEnvParams, OptionalStudyEnvParams } from '@juniper/ui-core'
 import RolesList from './RolesList'
+import { baseStudyEnvPath } from '../study/StudyEnvironmentRouter'
 
 /**
  * Handles user management paths across all users
@@ -26,10 +27,11 @@ export default function AdminUserRouter() {
 /**
  * handles user management paths for the given portal & study
  */
-export function PortalAdminUserRouter({ portal }: {portal: Portal}) {
+export function PortalAdminUserRouter({ portal, studyEnvParams }:
+  {portal: Portal, studyEnvParams: OptionalStudyEnvParams}) {
   return <>
     <NavBreadcrumb value="users">
-      <Link to={portalUsersPath(portal.shortcode)}>Users</Link>
+      <Link to={portalUsersPath(studyEnvParams)}>Users</Link>
     </NavBreadcrumb>
     <Routes>
       <Route path="roles" element={<RolesList/>}/>
@@ -41,6 +43,9 @@ export function PortalAdminUserRouter({ portal }: {portal: Portal}) {
 }
 
 /** path to portal-specific user list, but keeps study in-context */
-export const portalUsersPath = (portalShortcode: string) => {
-  return `/${portalShortcode}/users`
+export const portalUsersPath = (studyEnvParams: OptionalStudyEnvParams) => {
+  if (studyEnvParams.studyShortcode) {
+    return `${baseStudyEnvPath(studyEnvParams as StudyEnvParams)}/users`
+  }
+  return `/${studyEnvParams.portalShortcode}/users`
 }

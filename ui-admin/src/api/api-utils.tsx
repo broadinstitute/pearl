@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { failureNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
+import { SUPPORT_EMAIL_ADDRESS } from '@juniper/ui-core'
 
 export type ApiErrorResponse = {
   message: string,
@@ -8,7 +9,7 @@ export type ApiErrorResponse = {
   statusCode: number
 }
 
-const errorSuffix = 'If this error persists, please contact support@juniper.terra.bio'
+const errorSuffix = `If this error persists, please contact ${SUPPORT_EMAIL_ADDRESS}`
 
 /**
  * performs default error message alerting if an error occurs during an API request.

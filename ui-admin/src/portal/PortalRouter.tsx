@@ -1,11 +1,11 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import {
   Link,
   Route,
   Routes, useNavigate,
   useParams
 } from 'react-router-dom'
-import StudyRouter from '../study/StudyRouter'
+import StudyRouter, { studyShortcodeFromPath } from '../study/StudyRouter'
 import PortalDashboard from './dashboard/PortalDashboard'
 import {
   LoadedPortalContextT,
@@ -22,7 +22,6 @@ import {
   PortalEnvironment
 } from '@juniper/ui-core'
 import SiteContentLoader from './siteContent/SiteContentLoader'
-import { PortalAdminUserRouter } from 'user/AdminUserRouter'
 import { NavBreadcrumb } from 'navbar/AdminNavbar'
 import Select from 'react-select'
 import { portalEnvPath } from 'study/StudyEnvironmentRouter'
@@ -43,13 +42,34 @@ export type PortalEnvContext = {
 /** controls routes for within a portal */
 export default function PortalRouter() {
   const portalContext = useContext(PortalContext) as LoadedPortalContextT
+  const portal = portalContext.portal
+
+  // if there isn't a study selected, default to the first
+  const params = useParams()
+  const studyShortcode = studyShortcodeFromPath(params['*'])
+  const navigate = useNavigate()
+
+  let effectivePath = portalHomePath(portalContext.portal.shortcode, studyShortcode, 'live')
+  const currentStudy = portal.portalStudies.find(pStudy =>
+    pStudy.study.shortcode === studyShortcode)?.study ||
+    portal?.portalStudies.sort((a, b) => a.createdAt - b.createdAt)[0]?.study
+  if (!studyShortcode && currentStudy) {
+    effectivePath =`/${portal.shortcode}/studies/${currentStudy?.shortcode}/env/live/portalDashboard`
+  }
+
+  useEffect(() => {
+    if (!studyShortcode && currentStudy) {
+      navigate(effectivePath)
+    }
+  }, [])
+
   return <>
-    <NavBreadcrumb value={portalHomePath(portalContext.portal.shortcode)}>
+    <NavBreadcrumb value={effectivePath}>
       <Link className='me-2' to={''}>
         <FontAwesomeIcon icon={faHome}/> Home
       </Link>
       <FontAwesomeIcon icon={faChevronRight} className="fa-xs text-muted me-2"/>
-      <Link className='me-2' to={portalHomePath(portalContext.portal.shortcode)}>
+      <Link className='me-2' to={effectivePath}>
         {portalContext.portal.name}
       </Link>
     </NavBreadcrumb>
@@ -58,7 +78,6 @@ export default function PortalRouter() {
         <Route path=":studyShortcode/*" element={<StudyRouter portalContext={portalContext}/>}/>
       </Route>
       <Route path="env/:portalEnv/*" element={<PortalEnvRouter portalContext={portalContext}/>}/>
-      <Route path="users/*" element={<PortalAdminUserRouter portal={portalContext.portal}/>}/>
       <Route index element={<PortalDashboard portal={portalContext.portal}/>}/>
       <Route path="*" element={<div>Unmatched portal route</div>}/>
     </Routes>
@@ -138,8 +157,11 @@ function PortalEnvRouter({ portalContext }: {portalContext: LoadedPortalContextT
 }
 
 /** admin homepage for a given portal */
-export const portalHomePath = (portalShortcode: string) => {
-  return `/${portalShortcode}`
+export const portalHomePath = (portalShortcode: string, studyShortcode?: string, envName?: string) => {
+  if (!studyShortcode || !envName) {
+    return `/${portalShortcode}`
+  }
+  return `/${portalShortcode}/studies/${studyShortcode}/env/${envName}/portalDashboard`
 }
 
 /** path to portal-specific user list */

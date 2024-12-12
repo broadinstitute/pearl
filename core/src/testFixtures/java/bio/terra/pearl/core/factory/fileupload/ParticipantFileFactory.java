@@ -1,11 +1,9 @@
 package bio.terra.pearl.core.factory.fileupload;
 
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.participant.Enrollee;
-import bio.terra.pearl.core.model.survey.ParticipantFileSurveyResponse;
-import bio.terra.pearl.core.service.fileupload.ParticipantFileService;
-import bio.terra.pearl.core.service.fileupload.ParticipantFileSurveyResponseService;
+import bio.terra.pearl.core.service.file.ParticipantFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,9 +13,6 @@ import java.util.UUID;
 public class ParticipantFileFactory {
     @Autowired
     public ParticipantFileService participantFileService;
-
-    @Autowired
-    public ParticipantFileSurveyResponseService participantFileSurveyResponseService;
 
     @Autowired
     public EnrolleeFactory enrolleeFactory;
@@ -50,13 +45,5 @@ public class ParticipantFileFactory {
 
     public ParticipantFile buildPersisted(Enrollee enrollee) {
         return buildPersisted(builderWithDependencies(enrollee));
-    }
-
-    public ParticipantFileSurveyResponse attachToSurveyResponse(ParticipantFile participantFile, UUID surveyResponseId) {
-        ParticipantFileSurveyResponse participantFileSurveyResponse = ParticipantFileSurveyResponse.builder()
-                .participantFileId(participantFile.getId())
-                .surveyResponseId(surveyResponseId)
-                .build();
-        return participantFileSurveyResponseService.create(participantFileSurveyResponse);
     }
 }

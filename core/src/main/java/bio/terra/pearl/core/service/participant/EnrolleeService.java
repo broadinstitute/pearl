@@ -14,6 +14,7 @@ import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.exception.NotFoundException;
+import bio.terra.pearl.core.service.file.ParticipantFileService;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.notification.NotificationService;
@@ -53,6 +54,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
     private final FamilyService familyService;
     private final ShortcodeService shortcodeService;
     private final FamilyEnrolleeService familyEnrolleeService;
+    private final ParticipantFileService participantFileService;
 
     public EnrolleeService(EnrolleeDao enrolleeDao,
                            SurveyResponseDao surveyResponseDao,
@@ -72,7 +74,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
                            RandomUtilService randomUtilService,
                            EnrolleeRelationService enrolleeRelationService,
                            @Lazy PortalParticipantUserService portalParticipantUserService,
-                           FamilyService familyService, ShortcodeService shortcodeService, FamilyEnrolleeService familyEnrolleeService) {
+                           FamilyService familyService, ShortcodeService shortcodeService, FamilyEnrolleeService familyEnrolleeService, ParticipantFileService participantFileService) {
         super(enrolleeDao);
         this.surveyResponseDao = surveyResponseDao;
         this.participantTaskDao = participantTaskDao;
@@ -94,6 +96,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
         this.familyService = familyService;
         this.shortcodeService = shortcodeService;
         this.familyEnrolleeService = familyEnrolleeService;
+        this.participantFileService = participantFileService;
     }
 
     public Optional<Enrollee> findOneByShortcode(String shortcode) {
@@ -141,6 +144,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
         enrollee.setProfile(profileService.loadWithMailingAddress(enrollee.getProfileId()).orElseThrow(() -> new IllegalStateException("enrollee does not have a profile")));
         enrollee.setFamilyEnrollees(familyEnrolleeService.findByEnrolleeId(enrollee.getId()));
         enrollee.setRelations(enrolleeRelationService.findAllByEnrolleeOrTargetId(enrollee.getId()));
+        enrollee.setFiles(participantFileService.findByEnrolleeId(enrollee.getId()));
         return enrollee;
     }
 
@@ -210,6 +214,9 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
             throw new UnsupportedOperationException("Cannot delete live, non-withdrawn participants");
         }
         participantTaskService.deleteByEnrolleeId(enrolleeId);
+
+        participantFileService.deleteByEnrolleeId(enrolleeId);
+
         for (SurveyResponse surveyResponse : surveyResponseService.findByEnrolleeId(enrolleeId)) {
             surveyResponseService.delete(surveyResponse.getId(), cascades);
         }

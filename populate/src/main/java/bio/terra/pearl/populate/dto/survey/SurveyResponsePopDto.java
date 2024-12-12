@@ -10,7 +10,6 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Getter @Setter @NoArgsConstructor @SuperBuilder
 public class SurveyResponsePopDto extends SurveyResponse implements TimeShiftable {

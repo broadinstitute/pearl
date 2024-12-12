@@ -37,7 +37,6 @@ export const RedirectFromOAuth = () => {
 
   const defaultEnrollStudy = findDefaultEnrollmentStudy(returnToStudy, portal.portalStudies)
 
-
   useEffect(() => {
     const handleRedirectFromOauth = async () => {
       // RedirectFromOAuth may be rendered before react-oidc-context's AuthProvider has finished doing its thing. If so,

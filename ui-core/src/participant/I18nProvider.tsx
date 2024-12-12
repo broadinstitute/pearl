@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useApiContext } from './ApiProvider'
+import { SUPPORT_EMAIL_ADDRESS } from '../util/supportUtils'
 
 export const I18nContext = createContext<I18nContextT | null>(null)
 
@@ -89,7 +90,7 @@ export function I18nProvider({ defaultLanguage, portalShortcode, children }: {
     {isError && <div className="bg-white h-100 w-100">
       <div className="position-absolute top-50 start-50 translate-middle text-center">
         There is no Juniper site configured for this url.<br/>
-        If this is an error, contact <a href="mailto:support@juniper.terra.bio">support@juniper.terra.bio</a>.
+        If this is an error, contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>.
       </div>
     </div>}
     {!isLoading && !isError && <I18nContext.Provider value={{ languageTexts, i18n, selectedLanguage, changeLanguage }}>

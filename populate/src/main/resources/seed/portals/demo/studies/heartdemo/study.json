@@ -16,7 +16,8 @@
     "surveys/lostInterest.json",
     "surveys/ourHealthConsent.json",
     "surveys/depressionOutreach.json",
-    "surveys/massachusettsSurvey.json"
+    "surveys/massachusettsSurvey.json",
+    "surveys/medRecordRequest.json"
   ],
   "emailTemplateFiles": [
     "emails/studyConsent.json",
@@ -58,7 +59,8 @@
         {"populateFileName": "surveys/socialHealthV3.json"},
         {"populateFileName": "surveys/lostInterest.json"},
         {"populateFileName": "surveys/depressionOutreach.json"},
-        {"populateFileName": "surveys/massachusettsSurvey.json"}
+        {"populateFileName": "surveys/massachusettsSurvey.json"},
+        {"populateFileName": "surveys/medRecordRequest.json"}
       ],
       "triggerDtos": [{
         "triggerType": "EVENT",

@@ -1,19 +1,19 @@
 import { Link } from 'react-router-dom'
 import { Button } from 'components/forms/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowUpRightFromSquare, faCaretUp, faLightbulb } from '@fortawesome/free-solid-svg-icons'
+import { faCaretUp, faLightbulb, faUserPen } from '@fortawesome/free-solid-svg-icons'
 import LoadingSpinner from 'util/LoadingSpinner'
 import React, { useState } from 'react'
 import Api, { MailingListContact } from 'api/api'
 import { useLoadingEffect } from 'api/api-utils'
 import { Portal } from '@juniper/ui-core'
-import { mailingListPath } from 'portal/PortalRouter'
 import pluralize from 'pluralize'
 import { InfoCard, InfoCardBody, InfoCardHeader } from 'components/InfoCard'
+import { studyEnvMailingListPath, useStudyEnvParamsFromPath } from '../../../study/StudyEnvironmentRouter'
 
 export const MailingListWidget = ({ portal }: { portal: Portal }) => {
   const [contacts, setContacts] = useState<MailingListContact[]>([])
-
+  const studyEnvParams = useStudyEnvParamsFromPath()
   const recentContacts = contacts.filter(contact => {
     const lastWeek = new Date()
     lastWeek.setDate(lastWeek.getDate() - 7)
@@ -21,7 +21,7 @@ export const MailingListWidget = ({ portal }: { portal: Portal }) => {
   })
 
   const { isLoading: isMailingListLoading } = useLoadingEffect(async () => {
-    const result = await Api.fetchMailingList(portal.shortcode, 'live')
+    const result = await Api.fetchMailingList(portal.shortcode, studyEnvParams.envName || 'live')
     setContacts(result)
   }, [portal.shortcode])
 
@@ -30,10 +30,10 @@ export const MailingListWidget = ({ portal }: { portal: Portal }) => {
       <InfoCardHeader>
         <div className="d-flex align-items-center justify-content-between w-100">
           <span className="fw-bold">Mailing List</span>
-          <Link to={mailingListPath(portal.shortcode, 'live')}>
+          <Link to={studyEnvMailingListPath(studyEnvParams)}>
             <Button tooltip={'View mailing list'}
               variant="light" className="border">
-              <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="fa-lg"/>
+              <FontAwesomeIcon icon={faUserPen} className="fa-lg"/> Manage
             </Button>
           </Link>
         </div>

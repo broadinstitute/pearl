@@ -27,20 +27,17 @@ import bio.terra.pearl.populate.dto.survey.PreEnrollmentResponsePopDto;
 import bio.terra.pearl.populate.dto.survey.SurveyResponsePopDto;
 import bio.terra.pearl.populate.service.contexts.StudyPopulateContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -48,6 +45,7 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class EnrolleeResponsePopulator {
+
 
     public EnrolleeResponsePopulator(PreEnrollmentResponseDao preEnrollmentResponseDao, ObjectMapper objectMapper, SurveyService surveyService, SurveyResponseService surveyResponseService, ParticipantTaskService participantTaskService, TimeShiftDao timeShiftDao, AdminUserDao adminUserDao, PortalService portalService, SurveyQuestionDefinitionDao surveyQuestionDefinitionDao) {
         this.preEnrollmentResponseDao = preEnrollmentResponseDao;
@@ -61,12 +59,14 @@ public class EnrolleeResponsePopulator {
         this.surveyQuestionDefinitionDao = surveyQuestionDefinitionDao;
     }
 
-    public void populateResponse(Enrollee enrollee, SurveyResponsePopDto responsePopDto,
-                                  PortalParticipantUser ppUser, boolean simulateSubmissions, StudyPopulateContext context,
-                                  ParticipantUser pUser)
+    public void populateResponse(Enrollee enrollee,
+                                 SurveyResponsePopDto responsePopDto,
+                                 PortalParticipantUser ppUser,
+                                 boolean simulateSubmissions, StudyPopulateContext context,
+                                 ParticipantUser pUser)
             throws JsonProcessingException {
         ResponsibleEntity responsibleUser;
-        if(responsePopDto.getCreatingAdminUsername() != null) {
+        if (responsePopDto.getCreatingAdminUsername() != null) {
             responsibleUser = new ResponsibleEntity(adminUserDao.findByUsername(responsePopDto.getCreatingAdminUsername()).get());
         } else {
             responsibleUser = new ResponsibleEntity(pUser);
@@ -93,7 +93,7 @@ public class EnrolleeResponsePopulator {
 
         auditInfo.setResponsibleEntity(responsibleUser);
 
-        if(responsePopDto.getCreatingAdminUsername() != null) {
+        if (responsePopDto.getCreatingAdminUsername() != null) {
             AdminUser adminUser = adminUserDao.findByUsername(responsePopDto.getCreatingAdminUsername()).get();
             response.setCreatingAdminUserId(adminUser.getId());
             response.setCreatingParticipantUserId(null);

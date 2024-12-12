@@ -248,7 +248,6 @@ const SurveyEditorView = (props: SurveyEditorViewProps) => {
       </div>
       <ApiProvider api={previewApi(portal.shortcode, currentEnv.environmentName)}>
         <FormContentEditor
-          portal={portal}
           initialContent={draft?.content || currentForm.content} //favor loading the draft, if we find one
           initialAnswerMappings={draft?.answerMappings || currentForm.answerMappings || []}
           supportedLanguages={portalEnv?.supportedLanguages || []}

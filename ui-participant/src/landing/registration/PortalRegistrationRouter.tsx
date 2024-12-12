@@ -36,7 +36,6 @@ export default function PortalRegistrationRouter({
     setPreRegResponseId(preRegId)
   }
 
-
   useEffect(() => {
     // if there's a preRegResponseId on initial load (because it was in local storage) validate it and then redirect
     if (preRegResponseId) {

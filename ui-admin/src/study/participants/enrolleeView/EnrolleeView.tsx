@@ -1,7 +1,16 @@
 import React, { useState } from 'react'
-import { ParticipantTask, StudyEnvironmentSurvey, SurveyResponse } from 'api/api'
+import {
+  ParticipantTask,
+  StudyEnvironmentSurvey,
+  SurveyResponse
+} from 'api/api'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
-import { Link, NavLink, Route, Routes } from 'react-router-dom'
+import {
+  Link,
+  NavLink,
+  Route,
+  Routes
+} from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import SurveyResponseView from '../survey/SurveyResponseView'
 import PreEnrollmentView from '../survey/PreEnrollmentView'
@@ -16,11 +25,25 @@ import { NavBreadcrumb } from 'navbar/AdminNavbar'
 import useRoutedEnrollee from './useRoutedEnrollee'
 import LoadingSpinner from 'util/LoadingSpinner'
 import CollapsableMenu from 'navbar/CollapsableMenu'
-import { faCircleCheck, faCircleHalfStroke, faMinus } from '@fortawesome/free-solid-svg-icons'
-import { faCircle as faEmptyCircle, faCircleXmark } from '@fortawesome/free-regular-svg-icons'
-import { Enrollee, ParticipantTaskStatus } from '@juniper/ui-core'
+import {
+  faCircleCheck,
+  faCircleHalfStroke,
+  faMinus
+} from '@fortawesome/free-solid-svg-icons'
+import {
+  faCircle as faEmptyCircle,
+  faCircleXmark
+} from '@fortawesome/free-regular-svg-icons'
+import {
+  Enrollee,
+  ParticipantTaskStatus
+} from '@juniper/ui-core'
 import EnrolleeOverview from './EnrolleeOverview'
-import { navDivStyle, navListItemStyle } from 'util/subNavStyles'
+import {
+  navDivStyle,
+  navListItemStyle
+} from 'util/subNavStyles'
+import { RequireUserPermission } from 'util/RequireUserPermission'
 
 
 export type SurveyWithResponsesT = {
@@ -118,7 +141,7 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                   <ul className="list-unstyled">
                     {currentEnv.preEnrollSurvey && <li className="mb-2">
                       <NavLink to="preRegistration" className={getLinkCssClasses}>
-                        PreEnrollment
+                          PreEnrollment
                       </NavLink>
                     </li>}
                     <SurveyList surveys={surveys
@@ -140,6 +163,16 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
                   responseMap={responseMap} emptyText={'No study staff forms'}/>}
                 />
               </li>
+              <RequireUserPermission superuser>
+                <li style={navListItemStyle}>
+                  <CollapsableMenu header={'Document Requests'} headerClass="text-black" content={
+                    <SurveyList surveys={surveys
+                      .filter(survey => survey.survey.surveyType === 'DOCUMENT_REQUEST')}
+                    responseMap={responseMap} emptyText={'No document requests'}
+                    />}
+                  />
+                </li>
+              </RequireUserPermission>
               <li style={navListItemStyle}>
                 <CollapsableMenu header={'Outreach'} headerClass="text-black" content={
                   <SurveyList surveys={surveys
@@ -221,8 +254,10 @@ export function LoadedEnrolleeView({ enrollee, studyEnvContext, onUpdate }: {
   </div>
 }
 
-const SurveyList = ({ surveys, responseMap, emptyText }: { emptyText: string,
-  surveys: StudyEnvironmentSurvey[], responseMap: ResponseMapT }) => {
+const SurveyList = ({ surveys, responseMap, emptyText }: {
+  emptyText: string,
+  surveys: StudyEnvironmentSurvey[], responseMap: ResponseMapT
+}) => {
   return <ul className="list-unstyled">
     {surveys.length === 0 && <li className="mb-2">
       <span className="text-muted fst-italic">{emptyText}</span>
@@ -255,7 +290,7 @@ function getLinkCssClasses({ isActive }: { isActive: boolean }) {
 export function surveyResponsePath(currentEnvPath: string, enrolleeShortcode: string,
   surveyStableId: string, taskId?: string) {
   return `${currentEnvPath}/participants/${enrolleeShortcode}/surveys/${surveyStableId}${taskId ?
-      `?taskId=${taskId}` : ''}`
+    `?taskId=${taskId}` : ''}`
 }
 function createSurveyNavLink(stableId: string, responseMap: ResponseMapT, survey: StudyEnvironmentSurvey) {
   const taskId = responseMap[stableId]?.tasks[0]?.id

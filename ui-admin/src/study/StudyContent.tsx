@@ -1,6 +1,12 @@
-import React, { useContext, useState } from 'react'
+import React, {
+  useContext,
+  useState
+} from 'react'
 
-import { paramsFromContext, StudyEnvContextT } from './StudyEnvironmentRouter'
+import {
+  paramsFromContext,
+  StudyEnvContextT
+} from './StudyEnvironmentRouter'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
@@ -8,17 +14,31 @@ import CreateSurveyModal from './surveys/CreateSurveyModal'
 import { faEllipsisH } from '@fortawesome/free-solid-svg-icons'
 import ArchiveSurveyModal from './surveys/ArchiveSurveyModal'
 import DeleteSurveyModal from './surveys/DeleteSurveyModal'
-import { StudyEnvironmentSurvey, StudyEnvironmentSurveyNamed, SurveyType } from '@juniper/ui-core'
-import { Button, IconButton } from 'components/forms/Button'
+import {
+  StudyEnvironmentSurvey,
+  StudyEnvironmentSurveyNamed,
+  SurveyType
+} from '@juniper/ui-core'
+import {
+  Button,
+  IconButton
+} from 'components/forms/Button'
 import CreatePreEnrollSurveyModal from './surveys/CreatePreEnrollSurveyModal'
 import { renderPageHeader } from 'util/pageUtils'
 
 import Api from 'api/api'
-import { PortalContext, PortalContextT } from 'portal/PortalProvider'
+import {
+  PortalContext,
+  PortalContextT
+} from 'portal/PortalProvider'
 import LoadingSpinner from 'util/LoadingSpinner'
-import { doApiLoad, useLoadingEffect } from '../api/api-utils'
+import {
+  doApiLoad,
+  useLoadingEffect
+} from '../api/api-utils'
 import _uniq from 'lodash/uniq'
 import SurveyEnvironmentTable from './surveys/SurveyEnvironmentTable'
+import { RequireUserPermission } from 'util/RequireUserPermission'
 
 
 /** renders the main configuration page for a study environment */
@@ -64,6 +84,7 @@ function StudyContent({ studyEnvContext }: {studyEnvContext: StudyEnvContextT}) 
   const outreachSurveyStableIds = getUniqueStableIdsForType(configuredSurveys, 'OUTREACH')
   const consentSurveyStableIds = getUniqueStableIdsForType(configuredSurveys, 'CONSENT')
   const adminFormStableIds = getUniqueStableIdsForType(configuredSurveys, 'ADMIN')
+  const documnetRequestStableIds = getUniqueStableIdsForType(configuredSurveys, 'DOCUMENT_REQUEST')
 
   return <div className="container-fluid px-4 py-2">
     { renderPageHeader('Forms & Surveys') }
@@ -87,7 +108,7 @@ function StudyContent({ studyEnvContext }: {studyEnvContext: StudyEnvContextT}) 
                         <li>
                           <button className="dropdown-item"
                             onClick={() => alert('To remove a pre-enroll survey, contact support')}>
-                            Remove
+                              Remove
                           </button>
                         </li>
                       </ul>
@@ -177,6 +198,32 @@ function StudyContent({ studyEnvContext }: {studyEnvContext: StudyEnvContextT}) 
               </div>
             </div>
           </li>
+          <RequireUserPermission superuser>
+            <li className="mb-3 rounded-2 p-3" style={{ background: '#efefef' }}>
+              <h6>Document Requests</h6>
+              <div className="flex-grow-1 pt-3">
+                <SurveyEnvironmentTable
+                  key={studyEnvContext.currentEnvPath}
+                  stableIds={documnetRequestStableIds}
+                  studyEnvParams={paramsFromContext(studyEnvContext)}
+                  configuredSurveys={configuredSurveys}
+                  setSelectedSurveyConfig={setSelectedSurveyConfig}
+                  updateConfiguredSurveys={updateConfiguredSurveys}
+                  setShowDeleteSurveyModal={setShowDeleteSurveyModal}
+                  setShowArchiveSurveyModal={setShowArchiveSurveyModal}
+                  showArchiveSurveyModal={showArchiveSurveyModal}
+                  showDeleteSurveyModal={showDeleteSurveyModal}
+                />
+                <div>
+                  <Button variant="secondary" data-testid={'addDocumentRequest'} onClick={() => {
+                    setCreateSurveyType('DOCUMENT_REQUEST')
+                  }}>
+                    <FontAwesomeIcon icon={faPlus}/> Add
+                  </Button>
+                </div>
+              </div>
+            </li>
+          </RequireUserPermission>
           <li className="mb-3 rounded-2 p-3" style={{ background: '#efefef' }}>
             <h6>Outreach</h6>
             <div className="flex-grow-1 pt-3">

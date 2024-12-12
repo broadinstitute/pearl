@@ -186,7 +186,8 @@ export const mockSurveyResponse = (): SurveyResponse => {
     resumeData: '{}',
     enrolleeId: 'enrollee1',
     complete: false,
-    answers: []
+    answers: [],
+    participantFiles: []
   }
 }
 

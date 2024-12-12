@@ -14,14 +14,14 @@ import bio.terra.pearl.core.factory.survey.SurveyResponseFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.audit.ParticipantDataChange;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
-import bio.terra.pearl.core.service.fileupload.ParticipantFileService;
+import bio.terra.pearl.core.service.file.ParticipantFileService;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
 import bio.terra.pearl.core.service.participant.ParticipantUserService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
@@ -296,7 +296,9 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
                 .creatingParticipantUserId(enrolleeBundle.enrollee().getParticipantUserId())
                 .surveyId(survey.getId())
                 .complete(false)
-                .participantFiles(List.of(file))
+                .answers(List.of(
+                        Answer.builder().stringValue(file.getFileName()).format(AnswerFormat.FILE_NAME).questionStableId("my_file_question").build())
+                )
                 .build();
 
         surveyResponseService.updateResponse(response, new ResponsibleEntity(enrolleeBundle.participantUser()), null,
@@ -308,14 +310,6 @@ public class SurveyResponseServiceTests extends BaseSpringBootTest {
         // check that the answers were created
         SurveyResponse savedResponse = surveyResponseService.findByEnrolleeId(enrolleeBundle.enrollee().getId()).get(0);
         assertThat(participantFileService.findBySurveyResponseId(savedResponse.getId()), hasSize(1));
-
-
-        savedResponse.setParticipantFiles(List.of());
-        surveyResponseService.updateResponse(savedResponse, new ResponsibleEntity(enrolleeBundle.participantUser()), null,
-                enrolleeBundle.portalParticipantUser(), enrolleeBundle.enrollee(), task.getId(), survey.getPortalId());
-
-        assertThat(participantFileService.findBySurveyResponseId(savedResponse.getId()), hasSize(0));
-
     }
 
     @Test
