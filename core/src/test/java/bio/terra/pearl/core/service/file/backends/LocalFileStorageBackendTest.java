@@ -1,6 +1,6 @@
-package bio.terra.pearl.core.service.fileupload.backends;
+package bio.terra.pearl.core.service.file.backends;
 
-import bio.terra.pearl.core.service.fileupload.FileStorageConfig;
+import bio.terra.pearl.core.service.file.FileStorageConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.env.MockEnvironment;

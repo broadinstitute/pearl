@@ -1,6 +1,6 @@
-package bio.terra.pearl.core.service.fileupload.backends;
+package bio.terra.pearl.core.service.file.backends;
 
-import bio.terra.pearl.core.service.fileupload.FileStorageConfig;
+import bio.terra.pearl.core.service.file.FileStorageConfig;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 

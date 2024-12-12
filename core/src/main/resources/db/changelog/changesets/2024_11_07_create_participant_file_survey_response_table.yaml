@@ -20,5 +20,3 @@ databaseChangeLog:
                   { name: creating_participant_user_id, type: uuid, constraints: { foreignKeyName: fk_creating_participant_participant_file_survey_response, references: participant_user(id) } }
               - column:
                   { name: creating_admin_user_id, type: uuid, constraints: { foreignKeyName: fk_creating_admin_participant_file_survey_response, references: admin_user(id) } }
-
-

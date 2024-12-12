@@ -2108,6 +2108,27 @@ paths:
                 format: binary
         '500':
           $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrollees/{enrolleeShortcode}/file/{fileName}:
+    get:
+      summary: Returns the binary file data of the given file name
+      tags: [ participantFile ]
+      operationId: download
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - *enrolleeShortcodeParam
+        - { name: fileName, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: file data
+          content:
+            application/*: # any file type
+              schema:
+                type: string
+                format: binary
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrolleesWithKits:
     get:
       summary: Gets a list of enrollees with tasks and kit requests

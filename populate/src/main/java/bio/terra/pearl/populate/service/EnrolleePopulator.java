@@ -7,6 +7,7 @@ import bio.terra.pearl.core.dao.survey.PreEnrollmentResponseDao;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitRequestStatus;
 import bio.terra.pearl.core.model.kit.KitType;
@@ -18,9 +19,15 @@ import bio.terra.pearl.core.model.survey.PreEnrollmentResponse;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyTaskConfigDto;
-import bio.terra.pearl.core.model.workflow.*;
+import bio.terra.pearl.core.model.workflow.HubResponse;
+import bio.terra.pearl.core.model.workflow.ParticipantTask;
+import bio.terra.pearl.core.model.workflow.RecurrenceType;
+import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
+import bio.terra.pearl.core.service.file.ParticipantFileService;
+import bio.terra.pearl.core.service.file.backends.FileStorageBackend;
+import bio.terra.pearl.core.service.file.backends.FileStorageBackendProvider;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.kit.pepper.PepperKit;
@@ -38,6 +45,7 @@ import bio.terra.pearl.core.service.survey.SurveyTaskDispatcher;
 import bio.terra.pearl.core.service.workflow.EnrollmentService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import bio.terra.pearl.populate.dao.ParticipantUserPopulateDao;
+import bio.terra.pearl.populate.dto.fileupload.ParticipantFilePopDto;
 import bio.terra.pearl.populate.dto.kit.KitRequestPopDto;
 import bio.terra.pearl.populate.dto.notifications.NotificationPopDto;
 import bio.terra.pearl.populate.dto.participant.*;
@@ -55,7 +63,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -84,7 +94,8 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                              KitRequestService kitRequestService, KitTypeDao kitTypeDao, AdminUserDao adminUserDao,
                              ParticipantNotePopulator participantNotePopulator,
                              ParticipantUserPopulateDao participantUserPopulateDao, PortalParticipantUserPopulator portalParticipantUserPopulator, ObjectMapper objectMapper, PortalService portalService,
-                             ShortcodeService shortcodeService, StudyEnvironmentSurveyService studyEnvironmentSurveyService, EnrolleeResponsePopulator enrolleeResponsePopulator, SurveyTaskDispatcher surveyTaskDispatcher) {
+                             ShortcodeService shortcodeService, StudyEnvironmentSurveyService studyEnvironmentSurveyService, EnrolleeResponsePopulator enrolleeResponsePopulator, SurveyTaskDispatcher surveyTaskDispatcher,
+                             FileStorageBackendProvider fileStorageBackendProvider, ParticipantFileService participantFileService) {
         this.portalParticipantUserService = portalParticipantUserService;
         this.preEnrollmentResponseDao = preEnrollmentResponseDao;
         this.surveyService = surveyService;
@@ -111,6 +122,8 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         this.shortcodeService = shortcodeService;
         this.studyEnvironmentSurveyService = studyEnvironmentSurveyService;
         this.enrolleeResponsePopulator = enrolleeResponsePopulator;
+        this.fileStorageBackend = fileStorageBackendProvider.get();
+        this.participantFileService = participantFileService;
         this.surveyTaskDispatcher = surveyTaskDispatcher;
     }
 
@@ -155,6 +168,23 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         enrollee.getKitRequests().add(
                 new KitRequestDto(kitRequest, kitType, enrollee.getShortcode(), objectMapper));
         return kitRequest;
+    }
+
+    private ParticipantFile populateParticipantFile(Enrollee enrollee, ParticipantFilePopDto fileDto) {
+        InputStream fileContentStream = new ByteArrayInputStream(fileDto.getFileContent().getBytes());
+
+        UUID uploadId = fileStorageBackend.uploadFile(fileContentStream);
+
+        ParticipantFile file = ParticipantFile.builder()
+                .enrolleeId(enrollee.getId())
+                .fileName(fileDto.getFileName())
+                .fileType(fileDto.getFileType())
+                .externalFileId(uploadId)
+                .fileType(fileDto.getFileType())
+                .creatingParticipantUserId(enrollee.getParticipantUserId())
+                .build();
+
+        return participantFileService.create(file);
     }
 
     private String getTargetName(TaskType taskType, String stableId, UUID portalId, int version) {
@@ -312,6 +342,12 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                                       List<ParticipantTask> tasks, StudyEnvironment attachedEnv, StudyPopulateContext context)
             throws JsonProcessingException {
         ParticipantUser responsibleUser = participantUserService.find(enrollee.getParticipantUserId()).orElseThrow();
+
+        List<ParticipantFile> participantFiles = new ArrayList<>();
+        for (ParticipantFilePopDto fileDto : popDto.getParticipantFilePopDtos()) {
+            participantFiles.add(populateParticipantFile(enrollee, fileDto));
+        }
+
         for (SurveyResponsePopDto responsePopDto : popDto.getSurveyResponseDtos()) {
             enrolleeResponsePopulator.populateResponse(enrollee, responsePopDto, ppUser, popDto.isSimulateSubmissions(), context, responsibleUser);
         }
@@ -468,7 +504,7 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
                 enrolleeResponsePopulator.autoConsent(enrollee, user, ppUser, popType, popContext);
             }
             if (popType.equals(EnrolleePopulateType.ALL_COMPLETE)) {
-                enrolleeResponsePopulator.autoCompleteAll(enrollee, user,  ppUser, popType, popContext);
+                enrolleeResponsePopulator.autoCompleteAll(enrollee, user, ppUser, popType, popContext);
             }
             return enrollee;
         } catch (IOException e) {
@@ -485,12 +521,15 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
         createTimeShiftedTasks(enrollee, ppUser);
     }
 
-    /** for recurring and delayed surveys, we need to backfill the tasks that would have been assigned */
+    /**
+     * for recurring and delayed surveys, we need to backfill the tasks that would have been assigned
+     */
     public void createTimeShiftedTasks(Enrollee enrollee, PortalParticipantUser ppUser) {
         DataAuditInfo auditInfo = DataAuditInfo.builder()
                 .enrolleeId(enrollee.getId())
                 .portalParticipantUserId(ppUser.getId())
                 .systemProcess(DataAuditInfo.systemProcessName(getClass(), ".populateTask")).build();
+
 
         List<StudyEnvironmentSurvey> studyEnvSurveys = studyEnvironmentSurveyService.findAllByStudyEnvIdWithSurveyNoContent(enrollee.getStudyEnvironmentId(), true);
         long createdDaysAgo = ChronoUnit.DAYS.between(enrollee.getCreatedAt(), Instant.now());
@@ -540,7 +579,8 @@ public class EnrolleePopulator extends BasePopulator<Enrollee, EnrolleePopDto, S
     private final ObjectMapper objectMapper;
     private final PortalService portalService;
     private final ShortcodeService shortcodeService;
+    private final FileStorageBackend fileStorageBackend;
     private final EnrolleeResponsePopulator enrolleeResponsePopulator;
+    private final ParticipantFileService participantFileService;
     private final SurveyTaskDispatcher surveyTaskDispatcher;
 }
-

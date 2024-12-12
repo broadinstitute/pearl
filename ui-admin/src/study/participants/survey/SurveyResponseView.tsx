@@ -16,17 +16,26 @@ import {
 } from 'react-router-dom'
 import SurveyFullDataView from './SurveyFullDataView'
 import SurveyResponseEditor from './SurveyResponseEditor'
-import { ResponseMapT, surveyResponsePath } from '../enrolleeView/EnrolleeView'
+import {
+  ResponseMapT,
+  surveyResponsePath
+} from '../enrolleeView/EnrolleeView'
 import { EnrolleeParams } from '../enrolleeView/useRoutedEnrollee'
 import {
   AutosaveStatus,
-  Enrollee, instantToDateString,
-  instantToDefaultString, ParticipantTaskStatus, useTaskIdParam
+  Enrollee,
+  instantToDateString,
+  instantToDefaultString,
+  ParticipantTaskStatus,
+  useTaskIdParam
 } from '@juniper/ui-core'
 import DocumentTitle from 'util/DocumentTitle'
 import _uniq from 'lodash/uniq'
 import pluralize from 'pluralize'
-import { paramsFromContext, StudyEnvContextT } from 'study/StudyEnvironmentRouter'
+import {
+  paramsFromContext,
+  StudyEnvContextT
+} from 'study/StudyEnvironmentRouter'
 import {
   userHasPermission,
   useUser
@@ -36,7 +45,8 @@ import {
   faCheck,
   faCircleCheck,
   faCircleHalfStroke,
-  faEye, faMinus,
+  faEye,
+  faMinus,
   faPencil,
   faPrint,
   faSave,
@@ -47,6 +57,7 @@ import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import classNames from 'classnames'
 import { faCircle as faEmptyCircle } from '@fortawesome/free-regular-svg-icons'
 import JustifyChangesModal from '../JustifyChangesModal'
+import { ParticipantFileSurveyResponseView } from 'study/participants/survey/ParticipantFileSurveyResponseView'
 import SurveyAssignModal from './SurveyAssignModal'
 import TaskChangeModal from './TaskChangeModal'
 
@@ -78,18 +89,18 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
   return <div>
     <DocumentTitle title={`${enrollee.shortcode} - ${surveyAndResponses.survey.survey.name}`}/>
     <h4>{surveyAndResponses.survey.survey.name}</h4>
-    { !isAssigned && <div className="d-flex align-items-center">
+    {!isAssigned && <div className="d-flex align-items-center">
       <span className="text-muted fst-italic me-4">Not assigned</span>
       <Button variant={'secondary'} outline={true}
         onClick={() => setShowAssignModal(!showAssignModal)} className="ms-2">
-        Assign
+            Assign
       </Button>
     </div>}
-    { isAssigned && <>
-      { showTaskBar && <div className="d-flex">
+    {isAssigned && <>
+      {showTaskBar && <div className="d-flex">
         {surveyAndResponses.tasks.map(task => <NavLink key={task.id}
-          style={({ isActive }: {isActive: boolean}) => ({
-            borderBottom: (isActive && task.id === taskId) ? '2px solid #708DBC': '',
+          style={({ isActive }: { isActive: boolean }) => ({
+            borderBottom: (isActive && task.id === taskId) ? '2px solid #708DBC' : '',
             background: (isActive && task.id === taskId) ? '#E1E8F7' : ''
           })}
           className="p-2"
@@ -101,9 +112,10 @@ export default function SurveyResponseView({ enrollee, responseMap, updateRespon
         updateResponseMap={updateResponseMap}
         task={task!}
         configSurvey={surveyAndResponses.survey} response={response} onUpdate={onUpdate}/>
-    </> }
-    { showAssignModal && <SurveyAssignModal studyEnvParams={paramsFromContext(studyEnvContext)}
-      enrollee={enrollee} survey={surveyAndResponses.survey.survey} onDismiss={() => setShowAssignModal(false)}
+    </>}
+    {showAssignModal && <SurveyAssignModal studyEnvParams={paramsFromContext(studyEnvContext)}
+      enrollee={enrollee} survey={surveyAndResponses.survey.survey}
+      onDismiss={() => setShowAssignModal(false)}
       onSubmit={onUpdate}/>}
   </div>
 }
@@ -202,13 +214,20 @@ export function RawEnrolleeSurveyView({
         </div>
       </div>
       <hr/>
-      {(!isEditing && !response?.answers.length) && <div>No response for enrollee {enrollee.shortcode}</div>}
-      {(!isEditing && response?.answers.length) && <SurveyFullDataView
+      {(!isEditing && (!response?.answers.length && !response?.participantFiles?.length)) &&
+          <div>No response for enrollee {enrollee.shortcode}</div>}
+      {!isEditing && response?.answers.length !== undefined && response?.answers.length > 0 && <SurveyFullDataView
         responseId={response.id}
         enrollee={enrollee}
         answers={response?.answers || []}
         survey={configSurvey.survey}
         studyEnvContext={studyEnvContext}/>}
+      {!isEditing && (response?.participantFiles?.length !== undefined && response.participantFiles.length > 0) &&
+          <ParticipantFileSurveyResponseView
+            studyEnvContext={studyEnvContext}
+            enrollee={enrollee}
+            surveyResponse={response}/>
+      }
       {isEditing && user && <SurveyResponseEditor studyEnvContext={studyEnvContext}
         updateResponseMap={updateResponseMap}
         justification={justification}
@@ -228,9 +247,10 @@ export function RawEnrolleeSurveyView({
     </div>
     {showTaskModal && <TaskChangeModal studyEnvParams={paramsFromContext(studyEnvContext)}
       onDismiss={() => setShowTaskModal(false)}
-      task={task} onSubmit={onUpdate}/> }
+      task={task} onSubmit={onUpdate}/>}
   </div>
 }
+
 
 const taskStatusIndicators: Record<ParticipantTaskStatus, React.ReactNode> = {
   NEW: <span className="badge bg-secondary p-2 rounded-end-0 border border-light">
@@ -258,9 +278,9 @@ function surveyTaskStatus(task: ParticipantTask, surveyResponse?: SurveyResponse
   }
 
   return <div className="d-flex align-items-center">
-    { surveyResponse && <span className="ms-2">{surveyResponse.complete?
+    {surveyResponse && <span className="ms-2">{surveyResponse.complete ?
       'Completed' : 'Last Updated'} {instantToDefaultString(surveyResponse.createdAt)} ({versionString})
-    </span> }
+    </span>}
   </div>
 }
 

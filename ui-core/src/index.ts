@@ -20,6 +20,7 @@ export * from './types/kits'
 export * from './types/user'
 export * from './types/family'
 export * from './types/logging'
+export * from './types/participantFile'
 export * from './types/maintenance'
 
 export * from './autoSaveUtils'

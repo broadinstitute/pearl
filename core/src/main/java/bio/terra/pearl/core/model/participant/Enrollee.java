@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.model.participant;
 
 import bio.terra.pearl.core.model.BaseEntity;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.study.StudyEnvAttached;
 import bio.terra.pearl.core.model.survey.PreEnrollmentResponse;
 import bio.terra.pearl.core.model.survey.SurveyResponse;
@@ -50,4 +51,6 @@ public class Enrollee extends BaseEntity implements StudyEnvAttached {
     private List<KitRequestDto> kitRequests = new ArrayList<>();
     @Builder.Default
     private List<EnrolleeRelation> relations = new ArrayList<>();
+    @Builder.Default
+    private List<ParticipantFile> files = new ArrayList<>();
 }
