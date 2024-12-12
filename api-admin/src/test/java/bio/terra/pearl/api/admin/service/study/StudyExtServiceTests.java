@@ -12,7 +12,10 @@ import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyAuthContext;
+import bio.terra.pearl.core.factory.StudyFactory;
+import bio.terra.pearl.core.factory.admin.AdminUserBundle;
 import bio.terra.pearl.core.factory.admin.AdminUserFactory;
+import bio.terra.pearl.core.factory.admin.PortalAdminUserFactory;
 import bio.terra.pearl.core.factory.portal.PortalEnvironmentFactory;
 import bio.terra.pearl.core.factory.portal.PortalFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
@@ -20,10 +23,12 @@ import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
+import bio.terra.pearl.core.service.exception.PermissionDeniedException;
 import bio.terra.pearl.core.service.notification.TriggerService;
 import bio.terra.pearl.core.service.study.PortalStudyService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyService;
+import bio.terra.pearl.populate.service.BaseSeedPopulator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -38,10 +43,13 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
   @Autowired private PortalFactory portalFactory;
   @Autowired private PortalEnvironmentFactory portalEnvironmentFactory;
   @Autowired private AdminUserFactory adminUserFactory;
+  @Autowired private PortalAdminUserFactory portalAdminUserFactory;
   @Autowired private StudyEnvironmentService studyEnvironmentService;
   @Autowired private StudyService studyService;
   @Autowired private PortalStudyService portalStudyService;
   @Autowired private TriggerService triggerService;
+  @Autowired private StudyFactory studyFactory;
+  @Autowired private BaseSeedPopulator baseSeedPopulator;
 
   @Test
   public void allMethodsAuthed(TestInfo info) {
@@ -49,13 +57,15 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
         studyExtService,
         Map.of(
             "create",
-                AuthAnnotationSpec.withPortalPerm(
-                    AuthUtilService.BASE_PERMISSION, List.of(SuperuserOnly.class)),
+            AuthAnnotationSpec.withPortalPerm(
+                AuthUtilService.BASE_PERMISSION, List.of(SuperuserOnly.class)),
             "delete",
-                AuthAnnotationSpec.withPortalStudyPerm(
-                    AuthUtilService.BASE_PERMISSION, List.of(SuperuserOnly.class)),
+            AuthAnnotationSpec.withPortalStudyPerm(
+                AuthUtilService.BASE_PERMISSION, List.of(SuperuserOnly.class)),
             "getStudiesWithEnvs",
-                AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION)));
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
+            "update",
+            AuthAnnotationSpec.withPortalStudyPerm("study_settings_edit")));
   }
 
   @Test
@@ -116,5 +126,47 @@ public class StudyExtServiceTests extends BaseSpringBootTest {
             .orElseThrow();
 
     Assertions.assertEquals(6, triggerService.findByStudyEnvironmentId(sandboxEnv.getId()).size());
+  }
+
+  @Test
+  @Transactional
+  public void testOnlySuperuserCanUpdateShortcode(TestInfo info) {
+    baseSeedPopulator.populateRolesAndPermissions();
+    Portal portal = portalFactory.buildPersistedWithEnvironments(getTestName(info));
+    AdminUserBundle operatorBundle =
+        portalAdminUserFactory.buildPersistedWithRoles(
+            getTestName(info), portal, List.of("study_admin"));
+    AdminUser operator = operatorBundle.user();
+    Study study = studyFactory.buildPersisted(portal.getId(), getTestName(info));
+
+    Assertions.assertThrows(
+        PermissionDeniedException.class,
+        () ->
+            studyExtService.update(
+                PortalStudyAuthContext.of(operator, portal.getShortcode(), study.getShortcode()),
+                Study.builder().shortcode("newShortcode").name("newName").build()));
+
+    // Confirm that the study was not updated
+    Study updatedStudy = studyService.findByShortcode(study.getShortcode()).get();
+    assertThat(updatedStudy.getShortcode(), equalTo(study.getShortcode()));
+
+    studyExtService.update(
+        PortalStudyAuthContext.of(operator, portal.getShortcode(), study.getShortcode()),
+        Study.builder().shortcode(study.getShortcode()).name("newName").build());
+
+    // Confirm that the study was updated
+    updatedStudy = studyService.findByShortcode(study.getShortcode()).get();
+
+    assertThat(updatedStudy.getName(), equalTo("newName"));
+
+    AdminUser superuser = adminUserFactory.buildPersisted(getTestName(info), true);
+
+    studyExtService.update(
+        PortalStudyAuthContext.of(superuser, portal.getShortcode(), study.getShortcode()),
+        Study.builder().shortcode("newShortcode").name("newName").build());
+
+    // Confirm that the study was updated
+    updatedStudy = studyService.findByShortcode("newShortcode").get();
+    assertThat(updatedStudy.getId(), equalTo(study.getId()));
   }
 }
