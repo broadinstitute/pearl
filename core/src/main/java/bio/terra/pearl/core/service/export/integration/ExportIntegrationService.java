@@ -53,6 +53,13 @@ public class ExportIntegrationService extends CrudService<ExportIntegration, Exp
         return newIntegration;
     }
 
+    public void delete(UUID id) {
+        ExportIntegration integration = find(id).orElseThrow(() -> new IllegalArgumentException("Export integration not found"));
+        exportIntegrationJobService.deleteByExportIntegrationId(id);
+        super.delete(id, CascadeProperty.EMPTY_SET);
+        exportOptionsDao.delete(integration.getExportOptionsId());
+    }
+
     public ExportIntegration update(ExportIntegration integration) {
         ExportOptions updatedOpts = exportOptionsDao.update(integration.getExportOptions());
         ExportIntegration newIntegration = super.update(integration);

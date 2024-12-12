@@ -1235,6 +1235,14 @@ export default {
     return await this.processJsonResponse(response)
   },
 
+  async deleteExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<Response> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}`
+    return await fetch(url, {
+      method: 'DELETE',
+      headers: this.getInitHeaders()
+    })
+  },
+
   async runExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<ExportIntegrationJob> {
     const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}/run`
     const response = await fetch(url, {

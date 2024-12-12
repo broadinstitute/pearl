@@ -86,6 +86,17 @@ public class ExportIntegrationController implements ExportIntegrationApi {
   }
 
   @Override
+  public ResponseEntity<Void> delete(
+      String portalShortcode, String studyShortcode, String envName, UUID id) {
+    AdminUser adminUser = authUtilService.requireAdminUser(request);
+    EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
+    exportIntegrationExtService.delete(
+        PortalStudyEnvAuthContext.of(adminUser, portalShortcode, studyShortcode, environmentName),
+        id);
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
   public ResponseEntity<Object> save(
       String portalShortcode, String studyShortcode, String envName, UUID id, Object body) {
     AdminUser adminUser = authUtilService.requireAdminUser(request);
