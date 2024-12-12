@@ -1,7 +1,7 @@
 import { FormContent, FormElement, FormPanel, PortalEnvironmentLanguage, Question } from '@juniper/ui-core'
 import { PanelEditor } from './PanelEditor'
 import React from 'react'
-import { FullQuestionDesigner } from './FullQuestionDesigner'
+import { QuestionDesigner } from './QuestionDesigner'
 
 /**
  * An editor for a form element (question or panel).
@@ -28,7 +28,7 @@ export const FormElementEditor = ({
   return (
     <>
       {(elementType === 'question' || elementType === 'html') &&
-        <FullQuestionDesigner
+        <QuestionDesigner
           question={element as Question}
           isNewQuestion={false}
           readOnly={false}
