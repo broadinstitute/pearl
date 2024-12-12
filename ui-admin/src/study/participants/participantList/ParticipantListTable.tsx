@@ -79,7 +79,8 @@ function ParticipantListTable({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
     'givenName': false,
     'familyName': false,
-    'contactEmail': false
+    'contactEmail': false,
+    'subject': false
   })
 
 
@@ -166,6 +167,19 @@ function ParticipantListTable({
       meta: {
         columnType: 'string'
       }
+    }, {
+      id: 'subject',
+      header: 'Is subject',
+      accessorKey: 'enrollee.subject',
+      meta: {
+        columnType: 'boolean',
+        filterOptions: [
+          { value: true, label: 'Subject' },
+          { value: false, label: 'Not a subject (e.g. is only a proxy)' }
+        ]
+      },
+      filterFn: 'equals',
+      cell: info => info.getValue() ? <FontAwesomeIcon icon={faCheck}/> : ''
     }, {
       header: 'Consented',
       accessorKey: 'enrollee.consented',
