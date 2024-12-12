@@ -1,3 +1,5 @@
+# Creates the GKE autopilot cluster for Juniper
+
 locals {
   # authorize access only to broad networks
   authorized_networks = [
@@ -56,6 +58,11 @@ resource "google_container_cluster" "juniper_cluster" {
         cidr_block   = cidr_blocks.value
         display_name = cidr_blocks.value
       }
+    }
+
+    cidr_blocks {
+      cidr_block = "${google_compute_address.public_cloud_build_ip.address}/32"
+      display_name = "cloudbuild-nat-access"
     }
   }
 

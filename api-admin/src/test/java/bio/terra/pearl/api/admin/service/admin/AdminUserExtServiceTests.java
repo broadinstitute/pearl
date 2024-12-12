@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.*;
 import bio.terra.pearl.api.admin.AuthAnnotationSpec;
 import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
@@ -44,11 +45,11 @@ public class AdminUserExtServiceTests extends BaseSpringBootTest {
             "get",
             AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
             "getInPortal",
-            AuthAnnotationSpec.withPortalPerm("BASE"),
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
             "getAll",
             AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
             "findByPortal",
-            AuthAnnotationSpec.withPortalPerm("BASE"),
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
             "createSuperuser",
             AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
             "createAdminUser",

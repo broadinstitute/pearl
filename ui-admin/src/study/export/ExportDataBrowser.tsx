@@ -1,9 +1,10 @@
 import React, {
+  useEffect,
   useMemo,
   useState
 } from 'react'
 import { StudyEnvContextT } from '../StudyEnvironmentRouter'
-import Api, { ExportData } from 'api/api'
+import Api, { ExportData, ExportOptions } from 'api/api'
 import LoadingSpinner from 'util/LoadingSpinner'
 import {
   CellContext,
@@ -14,26 +15,91 @@ import {
   useReactTable,
   VisibilityState
 } from '@tanstack/react-table'
-import { basicTableLayout } from 'util/tableUtils'
-import ExportDataModal from './ExportDataModal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDownload } from '@fortawesome/free-solid-svg-icons'
-import { useLoadingEffect } from 'api/api-utils'
+
+import { faDownload, faInfoCircle } from '@fortawesome/free-solid-svg-icons'
+import { doApiLoad } from 'api/api-utils'
 import { Button } from 'components/forms/Button'
 import {
   renderPageHeader,
   renderTruncatedText
-} from '../../util/pageUtils'
-import { failureNotification } from '../../util/notifications'
+} from 'util/pageUtils'
+import { failureNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
-import { buildFilter } from '../../util/exportUtils'
+import { basicTableLayout } from 'util/tableUtils'
+import { currentIsoDate } from '@juniper/ui-core'
+import { saveBlobAsDownload } from 'util/downloadUtils'
+import ExportOptionsForm, { FILE_FORMATS } from './ExportOptionsForm'
+import { useSearchParams } from 'react-router-dom'
+
+export const DEFAULT_EXPORT_OPTS: ExportOptions = {
+  splitOptionsIntoColumns: false,
+  stableIdsForOptions: false,
+  fileFormat: 'TSV',
+  includeSubHeaders: true,
+  onlyIncludeMostRecent: true,
+  filterString: '{enrollee.subject} = true and {enrollee.consented} = true',
+  excludeModules: [],
+  includeFields: []
+}
 
 const ExportDataBrowser = ({ studyEnvContext }: {studyEnvContext: StudyEnvContextT}) => {
   const [data, setData] = useState<ExportData | null>(null)
-  const [showExportModal, setShowExportModal] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [rowSelection, setRowSelection] = React.useState<Record<string, boolean>>({})
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [searchParams] = useSearchParams()
+  const [isDownloading, setIsDownloading] = useState(false)
+  const [exportOptions, setExportOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTS)
+
+  // auto-load preview if specified
+  useEffect(() => {
+    if (searchParams.get('showPreview')) {
+      loadPreview()
+    }
+  }, [])
+
+  const doExport = () => {
+    doApiLoad(async () => {
+      const response = await Api.exportEnrollees(studyEnvContext.portal.shortcode, studyEnvContext.study.shortcode,
+        studyEnvContext.currentEnv.environmentName, exportOptions)
+      const fileSuffix = FILE_FORMATS.find(format =>
+        exportOptions.fileFormat === format.value)?.fileSuffix
+      const fileName = `${currentIsoDate()}-enrollees.${fileSuffix}`
+      const blob = await response.blob()
+      saveBlobAsDownload(blob, fileName)
+    }, { setIsLoading: setIsDownloading })
+  }
+
+  const doDictionaryExport = () => {
+    doApiLoad(async () => {
+      const response = await Api.exportDictionary(studyEnvContext.portal.shortcode, studyEnvContext.study.shortcode,
+        studyEnvContext.currentEnv.environmentName, exportOptions)
+      const fileName = `${currentIsoDate()}-DataDictionary.xlsx`
+      const blob = await response.blob()
+      saveBlobAsDownload(blob, fileName)
+    }, { setIsLoading: setIsDownloading })
+  }
+
+
+  const loadPreview = async ()  => {
+    doApiLoad(async () => {
+      const response = await Api.exportEnrollees(
+        studyEnvContext.portal.shortcode,
+        studyEnvContext.study.shortcode,
+        studyEnvContext.currentEnv.environmentName, {
+          ...exportOptions,
+          fileFormat: 'JSON', rowLimit: 10
+        })
+      const result = await response.json()
+      if (!response.ok) {
+        Store.addNotification(failureNotification('Failed to load export data', result.message))
+      } else {
+        setData(result)
+      }
+    }, { setIsLoading })
+  }
 
   const columns = useMemo<ColumnDef<string, string>[]>(() => {
     if (!data) {
@@ -75,40 +141,42 @@ const ExportDataBrowser = ({ studyEnvContext }: {studyEnvContext: StudyEnvContex
     onRowSelectionChange: setRowSelection
   })
 
-  const { isLoading } = useLoadingEffect(async () => {
-    const response = await Api.exportEnrollees(
-      studyEnvContext.portal.shortcode,
-      studyEnvContext.study.shortcode,
-      studyEnvContext.currentEnv.environmentName, {
-        fileFormat: 'JSON', rowLimit: 10, filterString: buildFilter(), includeFields: []
-      })
-    const result = await response.json()
-    if (!response.ok) {
-      Store.addNotification(failureNotification('Failed to load export data', result.message))
-    } else {
-      setData(result)
-    }
-  }, [studyEnvContext.study.shortcode, studyEnvContext.currentEnv.environmentName])
-
-  return <div className="container-fluid px-4 py-2">
+  return <div className="container-fluid px-4 py-2 align-items-start">
     { renderPageHeader('Data Export') }
-    <div className="align-items-center justify-content-between">
-      <div>
-        <span className="text-muted fst-italic px-2">
-          (Transposed for readability, the actual export has participants as rows)
-        </span>
-      </div>
-      <div >
-        <Button onClick={() => setShowExportModal(!showExportModal)}
-          variant="light" className="border m-1"
-          aria-label="show or hide export modal">
-          <FontAwesomeIcon icon={faDownload} className="fa-lg"/> Download
-        </Button>
-      </div>
+    <ExportOptionsForm setExportOptions={setExportOptions} exportOptions={exportOptions}/>
+    <div className="align-items-center my-4">
+      <Button variant="primary" onClick={doExport} disabled={isDownloading || isLoading}>
+        Download <FontAwesomeIcon icon={faDownload}/> <LoadingSpinner isLoading={isDownloading}/>
+      </Button>
+      <Button variant="secondary" onClick={doDictionaryExport} disabled={isDownloading || isLoading}>
+        Download dictionary (.xlsx) <LoadingSpinner isLoading={isDownloading}/>
+      </Button>
+      <Button
+        disabled={isDownloading || isLoading}
+        variant="secondary"
+        className="border ms-4 "
+        onClick={loadPreview}
+      >
+        Show preview <LoadingSpinner isLoading={isLoading}/>
+      </Button>
     </div>
-    <ExportDataModal studyEnvContext={studyEnvContext} show={showExportModal} setShow={setShowExportModal}/>
-    <LoadingSpinner isLoading={isLoading}/>
-    {!isLoading && basicTableLayout(table)}
+    <LoadingSpinner isLoading={isDownloading}/>
+    {!data && <div className={'d-flex justify-content-center'}>
+
+    </div> }
+    {!isDownloading && data &&
+      <>
+        <hr/>
+        <div className="my-2">
+          <span className="text-muted fst-italic m-1">
+            <FontAwesomeIcon className={'me-2'} icon={faInfoCircle}/>
+             Preview shows up to 10 participants, transposed for readability --
+            the downloaded export will have participants as rows.
+          </span>
+        </div>
+        {basicTableLayout(table)}
+      </>
+    }
   </div>
 }
 

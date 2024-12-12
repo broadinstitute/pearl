@@ -3,110 +3,118 @@ package bio.terra.pearl.core.service.publishing;
 import bio.terra.pearl.core.dao.publishing.PortalEnvironmentChangeRecordDao;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
-import bio.terra.pearl.core.model.dashboard.AlertTrigger;
-import bio.terra.pearl.core.model.dashboard.AlertType;
 import bio.terra.pearl.core.model.dashboard.ParticipantDashboardAlert;
-import bio.terra.pearl.core.model.notification.EmailTemplate;
-import bio.terra.pearl.core.model.notification.Trigger;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
-import bio.terra.pearl.core.model.portal.PortalEnvironmentConfig;
-import bio.terra.pearl.core.model.portal.PortalEnvironmentLanguage;
-import bio.terra.pearl.core.model.publishing.ConfigChange;
-import bio.terra.pearl.core.model.publishing.ListChange;
-import bio.terra.pearl.core.model.publishing.ParticipantDashboardAlertChange;
 import bio.terra.pearl.core.model.publishing.PortalEnvironmentChange;
 import bio.terra.pearl.core.model.publishing.PortalEnvironmentChangeRecord;
 import bio.terra.pearl.core.model.publishing.StudyEnvironmentChange;
-import bio.terra.pearl.core.model.publishing.VersionedConfigChange;
-import bio.terra.pearl.core.model.publishing.VersionedEntityChange;
-import bio.terra.pearl.core.model.site.SiteContent;
+import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
-import bio.terra.pearl.core.model.survey.Survey;
-import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
-import bio.terra.pearl.core.service.notification.TriggerService;
-import bio.terra.pearl.core.service.notification.email.EmailTemplateService;
 import bio.terra.pearl.core.service.portal.PortalDashboardConfigService;
-import bio.terra.pearl.core.service.portal.PortalEnvironmentConfigService;
-import bio.terra.pearl.core.service.portal.PortalEnvironmentLanguageService;
 import bio.terra.pearl.core.service.portal.PortalEnvironmentService;
-import bio.terra.pearl.core.service.site.SiteContentService;
-import bio.terra.pearl.core.service.survey.SurveyService;
+import bio.terra.pearl.core.service.study.StudyEnvironmentService;
+import bio.terra.pearl.core.service.study.StudyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * dedicated service for applying deltas to portal environments
  */
 @Service
 public class PortalPublishingService {
-    private final PortalDiffService portalDiffService;
-    private final PortalEnvironmentService portalEnvironmentService;
-    private final PortalEnvironmentConfigService portalEnvironmentConfigService;
+    private final StudyService studyService;
+    private final PortalEnvironmentService portalEnvService;
     private final PortalEnvironmentChangeRecordDao portalEnvironmentChangeRecordDao;
     private final PortalDashboardConfigService portalDashboardConfigService;
-    private final TriggerService triggerService;
-    private final SurveyService surveyService;
-    private final EmailTemplateService emailTemplateService;
-    private final SiteContentService siteContentService;
-    private final StudyPublishingService studyPublishingService;
-    private final PortalEnvironmentLanguageService portalEnvironmentLanguageService;
+    private final StudyEnvironmentService studyEnvironmentService;
+    private final List<PortalEnvPublishable> portalEnvPublishables;
+    private final List<StudyEnvPublishable> studyEnvPublishables;
     private final ObjectMapper objectMapper;
 
 
-    public PortalPublishingService(PortalDiffService portalDiffService,
-                                   PortalEnvironmentService portalEnvironmentService,
-                                   PortalEnvironmentConfigService portalEnvironmentConfigService,
-                                   PortalEnvironmentChangeRecordDao portalEnvironmentChangeRecordDao,
+    public PortalPublishingService(StudyService studyService, PortalEnvironmentService portalEnvService, PortalEnvironmentChangeRecordDao portalEnvironmentChangeRecordDao,
                                    PortalDashboardConfigService portalDashboardConfigService,
-                                   TriggerService triggerService, SurveyService surveyService,
-                                   EmailTemplateService emailTemplateService, SiteContentService siteContentService,
-                                   StudyPublishingService studyPublishingService,
-                                   PortalEnvironmentLanguageService portalEnvironmentLanguageService, ObjectMapper objectMapper) {
-        this.portalDiffService = portalDiffService;
-        this.portalEnvironmentService = portalEnvironmentService;
-        this.portalEnvironmentConfigService = portalEnvironmentConfigService;
+                                   StudyEnvironmentService studyEnvironmentService,
+                                   List<PortalEnvPublishable> portalEnvPublishables,
+                                   List<StudyEnvPublishable> studyEnvPublishables,
+                                   ObjectMapper objectMapper) {
+        this.studyService = studyService;
+        this.portalEnvService = portalEnvService;
         this.portalEnvironmentChangeRecordDao = portalEnvironmentChangeRecordDao;
         this.portalDashboardConfigService = portalDashboardConfigService;
-        this.triggerService = triggerService;
-        this.surveyService = surveyService;
-        this.emailTemplateService = emailTemplateService;
-        this.siteContentService = siteContentService;
-        this.studyPublishingService = studyPublishingService;
-        this.portalEnvironmentLanguageService = portalEnvironmentLanguageService;
+        this.studyEnvironmentService = studyEnvironmentService;
+        this.portalEnvPublishables = portalEnvPublishables;
+        this.studyEnvPublishables = studyEnvPublishables;
         this.objectMapper = objectMapper;
+    }
+
+
+    public PortalEnvironmentChange diffPortalEnvs(String shortcode, EnvironmentName source, EnvironmentName dest) {
+        PortalEnvironment sourceEnv = loadPortalEnvForProcessing(shortcode, source);
+        PortalEnvironment destEnv = loadPortalEnvForProcessing(shortcode, dest);
+        return diffPortalEnvs(sourceEnv, destEnv);
+    }
+
+    public PortalEnvironmentChange diffPortalEnvs(PortalEnvironment sourceEnv, PortalEnvironment destEnv) {
+        List<StudyEnvironmentChange> studyEnvChanges = new ArrayList<>();
+        List<Study> studies = studyService.findByPortalId(sourceEnv.getPortalId());
+        for (Study study : studies) {
+            StudyEnvironmentChange studyEnvChange = diffStudyEnvs(study.getShortcode(), sourceEnv.getEnvironmentName(), destEnv.getEnvironmentName());
+            studyEnvChanges.add(studyEnvChange);
+        }
+        PortalEnvironmentChange change = PortalEnvironmentChange.builder()
+                .studyEnvChanges(studyEnvChanges)
+                .build();
+        for(PortalEnvPublishable publishable : portalEnvPublishables) {
+            publishable.updateDiff(change, sourceEnv, destEnv);
+        }
+
+        return change;
+    }
+
+
+    public StudyEnvironmentChange diffStudyEnvs(String studyShortcode, EnvironmentName source, EnvironmentName dest) {
+        StudyEnvironment sourceEnv = loadStudyEnvForProcessing(studyShortcode, source);
+        StudyEnvironment destEnv = loadStudyEnvForProcessing(studyShortcode, dest);
+        return diffStudyEnvs(studyShortcode, sourceEnv, destEnv);
     }
 
     /**
      * updates the dest environment with the given changes
      */
     @Transactional
-    public PortalEnvironment applyChanges(String shortcode, EnvironmentName dest, PortalEnvironmentChange change, AdminUser operator) {
-        PortalEnvironment destEnv = portalDiffService.loadPortalEnvForProcessing(shortcode, dest);
-        return applyUpdate(destEnv, change, operator);
+    public PortalEnvironment applyChanges(String portalShortcode, EnvironmentName dest, PortalEnvironmentChange change, AdminUser operator) {
+        PortalEnvironment destEnv = loadPortalEnvForProcessing(portalShortcode, dest);
+        return applyChanges(destEnv, change, operator);
     }
+
+
+    protected PortalEnvironment loadPortalEnvForProcessing(String shortcode, EnvironmentName envName) {
+        PortalEnvironment portalEnv = portalEnvService.findOne(shortcode, envName).get();
+        for (PortalEnvPublishable publishable : portalEnvPublishables) {
+            publishable.loadForPublishing(portalEnv);
+        }
+        return portalEnv;
+    }
+
 
     /**
      * applies the given update -- the destEnv provided must already be fully-hydrated from loadPortalEnv
      * returns the updated environment
      */
-    protected PortalEnvironment applyUpdate(PortalEnvironment destEnv, PortalEnvironmentChange envChanges, AdminUser operator) {
-        applyChangesToEnvConfig(destEnv, envChanges.getConfigChanges());
+    protected PortalEnvironment applyChanges(PortalEnvironment destEnv, PortalEnvironmentChange envChanges, AdminUser operator) {
+        for (PortalEnvPublishable portalEnvPublishable : portalEnvPublishables) {
+            portalEnvPublishable.applyDiff(envChanges, destEnv);
+        }
 
-        applyChangesToPreRegSurvey(destEnv, envChanges.getPreRegSurveyChanges());
-        applyChangesToSiteContent(destEnv, envChanges.getSiteContentChange());
-        applyChangesToTriggers(destEnv, envChanges.getTriggerChanges());
-        applyChangesToParticipantDashboardAlerts(destEnv, envChanges.getParticipantDashboardAlertChanges());
-        applyChangesToLanguages(destEnv, envChanges.getLanguageChanges());
         for (StudyEnvironmentChange studyEnvChange : envChanges.getStudyEnvChanges()) {
-            StudyEnvironment studyEnv = portalDiffService.loadStudyEnvForProcessing(studyEnvChange.getStudyShortcode(), destEnv.getEnvironmentName());
-            studyPublishingService.applyChanges(studyEnv, studyEnvChange, destEnv);
+            StudyEnvironment studyEnv = loadStudyEnvForProcessing(studyEnvChange.getStudyShortcode(), destEnv.getEnvironmentName());
+            applyChanges(studyEnv, studyEnvChange, destEnv);
         }
         try {
             PortalEnvironmentChangeRecord changeRecord = PortalEnvironmentChangeRecord.builder()
@@ -122,114 +130,29 @@ public class PortalPublishingService {
         return destEnv;
     }
 
-    /**
-     * updates the passed-in config with the given changes.  Returns the updated config
-     */
-    protected PortalEnvironmentConfig applyChangesToEnvConfig(PortalEnvironment destEnv,
-                                                              List<ConfigChange> configChanges) {
-        if (configChanges.isEmpty()) {
-            return destEnv.getPortalEnvironmentConfig();
+    public StudyEnvironment loadStudyEnvForProcessing(String shortcode, EnvironmentName envName) {
+        StudyEnvironment studyEnvironment = studyEnvironmentService.findByStudy(shortcode, envName).get();
+        for (StudyEnvPublishable publishable : studyEnvPublishables) {
+            publishable.loadForPublishing(studyEnvironment);
         }
-        try {
-            for (ConfigChange change : configChanges) {
-                PropertyUtils.setProperty(destEnv.getPortalEnvironmentConfig(), change.propertyName(), change.newValue());
-            }
-        } catch (Exception e) {
-            throw new InternalServerException("Error copying properties during publish", e);
-        }
-        return portalEnvironmentConfigService.update(destEnv.getPortalEnvironmentConfig());
+        return studyEnvironment;
     }
 
-
-    protected PortalEnvironment applyChangesToPreRegSurvey(PortalEnvironment destEnv, VersionedEntityChange<Survey> change) {
-        if (!change.isChanged()) {
-            return destEnv;
+    /** assumes the source and dest environments are fully loaded */
+    public StudyEnvironmentChange diffStudyEnvs(String studyShortcode, StudyEnvironment sourceEnv, StudyEnvironment destEnv) {
+        StudyEnvironmentChange change = StudyEnvironmentChange.builder()
+                .studyShortcode(studyShortcode).build();
+        for (StudyEnvPublishable publishable : studyEnvPublishables) {
+            publishable.updateDiff(change, sourceEnv, destEnv);
         }
-        UUID newSurveyId = null;
-        if (change.newStableId() != null) {
-            newSurveyId = surveyService.findByStableId(change.newStableId(), change.newVersion(), destEnv.getPortalId()).get().getId();
-        }
-        destEnv.setPreRegSurveyId(newSurveyId);
-        PublishingUtils.assignPublishedVersionIfNeeded(destEnv.getEnvironmentName(), destEnv.getPortalId(), change, surveyService);
-        return portalEnvironmentService.update(destEnv);
+        return change;
     }
 
-    protected PortalEnvironment applyChangesToSiteContent(PortalEnvironment destEnv, VersionedEntityChange<SiteContent> change) {
-        if (!change.isChanged()) {
-            return destEnv;
-        }
-        UUID newDocumentId = null;
-        if (change.newStableId() != null) {
-            newDocumentId = siteContentService.findByStableId(change.newStableId(), change.newVersion(), destEnv.getPortalId()).get().getId();
-        }
-        destEnv.setSiteContentId(newDocumentId);
-        PublishingUtils.assignPublishedVersionIfNeeded(destEnv.getEnvironmentName(), destEnv.getPortalId(), change, siteContentService);
-        return portalEnvironmentService.update(destEnv);
-    }
-
-    protected void applyChangesToTriggers(PortalEnvironment destEnv, ListChange<Trigger,
-            VersionedConfigChange<EmailTemplate>> listChange) {
-        for (Trigger config : listChange.addedItems()) {
-            config.setPortalEnvironmentId(destEnv.getId());
-            triggerService.create(config.cleanForCopying());
-            destEnv.getTriggers().add(config);
-            PublishingUtils.assignPublishedVersionIfNeeded(destEnv.getEnvironmentName(), config, emailTemplateService);
-        }
-        for (Trigger config : listChange.removedItems()) {
-            triggerService.delete(config.getId(), CascadeProperty.EMPTY_SET);
-            destEnv.getTriggers().remove(config);
-        }
-        for (VersionedConfigChange<EmailTemplate> change : listChange.changedItems()) {
-            PublishingUtils.applyChangesToVersionedConfig(change, triggerService, emailTemplateService, destEnv.getEnvironmentName(), destEnv.getPortalId());
-        }
-    }
-
-    protected void applyChangesToParticipantDashboardAlerts(PortalEnvironment destEnv, List<ParticipantDashboardAlertChange> changes) {
-        for (ParticipantDashboardAlertChange change : changes) {
-            Optional<ParticipantDashboardAlert> destAlert = portalDashboardConfigService.findByPortalEnvIdAndTrigger(destEnv.getId(), change.trigger());
-            if (destAlert.isEmpty()) {
-                // The alert doesn't exist in the dest env yet, so default all the required fields before
-                // applying the changes from the change list
-                ParticipantDashboardAlert newAlert = getDefaultDashboardAlert(destEnv, change.trigger());
-                applyAlertChanges(newAlert, change.changes());
-                portalDashboardConfigService.create(newAlert);
-            } else {
-                ParticipantDashboardAlert alert = destAlert.get();
-                applyAlertChanges(alert, change.changes());
-                portalDashboardConfigService.update(alert);
-            }
-        }
-    }
-
-    private ParticipantDashboardAlert getDefaultDashboardAlert(PortalEnvironment destEnv, AlertTrigger trigger) {
-        return ParticipantDashboardAlert.builder()
-                .portalEnvironmentId(destEnv.getId())
-                .alertType(AlertType.PRIMARY)
-                .title("")
-                .detail("")
-                .portalEnvironmentId(destEnv.getId())
-                .trigger(trigger)
-                .build();
-    }
-
-    protected void applyAlertChanges(ParticipantDashboardAlert alert, List<ConfigChange> changes) {
-        try {
-            for (ConfigChange alertChange : changes) {
-                PublishingUtils.setPropertyEnumSafe(alert, alertChange.propertyName(), alertChange.newValue());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error applying changes to alert: " + alert.getId(), e);
-        }
-    }
-
-    protected void applyChangesToLanguages(PortalEnvironment destEnv, ListChange<PortalEnvironmentLanguage, Object> languageChanges) {
-        for (PortalEnvironmentLanguage language : languageChanges.addedItems()) {
-            language.cleanForCopying();
-            language.setPortalEnvironmentId(destEnv.getId());
-            portalEnvironmentLanguageService.create(language);
-        }
-        for (PortalEnvironmentLanguage language : languageChanges.removedItems()) {
-            portalEnvironmentLanguageService.delete(language.getId(), CascadeProperty.EMPTY_SET);
+    /** assumes the dest environment is fully loaded */
+    public void applyChanges(StudyEnvironment destEnv, StudyEnvironmentChange envChange,
+                                         PortalEnvironment destPortalEnv) {
+        for (StudyEnvPublishable publishable : studyEnvPublishables) {
+            publishable.applyDiff(envChange, destEnv, destPortalEnv);
         }
     }
 

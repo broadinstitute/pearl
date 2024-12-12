@@ -1,18 +1,34 @@
 package bio.terra.pearl.core.service.study;
 
 import bio.terra.pearl.core.dao.study.StudyEnvironmentSurveyDao;
+import bio.terra.pearl.core.model.portal.PortalEnvironment;
+import bio.terra.pearl.core.model.publishing.ListChange;
+import bio.terra.pearl.core.model.publishing.StudyEnvironmentChange;
+import bio.terra.pearl.core.model.publishing.VersionedConfigChange;
+import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
+import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.service.CrudService;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
+import bio.terra.pearl.core.service.publishing.PublishingUtils;
+import bio.terra.pearl.core.service.publishing.StudyEnvPublishable;
+import bio.terra.pearl.core.service.survey.SurveyService;
+import bio.terra.pearl.core.service.workflow.EventService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class StudyEnvironmentSurveyService extends CrudService<StudyEnvironmentSurvey, StudyEnvironmentSurveyDao> {
-    public StudyEnvironmentSurveyService(StudyEnvironmentSurveyDao dao) {
+public class StudyEnvironmentSurveyService extends CrudService<StudyEnvironmentSurvey, StudyEnvironmentSurveyDao> implements StudyEnvPublishable{
+    private final SurveyService surveyService;
+    private final EventService eventService;
+    public StudyEnvironmentSurveyService(StudyEnvironmentSurveyDao dao, SurveyService surveyService, EventService eventService) {
         super(dao);
+        this.surveyService = surveyService;
+        this.eventService = eventService;
     }
 
     public List<StudyEnvironmentSurvey> findAllByStudyEnvId(UUID studyEnvId, Boolean active) {
@@ -81,4 +97,50 @@ public class StudyEnvironmentSurveyService extends CrudService<StudyEnvironmentS
         dao.deleteBySurveyId(surveyId);
     }
 
+    @Override
+    public void loadForPublishing(StudyEnvironment studyEnv) {
+        studyEnv.setConfiguredSurveys(dao.findAllWithSurvey(studyEnv.getId(), true));
+    }
+
+    @Override
+    public void updateDiff(StudyEnvironmentChange change, StudyEnvironment sourceEnv, StudyEnvironment destEnv) {
+        ListChange<StudyEnvironmentSurvey, VersionedConfigChange<Survey>> surveyChanges = PortalEnvPublishable.diffConfigLists(
+                sourceEnv.getConfiguredSurveys(),
+                destEnv.getConfiguredSurveys(),
+                getPublishIgnoreProps());
+        change.setSurveyChanges(surveyChanges);
+    }
+
+    @Override
+    @Transactional
+    public void applyDiff(StudyEnvironmentChange change, StudyEnvironment destEnv, PortalEnvironment destPortalEnv) {
+        ListChange<StudyEnvironmentSurvey, VersionedConfigChange<Survey>> listChange = change.getSurveyChanges();
+        for (StudyEnvironmentSurvey config : listChange.addedItems()) {
+            config.setStudyEnvironmentId(destEnv.getId());
+            StudyEnvironmentSurvey newConfig = create(config.cleanForCopying());
+            newConfig.setSurvey(config.getSurvey());
+            destEnv.getConfiguredSurveys().add(newConfig);
+            PublishingUtils.assignPublishedVersionIfNeeded(destEnv.getEnvironmentName(), newConfig, surveyService);
+            eventService.publishSurveyPublishedEvent(destPortalEnv.getId(), destEnv.getId(), newConfig.getSurvey());
+        }
+        for (StudyEnvironmentSurvey config : listChange.removedItems()) {
+            deactivate(config.getId());
+            destEnv.getConfiguredSurveys().remove(config);
+        }
+        for (VersionedConfigChange<Survey> configChange : listChange.changedItems()) {
+            PublishingUtils.applyChangesToVersionedConfig(configChange, this, surveyService, destEnv.getEnvironmentName(), destPortalEnv.getPortalId());
+            if (configChange.documentChange().isChanged()) {
+                // if this is a change of version (as opposed to a reordering), then publish an event
+                Survey survey = surveyService.findByStableId(
+                        configChange.documentChange().newStableId(), configChange.documentChange().newVersion(), destPortalEnv.getPortalId()
+                ).orElseThrow();
+                eventService.publishSurveyPublishedEvent(destPortalEnv.getId(), destEnv.getId(), survey);
+            }
+        }
+    }
+
+    @Override
+    public List<String> getAdditionalPublishIgnoreProps() {
+        return List.of( "surveyId", "survey", "versionedEntity");
+    }
 }

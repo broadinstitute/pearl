@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service.admin;
 
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalPermission;
 import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
@@ -49,7 +50,7 @@ public class AdminUserExtService {
    * null, returns all portalAdminUsers, otherwise, just returns the portalAdminUser corresponding
    * to the portalId if one exists
    */
-  @EnforcePortalPermission(permission = "BASE")
+  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
   public AdminUser getInPortal(PortalAuthContext authContext, UUID id) {
     return get(id, authContext.getPortal(), authContext.getOperator());
   }
@@ -87,7 +88,7 @@ public class AdminUserExtService {
     return adminUserService.findAllWithRoles();
   }
 
-  @EnforcePortalPermission(permission = "BASE")
+  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<AdminUser> findByPortal(PortalAuthContext authContext) {
     return adminUserService.findAllWithRolesByPortal(authContext.getPortal().getId());
   }

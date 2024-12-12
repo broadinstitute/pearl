@@ -36,7 +36,8 @@ export default defineConfig({
     proxy: {
       '/api': { target: 'http://localhost:8081', changeOrigin: false },
       '/config': { target: 'http://localhost:8081', changeOrigin: false },
-      '/favicon.ico': { target: 'http://localhost:8081', changeOrigin: false }
+      '/favicon.ico': { target: 'http://localhost:8081', changeOrigin: false },
+      '/systemSettings': { target: 'http://localhost:8081', changeOrigin: false }
     },
     open: 'https://sandbox.demo.localhost:3001'
   },

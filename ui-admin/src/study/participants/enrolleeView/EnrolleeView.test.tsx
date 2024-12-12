@@ -3,7 +3,7 @@ import React from 'react'
 import { LoadedEnrolleeView } from './EnrolleeView'
 import { mockEnrollee, mockStudyEnvContext, taskForForm } from 'test-utils/mocking-utils'
 import { screen, within } from '@testing-library/react'
-import { renderWithRouter } from '@juniper/ui-core'
+import { ParticipantTaskStatus, renderWithRouter } from '@juniper/ui-core'
 
 
 test('renders survey links for configured surveys', async () => {
@@ -35,7 +35,10 @@ test('renders survey task viewed badge', async () => {
   const studyEnvContext = mockStudyEnvContext()
   const enrollee = mockEnrollee()
   enrollee.participantTasks
-    .push(taskForForm(studyEnvContext.currentEnv.configuredSurveys[0].survey, enrollee.id, 'SURVEY'))
+    .push({
+      ...taskForForm(studyEnvContext.currentEnv.configuredSurveys[0].survey, enrollee.id, 'SURVEY'),
+      status: 'VIEWED'
+    })
 
   enrollee.surveyResponses.push({
     surveyId: studyEnvContext.currentEnv.configuredSurveys[0].surveyId,
@@ -73,7 +76,10 @@ test('renders survey task complete badge for most recent', async () => {
     }],
     participantTasks: [
       taskForForm(studyEnvContext.currentEnv.configuredSurveys[0].survey, '1', 'SURVEY', 0, 'response1'),
-      taskForForm(studyEnvContext.currentEnv.configuredSurveys[0].survey, '1', 'SURVEY', 100000, 'response2')
+      {
+        ...taskForForm(studyEnvContext.currentEnv.configuredSurveys[0].survey, '1', 'SURVEY', 100000, 'response2'),
+        status: 'COMPLETE' as ParticipantTaskStatus
+      }
     ]
   }
 

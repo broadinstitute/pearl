@@ -37,6 +37,18 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /systemSettings:
+    get:
+      summary: Get system settings
+      tags: [ public ]
+      operationId: getSystemSettings
+      security: [ ]
+      responses:
+        '200':
+          description: System settings
+          content: &jsonContent { application/json: { schema: { type: object } } }
+        '500':
+          $ref: '#/components/responses/ServerError'
   /config:
     get:
       summary: Get configuration info for authenticating with and using the API
@@ -100,25 +112,6 @@ paths:
       responses:
         '200':
           description: List of admin-assigned participant tasks
-          content: *jsonContent
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/adminTasks/{id}:
-    patch:
-      summary: Updates the specified task
-      tags: [ participantTask ]
-      operationId: update
-      parameters:
-        - *portalShortcodeParam
-        - *studyShortcodeParam
-        - *envNameParam
-        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
-      requestBody:
-        required: true
-        content: *jsonContent
-      responses:
-        '200':
-          description: The updated task
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
@@ -406,6 +399,22 @@ paths:
           description: no content
         '500':
           $ref: '#/components/responses/ServerError'
+    put:
+      summary: updates a study
+      tags: [ study ]
+      operationId: update
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: updated study object
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/kitTypes:
     get:
       summary: Gets the kit types for a study
@@ -535,6 +544,21 @@ paths:
       responses:
         '200':
           description: list of participant users and list of enrollees
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/env/{envName}/participantUsers/{id}:
+    get:
+      summary: lists all the participant users for the given portal environment
+      tags: [ participantUser ]
+      operationId: findWithPortalUser
+      parameters:
+        - *portalShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: the participantuser with the portalParticipantUser object included too
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
@@ -681,7 +705,7 @@ paths:
         - *portalShortcodeParam
         - *studyShortcodeParam
         - *envNameParam
-        - { name: enrolleeShortcodeOrId, in: path, required: true, schema: { type: string } }
+        - &enrolleeShortcodeOrIdParam { name: enrolleeShortcodeOrId, in: path, required: true, schema: { type: string } }
       responses:
         '200':
           description: Enrollee object
@@ -785,6 +809,26 @@ paths:
       responses:
         '200':
           description: List of DataChangeRecords
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrollees/{enrolleeShortcodeOrId}/participantTasks/{id}:
+    patch:
+      summary: Updates the specified task
+      tags: [ participantTask ]
+      operationId: update
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - *enrolleeShortcodeOrIdParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: The updated task
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
@@ -1304,6 +1348,20 @@ paths:
         '200':
           description: The exportIntegration
           content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      summary: deletes the exportIntegration by id
+      tags: [ exportIntegration ]
+      operationId: delete
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '204':
+          description: Successful deletion
         '500':
           $ref: '#/components/responses/ServerError'
     patch:
@@ -1841,6 +1899,7 @@ paths:
       operationId: extractPortal
       parameters:
         - *portalShortcodeParam
+        - { name: onlyExtractActiveVersions, in: query, required: false, schema: { type: boolean, default: false } }
       responses:
         '200':
           description: zip file of portal configs
@@ -2205,6 +2264,20 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /api/systemSettings:
+    patch:
+      summary: Updates the system settings
+      tags: [ systemSettings ]
+      operationId: update
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: system settings
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/logEvents:
     get:
       summary: Get log events. Filterable by event type and number of days.

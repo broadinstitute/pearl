@@ -14,7 +14,9 @@ public enum TaskStatus {
     VIEWED, // the participant has affirmatively viewed the task (e.g. clicked on it)
     IN_PROGRESS, // the participant has affirmatively started (e.g. answered at least one question)
     COMPLETE,
-    REJECTED;
+    REMOVED, // the task was removed by study staff -- we don't delete it to avoid it being reassigned
+    REJECTED; // the participant actively declined to complete the task
+
 
     public boolean isTerminalStatus() {
         return Arrays.asList(COMPLETE, REJECTED).contains(this);

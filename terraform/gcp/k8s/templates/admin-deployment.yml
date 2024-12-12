@@ -5,7 +5,12 @@ metadata:
   labels:
     app: admin
 spec:
-  replicas: {{ .Values.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  replicas: {{if .Values.enableMaintenanceMode}} 0 {{ else }} {{ .Values.replicas }}{{ end }}
   selector:
     matchLabels:
       app: admin
@@ -93,7 +98,7 @@ spec:
             - name: DATABASE_NAME
               value: "d2p"
             - name: DEPLOYMENT_ZONE
-              value: dev
+              value: {{ .Values.deploymentZone }}
             - name: ADMIN_API_HOSTNAME
               value: {{ .Values.adminUrl }}
             - name: ADMIN_UI_HOSTNAME
@@ -125,15 +130,21 @@ spec:
             - name: SENDGRID_API_KEY_SECRET_ID
               value: sendgrid-api-key
             - name: DSM_JWT_ISSUER
-              value: admin-d2p.ddp-dev.envs.broadinstitute.org
+              value: {{ .Values.dsmIssuer }}
             - name: DSM_JWT_SIGNING_SECRET_SECRET_ID
               value: dsm-secret
             - name: DSM_ADDRESS
-              value: https://dsm-dev.datadonationplatform.org/dsm
+              value: {{ .Values.dsmUrl }}
             - name: TDR_SA_CREDS_SECRET_ID
               value: tdr-sa-creds
             - name: TDR_EXPORT_STORAGE_ACCOUNT_KEY_SECRET_ID
               value: tdr-storage-account-key
+            - name: MIXPANEL_TOKEN_SECRET_ID
+              value: mixpanel-token
+            - name: MIXPANEL_ENABLED
+              value: 'true'
+            - name: AIRTABLE_AUTH_TOKEN_SECRET_ID
+              value: airtable-auth-token
           resources:
             requests:
               # The proxy's memory use scales linearly with the number of active

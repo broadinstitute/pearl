@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.service.search.expressions;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
+import bio.terra.pearl.core.dao.dataimport.TimeShiftDao;
 import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.kit.KitRequestFactory;
@@ -36,34 +37,27 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EnrolleeSearchExpressionTest extends BaseSpringBootTest {
-
     @Autowired
     EnrolleeFactory enrolleeFactory;
-
     @Autowired
     SurveyFactory surveyFactory;
-
     @Autowired
     StudyEnvironmentFactory studyEnvironmentFactory;
-
     @Autowired
     SurveyResponseFactory surveyResponseFactory;
-
     @Autowired
     EnrolleeSearchExpressionParser enrolleeSearchExpressionParser;
-
     @Autowired
     ParticipantTaskFactory participantTaskFactory;
-
     @Autowired
     KitRequestFactory kitRequestFactory;
-
     @Autowired
     FamilyFactory familyFactory;
     @Autowired
     EnrolleeContextService enrolleeContextService;
     @Autowired
     PortalParticipantUserService portalParticipantUserService;
+
 
     @Test
     @Transactional
@@ -178,6 +172,36 @@ class EnrolleeSearchExpressionTest extends BaseSpringBootTest {
                 .enrollee(enrolleeNoResponse)
                 .build()));
     }
+
+    @Test
+    @Transactional
+    public void testInstantParseEvaluate(TestInfo info) {
+        StudyEnvironment studyEnvironment = studyEnvironmentFactory.buildPersisted(getTestName(info));
+
+        Survey survey = surveyFactory.buildPersisted(getTestName(info));
+        surveyFactory.attachToEnv(survey, studyEnvironment.getId(), true);
+
+        Enrollee enrolleeMatches = enrolleeFactory.buildPersisted(getTestName(info), studyEnvironment);
+        enrolleeMatches.setCreatedAt(Instant.now().minusSeconds(3600));
+        Enrollee enrolleeDoesNotMatch = enrolleeFactory.buildPersisted(getTestName(info), studyEnvironment);
+
+        String dateString = Instant.now().minusSeconds(1800).toString();
+        String rule = "{enrollee.createdAt} < '%s'".formatted(dateString);
+        EnrolleeSearchExpression searchExp = enrolleeSearchExpressionParser.parseRule(rule);
+
+        assertTrue(searchExp.evaluate(EnrolleeSearchContext
+                .builder()
+                .enrollee(enrolleeMatches)
+                .build()));
+
+        assertFalse(searchExp.evaluate(EnrolleeSearchContext
+                .builder()
+                .enrollee(enrolleeDoesNotMatch)
+                .build()));
+    }
+
+
+
 
 
     @Test

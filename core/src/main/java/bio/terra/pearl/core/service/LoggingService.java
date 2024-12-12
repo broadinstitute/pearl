@@ -47,6 +47,8 @@ public class LoggingService {
     String eventString = formatEventString(createdEvent);
     if (LogEventType.ERROR.equals(event.getEventType())) {
       logger.error(eventString);
+    } else if (LogEventType.WARN.equals(event.getEventType())) {
+      logger.warn(eventString);
     } else {
       logger.info(eventString);
     }

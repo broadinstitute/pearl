@@ -62,6 +62,12 @@ variable "customer_urls" {
   type = map(object({
     url = string
     dnssec = string
+    additional_records = list(object({
+      name = string
+      type = string
+      ttl = number
+      record_value = string
+    }))
   }))
   description = "Customer URLs"
 }
@@ -80,4 +86,10 @@ variable "k8s_namespace" {
   type = string
   description = "Kubernetes namespace"
   default = "juniper"
+}
+
+variable "slack_notification_channel" {
+  type = string
+  default = ""
+  description = "Slack notification channel"
 }

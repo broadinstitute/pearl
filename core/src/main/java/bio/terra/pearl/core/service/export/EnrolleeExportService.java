@@ -4,6 +4,8 @@ import bio.terra.pearl.core.dao.search.EnrolleeSearchExpressionDao;
 import bio.terra.pearl.core.dao.survey.AnswerDao;
 import bio.terra.pearl.core.dao.survey.SurveyQuestionDefinitionDao;
 import bio.terra.pearl.core.model.export.ExportOptions;
+import bio.terra.pearl.core.model.participant.Enrollee;
+import bio.terra.pearl.core.model.participant.EnrolleeRelation;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.participant.*;
 import bio.terra.pearl.core.model.search.EnrolleeSearchExpressionResult;
@@ -228,7 +230,7 @@ public class EnrolleeExportService {
         Map<UUID, ParticipantUser> participantUsers = participantUserService.findByParticipantUserIds(participantUserIds);
         Map<UUID, List<Answer>> answers = answerDao.findByEnrolleeIds(enrolleeIds);
         Map<UUID, List<ParticipantTask>> tasks = participantTaskService.findByEnrolleeIds(enrolleeIds);
-        Map<UUID, List<SurveyResponse>> surveyResponses = surveyResponseService.findByEnrolleeIds(enrolleeIds);
+        Map<UUID, List<SurveyResponse>> surveyResponses = surveyResponseService.findByEnrolleeIdsNotRemoved(enrolleeIds);
         Map<UUID, List<KitRequestDto>> kitRequests = kitRequestService.findByEnrollees(enrollees);
 
         return enrollees.stream()

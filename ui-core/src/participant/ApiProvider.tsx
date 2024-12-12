@@ -1,4 +1,7 @@
-import React, { useContext } from 'react'
+import React, {
+  createContext,
+  useContext
+} from 'react'
 import { StudyEnvParams } from 'src/types/study'
 import { HubResponse } from 'src/types/user'
 import {
@@ -7,6 +10,7 @@ import {
 } from 'src/types/address'
 import { SurveyResponseWithJustification } from 'src/types/forms'
 import { ParticipantFile } from 'src/types/participantFile'
+import { SystemSettings } from 'src/types/maintenance'
 
 export type ImageUrlFunc = (cleanFileName: string, version: number) => string
 export type SubmitMailingListContactFunc = (name: string, email: string) => Promise<object>
@@ -19,7 +23,7 @@ export type UpdateSurveyResponseFunc = ({
   studyEnvParams: StudyEnvParams, stableId: string, version: number,
   response: SurveyResponseWithJustification, enrolleeShortcode: string, taskId: string, alertErrors?: boolean
 }) => Promise<HubResponse>
-
+export type LoadSystemSettingsFunc = () => Promise<SystemSettings>
 export type ValidateAddressFunc = (address: MailingAddress) => Promise<AddressValidationResult>
 
 export type GetParticipantFilesFunc = ({ studyEnvParams, enrolleeShortcode }: {
@@ -59,6 +63,7 @@ export type ApiContextT = {
   uploadParticipantFile: UploadParticipantFileFunc,
   downloadParticipantFile: DownloadParticipantFileFunc,
   deleteParticipantFile: DeleteParticipantFileFunc
+  loadSystemSettings: LoadSystemSettingsFunc
 }
 
 export const emptyApi: ApiContextT = {
@@ -70,10 +75,11 @@ export const emptyApi: ApiContextT = {
   getParticipantFiles: () => Promise.resolve([]),
   uploadParticipantFile: () => Promise.resolve({} as ParticipantFile),
   downloadParticipantFile: () => Promise.resolve({} as Response),
-  deleteParticipantFile: () => Promise.resolve({} as Response)
+  deleteParticipantFile: () => Promise.resolve({} as Response),
+  loadSystemSettings: () => Promise.resolve({} as SystemSettings)
 }
 
-const ApiContext = React.createContext<ApiContextT>(emptyApi)
+const ApiContext = createContext<ApiContextT>(emptyApi)
 /** helper function for using the api context */
 export const useApiContext = () => {
   return useContext(ApiContext)

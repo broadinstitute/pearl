@@ -30,17 +30,17 @@ public class TriggerExtAuthServiceTests extends BaseSpringBootTest {
         triggerExtService,
         Map.of(
             "find",
-            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON),
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "test",
-            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON),
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "replace",
-            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON),
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "findForStudy",
-            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON),
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "create",
-            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON),
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "delete",
-            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON)));
+            AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION)));
   }
 
   @Test

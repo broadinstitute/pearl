@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin;
 
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalPermission;
 import bio.terra.pearl.api.admin.service.auth.SandboxOnly;
 import java.util.List;
@@ -12,7 +13,9 @@ public class AuthTestUtilsTest {
   public void testChecksAnnotatedMethod() {
     AuthTestUtils.assertAllMethodsAnnotated(
         new MethodAnnotatedClass(),
-        Map.of("doSomethingSecure", AuthAnnotationSpec.withPortalPerm("BASE")));
+        Map.of(
+            "doSomethingSecure",
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION)));
 
     // fails if the wrong permission is specced
     Assertions.assertThrows(
@@ -51,7 +54,9 @@ public class AuthTestUtilsTest {
         () -> {
           AuthTestUtils.assertAllMethodsAnnotated(
               new MethodNotAnnotatedClass(),
-              Map.of("doSomethingSecure", AuthAnnotationSpec.withPortalPerm("BASE")));
+              Map.of(
+                  "doSomethingSecure",
+                  AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION)));
         });
   }
 
@@ -65,7 +70,7 @@ public class AuthTestUtilsTest {
   }
 
   public static class MethodAnnotatedClass {
-    @EnforcePortalPermission(permission = "BASE")
+    @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
     public void doSomethingSecure() {}
   }
 
@@ -75,7 +80,7 @@ public class AuthTestUtilsTest {
 
   public static class SandboxMethodAnnotatedClass {
     @SandboxOnly
-    @EnforcePortalPermission(permission = "BASE")
+    @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
     public void doSomethingSecure() {}
   }
 }

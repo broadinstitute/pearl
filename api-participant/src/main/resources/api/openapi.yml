@@ -36,6 +36,19 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /systemSettings:
+    get:
+      summary: Get system settings
+      tags: [ public ]
+      operationId: getSystemSettings
+      security: [ ]
+      responses:
+        '200':
+          description: System settings
+          content: &jsonContent { application/json: { schema: { type: object } } }
+        '500':
+          $ref: '#/components/responses/ServerError'
+
   /config:
     get:
       summary: Get configuration info for authenticating with and using the API

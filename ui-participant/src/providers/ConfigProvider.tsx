@@ -1,12 +1,19 @@
 import React, { PropsWithChildren, useContext, useEffect, useState } from 'react'
 import Api, { Config } from 'api/api'
 import { PageLoadingIndicator } from 'util/LoadingSpinner'
+import { ServiceUnavailable } from '@juniper/ui-core'
 
 const uninitializedConfig = {
   b2cTenantName: 'uninitialized',
   b2cClientId: 'uninitialized',
   b2cPolicyName: 'uninitialized',
-  b2cChangePasswordPolicyName: 'uninitialized'
+  b2cChangePasswordPolicyName: 'uninitialized',
+  systemSettings: {
+    maintenanceModeEnabled: false,
+    maintenanceModeMessage: 'uninitialized',
+    maintenanceModeBypassPhrase: 'uninitialized',
+    disableScheduledJobs: false
+  }
 }
 
 const ConfigContext = React.createContext<Config>(uninitializedConfig)
@@ -32,7 +39,7 @@ export default function ConfigProvider({ children }: PropsWithChildren) {
     })
   }, [])
   if (error) {
-    return <p>{error}</p>
+    return <ServiceUnavailable/>
   } else if (!isLoaded) {
     return <PageLoadingIndicator />
   } else {

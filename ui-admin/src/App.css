@@ -20,11 +20,9 @@
 }
 
 .btn-secondary:focus, .btn-secondary:hover {
-  background-color: transparent;
   color:#4D72AA;
-  font-weight: bold;
   border: none;
-  box-shadow: none;
+  background: rgba(77, 114, 170, 0.1);
 }
 
 a {

@@ -16,13 +16,13 @@ import {
   StudyEnvironmentSurvey,
   StudyEnvParams,
   Survey,
-  SurveyResponse
+  SurveyResponse,
+  Answer, SystemSettings
 } from '@juniper/ui-core'
 import { defaultApiErrorHandle } from 'util/error-utils'
 import queryString from 'query-string'
 
 export type {
-  Answer,
   HtmlPage,
   HtmlSection,
   LocalSiteContent,
@@ -95,6 +95,7 @@ export type Config = {
   b2cClientId: string,
   b2cPolicyName: string,
   b2cChangePasswordPolicyName: string,
+  systemSettings: SystemSettings
 }
 
 let bearerToken: string | null = null
@@ -499,6 +500,12 @@ export default {
 
   setBearerToken(token: string): void {
     bearerToken = token
+  },
+
+  async loadSystemSettings(): Promise<SystemSettings> {
+    const url = `/systemSettings`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
   },
 
   async log(logEvent: LogEvent): Promise<void> {

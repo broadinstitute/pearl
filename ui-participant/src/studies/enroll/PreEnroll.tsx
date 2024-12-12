@@ -99,7 +99,7 @@ export default function PreEnrollView({ enrollContext, survey }:
     <div style={{ background: '#f3f3f3' }} className="flex-grow-1">
       <SurveyReviewModeButton surveyModel={surveyModel} envName={studyEnv.environmentName}/>
       <SurveyAutoCompleteButton surveyModel={surveyModel} envName={studyEnv.environmentName}/>
-      {SurveyComponent}
+      <div className="mb-2">{SurveyComponent}</div>
     </div>
   )
 }

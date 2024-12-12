@@ -19,7 +19,10 @@ import bio.terra.pearl.core.service.survey.SurveyService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 /** Utility service for common auth-related methods */
@@ -30,7 +33,7 @@ public class AuthUtilService {
    * authorized to access the given portal. It might include public-ish operations like viewing
    * surveys, etc.
    */
-  public static final String BASE_PERMISSON = "BASE";
+  public static final String BASE_PERMISSION = "BASE";
 
   private final AdminUserService adminUserService;
   private final BearerTokenFactory bearerTokenFactory;
@@ -84,7 +87,7 @@ public class AuthUtilService {
   public Portal authUserToPortalWithPermission(
       AdminUser user, String portalShortcode, String permission) {
     Portal portal = authUserToPortal(user, portalShortcode);
-    if (user.isSuperuser() || BASE_PERMISSON.equals(permission)) {
+    if (user.isSuperuser() || BASE_PERMISSION.equals(permission)) {
       return portal;
     }
     adminUserService

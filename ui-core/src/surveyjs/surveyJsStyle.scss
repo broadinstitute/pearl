@@ -23,6 +23,10 @@
   }
 }
 
+.sd-progress__text {
+  padding: 1em 0em 0em 0em;
+}
+
 //scale down all html headers for mobile devices
 @media (max-width: 768px) {
   .sd-html h1 {
