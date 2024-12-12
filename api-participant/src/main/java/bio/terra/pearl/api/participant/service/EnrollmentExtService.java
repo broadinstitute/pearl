@@ -63,8 +63,7 @@ public class EnrollmentExtService {
       EnvironmentName envName,
       String studyShortcode,
       UUID preEnrollmentId,
-      UUID governedPpUserId // could be null if a totally new user
-      ) {
+      UUID governedPpUserId) { // could be null if a totally new user
 
     PortalParticipantUser portalParticipantUser =
         authUtilService
