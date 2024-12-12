@@ -69,7 +69,6 @@ public class AnswerService extends CrudService<Answer, AnswerDao> {
             answer.setFormat(AnswerFormat.NONE);
         }
 
-
         if (answer.getFormat().equals(AnswerFormat.FILE_NAME) && answer.getStringValue() != null) {
             participantFileService.findByEnrolleeIdAndFileName(answer.getEnrolleeId(), answer.getStringValue())
                     .orElseThrow(() -> new IllegalArgumentException("File (%s) not found for answer".formatted(answer.getStringValue())));
