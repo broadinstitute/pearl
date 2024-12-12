@@ -36,5 +36,3 @@ export const ZendeskLink = ({ doc, className, children }:
                                 {doc: DocsKey, className?: string, children: React.ReactNode}) => {
   return <a href={zendeskUrl(doc)} className={className} target="_blank">{children}</a>
 }
-
-export const SUPPORT_EMAIL_ADDRESS = 'support@juniper.terra.bio'

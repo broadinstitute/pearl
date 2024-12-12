@@ -40,7 +40,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
     implementation 'com.sendgrid:sendgrid-java:4.0.1'
-    implementation 'com.auth0:java-jwt:4.2.2'
+    implementation 'com.auth0:java-jwt:4.4.0'
     implementation group: "bio.terra", name: "datarepo-jakarta-client", version: "1.565.0-SNAPSHOT"
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.18.0'
     implementation 'org.apache.poi:poi:5.2.3'
@@ -50,8 +50,8 @@ dependencies {
     implementation 'org.jooq:jooq:3.19.15'
     implementation 'com.mixpanel:mixpanel-java:1.5.3'
 
-    implementation 'com.google.cloud:spring-cloud-gcp-starter-secretmanager:5.6.0'
-    implementation 'com.google.cloud:spring-cloud-gcp-starter:5.6.0'
+    implementation 'com.google.cloud:spring-cloud-gcp-starter-secretmanager:5.9.0'
+    implementation 'com.google.cloud:spring-cloud-gcp-starter:5.9.0'
     implementation 'org.springframework.cloud:spring-cloud-context:4.1.4'
 
     liquibaseRuntime 'org.liquibase:liquibase-core:4.30.0'

@@ -1,6 +1,7 @@
 import classNames from 'classnames'
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { SUPPORT_EMAIL_ADDRESS } from '../util/supportUtils'
 
 type SectionHeadingProps = JSX.IntrinsicElements['h2']
 
@@ -413,7 +414,7 @@ export const PrivacyPolicy = () => {
       </p>
       <p>
         By email to:{' '}
-        <a href="mailto:support@juniper.terra.bio">support@juniper.terra.bio</a>
+        <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>
       </p>
 
       <SectionHeading>Will you update or change this Policy?</SectionHeading>

@@ -7,14 +7,13 @@ import {
   useNavigate
 } from 'react-router-dom'
 import {
-  siteContentPath,
   studyKitsPath,
   studyParticipantsPath
 } from 'portal/PortalRouter'
 import StudySelector from './StudySelector'
 import React from 'react'
 import {
-  adminTasksPath,
+  adminTasksPath, studyEnvMailingListPath, studyEnvSiteContentPath,
   studyEnvDataBrowserPath,
   studyEnvDatasetListViewPath,
   studyEnvExportIntegrationsPath,
@@ -33,6 +32,7 @@ import {
   studyPublishingPath
 } from 'study/StudyRouter'
 import { sidebarNavLinkClasses } from './AdminSidebar'
+import { portalUsersPath } from '../user/AdminUserRouter'
 
 
 /** shows menu options related to the current study */
@@ -75,6 +75,10 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
           <NavLink to={studyEnvImportPath(portalShortcode, study.shortcode, 'sandbox')}
             className={sidebarNavLinkClasses} style={navStyleFunc}>Import Participants</NavLink>
         </li>
+        <li className="mb-2">
+          <NavLink to={studyEnvMailingListPath({ ...studyParams, envName: 'live' })}
+            className={sidebarNavLinkClasses} style={navStyleFunc}>Mailing List</NavLink>
+        </li>
       </ul>}/>
       <CollapsableMenu header={'Analytics & Data'} content={<ul className="list-unstyled">
         <li className="mb-2">
@@ -98,7 +102,7 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
       </ul>}/>
       <CollapsableMenu header={'Design & Build'} content={<ul className="list-unstyled">
         <li className="mb-2">
-          <NavLink to={siteContentPath(portalShortcode, 'sandbox')}
+          <NavLink to={studyEnvSiteContentPath({ ...studyParams, envName: 'sandbox' })}
             className={sidebarNavLinkClasses} style={navStyleFunc}>Website</NavLink>
         </li>
         <li className="mb-2">
@@ -118,6 +122,12 @@ export const StudySidebar = ({ study, portalList, portalShortcode }:
         <li>
           <NavLink to={studyEnvSiteSettingsPath(portalShortcode, study.shortcode, 'live')}
             className={sidebarNavLinkClasses} style={navStyleFunc}>Site Settings</NavLink>
+        </li>
+      </ul>}/>
+      <CollapsableMenu header={'Manage'} content={<ul className="list-unstyled">
+        <li className="mb-2">
+          <NavLink to={portalUsersPath({ portalShortcode, studyShortcode: study.shortcode, envName: 'live' })}
+            className={sidebarNavLinkClasses} style={navStyleFunc}>Team Members</NavLink>
         </li>
       </ul>}/>
     </div>

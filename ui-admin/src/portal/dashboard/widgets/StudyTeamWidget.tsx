@@ -3,19 +3,19 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUserPen } from '@fortawesome/free-solid-svg-icons'
 import React, { useState } from 'react'
 import { Portal } from '@juniper/ui-core'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { portalUsersPath } from 'user/AdminUserRouter'
 import { useLoadingEffect } from 'api/api-utils'
 import Api from 'api/api'
 import { AdminUser, Role } from 'api/adminUser'
 import LoadingSpinner from 'util/LoadingSpinner'
 import { InfoCard, InfoCardBody, InfoCardHeader } from 'components/InfoCard'
+import { useStudyEnvParamsFromPath } from '../../../study/StudyEnvironmentRouter'
 
 export const StudyTeamWidget = ({ portal }: { portal: Portal }) => {
   const [users, setUsers] = useState<AdminUser[]>([])
-  const navigate = useNavigate()
   const [roles, setRoles] = useState<Role[]>([])
-
+  const studyEnvParams = useStudyEnvParamsFromPath()
   const { isLoading: isLoadingRoles } = useLoadingEffect(async () => {
     const fetchedRoles = await Api.fetchRoles()
     setRoles(fetchedRoles)
@@ -31,11 +31,12 @@ export const StudyTeamWidget = ({ portal }: { portal: Portal }) => {
       <InfoCardHeader>
         <div className="d-flex align-items-center justify-content-between w-100">
           <span className="fw-bold">Team Members</span>
-          <Button onClick={() => navigate(portalUsersPath(portal.shortcode))}
-            tooltip={'View all team members'}
-            variant="light" className="border">
-            <FontAwesomeIcon icon={faUserPen} className="fa-lg"/> Manage
-          </Button>
+          <Link to={portalUsersPath(studyEnvParams)}>
+            <Button tooltip={'View all team members'}
+              variant="light" className="border">
+              <FontAwesomeIcon icon={faUserPen} className="fa-lg"/> Manage
+            </Button>
+          </Link>
         </div>
       </InfoCardHeader>
       <InfoCardBody>

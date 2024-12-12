@@ -57,4 +57,16 @@ public class StudyController implements StudyApi {
             EnvironmentName.valueOfCaseInsensitive(envName));
     return ResponseEntity.ok(studies);
   }
+
+  @Override
+  public ResponseEntity<Object> update(String portalShortcode, String studyShortcode, Object body) {
+    AdminUser operator = requestService.requireAdminUser(request);
+    Study study = objectMapper.convertValue(body, Study.class);
+
+    study =
+        studyExtService.update(
+            PortalStudyAuthContext.of(operator, portalShortcode, studyShortcode), study);
+
+    return ResponseEntity.ok(study);
+  }
 }

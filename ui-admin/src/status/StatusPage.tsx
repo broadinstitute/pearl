@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckCircle, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import Api from 'api/api'
 import LoadingSpinner from 'util/LoadingSpinner'
+import { SUPPORT_EMAIL_ADDRESS } from '@juniper/ui-core'
 
 export const StatusPage = () => {
   const [operational, setOperational] = useState<boolean>()
@@ -23,7 +24,7 @@ export const StatusPage = () => {
     }
     <div className="text-center">
       <div className="text-muted">
-        Please contact <a href="mailto:support@juniper.terra.bio">support@juniper.terra.bio</a> for additional support.
+        Please contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a> for additional support.
       </div>
     </div>
   </div>

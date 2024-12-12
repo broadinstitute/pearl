@@ -104,7 +104,7 @@ export default function TriggerList({ studyEnvContext, portalContext }:
           </li> }
         </ul>
       </div> }
-      <div className="flex-grow-1 bg-white p-3">
+      <div className="flex-grow-1 bg-white px-3">
         <Routes>
           <Route path="triggers/:triggerId"
             element={<TriggerDesigner studyEnvContext={studyEnvContext}

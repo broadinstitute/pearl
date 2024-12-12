@@ -27,8 +27,8 @@ import {
   StudyEnvParams,
   Survey,
   SurveyResponse,
-  Trigger,
-  SystemSettings
+  SystemSettings,
+  Trigger
 } from '@juniper/ui-core'
 import queryString from 'query-string'
 import {
@@ -586,6 +586,16 @@ export default {
       headers: this.getInitHeaders()
     })
     return await this.processResponse(response)
+  },
+
+  async updateStudy(portalShortcode: string, studyShortcode: string, study: Study): Promise<Study> {
+    const url = `${basePortalUrl(portalShortcode)}/studies/${studyShortcode}`
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: this.getInitHeaders(),
+      body: JSON.stringify(study)
+    })
+    return await this.processJsonResponse(response)
   },
 
   async getPortalMedia(portalShortcode: string): Promise<SiteMediaMetadata[]> {
@@ -1233,6 +1243,14 @@ export default {
       body: JSON.stringify(integration)
     })
     return await this.processJsonResponse(response)
+  },
+
+  async deleteExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<Response> {
+    const url = `${baseStudyEnvUrlFromParams(studyEnvParams)}/exportIntegrations/${id}`
+    return await fetch(url, {
+      method: 'DELETE',
+      headers: this.getInitHeaders()
+    })
   },
 
   async runExportIntegration(studyEnvParams: StudyEnvParams, id: string): Promise<ExportIntegrationJob> {
