@@ -1,9 +1,9 @@
-package bio.terra.pearl.api.participant.controller.fileupload;
+package bio.terra.pearl.api.participant.controller.file;
 
 import bio.terra.pearl.api.participant.api.ParticipantFileApi;
 import bio.terra.pearl.api.participant.service.RequestUtilService;
-import bio.terra.pearl.api.participant.service.fileupload.ParticipantFileExtService;
-import bio.terra.pearl.core.model.fileupload.ParticipantFile;
+import bio.terra.pearl.api.participant.service.file.ParticipantFileExtService;
+import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,10 +41,10 @@ public class ParticipantFileController implements ParticipantFileApi {
       String enrolleeShortcode,
       String fileName) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
-
-    // todo verify portalShortcode, studyShortcode, envName
+    
     ParticipantFile participantFile =
         participantFileExtService.get(participantUser, enrolleeShortcode, fileName);
+
     InputStream content =
         participantFileExtService.downloadFile(participantUser, enrolleeShortcode, fileName);
 
@@ -67,7 +67,6 @@ public class ParticipantFileController implements ParticipantFileApi {
       MultipartFile participantFile) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
 
-    // todo verify portalShortcode, studyShortcode, envName
     ParticipantFile created =
         participantFileExtService.uploadFile(participantUser, enrolleeShortcode, participantFile);
 
@@ -79,7 +78,6 @@ public class ParticipantFileController implements ParticipantFileApi {
       String portalShortcode, String envName, String studyShortcode, String enrolleeShortcode) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
 
-    // todo verify portalShortcode, studyShortcode, envName
     return ResponseEntity.ok(participantFileExtService.list(participantUser, enrolleeShortcode));
   }
 
@@ -92,7 +90,6 @@ public class ParticipantFileController implements ParticipantFileApi {
       String fileName) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
 
-    // todo verify portalShortcode, studyShortcode, envName
     participantFileExtService.delete(participantUser, enrolleeShortcode, fileName);
 
     return ResponseEntity.noContent().build();
