@@ -89,7 +89,7 @@ const CreateUserModal = ({ onDismiss, portals, userCreated }:
             </label>
           </div> }
           { !newUser.superuser && <div>
-            <div>
+            <div className="mb-3">
               <PortalSelector portals={portals}
                 selectedPortal={portals.find(p => p.shortcode === newUser.portalShortcode)}
                 setSelectedPortal={portal => setNewUser({
