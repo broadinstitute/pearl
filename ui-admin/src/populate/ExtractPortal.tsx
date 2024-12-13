@@ -12,7 +12,7 @@ import { Store } from 'react-notifications-component'
 /** control for downloading portal configs as a zip file */
 export default function ExtractPortal({ initialPortalShortcode }: {initialPortalShortcode: string}) {
   const [portalShortcode, setPortalShortcode] = useState(initialPortalShortcode)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const [onlyExtractActiveVersions, setOnlyExtractActiveVersions] = useState(false)
 

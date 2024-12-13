@@ -7,8 +7,7 @@ import {
 import {
   AnswerMapping,
   FormContent,
-  PortalEnvironmentLanguage,
-  VersionedForm
+  PortalEnvironmentLanguage
 } from '@juniper/ui-core'
 
 import {
@@ -28,7 +27,6 @@ import { SplitCalculatedValueDesigner } from 'forms/designer/SplitCalculatedValu
 type FormContentEditorProps = {
   initialContent: string
   initialAnswerMappings: AnswerMapping[]
-  visibleVersionPreviews: VersionedForm[]
   supportedLanguages: PortalEnvironmentLanguage[]
   currentLanguage: PortalEnvironmentLanguage
   readOnly: boolean
