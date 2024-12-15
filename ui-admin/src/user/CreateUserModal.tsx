@@ -26,8 +26,6 @@ const CreateUserModal = ({ onDismiss, portals, userCreated }:
     portalShortcode: portals.length > 0 ? portals[0].shortcode : null,
     roleNames: []
   })
-  const portalOpts = portals.map(portal => ({ label: portal.name, value: portal.shortcode }))
-  const selectedPortalOpt = portalOpts.find(portalOpt => portalOpt.value === newUser.portalShortcode)
   const [roles, setRoles] = useState<Role[]>([])
 
   const { isLoading: rolesLoading } = useLoadingEffect(async () => {
@@ -45,7 +43,7 @@ const CreateUserModal = ({ onDismiss, portals, userCreated }:
     portals.find(portal => portal.shortcode === newUser.portalShortcode))
 
   const createUser = async () => {
-    doApiLoad(async () => {
+    await doApiLoad(async () => {
       let createdUser: AdminUser
       if (!newUser.superuser) {
         createdUser = await Api.createPortalUser(newUser)
