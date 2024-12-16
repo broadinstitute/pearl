@@ -37,11 +37,6 @@ const CreateUserModal = ({ onDismiss, portals, userCreated }:
     setRoles(fetchedRoles)
   })
 
-  useReactSingleSelect<Portal>(portals,
-    portal => ({ label: portal.name, value: portal }),
-    (opt: Portal | undefined) => setNewUser({ ...newUser, portalShortcode: opt?.shortcode ?? null }),
-    portals.find(portal => portal.shortcode === newUser.portalShortcode))
-
   const createUser = async () => {
     await doApiLoad(async () => {
       let createdUser: AdminUser
