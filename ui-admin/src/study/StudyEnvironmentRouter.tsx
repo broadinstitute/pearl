@@ -165,7 +165,7 @@ const StudyFormsRouter = ({ studyEnvContext, portalEnvContext }:
   {studyEnvContext: StudyEnvContextT, portalEnvContext: PortalEnvContext}) => {
   return <>
     <NavBreadcrumb value={studyEnvFormsParamsPath(paramsFromContext(studyEnvContext))}>
-      <Link to={studyEnvFormsParamsPath(paramsFromContext(studyEnvContext))}>forms</Link>
+      <Link to={studyEnvFormsParamsPath(paramsFromContext(studyEnvContext))}>Forms</Link>
     </NavBreadcrumb>
     <Routes>
       <Route path="preReg" element={<PreRegView studyEnvContext={studyEnvContext}
