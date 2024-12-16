@@ -40,7 +40,7 @@ test('renders routable trigger list', async () => {
     }
   ]
   jest.spyOn(Api, 'findTriggersForStudyEnv')
-    .mockResolvedValue(() => Promise.resolve(triggers))
+    .mockImplementation(() => Promise.resolve(triggers))
   jest.spyOn(Api, 'findTrigger')
     .mockImplementation(jest.fn())
 
