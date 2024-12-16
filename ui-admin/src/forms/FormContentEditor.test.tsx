@@ -5,7 +5,6 @@ import {
 import React from 'react'
 
 import { FormContentEditor } from './FormContentEditor'
-import { mockPortal } from 'test-utils/mocking-utils'
 import { userHasPermission } from '../user/UserProvider'
 
 jest.mock('user/UserProvider', () => ({
@@ -29,7 +28,6 @@ describe('FormContentEditor', () => {
     // avoid cluttering the console with the error message from the expected error
     jest.spyOn(console, 'error').mockImplementation(jest.fn())
     const { container } = render(<FormContentEditor
-      portal={mockPortal()}
       initialAnswerMappings={[]}
       currentLanguage={{ languageCode: 'en', languageName: 'English', id: '' }}
       supportedLanguages={[]}

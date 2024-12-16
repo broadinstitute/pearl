@@ -100,7 +100,8 @@ export const mockSurvey = (stableId: string): Survey => {
     stableId,
     version: 1,
     surveyType: 'RESEARCH',
-    blurb: 'This is a survey'
+    blurb: 'This is a survey',
+    recurrenceType: 'NONE'
   }
 }
 

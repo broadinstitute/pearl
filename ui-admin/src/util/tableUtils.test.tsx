@@ -51,7 +51,7 @@ const TestTableComponent = ({ initialValue, initialData }: {
 
   return <div>
     <ColumnVisibilityControl table={table}/>
-    <DownloadControl table={table} fileName={'test'}/>
+    <DownloadControl buttonClass={''} table={table} fileName={'test'}/>
     { basicTableLayout(table, { filterable: true }) }
   </div>
 }
