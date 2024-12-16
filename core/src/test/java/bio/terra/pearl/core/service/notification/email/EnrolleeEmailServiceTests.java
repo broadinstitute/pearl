@@ -19,7 +19,7 @@ import bio.terra.pearl.core.service.notification.NotificationService;
 import bio.terra.pearl.core.service.rule.EnrolleeContext;
 import bio.terra.pearl.core.service.study.StudyService;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
-import com.sendgrid.Mail;
+import com.sendgrid.helpers.mail.Mail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;

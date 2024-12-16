@@ -6,7 +6,7 @@ import bio.terra.pearl.core.model.notification.LocalizedEmailTemplate;
 import bio.terra.pearl.core.service.notification.NotificationContextInfo;
 import bio.terra.pearl.core.service.notification.substitutors.AdminEmailSubstitutor;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
-import com.sendgrid.Mail;
+import com.sendgrid.helpers.mail.Mail;
 import org.apache.commons.text.StringSubstitutor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
