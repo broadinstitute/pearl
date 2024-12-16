@@ -67,7 +67,7 @@ public class AdminUserService extends AdminDataAuditedService<AdminUser, AdminUs
     public void delete(UUID adminUserId, DataAuditInfo auditInfo, Set<CascadeProperty> cascade) {
         portalAdminUserService.deleteByUserId(adminUserId, auditInfo);
         adminDataChangeService.deleteByResponsibleAdminUserId(adminUserId);
-        participantDataChangeService.deleteByResponsibleUserId(adminUserId);
+        participantDataChangeService.deleteByResponsibleAdminUserId(adminUserId);
         portalEnvironmentChangeRecordService.deleteByResponsibleAdminUserId(adminUserId);
         dao.delete(adminUserId);
     }
