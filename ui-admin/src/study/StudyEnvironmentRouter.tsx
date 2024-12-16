@@ -9,6 +9,7 @@ import {
 import { StudyParams } from 'study/StudyRouter'
 
 import {
+  Link,
   Route,
   Routes,
   useNavigate,
@@ -55,7 +56,7 @@ import LoadedSettingsView from './settings/SettingsView'
 import { ENVIRONMENT_ICON_MAP } from 'util/publishUtils'
 import SiteContentLoader from '../portal/siteContent/SiteContentLoader'
 import PortalDashboard from '../portal/dashboard/PortalDashboard'
-import { mailingListPath } from '../portal/PortalRouter'
+import { mailingListPath, PortalEnvContext } from '../portal/PortalRouter'
 import { PortalAdminUserRouter } from '../user/AdminUserRouter'
 
 export type StudyEnvContextT = { study: Study, currentEnv: StudyEnvironment, currentEnvPath: string, portal: Portal }
@@ -148,23 +149,9 @@ function StudyEnvironmentRouter({ study }: { study: Study }) {
           <Route path="export/dataRepo/datasets" element={<DatasetList studyEnvContext={studyEnvContext}/>}/>
           <Route path="export/dataRepo/datasets/:datasetName"
             element={<DatasetDashboard studyEnvContext={studyEnvContext}/>}/>
-          <Route path="forms">
-            <Route path="preReg" element={<PreRegView studyEnvContext={studyEnvContext}
-              portalEnvContext={portalEnvContext}/>}/>
-            <Route path="preEnroll">
-              <Route path=":surveyStableId" element={<PreEnrollView studyEnvContext={studyEnvContext}/>}/>
-              <Route path="*" element={<div>Unknown preEnroll page</div>}/>
-            </Route>
-            <Route path="surveys">
-              <Route path=":surveyStableId">
-                <Route path=":version" element={<SurveyView studyEnvContext={studyEnvContext}/>}/>
-                <Route index element={<SurveyView studyEnvContext={studyEnvContext}/>}/>
-              </Route>
-              <Route path="scratch" element={<QuestionScratchbox/>}/>
-              <Route path="*" element={<div>Unknown survey page</div>}/>
-            </Route>
-            <Route index element={<StudyContent studyEnvContext={studyEnvContext}/>}/>
-          </Route>
+          <Route path="forms/*" element={<StudyFormsRouter studyEnvContext={studyEnvContext}
+            portalEnvContext={portalEnvContext}/>}/>
+
           <Route path="adminTasks">
             <Route index element={<AdminTaskList studyEnvContext={studyEnvContext}/>}/>
           </Route>
@@ -173,6 +160,31 @@ function StudyEnvironmentRouter({ study }: { study: Study }) {
       </I18nProvider>
     </ApiProvider>
   </div>
+}
+const StudyFormsRouter = ({ studyEnvContext, portalEnvContext }:
+  {studyEnvContext: StudyEnvContextT, portalEnvContext: PortalEnvContext}) => {
+  return <>
+    <NavBreadcrumb value={studyEnvFormsParamsPath(paramsFromContext(studyEnvContext))}>
+      <Link to={studyEnvFormsParamsPath(paramsFromContext(studyEnvContext))}>Forms</Link>
+    </NavBreadcrumb>
+    <Routes>
+      <Route path="preReg" element={<PreRegView studyEnvContext={studyEnvContext}
+        portalEnvContext={portalEnvContext}/>}/>
+      <Route path="preEnroll">
+        <Route path=":surveyStableId" element={<PreEnrollView studyEnvContext={studyEnvContext}/>}/>
+        <Route path="*" element={<div>Unknown preEnroll page</div>}/>
+      </Route>
+      <Route path="surveys">
+        <Route path=":surveyStableId">
+          <Route path=":version" element={<SurveyView studyEnvContext={studyEnvContext}/>}/>
+          <Route index element={<SurveyView studyEnvContext={studyEnvContext}/>}/>
+        </Route>
+        <Route path="scratch" element={<QuestionScratchbox/>}/>
+        <Route path="*" element={<div>Unknown survey page</div>}/>
+      </Route>
+      <Route index element={<StudyContent studyEnvContext={studyEnvContext}/>}/>
+    </Routes>
+  </>
 }
 
 export default StudyEnvironmentRouter
@@ -222,6 +234,11 @@ export const portalEnvPath = (portalShortcode: string, envName: string) => {
 /** surveys, consents, etc.. */
 export const studyEnvFormsPath = (portalShortcode: string, studyShortcode: string, envName: string) => {
   return `/${portalShortcode}/studies/${studyShortcode}/env/${envName}/forms`
+}
+
+/** convenience for the above method from study params */
+export const studyEnvFormsParamsPath = (studyEnvParams: StudyEnvParams) => {
+  return studyEnvFormsPath(studyEnvParams.portalShortcode, studyEnvParams.studyShortcode, studyEnvParams.envName)
 }
 
 /** helper for path to configure study notifications */

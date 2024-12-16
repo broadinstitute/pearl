@@ -256,14 +256,17 @@ const SurveyEditorView = (props: SurveyEditorViewProps) => {
           onFormContentChange={(newValidationErrors, newContent) => {
             if (isEmpty(newValidationErrors)) {
               setShowErrors(false)
-              setDraft({ ...currentForm, ...draft, content: JSON.stringify(newContent), date: Date.now() })
+              setDraft({
+                ...currentForm, ...draft as FormDraft,
+                content: JSON.stringify(newContent), date: Date.now()
+              })
             }
             setValidationErrors(newValidationErrors)
           }}
           onAnswerMappingChange={(newValidationErrors, newAnswerMappings) => {
             if (isEmpty(newValidationErrors)) {
               setDraft({
-                ...draft,
+                ...draft as FormDraft,
                 content: draft?.content || currentForm.content,
                 answerMappings: newAnswerMappings,
                 date: Date.now()
