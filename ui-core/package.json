@@ -19,7 +19,7 @@
   "devDependencies": {
     "@babel/cli": "^7.21.5",
     "@types/bootstrap": "^5.2.10",
-    "@types/lodash": "^4.14.184",
+    "@types/lodash": "^4.17.13",
     "@types/react": "^18.3.12"
   },
   "peerDependencies": {
