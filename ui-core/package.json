@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.21.5",
-    "@types/bootstrap": "^5.2.6",
+    "@types/bootstrap": "^5.2.10",
     "@types/lodash": "^4.14.184",
     "@types/react": "^18.3.12"
   },
