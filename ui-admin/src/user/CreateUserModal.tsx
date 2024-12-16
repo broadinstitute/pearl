@@ -9,6 +9,9 @@ import { Store } from 'react-notifications-component'
 import Select from 'react-select'
 import { doApiLoad, useLoadingEffect } from '../api/api-utils'
 import { RoleSelector } from './AdminUserDetail'
+import useReactSingleSelect from '../util/react-select-utils'
+
+const DEFAULT_ROLE = 'study_admin'
 
 /** creates a new admin user */
 const CreateUserModal = ({ onDismiss, portals, userCreated }:
@@ -16,26 +19,26 @@ const CreateUserModal = ({ onDismiss, portals, userCreated }:
                              portals: Portal[], userCreated: () => void
                            }) => {
   const [isLoading, setIsLoading] = useState(false)
-  const [portalShortcode, setPortalShortcode] =
-    useState<string | null>(portals.length > 0 ? portals[0].shortcode : null)
   const { user } = useUser()
   const [newUser, setNewUser] = useState<AdminUserParams>({
     username: '',
     superuser: false,
-    portalShortcode,
-    roleNames: ['study_admin']
+    portalShortcode: portals.length > 0 ? portals[0].shortcode : null,
+    roleNames: []
   })
-  const portalOpts = portals.map(portal => ({ label: portal.name, value: portal.shortcode }))
-  const selectedPortalOpt = portalOpts.find(portalOpt => portalOpt.value === portalShortcode)
   const [roles, setRoles] = useState<Role[]>([])
 
-  useLoadingEffect(async () => {
+  const { isLoading: rolesLoading } = useLoadingEffect(async () => {
     const fetchedRoles = await Api.fetchRoles()
+    setNewUser({
+      ...newUser,
+      roleNames: fetchedRoles.filter(role => role.name === DEFAULT_ROLE).map(role => role.name)
+    })
     setRoles(fetchedRoles)
   })
 
   const createUser = async () => {
-    doApiLoad(async () => {
+    await doApiLoad(async () => {
       let createdUser: AdminUser
       if (!newUser.superuser) {
         createdUser = await Api.createPortalUser(newUser)
@@ -59,12 +62,12 @@ const CreateUserModal = ({ onDismiss, portals, userCreated }:
       <form onSubmit={e => e.preventDefault()}>
         <div className="py-2">
           <div className="mb-3">
-            <label className="form-label">
+            <label className="form-label d-block">
               Email
               <input type="email" value={newUser.username} className="form-control"
                 onChange={e => setNewUser({ ...newUser, username: e.target.value })}/>
-              <span className="form-text">Email must be a Microsoft- or Google-based account</span>
             </label>
+            <span className="form-text ps-3">Email must be a Microsoft- or Google-based account</span>
           </div>
           {user?.superuser && <div className="mb-3">
             <span>Superuser</span><br/>
@@ -79,12 +82,13 @@ const CreateUserModal = ({ onDismiss, portals, userCreated }:
             </label>
           </div> }
           { !newUser.superuser && <div>
-            <div>
-              <label className="w-100 mb-3">
-                Portal
-                <Select options={portalOpts} value={selectedPortalOpt} isDisabled={portalOpts.length < 2}
-                  onChange={opt => setPortalShortcode(opt?.value ?? null)}/>
-              </label>
+            <div className="mb-3">
+              <PortalSelector portals={portals}
+                selectedPortal={portals.find(p => p.shortcode === newUser.portalShortcode)}
+                setSelectedPortal={portal => setNewUser({
+                  ...newUser,
+                  portalShortcode: portal?.shortcode ?? null
+                })}/>
             </div>
             <div>
               <RoleSelector roles={roles} selectedRoleNames={newUser.roleNames} setSelectedRoleNames={roleNames =>
@@ -95,7 +99,7 @@ const CreateUserModal = ({ onDismiss, portals, userCreated }:
       </form>
     </Modal.Body>
     <Modal.Footer>
-      <LoadingSpinner isLoading={isLoading}>
+      <LoadingSpinner isLoading={isLoading || rolesLoading}>
         <button className="btn btn-primary" onClick={createUser} disabled={!isUserValid}>Create</button>
         <button className="btn btn-secondary" onClick={onDismiss}>Cancel</button>
       </LoadingSpinner>
@@ -104,3 +108,19 @@ const CreateUserModal = ({ onDismiss, portals, userCreated }:
 }
 
 export default CreateUserModal
+
+export const PortalSelector = ({ portals, selectedPortal, setSelectedPortal }: {
+    portals: Portal[], selectedPortal?: Portal, setSelectedPortal: (portal?: Portal) => void
+    }) => {
+  const { onChange, options, selectedOption, selectInputId } = useReactSingleSelect<Portal>(portals,
+    portal => ({ label: portal.name, value: portal }),
+    (opt: Portal | undefined) => setSelectedPortal(opt),
+    portals.find(portal => portal.shortcode === selectedPortal?.shortcode))
+
+  return <>
+    <label className="form-label" htmlFor={selectInputId}>
+        Portal
+    </label>
+    <Select options={options} value={selectedOption} onChange={onChange} inputId={selectInputId}/>
+  </>
+}
