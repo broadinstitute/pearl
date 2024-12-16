@@ -21,11 +21,11 @@ import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyService;
 import bio.terra.pearl.core.service.workflow.EnrolleeEvent;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
-import com.sendgrid.Mail;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import com.sendgrid.helpers.mail.Mail;
 
 import java.util.List;
 import java.util.UUID;
@@ -93,12 +93,11 @@ public class AdminEmailService {
 
   protected String buildAndSendEmail(LocalizedEmailTemplate localizedEmailTemplate, String adminUsername, StringSubstitutor substitutor) throws Exception {
     String fromAddress = routingPaths.getSupportEmailAddress();
-    Mail mail = sendgridClient.buildEmail(localizedEmailTemplate, adminUsername, fromAddress, "Juniper", substitutor);
+    var mail = sendgridClient.buildEmail(localizedEmailTemplate, adminUsername, fromAddress, "Juniper", substitutor);
     return sendgridClient.sendEmail(mail);
   }
 
   protected Mail buildEmailToAllAdmins(LocalizedEmailTemplate localizedEmailTemplate, StringSubstitutor substitutor, List<AdminUser> adminUsers) throws Exception {
-
     return sendgridClient.buildMultiRecipientMail(
             localizedEmailTemplate,
             adminUsers.stream().map(AdminUser::getUsername).toList(),
