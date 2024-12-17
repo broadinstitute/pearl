@@ -85,7 +85,7 @@ public class TriggerActionService {
         List<ParticipantTask> tasks;
         // find the task(s) to update
         if (TriggerScope.STUDY.equals(trigger.getActionScope())) {
-            tasks = participantTaskService.findTasksByStudyAndTarget(trigger.getStudyEnvironmentId(), trigger.getFilterTargetStableIds());
+            tasks = participantTaskService.findTasksByStudyAndTarget(trigger.getStudyEnvironmentId(), trigger.getActionTargetStableIds());
         } else {
             tasks = participantTaskService.findByPortalParticipantUserId(event.getPortalParticipantUser().getId());
         }

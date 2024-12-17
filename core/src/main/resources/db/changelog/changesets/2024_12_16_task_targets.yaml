@@ -8,5 +8,5 @@ databaseChangeLog: # this will need a follow-up PR in a subsequent release to re
         - sql:
             sql: ALTER TABLE trigger ADD COLUMN action_target_stable_ids text[];
         - sql:
-            sql: update trigger set task_target_stable_ids = ARRAY[action_target_stable_ids];
+            sql: update trigger set action_target_stable_ids = ARRAY[update_task_target_stable_id];
 
