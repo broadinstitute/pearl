@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { Textarea } from 'components/forms/Textarea'
 import { questionFromRawText } from '../../../util/juniperSurveyUtils'
 
-export const FreetextEditor = ({ question, onChange }: {
+export const FormElementFreetextEditor = ({ question, onChange }: {
     question: Question, onChange: (newQuestion: Question) => void
 }) => {
   const [freetext, setFreetext] = useState<string>('')

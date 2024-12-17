@@ -14,7 +14,7 @@ import { isEqual } from 'lodash'
 import { FormElementEditor } from './FormElementEditor'
 import { FormElementJsonEditor } from './FormElementJsonEditor'
 import { FormElementOptions } from './controls/FormElementOptions'
-import { FreetextEditor } from './FreetextEditor'
+import { FormElementFreetextEditor } from './FormElementFreetextEditor'
 
 /* Note that this component is memoized using React.memo
  * Since survey pages can contain many elements, we need to be mindful of
@@ -62,7 +62,7 @@ export const SplitFormElementDesigner = memo(({
         onChange={onChange}
       />
       { showFreetextMode &&
-        <FreetextEditor
+        <FormElementFreetextEditor
           question={element as Question}
           onChange={newQuestion => {
             const newContent = { ...editedContent }
