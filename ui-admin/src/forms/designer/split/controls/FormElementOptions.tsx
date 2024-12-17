@@ -1,12 +1,14 @@
 import React from 'react'
 import { IconButton } from 'components/forms/Button'
-import { faClone, faCode } from '@fortawesome/free-solid-svg-icons'
+import { faClone, faCode, faKeyboard } from '@fortawesome/free-solid-svg-icons'
 import { ListElementController } from 'portal/siteContent/designer/components/ListElementController'
 import { FormContent, FormElement } from '@juniper/ui-core'
 
 type FormElementOptionsProps = {
     showJsonEditor: boolean,
     setShowJsonEditor: (show: boolean) => void,
+    showFreetextMode: boolean,
+    setShowFreetextMode: (show: boolean) => void,
     elementIndex: number,
     element: FormElement,
     currentPageNo: number,
@@ -17,6 +19,8 @@ type FormElementOptionsProps = {
 export const FormElementOptions = ({
   showJsonEditor,
   setShowJsonEditor,
+  showFreetextMode,
+  setShowFreetextMode,
   elementIndex,
   element,
   currentPageNo,
@@ -27,8 +31,14 @@ export const FormElementOptions = ({
     <div className="d-flex justify-content-end">
       <div className="d-flex border rounded-3 rounded-top-0 border-top-0 bg-light">
         <IconButton icon={faCode}
+          disabled={showFreetextMode}
           aria-label={showJsonEditor ? 'Switch to designer' : 'Switch to JSON editor'}
           onClick={() => setShowJsonEditor(!showJsonEditor)}
+        />
+        <IconButton icon={faKeyboard}
+          disabled={showJsonEditor}
+          aria-label={showFreetextMode ? 'Switch to designer' : 'Switch to freetext editor'}
+          onClick={() => setShowFreetextMode(!showFreetextMode)}
         />
         <IconButton icon={faClone}
           aria-label={'Clone'}

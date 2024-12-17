@@ -14,6 +14,7 @@ import { isEqual } from 'lodash'
 import { FormElementEditor } from './FormElementEditor'
 import { FormElementJsonEditor } from './FormElementJsonEditor'
 import { FormElementOptions } from './controls/FormElementOptions'
+import { FreetextEditor } from './FreetextEditor'
 
 /* Note that this component is memoized using React.memo
  * Since survey pages can contain many elements, we need to be mindful of
@@ -31,6 +32,7 @@ export const SplitFormElementDesigner = memo(({
     editedContent: FormContent, onChange: (newContent: FormContent) => void
 }) => {
   const [showJsonEditor, setShowJsonEditor] = useState(false)
+  const [showFreetextMode, setShowFreetextMode] = useState(false)
 
   // Chop the survey down to just the specific question that we're editing, so we can display
   // a preview using the SurveyJS survey component.
@@ -51,13 +53,35 @@ export const SplitFormElementDesigner = memo(({
       <FormElementOptions
         showJsonEditor={showJsonEditor}
         setShowJsonEditor={setShowJsonEditor}
+        showFreetextMode={showFreetextMode}
+        setShowFreetextMode={setShowFreetextMode}
         elementIndex={elementIndex}
         element={element}
         currentPageNo={currentPageNo}
         editedContent={editedContent}
         onChange={onChange}
       />
-      { !showJsonEditor ?
+      { showFreetextMode &&
+        <FreetextEditor
+          question={element as Question}
+          onChange={newQuestion => {
+            const newContent = { ...editedContent }
+            newContent.pages[currentPageNo].elements[elementIndex] = newQuestion
+            onChange(newContent)
+          }}
+        />
+      }
+      { showJsonEditor &&
+        <FormElementJsonEditor
+          question={element as Question}
+          onChange={newQuestion => {
+            const newContent = { ...editedContent }
+            newContent.pages[currentPageNo].elements[elementIndex] = newQuestion
+            onChange(newContent)
+          }}
+        />
+      }
+      { !showJsonEditor && !showFreetextMode &&
         <FormElementEditor
           element={element}
           elementIndex={elementIndex}
@@ -66,14 +90,6 @@ export const SplitFormElementDesigner = memo(({
           onChange={onChange}
           currentLanguage={currentLanguage}
           supportedLanguages={supportedLanguages}
-        /> :
-        <FormElementJsonEditor
-          question={element as Question}
-          onChange={newQuestion => {
-            const newContent = { ...editedContent }
-            newContent.pages[currentPageNo].elements[elementIndex] = newQuestion
-            onChange(newContent)
-          }}
         />
       }
     </div>
