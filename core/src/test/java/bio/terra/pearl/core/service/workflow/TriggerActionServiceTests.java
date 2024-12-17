@@ -17,6 +17,8 @@ import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -47,7 +49,40 @@ public class TriggerActionServiceTests extends BaseSpringBootTest {
         // simulate updating an survey task on completion of a kit request
         Trigger config = createStatusTrigger(enrolleeBundle, TriggerEventType.KIT_SENT);
         config.setStatusToUpdateTo(TaskStatus.COMPLETE);
-        config.setUpdateTaskTargetStableId("exampleTask");
+        config.setFilterTargetStableIds(List.of("exampleTask"));
+        triggerService.update(config);
+
+        KitRequest kitRequest = createKitRequest(enrolleeBundle, getTestName(testInfo));
+        eventService.publishKitStatusEvent(kitRequest, enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(),
+                KitRequestStatus.SENT);
+
+        // target task should be updated, other tasks should not
+        task = participantTaskService.find(task.getId()).orElseThrow();
+        assertThat(task.getStatus(), equalTo(TaskStatus.COMPLETE));
+        otherTask = participantTaskService.find(otherTask.getId()).orElseThrow();
+        assertThat(otherTask.getStatus(), equalTo(TaskStatus.NEW));
+        otherEnrolleeTask = participantTaskService.find(otherEnrolleeTask.getId()).orElseThrow();
+        assertThat(otherEnrolleeTask.getStatus(), equalTo(TaskStatus.NEW));
+    }
+
+    @Test
+    @Transactional
+    public void testTargetStableIdFilter(TestInfo testInfo) {
+        // simulate sending a reminder email for a single survey type
+        EnrolleeBundle enrolleeBundle = enrolleeFactory
+                .buildWithPortalUser(getTestName(testInfo));
+        ParticipantTask task = createTask(enrolleeBundle, "targetedSurvey", TaskStatus.NEW);
+        ParticipantTask otherTask = createTask(enrolleeBundle, "otherSurvey", TaskStatus.NEW);
+        ParticipantTask updateTask = createTask(enrolleeBundle, "updateSurvey", TaskStatus.NEW);
+        EnrolleeBundle otherEnrollee = enrolleeFactory
+                .buildWithPortalUser(getTestName(testInfo));
+        ParticipantTask otherEnrolleeTask = createTask(otherEnrollee, "otherSurvey", TaskStatus.NEW);
+        ParticipantTask otherUpdateTask = createTask(enrolleeBundle, "updateSurvey", TaskStatus.NEW);
+
+        // simulate updating an survey task on completion of another survey
+        Trigger config = createStatusTrigger(enrolleeBundle, TriggerEventType.SURVEY_RESPONSE);
+        config.setStatusToUpdateTo(TaskStatus.COMPLETE);
+        config.setFilterTargetStableIds(List.of("exampleTask"));
         triggerService.update(config);
 
         KitRequest kitRequest = createKitRequest(enrolleeBundle, getTestName(testInfo));

@@ -1,12 +1,12 @@
 import {
-  ParticipantTaskStatus,
+  ParticipantTaskStatus, StudyEnvParams, Survey,
   Trigger,
   TriggerActionType,
   TriggerDeliveryType,
   TriggerScope,
   TriggerType
 } from '@juniper/ui-core'
-import React from 'react'
+import React, { useId, useState } from 'react'
 import Select from 'react-select'
 import useReactSingleSelect from 'util/react-select-utils'
 import {
@@ -16,12 +16,13 @@ import {
   InfoCardTitle
 } from 'components/InfoCard'
 import EmailTemplateEditor from 'study/notifications/EmailTemplateEditor'
-import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
+import { paramsFromContext, StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import InfoPopup from 'components/forms/InfoPopup'
-import { TextInput } from 'components/forms/TextInput'
 import { NavLink } from 'react-router-dom'
 import { Checkbox } from 'components/forms/Checkbox'
 import { LazySearchQueryBuilder } from 'search/LazySearchQueryBuilder'
+import { useLoadingEffect } from 'api/api-utils'
+import Api from 'api/api'
 
 
 export const TriggerDesignerEditor = (
@@ -44,6 +45,7 @@ export const TriggerDesignerEditor = (
       baseFieldsOnly={baseFieldsOnly}
       trigger={trigger}
       updateTrigger={updateTrigger}
+      studyEnvParams={paramsFromContext(studyEnvContext)}
     />
     <TriggerActionEditor
       baseFieldsOnly={baseFieldsOnly}
@@ -67,12 +69,14 @@ const TriggerTypeEditor = (
     baseFieldsOnly,
     studyEnvContext,
     trigger,
-    updateTrigger
+    updateTrigger,
+    studyEnvParams
   }: {
     baseFieldsOnly: boolean
     studyEnvContext: StudyEnvContextT,
     trigger: Trigger;
     updateTrigger: (string: keyof Trigger, value: unknown) => void;
+    studyEnvParams: StudyEnvParams
   }
 ) => {
   const updateTriggerType = (val: TriggerType | undefined) => {
@@ -94,6 +98,9 @@ const TriggerTypeEditor = (
     },
     updateTriggerType,
     trigger.triggerType)
+
+  const isTaskScopable = trigger.triggerType === 'TASK_REMINDER' ||
+    (trigger.triggerType === 'EVENT' && trigger.eventType === 'SURVEY_RESPONSE')
 
   return <InfoCard>
     <InfoCardHeader>
@@ -120,6 +127,10 @@ const TriggerTypeEditor = (
 
 
         {!baseFieldsOnly && <>
+          {isTaskScopable && <TaskTargetStableIdsEditor
+            studyEnvParams={studyEnvParams}
+            stableIds={trigger.taskTargetStableIds}
+            setStableIds={ids => updateTrigger('taskTargetStableIds', ids)}/>}
 
           {trigger.triggerType !== 'AD_HOC' &&
               <HorizontalBar/>}
@@ -311,7 +322,6 @@ const TriggerActionEditor = (
     updateActionType,
     trigger.actionType)
 
-
   return <InfoCard>
     <InfoCardHeader>
       <InfoCardTitle title={'Action'}/>
@@ -407,8 +417,6 @@ const NotificationEditor = (
             </button>
           </div>}
         </>}
-
-
   </>
 }
 
@@ -452,12 +460,32 @@ const TaskStatusEditor = (
       />
     </div>
     <div>
-      <label className="form-label mt-3" htmlFor="updateTaskTargetStableId">Target stable id </label>
+      <label className="form-label mt-3" htmlFor="updateTaskTargetStableIds">Target stable id </label>
       <InfoPopup content={<span>
             the stable id of the task to update. For survey tasks, this is the survey stable id.
       </span>}/>
-      <TextInput value={trigger.updateTaskTargetStableId} id="updateTaskTargetStableId"
-        onChange={v => updateTrigger('updateTaskTargetStableId', v)}/>
     </div>
+  </div>
+}
+
+const TaskTargetStableIdsEditor = ({ studyEnvParams, stableIds, setStableIds }:
+  {studyEnvParams: StudyEnvParams, stableIds: string[], setStableIds: (ids: string[]) => void}) => {
+  const [surveys, setSurveys] = useState<Survey[]>([])
+  useLoadingEffect(async () => {
+    const studyEnvSurveys = await Api.findConfiguredSurveys(studyEnvParams.portalShortcode,
+      studyEnvParams.studyShortcode, studyEnvParams.envName, true)
+    setSurveys(studyEnvSurveys.map(studyEnvSurvey => studyEnvSurvey.survey))
+  })
+  stableIds = stableIds ?? []
+  const inputId = useId()
+  return <div className="mt-3">
+    <label className="form-label" htmlFor={inputId}>Limit to these surveys
+      <span className="fst-italic ms-2">(leave blank if trigger applies to all)</span></label>
+    <Select options={surveys} inputId={inputId}
+      value={stableIds.map(stableId => surveys.find(survey => survey.stableId === stableId))}
+      getOptionLabel={survey => survey!.name}
+      getOptionValue={option => option!.stableId}
+      isMulti={true}
+      onChange={values => setStableIds(values.map(value => value!.stableId))}/>
   </div>
 }

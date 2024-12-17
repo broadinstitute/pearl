@@ -6,8 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import Select from 'react-select'
 import { useReactMultiSelect } from 'util/react-select-utils'
-import InfoPopup from '../../components/forms/InfoPopup'
-import { DocsKey, ZendeskLink } from '../../util/zendeskUtils'
+import InfoPopup from 'components/forms/InfoPopup'
+import { DocsKey, ZendeskLink } from 'util/zendeskUtils'
 
 export const FILE_FORMATS = [{
   label: 'Tab-delimited (.tsv)',

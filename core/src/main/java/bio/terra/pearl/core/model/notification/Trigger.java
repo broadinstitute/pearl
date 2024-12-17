@@ -7,6 +7,8 @@ import bio.terra.pearl.core.model.study.StudyEnvAttached;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import lombok.Builder;
@@ -34,12 +36,16 @@ public class Trigger extends BaseEntity implements VersionedEntityConfig, StudyE
     private TriggerEventType eventType; // for notificationTypes of EVENT
     @Builder.Default
     private TriggerActionType actionType = TriggerActionType.NOTIFICATION;
+    @Builder.Default // narrows the scope of the trigger to tasks with these stableIds
+    private List<String> filterTargetStableIds = new ArrayList<>();
 
     // fields below are for triggerActionType of TASK_STATUS_CHANGE
     @Builder.Default
     private TriggerScope actionScope = TriggerScope.STUDY;
     private TaskStatus statusToUpdateTo;
-    private String updateTaskTargetStableId; // will update any tasks with this stableId
+
+    @Builder.Default // the trigger will create an action related to these task stableIds
+    private List<String> actionTargetStableIds = new ArrayList<>();
 
     // fields below are for triggerActionType of NOTIFICATION
     @Builder.Default

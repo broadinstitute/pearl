@@ -19,7 +19,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * listens for events, finds any correspond action triggers for the study environment,
@@ -56,6 +55,8 @@ public class TriggerActionService {
                 .stream().filter(trigger  -> trigger.getTriggerType().equals(TriggerType.EVENT))
                 // that match the event type
                 .filter(trigger -> trigger.getEventType().eventClass.isInstance(event))
+                // that match the trigger's event target (if a target is specified)
+                .filter(trigger -> trigger.getFilterTargetStableIds().isEmpty() || trigger.getFilterTargetStableIds().contains(event.getTargetStableId()))
                 // that satisfy the trigger's rule
                 .filter(trigger -> EnrolleeRuleEvaluator.evaluateRule(trigger.getRule(), event.getEnrolleeContext()))
                 .toList();
@@ -84,11 +85,11 @@ public class TriggerActionService {
         List<ParticipantTask> tasks;
         // find the task(s) to update
         if (TriggerScope.STUDY.equals(trigger.getActionScope())) {
-            tasks = participantTaskService.findTasksByStudyAndTarget(trigger.getStudyEnvironmentId(), List.of(trigger.getUpdateTaskTargetStableId()));
+            tasks = participantTaskService.findTasksByStudyAndTarget(trigger.getStudyEnvironmentId(), trigger.getFilterTargetStableIds());
         } else {
             tasks = participantTaskService.findByPortalParticipantUserId(event.getPortalParticipantUser().getId());
         }
-        tasks = tasks.stream().filter(task -> Objects.equals(task.getTargetStableId(), trigger.getUpdateTaskTargetStableId())).toList();
+        tasks = tasks.stream().filter(task -> trigger.getActionTargetStableIds().contains(task.getTargetStableId())).toList();
         tasks.stream().forEach(task -> {
             task.setStatus(trigger.getStatusToUpdateTo());
             participantTaskService.update(task, createAuditInfo(event,"updateTaskStatus"));
