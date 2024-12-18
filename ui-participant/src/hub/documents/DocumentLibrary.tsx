@@ -1,8 +1,10 @@
-import { Enrollee, ParticipantFile } from '@juniper/ui-core'
+import { Enrollee, instantToDateString, ParticipantFile } from '@juniper/ui-core'
 import React, { useEffect, useState } from 'react'
 import { useActiveUser } from 'providers/ActiveUserProvider'
 import { usePortalEnv } from 'providers/PortalProvider'
 import Api from '../../api/api'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFile, faFileImage, faFileLines, faFilePdf, faTrash } from '@fortawesome/free-solid-svg-icons'
 
 export default function DocumentLibrary() {
   const { enrollees, ppUser } = useActiveUser()
@@ -50,9 +52,29 @@ const Documents = ({ enrollee, participantFiles }: { enrollee: Enrollee, partici
     <div className="d-flex flex-column">
       {participantFiles.map((participantFile, index) => {
         return <div key={index} className="d-flex justify-content-between align-items-center py-2">
-          {participantFile.fileName}
+          <div className={'align-items-center'}>
+            {fileTypeToIcon(participantFile.fileType)}
+            {participantFile.fileName}
+          </div>
+          <div className={'align-items-center fst-italic'}>
+            {instantToDateString(participantFile.createdAt)}
+          </div>
+          <FontAwesomeIcon icon={faTrash}/>
         </div>
       })}
     </div>
   </div>
+}
+
+const fileTypeToIcon = (fileType: string) => {
+  switch (fileType) {
+    case 'text/plain':
+      return <FontAwesomeIcon className="me-2" icon={faFileLines}/>
+    case 'application/pdf':
+      return <FontAwesomeIcon className="me-2" icon={faFilePdf}/>
+    case 'image/jpg':
+      return <FontAwesomeIcon className="me-2" icon={faFileImage}/>
+    default:
+      return <FontAwesomeIcon className="me-2" icon={faFile}/>
+  }
 }
