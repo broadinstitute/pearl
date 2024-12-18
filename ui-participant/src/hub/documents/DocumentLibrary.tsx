@@ -4,7 +4,7 @@ import { useActiveUser } from 'providers/ActiveUserProvider'
 import { usePortalEnv } from 'providers/PortalProvider'
 import Api from '../../api/api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFile, faFileImage, faFileLines, faFilePdf, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faDownload, faFile, faFileImage, faFileLines, faFilePdf, faTrash } from '@fortawesome/free-solid-svg-icons'
 
 export default function DocumentLibrary() {
   const { enrollees, ppUser } = useActiveUser()
@@ -48,20 +48,34 @@ const Documents = ({ enrollee, participantFiles }: { enrollee: Enrollee, partici
       Below you will find all of the documents that you have uploaded to your studies. You can also view
         documents that you have completed as part of your studies, such as consent forms.
     </div>
-    <h3>Your documents ({participantFiles.length})</h3>
+    <h3>Uploaded documents ({participantFiles.length})</h3>
     <div className="d-flex flex-column">
-      {participantFiles.map((participantFile, index) => {
-        return <div key={index} className="d-flex justify-content-between align-items-center py-2">
-          <div className={'align-items-center'}>
-            {fileTypeToIcon(participantFile.fileType)}
-            {participantFile.fileName}
-          </div>
-          <div className={'align-items-center fst-italic'}>
-            {instantToDateString(participantFile.createdAt)}
-          </div>
-          <FontAwesomeIcon icon={faTrash}/>
-        </div>
-      })}
+      <table className="table">
+        <thead>
+          <tr>
+            <th>File Name</th>
+            <th>Created At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {participantFiles.map((participantFile, index) => (
+            <tr key={index}>
+              <td>
+                {fileTypeToIcon(participantFile.fileType)}
+                {participantFile.fileName}
+              </td>
+              <td className="fst-italic">
+                {instantToDateString(participantFile.createdAt)}
+              </td>
+              <td>
+                <FontAwesomeIcon className="me-2" icon={faTrash}/>
+                <FontAwesomeIcon className="me-2" icon={faDownload}/>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   </div>
 }
