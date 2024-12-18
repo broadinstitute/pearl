@@ -1,7 +1,6 @@
 package bio.terra.pearl.api.participant.service.file;
 
 import bio.terra.pearl.api.participant.service.AuthUtilService;
-import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.ParticipantUser;

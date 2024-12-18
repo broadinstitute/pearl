@@ -16,7 +16,7 @@ import {
   StudyEnvParams,
   Survey,
   SurveyResponse,
-  Answer, SystemSettings
+  Answer, SystemSettings, ParticipantFile
 } from '@juniper/ui-core'
 import { defaultApiErrorHandle } from 'util/error-utils'
 import queryString from 'query-string'
@@ -162,6 +162,12 @@ export default {
   async listOutreachActivities(
   ): Promise<TaskWithSurvey[]> {
     const url = `${baseEnvUrl(false)}/tasks?taskType=outreach`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async listParticipantFiles(studyShortcode: string, enrolleeShortcode: string): Promise<ParticipantFile[]> {
+    const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },

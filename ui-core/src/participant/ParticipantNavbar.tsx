@@ -420,6 +420,11 @@ export const AccountOptionsDropdown = (
                 </button>
               </NavLink>
           }
+          <NavLink to="/hub/documents">
+            <button className="dropdown-item" aria-label="documents">
+              Documents
+            </button>
+          </NavLink>
           <button className="dropdown-item" aria-label="change password" onClick={() => {
             doChangePassword()
           }}>

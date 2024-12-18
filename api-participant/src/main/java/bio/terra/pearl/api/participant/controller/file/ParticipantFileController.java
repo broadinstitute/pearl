@@ -41,7 +41,7 @@ public class ParticipantFileController implements ParticipantFileApi {
       String enrolleeShortcode,
       String fileName) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
-    
+
     ParticipantFile participantFile =
         participantFileExtService.get(participantUser, enrolleeShortcode, fileName);
 
