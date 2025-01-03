@@ -18,6 +18,7 @@ import { LazySearchQueryBuilder } from 'search/LazySearchQueryBuilder'
 import { TextInput } from '../../components/forms/TextInput'
 import { useNonNullReactSingleSelect } from '../../util/react-select-utils'
 import Select from 'react-select'
+import { RecurrenceType } from '@juniper/ui-core'
 
 
 /** component for selecting versions of a form */
@@ -53,7 +54,7 @@ export default function FormOptionsModal({
   </Modal>
 }
 
-const RECURRENCE_OPTS: {label: string, value: string}[] = [{
+const RECURRENCE_OPTS: {label: string, value: RecurrenceType}[] = [{
   value: 'NONE',
   label: 'None'
 }, {
@@ -80,7 +81,7 @@ export const FormOptions = ({ studyEnvContext, initialWorkingForm, updateWorking
     selectedOption: selectedRecurrenceType, selectInputId: recurrenceSelectInputId
   } = useNonNullReactSingleSelect(RECURRENCE_OPTS.map(opt => opt.value),
     val => RECURRENCE_OPTS.find(opt => opt.value === val)!,
-    (val: string) => updateWorkingForm({
+    (val: RecurrenceType) => updateWorkingForm({
       ...workingForm,
       recurrenceType: val,
       recurrenceIntervalDays: val === 'NONE' ? undefined : workingForm.recurrenceIntervalDays || 365

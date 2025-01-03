@@ -10,7 +10,7 @@ import { successNotification } from 'util/notifications'
 import SurveyEditorView from './SurveyEditorView'
 import LoadingSpinner from 'util/LoadingSpinner'
 import { doApiLoad, useLoadingEffect } from 'api/api-utils'
-import { AnswerMapping } from '@juniper/ui-core'
+import { AnswerMapping, RecurrenceType} from '@juniper/ui-core'
 
 export type SurveyParamsT = StudyParams & {
   surveyStableId: string,
@@ -24,7 +24,7 @@ export type SaveableFormProps = {
   autoAssign?: boolean
   assignToExistingEnrollees?: boolean
   rule?: string
-  recurrenceType: string
+  recurrenceType: RecurrenceType
   prepopulate: boolean
   recurrenceIntervalDays?: number
   daysAfterEligible?: number
@@ -40,7 +40,7 @@ function RawSurveyView({ studyEnvContext, survey, readOnly = false }:
   const { portal, study, currentEnv } = studyEnvContext
   const navigate = useNavigate()
 
-  const [currentSurvey, setCurrentSurvey] = useState(survey)
+  const [currentSurvey, setCurrentSurvey] = useState<Survey>(survey)
   /** saves the survey as a new version */
   async function createNewVersion(saveableProps: SaveableFormProps): Promise<void> {
     doApiLoad(async () => {
