@@ -22,6 +22,7 @@
       "answerPopDtos": [
         {"questionStableId": "hd_hd_basic_firstName", "stringValue": "Recurrence"},
         {"questionStableId": "hd_hd_basic_lastName", "stringValue": "Due"},
+        {"questionStableId": "hd_hd_basic_dateOfBirth", "stringValue": "05/07/1983"},
         {"questionStableId": "hd_hd_basic_streetAddress", "stringValue": "99 Spruce Street"},
         {"questionStableId": "hd_hd_basic_mghPatient", "stringValue": "yes"}
       ],

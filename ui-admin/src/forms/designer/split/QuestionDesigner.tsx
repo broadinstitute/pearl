@@ -1,6 +1,12 @@
 import React, { useState } from 'react'
 
-import { HtmlQuestion, PortalEnvironmentLanguage, Question, QuestionType } from '@juniper/ui-core'
+import {
+  HtmlQuestion,
+  PortalEnvironmentLanguage,
+  Question,
+  SimpleQuestion,
+  SimpleQuestionType
+} from '@juniper/ui-core'
 
 import { Textarea } from 'components/forms/Textarea'
 import { i18nSurveyText, updateI18nSurveyText } from 'util/juniperSurveyUtils'
@@ -59,14 +65,15 @@ export const QuestionDesigner = (props: QuestionDesignerProps) => {
         </div>
         { (!isTemplated && question.type !== 'html') &&
             <IconButton
-              className={classNames('mb-2', 'ms-1', 'border', question.isRequired ? 'text-danger' : 'text-muted')}
+              className={classNames('mb-2', 'ms-1', 'border',
+                (question as SimpleQuestion).isRequired ? 'text-danger' : 'text-muted')}
               icon={faAsterisk}
               aria-label={'Toggle required'}
               onClick={() => {
-                onChange({
+                onChange(({
                   ...question,
-                  isRequired: !question.isRequired
-                })
+                  isRequired: !(question as SimpleQuestion).isRequired
+                }) as SimpleQuestion)
               }}
             /> }
       </div>
@@ -75,7 +82,7 @@ export const QuestionDesigner = (props: QuestionDesignerProps) => {
         questionType={question.type}
         onChange={newType => {
           onChange({
-            ...baseQuestions[newType as QuestionType],
+            ...baseQuestions[newType as SimpleQuestionType],
             ...question,
             // @ts-ignore
             type: newType
@@ -99,7 +106,7 @@ export const QuestionDesigner = (props: QuestionDesignerProps) => {
         disabled={readOnly}
         currentLanguage={currentLanguage}
         supportedLanguages={supportedLanguages}
-        question={question}
+        question={question as SimpleQuestion}
         onChange={onChange}
       />
 
@@ -143,7 +150,7 @@ export const QuestionDesigner = (props: QuestionDesignerProps) => {
         >
           <VisibilityFields
             disabled={readOnly}
-            question={question}
+            question={question as SimpleQuestion}
             onChange={onChange}
           />
         </Tab>
@@ -184,17 +191,17 @@ export const QuestionDesigner = (props: QuestionDesignerProps) => {
                 label="Description"
                 labelClassname={'mb-0'}
                 rows={2}
-                value={i18nSurveyText(question.description, currentLanguage.languageCode)}
+                value={i18nSurveyText((question as SimpleQuestion).description, currentLanguage.languageCode)}
                 onChange={value => {
-                  onChange({
+                  onChange(({
                     ...question,
                     description: updateI18nSurveyText({
                       valueText: value,
-                      oldValue: question.description,
+                      oldValue: (question as SimpleQuestion).description,
                       languageCode: currentLanguage.languageCode,
                       supportedLanguages
                     })
-                  })
+                  }) as SimpleQuestion)
                 }}
               />
             </div>
