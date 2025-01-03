@@ -5,7 +5,6 @@ import Api, {
   EnrolleeSearchExpressionResult,
   Notification,
   NotificationEventDetails,
-  PepperKit,
   Portal,
   PortalEnvironmentConfig,
   PortalStudy,

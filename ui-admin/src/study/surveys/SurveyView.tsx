@@ -10,7 +10,7 @@ import { successNotification } from 'util/notifications'
 import SurveyEditorView from './SurveyEditorView'
 import LoadingSpinner from 'util/LoadingSpinner'
 import { doApiLoad, useLoadingEffect } from 'api/api-utils'
-import { AnswerMapping, RecurrenceType} from '@juniper/ui-core'
+import { AnswerMapping, RecurrenceType } from '@juniper/ui-core'
 
 export type SurveyParamsT = StudyParams & {
   surveyStableId: string,
