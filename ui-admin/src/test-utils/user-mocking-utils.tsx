@@ -33,7 +33,9 @@ export const mockAdminUserWithPerms = (portalId: string, perms: string[]): Admin
     portalAdminUsers: [
       {
         portalId,
+        portalAdminUserRoles: [],
         roles: [{
+          id: 'r1',
           name: 'role1',
           description: 'role1',
           displayName: 'role1',
@@ -67,7 +69,8 @@ export const MockUserProvider = ({ children, user }: { children: React.ReactNode
     user,
     loginUser: () => null,
     loginUserUnauthed: () => null,
-    logoutUser: () => null
+    logoutUser: () => null,
+    toggleSuperuserOverride: () => null
   }
   return <UserContext.Provider value={fakeUserContext}>
     {children}

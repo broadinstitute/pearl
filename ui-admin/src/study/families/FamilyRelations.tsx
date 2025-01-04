@@ -126,7 +126,7 @@ export const FamilyRelations = ({
       }
 
       const enrollee = row.original.enrollee || family.members?.find(m => m.id === row.original.targetEnrolleeId)
-      return <EnrolleeLink studyEnvContext={studyEnvContext} enrollee={enrollee}/>
+      return <EnrolleeLink studyEnvContext={studyEnvContext} enrollee={enrollee!}/>
     }
   }, {
     header: 'Relation',
@@ -169,7 +169,7 @@ export const FamilyRelations = ({
       }
 
       const enrollee = row.original.targetEnrollee || family.members?.find(m => m.id === row.original.targetEnrolleeId)
-      return <EnrolleeLink studyEnvContext={studyEnvContext} enrollee={enrollee}/>
+      return <EnrolleeLink studyEnvContext={studyEnvContext} enrollee={enrollee!}/>
     }
   },
   {

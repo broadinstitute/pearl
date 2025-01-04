@@ -29,7 +29,7 @@ export const ProbandEditor = (
     studyEnvContext: StudyEnvContextT,
     reloadFamily: () => void
   }) => {
-  const [proband, setProband] = React.useState<Enrollee>(family.proband)
+  const [proband, setProband] = React.useState<Enrollee>(family.proband!)
   const [editMode, setEditMode] = React.useState<boolean>(false)
   const [openSaveNewProbandModal, setOpenSaveNewProbandModal] = React.useState<boolean>(false)
 
@@ -56,7 +56,7 @@ export const ProbandEditor = (
           disabled={!editMode}
           selectedEnrollee={proband}
           studyEnvContext={studyEnvContext}
-          onEnrolleeSelected={newProband => setProband(newProband || family.proband)}
+          onEnrolleeSelected={newProband => setProband(newProband || family.proband!)}
           searchExpFilter={`{family.shortcode} = '${family.shortcode}'`}
         />
       </div>
@@ -67,7 +67,7 @@ export const ProbandEditor = (
         onClick={() => {
           setEditMode(!editMode)
           if (!editMode) {
-            setProband(family.proband)
+            setProband(family.proband!)
           }
         }}>
         <FontAwesomeIcon icon={faPencil} />
@@ -83,7 +83,7 @@ export const ProbandEditor = (
         <button
           className="btn btn-secondary"
           onClick={() => {
-            setProband(family.proband)
+            setProband(family.proband!)
             setEditMode(false)
           }}>
           <FontAwesomeIcon icon={faX}/>

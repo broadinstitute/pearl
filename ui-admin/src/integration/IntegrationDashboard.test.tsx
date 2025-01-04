@@ -8,7 +8,9 @@ import { setupRouterTest } from '@juniper/ui-core'
 test('routes to integration paths', async () => {
   jest.spyOn(Api, 'fetchInternalConfig').mockResolvedValue({
     pepperDsmConfig: {},
-    addrValidationConfig: {}
+    addrValidationConfig: {},
+    airtable: {},
+    mixpanel: {}
   })
   const { RoutedComponent } = setupRouterTest(<IntegrationDashboard/>)
   render(RoutedComponent)

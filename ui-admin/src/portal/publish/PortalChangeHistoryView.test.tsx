@@ -16,10 +16,12 @@ test('renders a list of changes', async () => {
     adminUserId: 'admin1',
     createdAt: 0,
     portalId: 'portal1',
-    portalEnvironmentChange: '{"key": "value"}'
+    portalEnvironmentChange: '{"key": "value"}',
+    environmentName: 'live'
   }])
   const portal = mockPortal()
   renderInPortalRouter(portal, <PortalChangeHistoryView portal={portal}/>, {
+    user: mockAdminUser(true),
     adminUsers: [{
       ...mockAdminUser(false), id: 'admin1', username: 'staffPerson'
     }]

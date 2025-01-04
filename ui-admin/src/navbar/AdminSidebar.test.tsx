@@ -5,7 +5,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import AdminSidebar from './AdminSidebar'
 import { userEvent } from '@testing-library/user-event'
 import { Config } from '../api/api'
-import { setupRouterTest } from '@juniper/ui-core'
+import { setupRouterTest, SystemSettings } from '@juniper/ui-core'
 
 
 const testConfig: Config = {
@@ -16,7 +16,8 @@ const testConfig: Config = {
   b2cPolicyName: '',
   participantApiHostname: '',
   participantUiHostname: '',
-  deploymentZone: 'live'
+  deploymentZone: 'live',
+  systemSettings: {} as SystemSettings
 }
 test('renders the superuser menu for superusers', async () => {
   const { RoutedComponent } = setupRouterTest(
