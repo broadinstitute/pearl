@@ -57,6 +57,7 @@
     "answerPopDtos": [
       {"questionStableId": "hd_hd_basic_firstName", "stringValue": "Child 2"},
       {"questionStableId": "hd_hd_basic_lastName", "stringValue": "Family 2"},
+      {"questionStableId": "hd_hd_basic_dateOfBirth", "stringValue": "08/24/2019"},
       {"questionStableId": "hd_hd_basic_streetAddress", "stringValue": "105 Broadway"},
       {"questionStableId": "hd_hd_basic_mghPatient", "stringValue": "yes"}
     ],

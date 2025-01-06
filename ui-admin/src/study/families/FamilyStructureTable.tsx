@@ -34,7 +34,7 @@ import LoadingSpinner from 'util/LoadingSpinner'
 import { EnrolleeLink } from 'study/participants/enrolleeView/EnrolleeLink'
 
 type FamilyMemberWithSubrows = {
-  member: Enrollee,
+  member?: Enrollee,
   relationToParentRow?: EnrolleeRelation
   subrows: FamilyMemberWithSubrows[]
 }
@@ -74,7 +74,7 @@ export const FamilyStructureTable = (
       id: 'enrollee',
       header: 'Enrollee',
       cell: ({ row }) => {
-        return <EnrolleeLink studyEnvContext={studyEnvContext} enrollee={row.original.member}/>
+        return <EnrolleeLink studyEnvContext={studyEnvContext} enrollee={row.original.member!}/>
       }
     },
     {
@@ -82,7 +82,7 @@ export const FamilyStructureTable = (
       header: 'Proxies',
       cell: ({ row }) => {
         return <ProxyList
-          member={row.original.member}
+          member={row.original.member!}
           family={family}
           studyEnvContext={studyEnvContext}/>
       }
@@ -108,7 +108,7 @@ export const FamilyStructureTable = (
     if (!isNil(parentRow)) {
       const parent = parentRow.original
       const relation = row.original.relationToParentRow?.familyRelationship
-      const subRowIdx = parent.subrows.findIndex(s => s.member.id === row.original.member.id)
+      const subRowIdx = parent.subrows.findIndex(s => s.member!.id === row.original.member!.id)
       const showHeader = (
         subRowIdx === 0 || parent.subrows[subRowIdx - 1].relationToParentRow?.familyRelationship != relation
       )
@@ -148,7 +148,7 @@ const groupFamilyMembersWithSubrows = (family: Family): FamilyMemberWithSubrows[
   // sort relations by number of parent relations
   // to ensure that parents are created before children
   const relations = (family.relations || []).sort(
-    (a, b) => getNumParentRelations(a, family) - getNumParentRelations(b, family)
+    (a, b) => getNumParentRelations(a.enrollee!, family) - getNumParentRelations(b.enrollee!, family)
   ).filter(r => {
     return family.members?.find(m => m.id === r.enrolleeId) && family.members?.find(m => m.id === r.targetEnrolleeId)
   })
@@ -195,7 +195,7 @@ const getNumParentRelations = (member: Enrollee, family: Family): number => {
 
 const findRowOrSubrow = (data: FamilyMemberWithSubrows[], id: string): FamilyMemberWithSubrows | undefined => {
   return data.find(d => {
-    if (d.member.id === id) {
+    if (d.member!.id === id) {
       return d
     }
     return findRowOrSubrow(d.subrows, id)
@@ -226,7 +226,7 @@ const ProxyList = ({ member, family, studyEnvContext }: {
       .filter(r => r.targetEnrolleeId === member.id && r.relationshipType === 'PROXY')
       .map(async r => {
         // see if the proxy is in the family, if so we already have it loaded
-        const familyProxy: Enrollee = family.members?.find(m => m.id === r.enrolleeId)
+        const familyProxy: Enrollee | undefined = family.members?.find(m => m.id === r.enrolleeId)
         if (!isNil(familyProxy)) {
           return Promise.resolve(familyProxy)
         }

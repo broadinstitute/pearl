@@ -11,6 +11,7 @@
       "answerPopDtos": [
         {"questionStableId": "hd_hd_basic_firstName", "stringValue": "Invited"},
         {"questionStableId": "hd_hd_basic_lastName", "stringValue": "PriorUser"},
+        {"questionStableId": "hd_hd_basic_dateOfBirth", "stringValue": "05/04/1990"},
         {"questionStableId": "hd_hd_basic_streetAddress", "stringValue": "465 Spruce Street"},
         {"questionStableId": "hd_hd_basic_mghPatient", "stringValue": "yes"},
         {"questionStableId": "hd_hd_basic_sexualOrientation", "stringValue": "preferNoAnswer"}

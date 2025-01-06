@@ -7,8 +7,9 @@ import {
   SiteContent
 } from 'api/api'
 import {
+  ApiContextT,
   HtmlSection,
-  HubResponse
+  HubResponse, SystemSettings
 } from '@juniper/ui-core'
 
 /** mock site content */
@@ -50,7 +51,8 @@ export const mockHtmlPage = (): HtmlPage => {
   return {
     path: '/',
     sections: [mockHtmlSection()],
-    title: 'example page'
+    title: 'example page',
+    minimalNavbar: false
   }
 }
 
@@ -88,10 +90,11 @@ export const makeEmptyHtmlSection = (sectionType: SectionType): HtmlSection => {
 }
 
 /** no-op apiContext for rendering preview participant content in tests */
-export const emptyApi = {
+export const emptyApi: ApiContextT = {
   getImageUrl: () => '',
   submitMailingListContact: () => Promise.resolve({}),
   getLanguageTexts: () => Promise.resolve({}),
   updateSurveyResponse: () => Promise.resolve({} as HubResponse),
-  validateAddress: () => Promise.resolve({} as AddressValidationResult)
+  validateAddress: () => Promise.resolve({} as AddressValidationResult),
+  loadSystemSettings: () => Promise.resolve({} as SystemSettings)
 }

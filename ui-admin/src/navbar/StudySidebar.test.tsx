@@ -10,6 +10,7 @@ test('renders the study selector and sub menus', async () => {
   const { study } = mockStudyEnvContext()
   const portal = mockPortal()
   portal.portalStudies.push({
+    createdAt: 0,
     study
   })
   const { RoutedComponent } = setupRouterTest(

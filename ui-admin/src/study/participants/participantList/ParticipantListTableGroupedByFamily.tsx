@@ -52,7 +52,7 @@ function ParticipantListTableGroupedByFamily({
   const [sorting, setSorting] = useState<SortingState>([{ 'id': 'createdAt', 'desc': true }])
   const [families, setFamilies] = useState<Family[]>([])
 
-  const { isLoading } = useLoadingEffect(async () => {
+  const { isLoading, reload } = useLoadingEffect(async () => {
     const loadedFamilies = await Api.getAllFamilies(
       studyEnvContext.portal.shortcode,
       studyEnvContext.study.shortcode,
@@ -175,6 +175,7 @@ function ParticipantListTableGroupedByFamily({
                   </p>}
             </div> : <h5>No family</h5>}
             tableClass={'table table-light'}
+            reload={reload}
           />
         </div>
       </td>

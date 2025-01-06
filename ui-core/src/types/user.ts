@@ -70,7 +70,7 @@ export type Profile = {
     contactEmail?: string,
     doNotEmail?: boolean,
     doNotEmailSolicit?: boolean,
-    mailingAddress?: MailingAddress,
+    mailingAddress: MailingAddress,
     phoneNumber?: string,
     birthDate?: number[],
     sexAtBirth?: string,

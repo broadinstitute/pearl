@@ -7,7 +7,7 @@ type FormPreviewOptions = {
   ignoreValidation: boolean
   showInvisibleElements: boolean
   locale: string
-  profile?: Profile
+  profile: Profile
   proxyProfile?: Profile
   isGovernedUser: boolean
 }
@@ -117,7 +117,7 @@ export const FormPreviewOptions = (props: FormPreviewOptionsProps) => {
           <TextInput onChange={text => onChange({
             ...value,
             proxyProfile: {
-              ...value.proxyProfile,
+              ...value.proxyProfile!,
               givenName: text
             }
           })}
@@ -128,7 +128,7 @@ export const FormPreviewOptions = (props: FormPreviewOptionsProps) => {
           <TextInput onChange={text => onChange({
             ...value,
             proxyProfile: {
-              ...value.proxyProfile,
+              ...value.proxyProfile!,
               familyName: text
             }
           })}

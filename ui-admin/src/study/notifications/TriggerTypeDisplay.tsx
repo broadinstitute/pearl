@@ -23,7 +23,7 @@ export default function TriggerTypeDisplay({ config }: {config?: Trigger}) {
     return <span>{eventTypeDisplayMap[config.eventType]}</span>
   } else if (config.triggerType === 'TASK_REMINDER') {
     return <span>
-      Reminder: {config.taskType} {config.taskTargetStableId}
+      Reminder: {config.taskType} {config.updateTaskTargetStableId}
     </span>
   } else if (config.triggerType === 'AD_HOC') {
     return <span>Ad-Hoc</span>

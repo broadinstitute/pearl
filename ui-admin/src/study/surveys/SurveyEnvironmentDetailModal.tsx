@@ -85,7 +85,8 @@ export default function SurveyEnvironmentDetailModal(props: SurveyEnvironmentDet
         assignAllUnassigned: true,
         targetStableId: stableId,
         targetAssignedVersion: mostRecentVersion,
-        taskType: 'SURVEY'
+        taskType: 'SURVEY',
+        overrideEligibility: false
       })
       Store.addNotification(successNotification(`Assigned survey to ${newTasks.length} enrollees`))
       reload()

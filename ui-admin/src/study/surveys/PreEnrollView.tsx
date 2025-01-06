@@ -31,7 +31,7 @@ function RawPreEnrollView({ studyEnvContext, survey, readOnly = false }:
                               {studyEnvContext: StudyEnvContextT, survey: Survey, readOnly?: boolean}) {
   const { portal, study, currentEnv } = studyEnvContext
   const navigate = useNavigate()
-  const [currentSurvey, setCurrentSurvey] = useState(survey)
+  const [currentSurvey, setCurrentSurvey] = useState<Survey>(survey)
 
   /** saves as a new version and updates the study environment accordingly */
   async function createNewVersion(changes: SaveableFormProps): Promise<void> {
@@ -51,6 +51,7 @@ function RawPreEnrollView({ studyEnvContext, survey, readOnly = false }:
 
   return <SurveyEditorView
     studyEnvContext={studyEnvContext}
+    replaceSurvey={updatedSurvey => setCurrentSurvey(updatedSurvey)}
     currentForm={currentSurvey}
     readOnly={readOnly}
     onCancel={() => navigate(studyEnvFormsPath(portal.shortcode, study.shortcode, currentEnv.environmentName))}
