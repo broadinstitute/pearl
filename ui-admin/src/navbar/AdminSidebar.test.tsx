@@ -5,7 +5,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import AdminSidebar from './AdminSidebar'
 import { userEvent } from '@testing-library/user-event'
 import { Config } from '../api/api'
-import { setupRouterTest, SystemSettings } from '@juniper/ui-core'
+import { setupRouterTest } from '@juniper/ui-core'
 
 
 const testConfig: Config = {
