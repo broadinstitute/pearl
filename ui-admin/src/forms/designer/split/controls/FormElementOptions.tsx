@@ -1,6 +1,6 @@
 import React from 'react'
 import { IconButton } from 'components/forms/Button'
-import { faClone, faCode, faKeyboard } from '@fortawesome/free-solid-svg-icons'
+import { faClone, faCode, faKeyboard, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons'
 import { ListElementController } from 'portal/siteContent/designer/components/ListElementController'
 import { FormContent, FormElement } from '@juniper/ui-core'
 
@@ -32,10 +32,15 @@ export const FormElementOptions = ({
       <div className="d-flex border rounded-3 rounded-top-0 border-top-0 bg-light">
         <IconButton icon={faCode}
           disabled={showFreetextMode}
-          aria-label={showJsonEditor ? 'Switch to designer' : 'Switch to JSON editor'}
+          aria-label={
+            showJsonEditor ?
+              'Switch to designer' :
+              showFreetextMode ? 'You must exit the freetext editor to switch to JSON editor' :
+                'Switch to JSON editor'
+          }
           onClick={() => setShowJsonEditor(!showJsonEditor)}
         />
-        <IconButton icon={faKeyboard}
+        <IconButton icon={showFreetextMode ? faKeyboard : faWandMagicSparkles}
           disabled={showJsonEditor}
           aria-label={showFreetextMode ? 'Switch to designer' : 'Switch to freetext editor'}
           onClick={() => setShowFreetextMode(!showFreetextMode)}
