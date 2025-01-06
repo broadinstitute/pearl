@@ -21,8 +21,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * listens for events, finds any correspond action triggers for the study environment,
- * and then executes the actions
+ * Listens for events, finds any correspond action triggers for the study environment,
+ * and then executes the actions.
+ *
+ *  This service is the custom counterpart to TaskDispatcher and its subclasses.  While those classes handle
+ *  hard-coded Juniper event consequences (e.g. when a participant enrolls, assign them all eligible surveys, or
+ *  when a participant completes all their consent forms, mark them as consented), this service handles custom triggered actions
+ *
  */
 @Service
 @Slf4j

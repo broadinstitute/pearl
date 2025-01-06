@@ -29,6 +29,10 @@ import java.util.*;
 
 /**
  * Handles dispatching tasks to enrollees based on task configurations.
+ *
+ * This service can be thought of as the hard-coded counterpart to TriggerActionService.  While those classes handle
+ * custom actions configured for a particiular study (e.g. when this survey is completed, send a particular email),
+ * this class and subclasses handle hardcoded Juniper actions such as "when a participant enrolls, assign them all the eligible surveys
  */
 @Service
 @Slf4j
