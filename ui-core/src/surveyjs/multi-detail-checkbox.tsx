@@ -36,10 +36,10 @@ const OtherItem = ({ otherStableId, otherText, value, onChange } : {
 }) => {
   const [otherValue, setOtherValue] = React.useState(value)
 
-  return <>
-    <span className='sv-string-viewer sv-string-viewer--multiline' >
+  return <div className="my-1">
+    <p className='h6 fw-semibold'>
       {otherText}
-    </span>
+    </p>
     <input
       id={otherStableId}
       type='text'
@@ -50,7 +50,7 @@ const OtherItem = ({ otherStableId, otherText, value, onChange } : {
         setOtherValue(e.target.value)
       }}
     />
-  </>
+  </div>
 }
 
 export class SurveyQuestionCheckboxMultipleOther extends SurveyQuestionCheckbox {
