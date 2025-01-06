@@ -32,7 +32,20 @@ public class BaseSeedPopulator {
                     "adminUsers/cunningh.json", "adminUsers/andrew.json",
                     "adminUsers/sampath.json");
     public static final List<String> LANGUAGE_TEXTS_TO_POPULATE =
-            Arrays.asList("i18n/en/languageTexts.json", "i18n/es/languageTexts.json", "i18n/dev/languageTexts.json");
+            Arrays.asList(
+                    "i18n/de/languageTexts.json",
+                    "i18n/dev/languageTexts.json",
+                    "i18n/en/languageTexts.json",
+                    "i18n/es/languageTexts.json",
+                    "i18n/fr/languageTexts.json",
+                    "i18n/hi/languageTexts.json",
+                    "i18n/it/languageTexts.json",
+                    "i18n/ja/languageTexts.json",
+                    "i18n/pl/languageTexts.json",
+                    "i18n/pt/languageTexts.json",
+                    "i18n/ru/languageTexts.json",
+                    "i18n/tr/languageTexts.json",
+                    "i18n/zh/languageTexts.json");
 
     public BaseSeedPopulator(AdminUserPopulator adminUserPopulator, AdminConfigPopulator adminConfigPopulator,
                              AdminUserService adminUserService, KitTypePopulator kitTypePopulator,
