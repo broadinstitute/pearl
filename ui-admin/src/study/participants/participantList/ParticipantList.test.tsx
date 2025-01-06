@@ -51,7 +51,9 @@ const mockWithrawnEnrolleeApi = () => {
     .mockResolvedValue([{
       shortcode: 'HDGONE',
       userData: '{"createdAt": 345, "username": "good@bye.com"}',
-      createdAt: 123
+      createdAt: 123,
+      note: 'some reason',
+      reason: 'PARTICIPANT_REQUEST'
     }])
 }
 

@@ -45,10 +45,10 @@ test('renders enrollee profile', async () => {
 
   expect(screen.getByText(`${enrollee.profile.givenName} ${enrollee.profile.familyName}`)).toBeInTheDocument()
   expect(screen.getByText(dateToDefaultString(enrollee.profile.birthDate))).toBeInTheDocument()
-  expect(screen.getByText(enrollee.profile.mailingAddress.street1)).toBeInTheDocument()
+  expect(screen.getByText(enrollee.profile.mailingAddress!.street1)).toBeInTheDocument()
   // e.g., Boston, MA 02120
   expect(screen.getByText(
-    `${mailingAddress.city}, ${mailingAddress.state} ${mailingAddress.postalCode}`
+    `${mailingAddress!.city}, ${mailingAddress!.state} ${mailingAddress!.postalCode}`
   )).toBeInTheDocument()
 })
 

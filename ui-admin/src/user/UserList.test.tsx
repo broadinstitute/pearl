@@ -17,6 +17,7 @@ describe('UserList', () => {
         ...mockAdminUser(false),
         username: 'staff@test.com',
         portalAdminUsers: [{
+          portalAdminUserRoles: [],
           portalId: 'portal2',
           roles: []
         }]
@@ -58,6 +59,7 @@ describe('UserList', () => {
         ...mockAdminUser(false),
         username: 'staff@test.com',
         portalAdminUsers: [{
+          portalAdminUserRoles: [],
           portalId: 'portal2',
           roles: []
         }]

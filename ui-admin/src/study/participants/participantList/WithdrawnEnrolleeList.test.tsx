@@ -8,7 +8,10 @@ import { waitFor, screen } from '@testing-library/react'
 test('renders list', async () => {
   const studyEnvContext = mockStudyEnvContext()
   jest.spyOn(Api, 'fetchWithdrawnEnrollees').mockResolvedValue([
-    { shortcode: 'BLEH', userData: '{"username": "foo@bar.com", "createdAt": 0}', createdAt: 123 }
+    {
+      shortcode: 'BLEH', userData: '{"username": "foo@bar.com", "createdAt": 0}', createdAt: 123,
+      note: 'some reason', reason: 'PARTICIPANT_REQUEST'
+    }
   ])
   renderInPortalRouter(studyEnvContext.portal,
     <WithdrawnEnrolleeList studyEnvContext={studyEnvContext}  />)

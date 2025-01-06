@@ -16,7 +16,13 @@ const testConfig: Config = {
   b2cPolicyName: '',
   participantApiHostname: '',
   participantUiHostname: '',
-  deploymentZone: 'live'
+  deploymentZone: 'live',
+  systemSettings: {
+    maintenanceModeEnabled: false,
+    maintenanceModeMessage: '',
+    maintenanceModeBypassPhrase: '',
+    disableScheduledJobs: false
+  }
 }
 test('renders the superuser menu for superusers', async () => {
   const { RoutedComponent } = setupRouterTest(

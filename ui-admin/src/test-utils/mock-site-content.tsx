@@ -8,7 +8,7 @@ import {
 } from 'api/api'
 import {
   HtmlSection,
-  HubResponse
+  HubResponse, SystemSettings
 } from '@juniper/ui-core'
 
 /** mock site content */
@@ -50,7 +50,8 @@ export const mockHtmlPage = (): HtmlPage => {
   return {
     path: '/',
     sections: [mockHtmlSection()],
-    title: 'example page'
+    title: 'example page',
+    minimalNavbar: false
   }
 }
 
@@ -93,5 +94,6 @@ export const emptyApi = {
   submitMailingListContact: () => Promise.resolve({}),
   getLanguageTexts: () => Promise.resolve({}),
   updateSurveyResponse: () => Promise.resolve({} as HubResponse),
-  validateAddress: () => Promise.resolve({} as AddressValidationResult)
+  validateAddress: () => Promise.resolve({} as AddressValidationResult),
+  loadSystemSettings: () => Promise.resolve({} as SystemSettings)
 }

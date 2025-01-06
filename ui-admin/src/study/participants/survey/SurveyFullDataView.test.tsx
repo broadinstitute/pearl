@@ -233,8 +233,8 @@ describe('ItemDisplay', () => {
 
     const answerMap: Record<string, Answer> = {}
     answerMap[answer.questionStableId] = answer
-    render(<AnswerEditHistory
-      question={question} answer={answer} editHistory={[firstChangeRecord, secondChangeRecord]}/>)
+    render(<AnswerEditHistory supportedLanguages={[]} question={question}
+      answer={answer} editHistory={[firstChangeRecord, secondChangeRecord]}/>)
 
     expect(screen.getByText('Answered on', { exact: false })).toBeInTheDocument()
     expect(screen.getAllByText('Edited on', { exact: false })).toHaveLength(2)
