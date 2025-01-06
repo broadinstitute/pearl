@@ -12,7 +12,7 @@ import {
   VisibilityState
 } from '@tanstack/react-table'
 
-import Api from 'api/api'
+import Api, { ParticipantTask } from 'api/api'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import {
   basicTableLayout,
@@ -60,7 +60,7 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
     const enrolleeRows = enrollees.map(enrollee => {
       const taskCompletionStatus = _mapValues(
         _keyBy(enrollee.participantTasks, task => task.targetStableId),
-        task => task.status === 'COMPLETE'
+        task => (task as ParticipantTask).status === 'COMPLETE'
       )
 
       return { ...enrollee, taskCompletionStatus }

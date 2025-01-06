@@ -64,6 +64,7 @@ function RawPreRegView({ studyEnvContext, portalEnvContext, survey, readOnly = f
       readOnly={readOnly}
       onCancel={() => navigate(siteContentPath(portal.shortcode, portalEnv.environmentName))}
       onSave={createNewVersion}
+      replaceSurvey={updatedSurvey => setCurrentSurvey(updatedSurvey)}
     />
   </>
 }

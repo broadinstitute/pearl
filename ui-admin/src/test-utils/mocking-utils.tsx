@@ -5,7 +5,6 @@ import Api, {
   EnrolleeSearchExpressionResult,
   Notification,
   NotificationEventDetails,
-  PepperKit,
   Portal,
   PortalEnvironmentConfig,
   PortalStudy,
@@ -152,6 +151,7 @@ export const mockSurvey: (surveyType?: SurveyType) => Survey = (surveyType = 'RE
 /** returns a mock portal study */
 export const makeMockPortalStudy = (name: string, shortcode: string): PortalStudy => {
   return {
+    createdAt: 0,
     study: {
       name,
       shortcode,
@@ -269,20 +269,6 @@ export const mockKitType: () => KitType = () => ({
   displayName: 'Test kit',
   description: 'Test sample collection kit'
 })
-
-/** returns a mock PepperKitStatus */
-export const mockExternalKitRequest = (): PepperKit => {
-  return {
-    kitId: '',
-    currentStatus: 'Kit Without Label',
-    labelDate: '',
-    scanDate: '',
-    receiveDate: '',
-    trackingNumber: '',
-    returnTrackingNumber: '',
-    errorMessage: ''
-  }
-}
 
 /** returns a mock kit request */
 export const mockKitRequest: (args?: {

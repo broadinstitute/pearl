@@ -31,7 +31,7 @@ export type VersionedForm = {
 }
 
 export type SurveyType = 'RESEARCH' | 'OUTREACH' | 'CONSENT' | 'ADMIN' | 'DOCUMENT_REQUEST'
-
+export type RecurrenceType = 'NONE' | 'LONGITUDINAL' | 'UPDATE'
 export type Survey = VersionedForm & {
   surveyType: SurveyType
   blurb?: string
@@ -40,7 +40,7 @@ export type Survey = VersionedForm & {
   autoAssign: boolean
   assignToExistingEnrollees: boolean
   autoUpdateTaskAssignments: boolean
-  recurrenceType: 'NONE' | 'LONGITUDINAL' | 'UPDATE'
+  recurrenceType: RecurrenceType
   recurrenceIntervalDays: number
   daysAfterEligible?: number
   allowAdminEdit: boolean
@@ -55,7 +55,7 @@ export const defaultSurvey = {
   autoAssign: true,
   assignToExistingEnrollees: false,
   autoUpdateTaskAssignments: false,
-  recurrenceType: 'NONE',
+  recurrenceType: 'NONE' as RecurrenceType,
   recurrenceIntervalDays: 0,
   allowAdminEdit: true,
   allowParticipantStart: true,

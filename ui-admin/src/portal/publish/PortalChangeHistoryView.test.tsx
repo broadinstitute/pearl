@@ -21,6 +21,7 @@ test('renders a list of changes', async () => {
   }])
   const portal = mockPortal()
   renderInPortalRouter(portal, <PortalChangeHistoryView portal={portal}/>, {
+    user: mockAdminUser(true),
     adminUsers: [{
       ...mockAdminUser(false), id: 'admin1', username: 'staffPerson'
     }]
