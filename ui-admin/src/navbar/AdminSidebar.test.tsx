@@ -17,7 +17,12 @@ const testConfig: Config = {
   participantApiHostname: '',
   participantUiHostname: '',
   deploymentZone: 'live',
-  systemSettings: {} as SystemSettings
+  systemSettings: {
+    maintenanceModeEnabled: false,
+    maintenanceModeMessage: '',
+    maintenanceModeBypassPhrase: '',
+    disableScheduledJobs: false
+  }
 }
 test('renders the superuser menu for superusers', async () => {
   const { RoutedComponent } = setupRouterTest(

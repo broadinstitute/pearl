@@ -15,6 +15,7 @@ const mockRoleManager = {
   portalAdminUsers: [{
     portalId: 'portal2',
     roles: [{
+      id: 'role1',
       name: 'study_admin',
       displayName: 'Study Admin',
       description: 'Can manage studies',
@@ -27,7 +28,8 @@ const mockRoleManager = {
         displayName: 'manage team roles',
         description: 'roles stuff'
       }]
-    }]
+    }],
+    portalAdminUserRoles: []
   }]
 }
 

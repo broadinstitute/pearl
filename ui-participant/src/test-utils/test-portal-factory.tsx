@@ -101,6 +101,7 @@ export const mockLocalSiteContent = (): LocalSiteContent => {
 export const mockHtmlPage = (): HtmlPage => {
   return {
     title: 'mock home page',
+    minimalNavbar: false,
     path: '/',
     sections: []
   }
