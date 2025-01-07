@@ -77,7 +77,8 @@ export type Trigger = {
   eventType: string
   taskType?: string
   actionScope: TriggerScope
-  taskTargetStableIds: string[]
+  filterTargetStableIds: string[]
+  actionTargetStableIds: string[]
   statusToUpdateTo?: ParticipantTaskStatus
   afterMinutesIncomplete: number
   reminderIntervalMinutes: number

@@ -247,7 +247,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
             assertThat(siteContent.getStableId(), Matchers.startsWith(newShortcode));
         });
         List<EmailTemplate> emailTemplates = emailTemplateService.findByPortalId(portal.getId());
-        assertThat(emailTemplates, hasSize(8));
+        assertThat(emailTemplates, hasSize(9));
         emailTemplates.forEach(emailTemplate -> {
             assertThat(emailTemplate.getStableId(), Matchers.startsWith(newShortcode));
         });
