@@ -67,7 +67,7 @@ export default function SurveyEnvironmentTable(props: SurveyTableProps) {
   }), [dependencyString])
 
   const columns: ColumnDef<SurveyEnvTableRow>[] = useMemo(() => {
-    const baseCols = [{
+    const baseCols: ColumnDef<SurveyEnvTableRow>[] = [{
       header: '',
       id: 'name',
       cell: ({ row }) => <div className="h-100 align-items-center d-flex">

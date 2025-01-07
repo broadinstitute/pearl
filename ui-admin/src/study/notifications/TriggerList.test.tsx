@@ -12,19 +12,19 @@ import {
 } from 'test-utils/mocking-utils'
 import TriggerList from './TriggerList'
 import { userEvent } from '@testing-library/user-event'
-import Api from 'api/api'
+import Api, { Trigger } from 'api/api'
 import { ReactNotifications } from 'react-notifications-component'
 import { setupRouterTest } from '@juniper/ui-core'
 
 test('renders routable trigger list', async () => {
   const studyEnvContext = mockStudyEnvContext()
-  const enrollEmailConfig = {
+  const enrollEmailConfig: Trigger = {
     ...mockTrigger(),
     id: 'event1',
     triggerType: 'EVENT',
     eventType: 'STUDY_ENROLLMENT'
   }
-  const triggers = [
+  const triggers: Trigger[] = [
     enrollEmailConfig,
     {
       ...mockTrigger(),
@@ -61,13 +61,13 @@ test('renders routable trigger list', async () => {
 
 test('allows deletion of notification config', async () => {
   const studyEnvContext = mockStudyEnvContext()
-  const consentConfig = {
+  const consentConfig: Trigger = {
     ...mockTrigger(),
     id: 'reminder1',
     triggerType: 'TASK_REMINDER',
     taskType: 'CONSENT'
   }
-  const notificationConfigs = [
+  const notificationConfigs: Trigger[] = [
     {
       ...mockTrigger(),
       id: 'event1',

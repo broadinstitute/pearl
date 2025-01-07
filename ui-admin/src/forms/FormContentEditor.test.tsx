@@ -31,7 +31,8 @@ describe('FormContentEditor', () => {
       initialAnswerMappings={[]}
       currentLanguage={{ languageCode: 'en', languageName: 'English', id: '' }}
       supportedLanguages={[]}
-      initialContent={formContent} visibleVersionPreviews={[]} readOnly={false}
+      initialContent={formContent}
+      readOnly={false}
       onFormContentChange={jest.fn()}
       onAnswerMappingChange={jest.fn()}
     />)

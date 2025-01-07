@@ -82,7 +82,7 @@ describe('PagedSurveyView', () => {
   })
   //
   it('autosaves question and page progress', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(generateThreePageSurvey(), profile)
 
@@ -108,7 +108,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('autosaves question and page progress with diffs', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(generateThreePageSurvey(), profile)
 
@@ -135,7 +135,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('autosave handles updated questions', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(generateThreePageSurvey(), profile)
     await userEvent.click(screen.getByText('Green'))
@@ -161,7 +161,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('autosave handles hidden questions with default clear-on-submit behavior', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(mockSurveyWithHiddenQuestion(), profile)
     await userEvent.click(screen.getByText('Green'))
@@ -191,7 +191,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('autosave handles hidden questions with clear-on-hidden', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(
       mockSurveyWithHiddenQuestionClearOnHidden(),
@@ -224,7 +224,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('retries autosave if autosave fails', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(generateThreePageSurvey(), profile)
     submitSpy.mockImplementation(() => Promise.reject({}))

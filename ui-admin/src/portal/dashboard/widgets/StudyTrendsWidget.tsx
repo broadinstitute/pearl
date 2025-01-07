@@ -31,7 +31,7 @@ export const StudyTrendsWidget = ({ portal, study }: { portal: Portal, study: St
       const lastWeek = new Date()
       lastWeek.setDate(lastWeek.getDate() - 7)
       return new Date((datum.time || 0) * 1000) > lastWeek
-    }))
+    }), 'live')
   }
 
   return (

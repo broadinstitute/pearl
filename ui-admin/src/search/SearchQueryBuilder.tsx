@@ -372,17 +372,17 @@ const CustomValueEditor = (props: ValueEditorProps) => {
 }
 
 const OperatorSelector = (props: OperatorSelectorProps) => {
-  const options = props.options as { name: string, label: string }[]
+  const options = (props.options as { name: string, label: string }[])
+    .map(option => ({ ...option, value: option.name }))
 
   const selectedOptions = options.find(o => o.name === props.value)
-
   return <div className="w-50">
     <Select
       options={options}
       value={selectedOptions ? { value: selectedOptions.name, label: selectedOptions.label } : undefined}
       onChange={newVal => {
-        if (newVal?.name != props.value) {
-          props.handleOnChange(newVal?.name || '')
+        if (newVal?.value != props.value) {
+          props.handleOnChange(newVal?.value || '')
         }
       }}
     />

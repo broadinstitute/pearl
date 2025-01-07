@@ -76,6 +76,7 @@ describe('SurveyEnvironmentDetailModal', () => {
       studyShortcode: 'bar'
     }, {
       assignAllUnassigned: true,
+      overrideEligibility: false,
       targetAssignedVersion: 2,
       targetStableId: 'test1234',
       taskType: 'SURVEY'

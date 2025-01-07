@@ -332,7 +332,7 @@ export const studyEnvMailingListPath = (studyEnvParams: OptionalStudyEnvParams) 
   if (!studyEnvParams.studyShortcode || !studyEnvParams.envName) {
     return `/${mailingListPath(studyEnvParams.portalShortcode, 'live')}`
   }
-  return `${baseStudyEnvPath(studyEnvParams)}/mailingList`
+  return `${baseStudyEnvPath(studyEnvParams as StudyEnvParams)}/mailingList`
 }
 
 export const studyEnvSiteContentPath = (studyEnvParams: StudyEnvParams) => {

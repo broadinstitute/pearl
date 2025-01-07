@@ -139,9 +139,7 @@ export const mockEnrollee: () => Enrollee = () => {
     subject: true,
     id: 'enrollee1',
     participantUserId: 'user1',
-    profile: {
-      sexAtBirth: 'female'
-    },
+    profile: mockProfile(),
     profileId: 'profile1',
     kitRequests: [],
     surveyResponses: [],
@@ -194,6 +192,14 @@ export const mockSurveyResponse = (): SurveyResponse => {
 /** mock enrollee profile */
 export const mockProfile = (): Profile => {
   return {
-    sexAtBirth: 'female'
+    sexAtBirth: 'female',
+    mailingAddress: {
+      city: 'city',
+      state: 'state',
+      street1: 'street1',
+      street2: 'street2',
+      country: 'US',
+      postalCode: '02478'
+    }
   }
 }
