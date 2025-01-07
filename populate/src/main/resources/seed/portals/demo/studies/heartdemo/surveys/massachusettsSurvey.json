@@ -43,6 +43,66 @@
                 "value": "unsure"
               }
             ]
+          },
+          {
+            "name": "schools",
+            "type": "checkbox",
+            "title": "What schools did you attend?",
+            "renderAs": "checkbox-multiple-other",
+            "choices": [
+              {
+                "text": "MIT",
+                "value": "mit",
+                "otherStableId": "schoolsMitDetail",
+                "otherText": {
+                    "en": "What did you study at MIT?",
+                    "es": "¿Qué estudiaste en MIT?"
+                },
+                "otherPlaceHolder": {
+                    "en": "Your major",
+                    "es": "Tu especialidad"
+                }
+              },
+              {
+                  "text": "Harvard",
+                  "value": "harvard",
+                  "otherStableId": "schoolsHarvardDetail",
+                  "otherText": {
+                    "en": "What did you study at Harvard?",
+                    "es": "¿Qué estudiaste en Harvard?"
+                  },
+                  "otherPlaceHolder": {
+                    "en": "Your major",
+                    "es": "Tu especialidad"
+                  }
+              },
+              {
+                "text": "Northeastern",
+                "value": "northeastern",
+                "otherStableId": "schoolsNortheasternDetail",
+                "otherText": {
+                    "en": "What did you study at Northeastern?",
+                    "es": "¿Qué estudiaste en Northeastern?"
+                },
+                "otherPlaceHolder": {
+                    "en": "Your major",
+                    "es": "Tu especialidad"
+                }
+              },
+              {
+                "text": "Boston University",
+                "value": "bu",
+                "otherStableId": "schoolsBuDetail",
+                "otherText": {
+                    "en": "What did you study at Boston University?",
+                    "es": "¿Qué estudiaste en Boston University?"
+                },
+                "otherPlaceHolder": {
+                    "en": "Your major",
+                    "es": "Tu especialidad"
+                }
+              }
+            ]
           }
         ]
       }
