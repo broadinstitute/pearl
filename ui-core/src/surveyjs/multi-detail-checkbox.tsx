@@ -49,17 +49,17 @@ type Choice = ItemValue & {
 
 const OtherItem = ({ otherStableId, otherText, value, onChange } : {
   otherStableId: string
-  otherText: string
-  otherPlaceholder: string
+  otherText?: string
+  otherPlaceholder?: string
   value: string
   onChange: (value: string) => void
 }) => {
   const [otherValue, setOtherValue] = React.useState(value)
 
   return <div className="my-1">
-    <label htmlFor={otherStableId} className="h6 fw-semibold d-block">
+    {!isEmpty(otherText) && <label htmlFor={otherStableId} className="h6 fw-semibold d-block">
       {otherText}
-    </label>
+    </label>}
     <input
       id={otherStableId}
       type='text'
@@ -78,18 +78,22 @@ export class SurveyQuestionCheckboxMultipleOther extends SurveyQuestionCheckbox 
   protected renderItem(item: Choice, isFirst: boolean, cssClasses: string, index?: string): JSX.Element {
     const otherStableId = item!.jsonObj!.otherStableId
     const otherText = item.jsonObj.otherText
+
     return <>
       {super.renderItem(item, isFirst, cssClasses, index)}
       {this.question.isItemSelected(item)
-        && otherStableId && this.renderOtherItem(otherStableId, otherText || otherStableId)}
+        && otherStableId && this.renderOtherItem(otherStableId, otherText)}
     </>
   }
 
-  protected renderOtherItem(otherStableId: string, otherText: string | { [index: string]: string }): JSX.Element {
+  protected renderOtherItem(
+    otherStableId: string,
+    otherText?: string | { [index: string]: string },
+    otherPlaceholder?: string | { [index: string]: string }): JSX.Element {
     const survey: SurveyModel = this.question.survey as SurveyModel
 
-    const text = renderLocString(otherText, survey.locale)
-    const placeholder = renderLocString(otherText, survey.locale)
+    const text = otherText && renderLocString(otherText, survey.getLocale())
+    const placeholder = otherPlaceholder && renderLocString(otherPlaceholder, survey.getLocale())
 
     return <>
       <OtherItem

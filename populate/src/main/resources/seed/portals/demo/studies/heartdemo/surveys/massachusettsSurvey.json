@@ -101,6 +101,11 @@
                     "en": "Your major",
                     "es": "Tu especialidad"
                 }
+              },
+              {
+                "text": "Other",
+                "value": "other",
+                "otherStableId": "schoolsOtherDetail"
               }
             ]
           }
