@@ -58,7 +58,7 @@
                     "en": "What did you study at MIT?",
                     "es": "¿Qué estudiaste en MIT?"
                 },
-                "otherPlaceHolder": {
+                "otherPlaceholder": {
                     "en": "Your major",
                     "es": "Tu especialidad"
                 }
@@ -71,7 +71,7 @@
                     "en": "What did you study at Harvard?",
                     "es": "¿Qué estudiaste en Harvard?"
                   },
-                  "otherPlaceHolder": {
+                  "otherPlaceholder": {
                     "en": "Your major",
                     "es": "Tu especialidad"
                   }
@@ -84,7 +84,7 @@
                     "en": "What did you study at Northeastern?",
                     "es": "¿Qué estudiaste en Northeastern?"
                 },
-                "otherPlaceHolder": {
+                "otherPlaceholder": {
                     "en": "Your major",
                     "es": "Tu especialidad"
                 }
@@ -97,7 +97,7 @@
                     "en": "What did you study at Boston University?",
                     "es": "¿Qué estudiaste en Boston University?"
                 },
-                "otherPlaceHolder": {
+                "otherPlaceholder": {
                     "en": "Your major",
                     "es": "Tu especialidad"
                 }

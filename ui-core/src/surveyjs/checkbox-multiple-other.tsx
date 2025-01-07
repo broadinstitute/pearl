@@ -1,8 +1,6 @@
 /**
- * A SurveyJS question that renders a multiple selection combobox.
- * This provides similar functionality as the "tagbox" in https://github.com/surveyjs/custom-widgets.
- * However, this virtualizes the options list to support mahy more
- * options while remaining performant.
+ * A SurveyJS custom renderer for checkboxes that includes an "other" text input
+ * for each choice that has a `jsonObj.otherStableId` property.
  */
 import {
   ReactQuestionFactory,
@@ -48,14 +46,14 @@ type Choice = ItemValue & {
 }
 
 
-const OtherTextbox = ({ stableId, title, value, onChange }: {
+const OtherTextbox = ({ stableId, title, value, onChange, placeholder }: {
   stableId: string
   title?: string
   placeholder?: string
   value: string
   onChange: (value: string) => void
 }) => {
-  const [otherValue, setOtherValue] = React.useState(value)
+  const [otherValue, setOtherValue] = React.useState(value || '')
 
   return <div className="my-1">
     {!isEmpty(title) && <label htmlFor={stableId} className="h6 fw-semibold d-block">
@@ -67,6 +65,7 @@ const OtherTextbox = ({ stableId, title, value, onChange }: {
       className='sd-input sd-text'
       value={otherValue}
       aria-label={title}
+      placeholder={placeholder}
       onChange={e => {
         onChange(e.target.value)
         setOtherValue(e.target.value)
@@ -79,12 +78,14 @@ export class SurveyQuestionCheckboxMultipleOther extends SurveyQuestionCheckbox 
   protected renderItem(item: Choice, isFirst: boolean, cssClasses: string, index?: string): JSX.Element {
     const otherStableId = item!.jsonObj!.otherStableId
     const otherText = item.jsonObj.otherText
+    const otherPlaceholder = item.jsonObj.otherPlaceholder
 
-    return <>
+    return <React.Fragment key={index}>
       {super.renderItem(item, isFirst, cssClasses, index)}
       {this.question.isItemSelected(item)
-        && otherStableId && this.renderOtherItem(otherStableId, otherText)}
-    </>
+        && otherStableId
+        && this.renderOtherItem(otherStableId, otherText, otherPlaceholder)}
+    </React.Fragment>
   }
 
   protected renderOtherItem(
