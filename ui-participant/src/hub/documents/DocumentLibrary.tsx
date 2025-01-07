@@ -28,7 +28,7 @@ export default function DocumentLibrary() {
       <div className="my-md-4 mx-auto px-0" style={{ maxWidth: 768 }}>
         <div className="card-body">
           <div className="align-items-center">
-            <Documents enrollee={enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!}
+            <DocumentsList enrollee={enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!}
               participantFiles={participantFiles}/>
           </div>
         </div>
@@ -37,7 +37,7 @@ export default function DocumentLibrary() {
   </div>
 }
 
-const Documents = ({ enrollee, participantFiles }: { enrollee: Enrollee, participantFiles: ParticipantFile[] }) => {
+const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, participantFiles: ParticipantFile[] }) => {
   const { portal, portalEnv } = usePortalEnv()
 
   return <div className="mb-3 rounded round-3 py-4 bg-white px-md-5 shadow-sm px-2">

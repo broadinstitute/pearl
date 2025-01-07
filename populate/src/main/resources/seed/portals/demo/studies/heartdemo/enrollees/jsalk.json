@@ -5,7 +5,17 @@
   "submittedHoursAgo": 252,
   "participantFilePopDtos": [
     {
-      "fileName": "my_file.txt",
+      "fileName": "medical_history_MGB (Full).pdf",
+      "fileType": "application/pdf",
+      "fileContent": "not_a_real_pdf"
+    },
+    {
+      "fileName": "body_mri_scan_12-05-2020.tiff",
+      "fileType": "image/tiff",
+      "fileContent": "not_a_real_image"
+    },
+    {
+      "fileName": "medical_notes.txt",
       "fileType": "text/plain",
       "fileContent": "Hi!"
     }
