@@ -74,7 +74,7 @@ const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, par
               </td>
               <td>
                 <div className="d-flex align-items-center btn-group-vertical">
-                  <button className="btn btn-sm rounded-pill fw-bold btn-danger"
+                  <button className="btn btn-sm rounded-pill fw-bold btn-outline-danger"
                     onClick={() => setShowConfirmDelete(participantFile.fileName)}>
                     Delete
                   </button>
