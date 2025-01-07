@@ -59,20 +59,19 @@ public class SurveyParseUtils {
         List<JsonNode> subQuestions = new ArrayList<>();
 
         if (parent.get("type").asText().equals("paneldynamic") && parent.has("templateElements")) {
-            subQuestions = getPanelDynamicSubQuestions(parent);
+            // get subquestions and add parent stable id to each
+            subQuestions = getPanelDynamicSubQuestions(parent)
+                    .stream()
+                    .map(q -> (JsonNode) q.deepCopy())
+                    .map(q -> {
+                        ((ObjectNode) q).put("parent", parent.get("name").asText());
+                        return q;
+                    })
+                    .toList();
         }
 
-        // keep track of the parent stableid
-        subQuestions = subQuestions
-                .stream()
-                .map(q -> (JsonNode) q.deepCopy())
-                .map(q -> {
-                    ((ObjectNode) q).put("parent", parent.get("name").asText());
-                    return q;
-                })
-                .toList();
-
         if (parent.get("type").asText().equals("checkbox") && parent.has("choices")) {
+            // not a derived value, so doesn't need parent
             subQuestions = getCheckboxOtherSubquestions(parent);
         }
 

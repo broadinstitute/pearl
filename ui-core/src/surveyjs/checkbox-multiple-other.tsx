@@ -24,13 +24,14 @@ import {
 
 type LocalizedString = string | { [index: string]: string }
 
+// I don't love that we have to do this manually, but
+// using the "real" localization stuff via surveyjs
+// makes this... a lot more complicated
 const renderLocString = (locStr: LocalizedString, locale: string) => {
   if (isString(locStr)) {
     return locStr
   }
 
-  console.log('locStr', locStr)
-  console.log('locale', locale)
   if (isEmpty(locStr) || !locStr[locale]) {
     return locStr['default'] || locStr['en'] || ''
   }
@@ -47,25 +48,25 @@ type Choice = ItemValue & {
 }
 
 
-const OtherItem = ({ otherStableId, otherText, value, onChange } : {
-  otherStableId: string
-  otherText?: string
-  otherPlaceholder?: string
+const OtherTextbox = ({ stableId, title, value, onChange }: {
+  stableId: string
+  title?: string
+  placeholder?: string
   value: string
   onChange: (value: string) => void
 }) => {
   const [otherValue, setOtherValue] = React.useState(value)
 
   return <div className="my-1">
-    {!isEmpty(otherText) && <label htmlFor={otherStableId} className="h6 fw-semibold d-block">
-      {otherText}
+    {!isEmpty(title) && <label htmlFor={stableId} className="h6 fw-semibold d-block">
+      {title}
     </label>}
     <input
-      id={otherStableId}
+      id={stableId}
       type='text'
       className='sd-input sd-text'
       value={otherValue}
-      aria-label={otherText}
+      aria-label={title}
       onChange={e => {
         onChange(e.target.value)
         setOtherValue(e.target.value)
@@ -96,10 +97,10 @@ export class SurveyQuestionCheckboxMultipleOther extends SurveyQuestionCheckbox 
     const placeholder = otherPlaceholder && renderLocString(otherPlaceholder, survey.getLocale())
 
     return <>
-      <OtherItem
-        otherStableId={otherStableId}
-        otherText={text}
-        otherPlaceholder={placeholder}
+      <OtherTextbox
+        stableId={otherStableId}
+        title={text}
+        placeholder={placeholder}
         value={survey.getValue(otherStableId)}
         onChange={(val: string) => survey.setValue(otherStableId, val)}
       />
