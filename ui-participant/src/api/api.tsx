@@ -131,6 +131,13 @@ export default {
     return Promise.reject(obj)
   },
 
+  async processResponse(response: Response) {
+    if (response.ok) {
+      return response
+    }
+    return Promise.reject(response)
+  },
+
   async getConfig(): Promise<Config> {
     const response = await fetch(`/config`)
     return await this.processJsonResponse(response)
@@ -170,6 +177,12 @@ export default {
     const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
+  },
+
+  async downloadParticipantFile(studyShortcode: string, enrolleeShortcode: string, fileId: string): Promise<Response> {
+    const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file/${fileId}`
+    const response = await fetch(url, this.getGetInit())
+    return this.processResponse(response)
   },
 
   /** submit portal preregistration survey data */

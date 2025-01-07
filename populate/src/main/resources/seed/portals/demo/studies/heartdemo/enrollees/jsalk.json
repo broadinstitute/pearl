@@ -132,7 +132,7 @@
       "surveyVersion": 1,
       "complete": true,
       "answerPopDtos": [
-        {"questionStableId": "medical_record_document_request", "format": "FILE_NAME", "stringValue":  "my_file.txt"}
+        {"questionStableId": "medical_record_document_request", "format": "FILE_NAME", "stringValue":  "medical_notes.txt"}
      ]
     }
   ],

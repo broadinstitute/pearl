@@ -1,4 +1,4 @@
-import { Enrollee, instantToDateString, ParticipantFile } from '@juniper/ui-core'
+import { Enrollee, instantToDateString, ParticipantFile, saveBlobAsDownload } from '@juniper/ui-core'
 import React, { useEffect, useState } from 'react'
 import { useActiveUser } from 'providers/ActiveUserProvider'
 import { usePortalEnv } from 'providers/PortalProvider'
@@ -45,8 +45,8 @@ const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, par
       Documents
     </h1>
     <div className="pb-4">
-      Below you will find all of the documents that you have uploaded to your studies. You can also view
-        documents that you have completed as part of your studies, such as consent forms.
+      Below you will find all of the documents that you have uploaded to your studies. You can download them at any
+      time or delete them if they are no longer needed.
     </div>
     <h3>Uploaded documents ({participantFiles.length})</h3>
     <div className="d-flex flex-column">
@@ -54,7 +54,7 @@ const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, par
         <thead>
           <tr>
             <th>File Name</th>
-            <th>Created At</th>
+            <th>Created</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -69,8 +69,16 @@ const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, par
                 {instantToDateString(participantFile.createdAt)}
               </td>
               <td>
-                <FontAwesomeIcon className="me-2" icon={faTrash}/>
-                <FontAwesomeIcon className="me-2" icon={faDownload}/>
+                <button className="btn btn-link text-danger p-0">
+                  <FontAwesomeIcon className="me-2" icon={faTrash}/>
+                </button>
+                <button className="btn btn-link p-0" onClick={async () => {
+                  const response =
+                      await Api.downloadParticipantFile('demo', enrollee.shortcode, participantFile.fileName)
+                  saveBlobAsDownload(await response.blob(), participantFile.fileName)
+                }}>
+                  <FontAwesomeIcon className="me-2" icon={faDownload}/>
+                </button>
               </td>
             </tr>
           ))}
@@ -81,13 +89,14 @@ const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, par
 }
 
 const fileTypeToIcon = (fileType: string) => {
+  if (fileType.startsWith('image/')) {
+    return <FontAwesomeIcon className="me-2" icon={faFileImage}/>
+  }
   switch (fileType) {
     case 'text/plain':
       return <FontAwesomeIcon className="me-2" icon={faFileLines}/>
     case 'application/pdf':
       return <FontAwesomeIcon className="me-2" icon={faFilePdf}/>
-    case 'image/jpg':
-      return <FontAwesomeIcon className="me-2" icon={faFileImage}/>
     default:
       return <FontAwesomeIcon className="me-2" icon={faFile}/>
   }
