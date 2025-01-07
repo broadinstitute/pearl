@@ -173,16 +173,30 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async listParticipantFiles(studyShortcode: string, enrolleeShortcode: string): Promise<ParticipantFile[]> {
+  async listParticipantFiles(
+    studyShortcode: string, enrolleeShortcode: string
+  ): Promise<ParticipantFile[]> {
     const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
   },
 
-  async downloadParticipantFile(studyShortcode: string, enrolleeShortcode: string, fileId: string): Promise<Response> {
-    const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file/${fileId}`
+  async downloadParticipantFile(
+    studyShortcode: string, enrolleeShortcode: string, fileName: string
+  ): Promise<Response> {
+    const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file/${fileName}`
     const response = await fetch(url, this.getGetInit())
     return this.processResponse(response)
+  },
+
+  async deleteParticipantFile(
+    studyShortcode: string, enrolleeShortcode: string, fileName: string
+  ): Promise<void> {
+    const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file/${fileName}`
+    await fetch(url, {
+      method: 'DELETE',
+      headers: this.getInitHeaders()
+    })
   },
 
   /** submit portal preregistration survey data */
