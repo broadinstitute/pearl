@@ -1,8 +1,13 @@
 package bio.terra.pearl.populate;
 
+import bio.terra.pearl.core.model.i18n.LanguageText;
 import bio.terra.pearl.core.service.admin.AdminUserService;
+import bio.terra.pearl.core.service.i18n.LanguageTextService;
 import bio.terra.pearl.populate.service.BaseSeedPopulator;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -20,6 +25,8 @@ public class SetupPopulateTest extends BaseSpringBootTest {
     BaseSeedPopulator baseSeedPopulator;
     @Autowired
     AdminUserService adminUserService;
+    @Autowired
+    LanguageTextService languageTextService;
 
     @Test
     @Transactional
@@ -27,5 +34,16 @@ public class SetupPopulateTest extends BaseSpringBootTest {
         adminUserService.bulkDelete(adminUserService.findAll(), getAuditInfo(info));
         BaseSeedPopulator.SetupStats setupStats = baseSeedPopulator.populate("");
         Assertions.assertEquals(BaseSeedPopulator.ADMIN_USERS_TO_POPULATE.size(), setupStats.getNumAdminUsers());
+    }
+
+    @Test
+    @Transactional
+    public void testPopulateLanguageTexts(TestInfo info) throws IOException {
+//        BaseSeedPopulator.SetupStats setupStats = baseSeedPopulator.populate("");
+        List<LanguageText> languageTexts = languageTextService.findAll();
+        Map<String, List<LanguageText>> languageTextsByLanguageCode = languageTexts.stream()
+            .collect(java.util.stream.Collectors.groupingBy(LanguageText::getLanguage));
+
+        Assertions.assertEquals(BaseSeedPopulator.LANGUAGE_TEXTS_TO_POPULATE.size(), languageTextsByLanguageCode.size());
     }
 }
