@@ -1,4 +1,4 @@
-import { Enrollee, instantToDateString, ParticipantFile, saveBlobAsDownload, useI18n } from '@juniper/ui-core'
+import { Enrollee, instantToDateString, ParticipantFile, saveBlobAsDownload, Study, useI18n } from '@juniper/ui-core'
 import React, { useEffect, useState } from 'react'
 import { useActiveUser } from 'providers/ActiveUserProvider'
 import Api from 'api/api'
@@ -11,15 +11,21 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import Modal from 'react-bootstrap/Modal'
 import ThemedModal from 'components/ThemedModal'
+import { usePortalEnv } from 'providers/PortalProvider'
 
 export default function DocumentLibrary() {
+  const { portal, portalEnv } = usePortalEnv()
   const { enrollees, ppUser } = useActiveUser()
   const [participantFiles, setParticipantFiles] = useState<ParticipantFile[]>([])
+  const currentStudy = portal.portalStudies.find(pStudy =>
+    pStudy.study.studyEnvironments.find(studyEnv =>
+      studyEnv.environmentName === portalEnv.environmentName))?.study
 
   const loadDocuments = async () => {
-    const enrolleShortcode = enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!.shortcode
-    const foo = await Api.listParticipantFiles('demo', enrolleShortcode)
-    setParticipantFiles(foo)
+    if (!currentStudy) { return }
+    const enrolleeShortcode = enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!.shortcode
+    const documents = await Api.listParticipantFiles(currentStudy.shortcode, enrolleeShortcode)
+    setParticipantFiles(documents)
   }
 
   useEffect(() => {
@@ -33,7 +39,9 @@ export default function DocumentLibrary() {
       <div className="my-md-4 mx-auto px-0" style={{ maxWidth: 768 }}>
         <div className="card-body">
           <div className="align-items-center">
-            <DocumentsList enrollee={enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!}
+            <DocumentsList
+              currentStudy={currentStudy!}
+              enrollee={enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!}
               participantFiles={participantFiles}/>
           </div>
         </div>
@@ -42,7 +50,9 @@ export default function DocumentLibrary() {
   </div>
 }
 
-const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, participantFiles: ParticipantFile[] }) => {
+const DocumentsList = ({ currentStudy, enrollee, participantFiles }: {
+  currentStudy: Study, enrollee: Enrollee, participantFiles: ParticipantFile[]
+}) => {
   const { i18n } = useI18n()
 
   return <div className="mb-3 rounded round-3 py-4 bg-white px-md-5 shadow-sm px-2">
@@ -74,21 +84,21 @@ const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, par
                 </div>
               </td>
               <td>
-                <FileOptionsDropdown participantFile={participantFile} enrollee={enrollee}/>
+                <FileOptionsDropdown currentStudy={currentStudy} participantFile={participantFile} enrollee={enrollee}/>
               </td>
             </tr>
           ))}
         </tbody>
       </table> }
       {participantFiles.length === 0 &&
-        <div className="text-muted fst-italic my-3">{i18n('documentsNone')}</div>
+        <div className="text-muted fst-italic my-3">{i18n('documentsListNone')}</div>
       }
     </div>
   </div>
 }
 
-const FileOptionsDropdown = ({ participantFile, enrollee }: {
-  participantFile: ParticipantFile, enrollee: Enrollee
+const FileOptionsDropdown = ({ currentStudy, participantFile, enrollee }: {
+  currentStudy: Study, participantFile: ParticipantFile, enrollee: Enrollee
 }) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const { i18n } = useI18n()
@@ -109,7 +119,7 @@ const FileOptionsDropdown = ({ participantFile, enrollee }: {
         <li>
           <a className="dropdown-item" role={'button'} onClick={async () => {
             const response = await Api.downloadParticipantFile(
-              'demo', enrollee.shortcode, participantFile.fileName)
+              currentStudy.shortcode, enrollee.shortcode, participantFile.fileName)
             saveBlobAsDownload(await response.blob(), participantFile.fileName)
           }}>
             {i18n('documentDownloadButton')}
@@ -131,7 +141,7 @@ const FileOptionsDropdown = ({ participantFile, enrollee }: {
         <div className={'d-flex w-100'}>
           <button className={'btn btn-primary m-2'}
             onClick={async () => {
-              await Api.deleteParticipantFile('demo', enrollee.shortcode, participantFile.fileName)
+              await Api.deleteParticipantFile(currentStudy.shortcode, enrollee.shortcode, participantFile.fileName)
             }}>
             {i18n('documentDeletionDelete')}
           </button>
