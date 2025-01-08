@@ -65,6 +65,7 @@ public class PortalController implements PortalApi {
         "https://gvascdev.b2clogin.com", // gVASC (demo)
         "https://gvascprod.b2clogin.com", // gVASC (prod)
         "https://juniperatcpdev.b2clogin.com", // ATCP (demo)
+        "https://trccproject.b2clogin.com" // tRCC (prod)
       },
       maxAge = 3600,
       methods = {RequestMethod.GET, RequestMethod.OPTIONS})
