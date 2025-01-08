@@ -421,7 +421,7 @@ export const AccountOptionsDropdown = (
           }
           <NavLink to="/hub/documents">
             <button className="dropdown-item" aria-label="documents">
-              Documents
+              {i18n('navbarDocuments')}
             </button>
           </NavLink>
           <button className="dropdown-item" aria-label="change password" onClick={() => {

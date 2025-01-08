@@ -1,12 +1,16 @@
 import { Enrollee, instantToDateString, ParticipantFile, saveBlobAsDownload, useI18n } from '@juniper/ui-core'
 import React, { useEffect, useState } from 'react'
 import { useActiveUser } from 'providers/ActiveUserProvider'
-import { usePortalEnv } from 'providers/PortalProvider'
-import Api from '../../api/api'
+import Api from 'api/api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFile, faFileImage, faFileLines, faFilePdf } from '@fortawesome/free-solid-svg-icons'
+import {
+  faFile,
+  faFileImage,
+  faFileLines,
+  faFilePdf
+} from '@fortawesome/free-solid-svg-icons'
 import Modal from 'react-bootstrap/Modal'
-import ThemedModal from '../../components/ThemedModal'
+import ThemedModal from 'components/ThemedModal'
 
 export default function DocumentLibrary() {
   const { enrollees, ppUser } = useActiveUser()
@@ -39,24 +43,21 @@ export default function DocumentLibrary() {
 }
 
 const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, participantFiles: ParticipantFile[] }) => {
-  const { portal, portalEnv } = usePortalEnv()
-  const [showConfirmDelete, setShowConfirmDelete] = useState<string>()
   const { i18n } = useI18n()
 
   return <div className="mb-3 rounded round-3 py-4 bg-white px-md-5 shadow-sm px-2">
     <h1 className="pb-3">
-      Documents
+      {i18n('documentsPageTitle')}
     </h1>
     <div className="pb-4">
-      While participating in a study, you may be asked to upload documents as part of a form or survey.
-      Below, you can manage the documents you have uploaded.
+      {i18n('documentsPageMessage')}
     </div>
-    <h3>Uploaded documents ({participantFiles.length})</h3>
+    <h3>{i18n('documentsPageUploadedDocumentsTitle')} ({participantFiles.length})</h3>
     <div className="d-flex flex-column">
       { participantFiles.length > 0 && <table className="table">
         <thead>
           <tr>
-            <th>File Name</th>
+            <th>{i18n('documentsListFileName')}</th>
             <th></th>
           </tr>
         </thead>
@@ -68,53 +69,81 @@ const DocumentsList = ({ enrollee, participantFiles }: { enrollee: Enrollee, par
                   {fileTypeToIcon(participantFile.fileType)}
                   {participantFile.fileName}
                   <div className={'text-muted fst-italic'}>
-                    {`Created on ${  instantToDateString(participantFile.createdAt)}`}
+                    {`${i18n('documentsListCreatedOn')} ${  instantToDateString(participantFile.createdAt)}`}
                   </div>
                 </div>
               </td>
               <td>
-                <div className="d-flex align-items-center btn-group-vertical">
-                  <button className="btn btn-sm rounded-pill fw-bold btn-outline-danger"
-                    onClick={() => setShowConfirmDelete(participantFile.fileName)}>
-                    Delete
-                  </button>
-                  <button className="btn btn-sm rounded-pill fw-bold btn-primary mt-2" onClick={async () => {
-                    const response = await Api.downloadParticipantFile(
-                      'demo', enrollee.shortcode, participantFile.fileName)
-                    saveBlobAsDownload(await response.blob(), participantFile.fileName)
-                  }}>
-                    Download
-                  </button>
-                </div>
+                <FileOptionsDropdown participantFile={participantFile} enrollee={enrollee}/>
               </td>
             </tr>
           ))}
         </tbody>
       </table> }
       {participantFiles.length === 0 &&
-        <div className="text-muted fst-italic">You have not uploaded any documents yet</div>
+        <div className="text-muted fst-italic my-3">{i18n('documentsNone')}</div>
       }
     </div>
+  </div>
+}
+
+const FileOptionsDropdown = ({ participantFile, enrollee }: {
+  participantFile: ParticipantFile, enrollee: Enrollee
+}) => {
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
+  const { i18n } = useI18n()
+  return (<>
+    <li className="nav-item dropdown d-flex flex-column">
+      <button className="btn btn-outline-primary dropdown-toggle" id="fileOptionsDropdown"
+        data-bs-toggle="dropdown" aria-expanded="false">
+        {i18n('documentOptionsButton')}
+      </button>
+      <ul className="dropdown-menu" aria-labelledby="fileOptionsDropdown">
+        <li>
+          <a role={'button'} className="dropdown-item"
+            onClick={() => setShowConfirmDelete(true)}
+          >
+            {i18n('documentDeletionDelete')}
+          </a>
+        </li>
+        <li>
+          <a className="dropdown-item" role={'button'} onClick={async () => {
+            const response = await Api.downloadParticipantFile(
+              'demo', enrollee.shortcode, participantFile.fileName)
+            saveBlobAsDownload(await response.blob(), participantFile.fileName)
+          }}>
+            {i18n('documentDownloadButton')}
+          </a>
+        </li>
+      </ul>
+    </li>
     {showConfirmDelete && <ThemedModal show={true}
-      onHide={() => console.log('')} size={'lg'} animation={false}> <Modal.Header>
+      onHide={() => setShowConfirmDelete(false)} size={'lg'} animation={true}>
+      <Modal.Header>
         <Modal.Title>
-          <h2 className="fw-bold pb-0 mb-0">Are you sure?</h2>
+          <h2 className="fw-bold pb-0 mb-0">{i18n('documentDeletionConfirmationTitle')}</h2>
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p className="m-0">Are you sure you want to delete this document? This cannot be undone.</p>
+        <p className="m-0">{i18n('documentDeletionConfirmationMessage')}</p>
       </Modal.Body>
       <Modal.Footer>
         <div className={'d-flex w-100'}>
-          <button className={'btn btn-primary m-2'} onClick={async () => {
-            await Api.deleteParticipantFile('demo', enrollee.shortcode, showConfirmDelete)
-          }}>{i18n('yesDelete')}</button>
+          <button className={'btn btn-primary m-2'}
+            onClick={async () => {
+              await Api.deleteParticipantFile('demo', enrollee.shortcode, participantFile.fileName)
+            }}>
+            {i18n('documentDeletionDelete')}
+          </button>
           <button className={'btn btn-outline-secondary m-2'}
-            onClick={() => setShowConfirmDelete(undefined)}>{i18n('cancel')}</button>
+            onClick={() => setShowConfirmDelete(false)}>
+            {i18n('cancel')}
+          </button>
         </div>
       </Modal.Footer>
     </ThemedModal> }
-  </div>
+  </>
+  )
 }
 
 const fileTypeToIcon = (fileType: string) => {
