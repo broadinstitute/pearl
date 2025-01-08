@@ -4,6 +4,7 @@ import './autosized-signaturepad'
 import './formatDate'
 import './inputmask'
 import './multiple-combobox-question'
+import './checkbox-multiple-other'
 import './address-validation-modal-question'
 import './medications-question'
 
