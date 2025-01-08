@@ -44,6 +44,11 @@ public class SetupPopulateTest extends BaseSpringBootTest {
         Map<String, List<LanguageText>> languageTextsByLanguageCode = languageTexts.stream()
             .collect(java.util.stream.Collectors.groupingBy(LanguageText::getLanguage));
 
-        Assertions.assertEquals(BaseSeedPopulator.LANGUAGE_TEXTS_TO_POPULATE.size(), languageTextsByLanguageCode.size());
+        List<String> expectedLanguages = List.of("de", "dev", "en", "es", "fr", "hi", "it", "ja", "pl", "pt", "ru", "tr", "zh");
+
+        for (String languageCode : expectedLanguages) {
+            Assertions.assertTrue(languageTextsByLanguageCode.containsKey(languageCode));
+            Assertions.assertFalse(languageTextsByLanguageCode.get(languageCode).isEmpty());
+        }
     }
 }
