@@ -38,8 +38,8 @@ public class SetupPopulateTest extends BaseSpringBootTest {
 
     @Test
     @Transactional
-    public void testPopulateLanguageTexts(TestInfo info) throws IOException {
-//        BaseSeedPopulator.SetupStats setupStats = baseSeedPopulator.populate("");
+    public void testPopulateLanguageTexts(TestInfo info) {
+        baseSeedPopulator.populateLanguageTexts();
         List<LanguageText> languageTexts = languageTextService.findAll();
         Map<String, List<LanguageText>> languageTextsByLanguageCode = languageTexts.stream()
             .collect(java.util.stream.Collectors.groupingBy(LanguageText::getLanguage));
