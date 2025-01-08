@@ -28,7 +28,8 @@ const getDefaultConfig = (): Trigger => {
     studyEnvironmentId: '',
     afterMinutesIncomplete: 72 * 60,
     reminderIntervalMinutes: 72 * 60,
-    taskTargetStableIds: [],
+    filterTargetStableIds: [],
+    actionTargetStableIds: [],
     maxNumReminders: 3,
     emailTemplate: {
       stableId: 'placeholderStableId',

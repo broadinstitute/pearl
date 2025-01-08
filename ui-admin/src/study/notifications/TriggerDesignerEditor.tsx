@@ -129,8 +129,8 @@ const TriggerTypeEditor = (
         {!baseFieldsOnly && <>
           {isTaskScopable && <TaskTargetStableIdsEditor
             studyEnvParams={studyEnvParams}
-            stableIds={trigger.taskTargetStableIds}
-            setStableIds={ids => updateTrigger('taskTargetStableIds', ids)}/>}
+            stableIds={trigger.filterTargetStableIds}
+            setStableIds={ids => updateTrigger('filterTargetStableIds', ids)}/>}
 
           {trigger.triggerType !== 'AD_HOC' &&
               <HorizontalBar/>}
