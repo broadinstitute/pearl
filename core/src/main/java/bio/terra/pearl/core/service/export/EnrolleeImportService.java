@@ -18,6 +18,7 @@ import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.export.dataimport.ImportFileFormat;
 import bio.terra.pearl.core.service.export.dataimport.ImportItemService;
 import bio.terra.pearl.core.service.export.dataimport.ImportService;
+import bio.terra.pearl.core.service.export.formatters.ExportFormatUtils;
 import bio.terra.pearl.core.service.export.formatters.module.*;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
@@ -547,6 +548,18 @@ public class EnrolleeImportService {
                     new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "handleSurveyPublished.assignToExistingEnrollees")));
             relatedTask = tasks.getFirst();
         }
+
+        // make sure the task reflects created and completion status
+        // so that recurrences are properly scheduled
+        String completedAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "completedAt";
+        String createdAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "createdAt";
+        if (enrolleeMap.containsKey(completedAtKey)) {
+            relatedTask.setCompletedAt(ExportFormatUtils.importInstant(enrolleeMap.get(completedAtKey)));
+        }
+        if (enrolleeMap.containsKey(createdAtKey)) {
+            relatedTask.setCreatedAt(ExportFormatUtils.importInstant(enrolleeMap.get(createdAtKey)));
+        }
+
         // we're not worrying about dating the response yet
         return surveyResponseService.updateResponse(response, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "importSurveyResponse")),
                 "Imported", ppUser, enrollee, relatedTask.getId(), portalId).getResponse();

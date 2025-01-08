@@ -6,32 +6,33 @@ import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.ParticipantNote;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
-
-import java.time.Instant;
-import java.util.*;
-
 import bio.terra.pearl.core.model.workflow.TaskType;
-import bio.terra.pearl.core.service.DataAuditedService;
 import bio.terra.pearl.core.service.ParticipantDataAuditedService;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
 import bio.terra.pearl.core.service.participant.ParticipantNoteService;
+import bio.terra.pearl.core.service.survey.SurveyResponseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.util.*;
+
 @Service
 @Slf4j
 public class ParticipantTaskService extends ParticipantDataAuditedService<ParticipantTask, ParticipantTaskDao> {
     private final EnrolleeService enrolleeService;
     private final ParticipantNoteService participantNoteService;
+    private final SurveyResponseService surveyResponseService;
 
-    public ParticipantTaskService(ParticipantTaskDao dao, ParticipantDataChangeService participantDataChangeService, ObjectMapper objectMapper, @Lazy EnrolleeService enrolleeService, ParticipantNoteService participantNoteService) {
+    public ParticipantTaskService(ParticipantTaskDao dao, ParticipantDataChangeService participantDataChangeService, ObjectMapper objectMapper, @Lazy EnrolleeService enrolleeService, ParticipantNoteService participantNoteService, @Lazy SurveyResponseService surveyResponseService) {
         super(dao, participantDataChangeService, objectMapper);
         this.enrolleeService = enrolleeService;
         this.participantNoteService = participantNoteService;
+        this.surveyResponseService = surveyResponseService;
     }
 
     public List<ParticipantTask> findByEnrolleeId(UUID enrolleeId) {
@@ -77,6 +78,13 @@ public class ParticipantTaskService extends ParticipantDataAuditedService<Partic
     public ParticipantTask update(ParticipantTask task, DataAuditInfo dataAuditInfo) {
         if (task.getStatus().isTerminalStatus() && task.getCompletedAt() == null) {
             task.setCompletedAt(Instant.now());
+            if (Objects.nonNull(task.getSurveyResponseId())) {
+                surveyResponseService.find(task.getSurveyResponseId()).ifPresent(surveyResponse -> {
+                    surveyResponse.setComplete(true);
+                    surveyResponse.setCompletedAt(task.getCompletedAt());
+                    surveyResponseService.update(surveyResponse);
+                });
+            }
         }
         return super.update(task, dataAuditInfo);
     }

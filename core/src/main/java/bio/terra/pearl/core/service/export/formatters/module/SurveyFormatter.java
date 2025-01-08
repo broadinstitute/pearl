@@ -1,8 +1,8 @@
 package bio.terra.pearl.core.service.export.formatters.module;
 
+import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.service.export.EnrolleeExportData;
-import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.service.export.formatters.ExportFormatUtils;
 import bio.terra.pearl.core.service.export.formatters.item.AnswerItemFormatter;
 import bio.terra.pearl.core.service.export.formatters.item.ItemFormatter;
@@ -12,7 +12,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
@@ -21,7 +20,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.reducing;
 
 /**
  * See https://broad-juniper.zendesk.com/hc/en-us/articles/18259824756123-Participant-List-Export-details
@@ -57,6 +55,8 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
         // Note that we generate and add answer formatters to this list later in the constructor
         List<ItemFormatter<SurveyResponse>> formatters = new ArrayList<>();
         formatters.add(new PropertyItemFormatter<>("lastUpdatedAt", SurveyResponse.class));
+        formatters.add(new PropertyItemFormatter<>("createdAt", SurveyResponse.class));
+        formatters.add(new PropertyItemFormatter<>("completedAt", SurveyResponse.class));
         formatters.add(new PropertyItemFormatter<>("complete", SurveyResponse.class));
         return formatters;
     }
