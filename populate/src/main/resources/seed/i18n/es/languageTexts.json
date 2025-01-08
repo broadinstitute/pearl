@@ -136,5 +136,17 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Gracias por su participación.", "language": "es"},
   {"keyName": "kitTypeSaliva", "text": "Kit para saliva", "language": "es"},
   {"keyName": "kitTypeStool", "text": "Kit para heces", "language": "es"},
-  {"keyName": "kitTypeBlood", "text": "Kit para sangre", "language": "es"}
+  {"keyName": "kitTypeBlood", "text": "Kit para sangre", "language": "es"},
+  {"keyName": "documentDeletionConfirmationMessage", "text": "¿Está seguro de que desea eliminar este documento? No es posible deshacer esta acción.", "language": "es"},
+  {"keyName": "documentDeletionConfirmationTitle", "text": "¿Está seguro?", "language": "es"},
+  {"keyName": "documentDeletionDelete", "text": "Borrar", "language": "es"},
+  {"keyName": "documentDownloadButton", "text": "Descargar", "language": "es"},
+  {"keyName": "documentOptionsButton", "text": "Opciones", "language": "es"},
+  {"keyName": "documentsListNone", "text": "Aún no has subido ningún documento", "language": "es"},
+  {"keyName": "documentsListFileName", "text": "Nombre del archivo", "language": "es"},
+  {"keyName": "documentsListCreatedOn", "text": "Creado el", "language": "es"},
+  {"keyName": "documentsPageTitle", "text": "Documentos", "language": "es"},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Documentos cargados", "language": "es"},
+  {"keyName": "documentsPageMessage", "text": "Mientras participa en un estudio, es posible que se le solicite que cargue documentos como parte de un formulario o encuesta. A continuación, puede administrar los documentos que ha cargado.", "language": "es"},
+  {"keyName": "navbarDocuments", "text": "Documentos", "language": "es"}
 ]

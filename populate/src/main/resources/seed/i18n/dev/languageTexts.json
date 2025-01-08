@@ -137,5 +137,17 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "DEV_Thank you for your participation.", "language": "dev"},
   {"keyName": "kitTypeSaliva", "text": "DEV_Saliva kit", "language": "dev"},
   {"keyName": "kitTypeStool", "text": "DEV_Stool kit", "language": "dev"},
-  {"keyName": "kitTypeBlood", "text": "DEV_Blood kit", "language": "dev"}
+  {"keyName": "kitTypeBlood", "text": "DEV_Blood kit", "language": "dev"},
+  {"keyName": "documentDeletionConfirmationMessage", "text": "DEV_Are you sure you want to delete this document? This cannot be undone.", "language": "dev"},
+  {"keyName": "documentDeletionConfirmationTitle", "text": "DEV_Are you sure?", "language": "dev"},
+  {"keyName": "documentDeletionDelete", "text": "DEV_Delete", "language": "dev"},
+  {"keyName": "documentDownloadButton", "text": "DEV_Download", "language": "dev"},
+  {"keyName": "documentOptionsButton", "text": "DEV_Options", "language": "dev"},
+  {"keyName": "documentsListNone", "text": "DEV_You have not uploaded any documents yet", "language": "dev"},
+  {"keyName": "documentsListFileName", "text": "DEV_File Name", "language": "dev"},
+  {"keyName": "documentsListCreatedOn", "text": "DEV_Created on", "language": "dev"},
+  {"keyName": "documentsPageTitle", "text": "DEV_Documents", "language": "dev"},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "DEV_Uploaded documents", "language": "dev"},
+  {"keyName": "documentsPageMessage", "text": "DEV_While participating in a study, you may be asked to upload documents as part of a form or survey. Below, you can manage the documents you have uploaded.", "language": "dev"},
+  {"keyName": "navbarDocuments", "text": "DEV_Documents", "language": "dev"}
 ]
