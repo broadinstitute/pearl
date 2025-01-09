@@ -42,7 +42,9 @@ export default function DocumentLibrary() {
             <DocumentsList
               currentStudy={currentStudy!}
               enrollee={enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!}
-              participantFiles={participantFiles}/>
+              participantFiles={participantFiles}
+              loadDocuments={loadDocuments}
+            />
           </div>
         </div>
       </div>
@@ -50,8 +52,8 @@ export default function DocumentLibrary() {
   </div>
 }
 
-const DocumentsList = ({ currentStudy, enrollee, participantFiles }: {
-  currentStudy: Study, enrollee: Enrollee, participantFiles: ParticipantFile[]
+const DocumentsList = ({ currentStudy, enrollee, participantFiles, loadDocuments }: {
+  currentStudy: Study, enrollee: Enrollee, participantFiles: ParticipantFile[], loadDocuments: () => void
 }) => {
   const { i18n } = useI18n()
 
@@ -84,7 +86,11 @@ const DocumentsList = ({ currentStudy, enrollee, participantFiles }: {
                 </div>
               </td>
               <td>
-                <FileOptionsDropdown currentStudy={currentStudy} participantFile={participantFile} enrollee={enrollee}/>
+                <FileOptionsDropdown
+                  currentStudy={currentStudy}
+                  loadDocuments={loadDocuments}
+                  participantFile={participantFile}
+                  enrollee={enrollee}/>
               </td>
             </tr>
           ))}
@@ -97,8 +103,8 @@ const DocumentsList = ({ currentStudy, enrollee, participantFiles }: {
   </div>
 }
 
-const FileOptionsDropdown = ({ currentStudy, participantFile, enrollee }: {
-  currentStudy: Study, participantFile: ParticipantFile, enrollee: Enrollee
+const FileOptionsDropdown = ({ currentStudy, participantFile, enrollee, loadDocuments }: {
+  currentStudy: Study, participantFile: ParticipantFile, enrollee: Enrollee, loadDocuments: () => void
 }) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const { i18n } = useI18n()
@@ -142,6 +148,8 @@ const FileOptionsDropdown = ({ currentStudy, participantFile, enrollee }: {
           <button className={'btn btn-primary m-2'}
             onClick={async () => {
               await Api.deleteParticipantFile(currentStudy.shortcode, enrollee.shortcode, participantFile.fileName)
+              loadDocuments()
+              setShowConfirmDelete(false)
             }}>
             {i18n('documentDeletionDelete')}
           </button>

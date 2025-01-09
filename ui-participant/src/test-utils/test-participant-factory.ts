@@ -1,6 +1,6 @@
 import {
   KitType,
-  ParticipantTask,
+  ParticipantTask, ParticipantTaskStatus,
   ParticipantTaskType, PortalParticipantUser,
   Survey
 } from 'api/api'
