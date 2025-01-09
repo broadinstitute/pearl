@@ -1,5 +1,5 @@
 import {
-  ParticipantTaskStatus, StudyEnvParams, Survey,
+  ParticipantTaskStatus, StudyEnvParams,
   Trigger,
   TriggerActionType,
   TriggerDeliveryType,
@@ -99,8 +99,8 @@ const TriggerTypeEditor = (
     updateTriggerType,
     trigger.triggerType)
 
-  const isTaskScopable = trigger.triggerType === 'TASK_REMINDER' ||
-    (trigger.triggerType === 'EVENT' && trigger.eventType === 'SURVEY_RESPONSE')
+  const isTaskScopable = (trigger.triggerType === 'TASK_REMINDER') ||
+    (trigger.triggerType === 'EVENT' && ['SURVEY_RESPONSE', 'KIT_RECEIVED', 'KIT_SENT'].includes(trigger.eventType))
 
   return <InfoCard>
     <InfoCardHeader>
@@ -125,12 +125,13 @@ const TriggerTypeEditor = (
 
         </div>
 
-
         {!baseFieldsOnly && <>
           {isTaskScopable && <TaskTargetStableIdsEditor
             studyEnvParams={studyEnvParams}
             stableIds={trigger.filterTargetStableIds}
-            setStableIds={ids => updateTrigger('filterTargetStableIds', ids)}/>}
+            setStableIds={ids => updateTrigger('filterTargetStableIds', ids)}
+            isKitType={['KIT_RECEIVED', 'KIT_SENT'].includes(trigger.eventType)}
+          />}
 
           {trigger.triggerType !== 'AD_HOC' &&
               <HorizontalBar/>}
@@ -468,24 +469,27 @@ const TaskStatusEditor = (
   </div>
 }
 
-const TaskTargetStableIdsEditor = ({ studyEnvParams, stableIds, setStableIds }:
-  {studyEnvParams: StudyEnvParams, stableIds: string[], setStableIds: (ids: string[]) => void}) => {
-  const [surveys, setSurveys] = useState<Survey[]>([])
+const TaskTargetStableIdsEditor = ({ studyEnvParams, stableIds, setStableIds, isKitType }:
+  {studyEnvParams: StudyEnvParams, stableIds: string[], setStableIds: (ids: string[]) => void, isKitType: boolean}) => {
+  const [options, setOptions] = useState<{ label: string, value: string }[]>([])
   useLoadingEffect(async () => {
-    const studyEnvSurveys = await Api.findConfiguredSurveys(studyEnvParams.portalShortcode,
-      studyEnvParams.studyShortcode, studyEnvParams.envName, true)
-    setSurveys(studyEnvSurveys.map(studyEnvSurvey => studyEnvSurvey.survey))
-  })
+    if (isKitType) {
+      const kitTypes = await Api.fetchKitTypes(studyEnvParams)
+      setOptions(kitTypes.map(kitType => ({ label: kitType.displayName, value: kitType.name })))
+    } else {
+      const studyEnvSurveys = await Api.findConfiguredSurveys(studyEnvParams.portalShortcode,
+        studyEnvParams.studyShortcode, studyEnvParams.envName, true)
+      setOptions(studyEnvSurveys.map(ses => ({ label: ses.survey.name, value: ses.survey.stableId })))
+    }
+  }, [isKitType])
   stableIds = stableIds ?? []
   const inputId = useId()
   return <div className="mt-3">
     <label className="form-label" htmlFor={inputId}>Limit to these surveys
       <span className="fst-italic ms-2">(leave blank if trigger applies to all)</span></label>
-    <Select options={surveys} inputId={inputId}
-      value={stableIds.map(stableId => surveys.find(survey => survey.stableId === stableId))}
-      getOptionLabel={survey => survey!.name}
-      getOptionValue={option => option!.stableId}
+    <Select options={options} inputId={inputId}
+      value={stableIds.map(stableId => options.find(option => option.value === stableId))}
       isMulti={true}
-      onChange={values => setStableIds(values.map(value => value!.stableId))}/>
+      onChange={options => setStableIds(options.map(opt => opt!.value))}/>
   </div>
 }

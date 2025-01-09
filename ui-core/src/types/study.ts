@@ -78,6 +78,7 @@ export type Trigger = {
   taskType?: string
   actionScope: TriggerScope
   filterTargetStableIds: string[]
+  filterKitTypeNames: string[]
   actionTargetStableIds: string[]
   statusToUpdateTo?: ParticipantTaskStatus
   afterMinutesIncomplete: number

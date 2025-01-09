@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Service
 public class ParticipantTaskFactory {
@@ -30,13 +31,23 @@ public class ParticipantTaskFactory {
     return buildPersisted(enrolleeBundle, null, status, type);
   }
 
+  public ParticipantTask buildPersisted(EnrolleeBundle enrolleeBundle,
+                                        TaskStatus status, UUID kitRequestId) {
+    return buildPersisted(enrolleeBundle, null, null, status, TaskType.KIT_REQUEST, kitRequestId);
+  }
+
   public ParticipantTask buildPersisted(EnrolleeBundle enrolleeBundle, String targetStableId,
                                         TaskStatus status, TaskType type) {
     return buildPersisted(enrolleeBundle, targetStableId, RandomStringUtils.randomAlphabetic(6), status, type);
   }
 
   public ParticipantTask buildPersisted(EnrolleeBundle enrolleeBundle, String targetStableId,
-                                        String targetName, TaskStatus status, TaskType type) {
+                                        String targetName, TaskStatus status, TaskType type){
+    return buildPersisted(enrolleeBundle, targetStableId, targetName, status, type, null);
+  }
+
+  public ParticipantTask buildPersisted(EnrolleeBundle enrolleeBundle, String targetStableId,
+                                        String targetName, TaskStatus status, TaskType type, UUID kitRequestId) {
     DataAuditInfo auditInfo = DataAuditInfo.builder().systemProcess(
             DataAuditInfo.systemProcessName(getClass(), "buildPersisted")
     ).build();
@@ -47,6 +58,7 @@ public class ParticipantTaskFactory {
         .targetStableId(targetStableId)
         .studyEnvironmentId(enrolleeBundle.enrollee().getStudyEnvironmentId())
         .targetName(targetName)
+            .kitRequestId(kitRequestId)
         .portalParticipantUserId(enrolleeBundle.portalParticipantUser().getId())
         .build();
     return participantTaskService.create(task, auditInfo);
