@@ -16,6 +16,7 @@ export type LocalSiteContent = {
   footerSection?: HtmlSection
   primaryBrandColor?: string
   dashboardBackgroundColor?: string
+  navbarRegisterText?: string
 }
 
 export type HtmlPage = {

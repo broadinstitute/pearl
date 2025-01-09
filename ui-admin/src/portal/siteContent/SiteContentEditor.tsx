@@ -351,6 +351,7 @@ const SiteContentEditor = (props: InitializedSiteContentViewProps) => {
                         <HtmlPageEditView
                           localSiteContent={localContent}
                           updateNavbarItems={updateNavbarItems}
+                          updateLocalContent={updateLocalContent}
                           htmlPage={selectedPage}
                           readOnly={readOnly}
                           portalEnvContext={portalEnvContext}
@@ -376,6 +377,7 @@ const SiteContentEditor = (props: InitializedSiteContentViewProps) => {
                         <HtmlPageEditView
                           portalEnvContext={portalEnvContext}
                           localSiteContent={localContent}
+                          updateLocalContent={updateLocalContent}
                           updateNavbarItems={updateNavbarItems}
                           htmlPage={selectedPage}
                           readOnly={readOnly}

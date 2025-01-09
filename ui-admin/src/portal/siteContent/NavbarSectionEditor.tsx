@@ -20,10 +20,12 @@ import { TextInput } from 'components/forms/TextInput'
 export function NavbarSectionEditor(
   {
     localSiteContent,
-    updateNavbarItems
+    updateNavbarItems,
+    updateLocalContent
   } : {
     localSiteContent: LocalSiteContent,
-    updateNavbarItems: (navbarItems: NavbarItem[]) => void
+    updateNavbarItems: (navbarItems: NavbarItem[]) => void,
+    updateLocalContent: (localContent: LocalSiteContent) => void
   }) {
   const navbarItems = useMemo(() => {
     return localSiteContent.navbarItems || []
@@ -75,6 +77,10 @@ export function NavbarSectionEditor(
       }}><FontAwesomeIcon icon={faPlus}/> Add Navbar Item
       </Button>
     </div>
+    <TextInput label="Register Text" className="mb-2" value={localSiteContent.navbarRegisterText}
+      onChange={value => {
+        updateLocalContent({ ...localSiteContent, navbarRegisterText: value })
+      }}/>
   </>
 }
 

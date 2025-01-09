@@ -27,6 +27,7 @@ type HtmlPageViewProps = {
   siteHasInvalidSection: boolean
   setSiteHasInvalidSection: (invalid: boolean) => void
   footerSection?: HtmlSection
+  updateLocalContent: (localContent: LocalSiteContent) => void
   updateFooter: (section?: HtmlSection) => void
   updateNavbarItems: (items: NavbarItem[]) => void
   updatePage: (page: HtmlPage) => void
@@ -42,6 +43,7 @@ const HtmlPageView = ({
   siteHasInvalidSection,
   setSiteHasInvalidSection,
   footerSection,
+  updateLocalContent,
   updateFooter,
   updateNavbarItems,
   updatePage,
@@ -136,6 +138,7 @@ const HtmlPageView = ({
         <NavbarSectionEditor
           updateNavbarItems={updateNavbarItems}
           localSiteContent={localSiteContent}
+          updateLocalContent={updateLocalContent}
         />
       </div>
       <div className="col-md-8">

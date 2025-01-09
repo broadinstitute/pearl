@@ -25,6 +25,7 @@ public class LocalizedSiteContent extends BaseEntity {
     private List<NavbarItem> navbarItems = new ArrayList<>();
     @Builder.Default
     private List<HtmlPage> pages = new ArrayList<>();
+    private String navbarRegisterText;
     private String navLogoCleanFileName;
     private int navLogoVersion;
     private UUID footerSectionId;

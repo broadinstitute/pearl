@@ -1,0 +1,11 @@
+databaseChangeLog: # this will need a follow-up PR in a subsequent release to remove the update_task_target_stable_id column
+  - changeSet:
+      id: "navbar_custom_register_text"
+      author: connorlbark
+      changes:
+        - addColumn:
+            tableName: localized_site_content
+            columns:
+              - column:
+                  name: navbar_register_text
+                  type: text
