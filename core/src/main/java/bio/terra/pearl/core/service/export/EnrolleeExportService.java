@@ -29,7 +29,6 @@ import bio.terra.pearl.core.service.survey.SurveyService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.OutputStream;
@@ -303,29 +302,23 @@ public class EnrolleeExportService {
         Map<UUID, List<SurveyResponseWithTaskDto>> surveyResponseWithTaskMap = new HashMap<>();
 
         for (UUID enrolleeId : surveyResponseMap.keySet()) {
-            List<ParticipantTask> tasks = taskMap.get(enrolleeId);
-            List<SurveyResponse> surveyResponses = surveyResponseMap.get(enrolleeId);
+            List<ParticipantTask> tasks = taskMap.getOrDefault(enrolleeId, new ArrayList<>());
+            List<SurveyResponse> surveyResponses = surveyResponseMap.getOrDefault(enrolleeId, new ArrayList<>());
             List<SurveyResponseWithTaskDto> surveyResponseWithTaskDtos = new ArrayList<>();
 
-            if (tasks == null) {
-                tasks = Collections.emptyList();
-            }
-
             for (SurveyResponse surveyResponse : surveyResponses) {
-                SurveyResponseWithTaskDto surveyResponseWithTaskDto = new SurveyResponseWithTaskDto();
-
-                try {
-                    BeanUtils.copyProperties(surveyResponseWithTaskDto, surveyResponse);
-                } catch (Exception e) {
-                    throw new IllegalStateException("Error copying properties from surveyResponse to surveyResponseWithTaskDto", e);
-                }
-                surveyResponseWithTaskDto.setTask(tasks.stream()
+                ParticipantTask taskForSurveyResponse = tasks.stream()
                         .filter(task -> surveyResponse.getId().equals(task.getSurveyResponseId()))
                         .sorted(Comparator.comparing(ParticipantTask::getCreatedAt).reversed())
                         .findAny()
-                        .orElse(null));
+                        .orElse(null);
 
-                surveyResponseWithTaskDtos.add(surveyResponseWithTaskDto);
+                surveyResponseWithTaskDtos.add(
+                        new SurveyResponseWithTaskDto(
+                                surveyResponse,
+                                taskForSurveyResponse
+                        )
+                );
             }
 
             surveyResponseWithTaskMap.put(enrolleeId, surveyResponseWithTaskDtos);
