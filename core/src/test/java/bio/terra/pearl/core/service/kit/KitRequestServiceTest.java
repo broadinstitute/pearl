@@ -190,6 +190,7 @@ public class KitRequestServiceTest extends BaseSpringBootTest {
                 .juniperKitId(kitRequest.getId().toString())
                 .currentStatus(PepperKitStatus.SENT.pepperString)
                 .scanDate(sentDate)
+                .mfBarcode("1234567890")
                 .errorMessage(errorMessage)
                 .build();
         when(mockPepperDSMClient.fetchKitStatus(any(), eq(kitRequest.getId()))).thenReturn(pepperKit);
@@ -200,6 +201,7 @@ public class KitRequestServiceTest extends BaseSpringBootTest {
 
         KitRequest savedKit = kitRequestDao.find(kitRequest.getId()).get();
         assertThat(savedKit.getStatus(), equalTo(KitRequestStatus.SENT));
+        assertThat(savedKit.getKitLabel(), equalTo("1234567890"));
         assertThat(savedKit.getErrorMessage(), equalTo(errorMessage));
         assertThat(savedKit.getSentAt(), equalTo(Instant.parse(sentDate)));
     }
