@@ -1,4 +1,4 @@
-databaseChangeLog: # this will need a follow-up PR in a subsequent release to remove the update_task_target_stable_id column
+databaseChangeLog:
   - changeSet:
       id: "navbar_custom_register_text"
       author: connorlbark
