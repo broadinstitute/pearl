@@ -337,6 +337,7 @@ default_translation_overrides = [
     TranslationOverride('PROFILE.EMAIL', 'profile.contactEmail'),
     # if the user doesn't have an email, it usually means their proxy does, so check there
     # as well
+    TranslationOverride('PROFILE.PROXY.EMAIL', 'proxy.username'),
     TranslationOverride('PROFILE.PROXY.EMAIL', 'account.username'),
     TranslationOverride('PROFILE.EMAIL', 'account.username'),
     TranslationOverride('PROFILE.FIRSTNAME', 'profile.givenName'),
