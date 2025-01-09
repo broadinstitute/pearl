@@ -16,6 +16,7 @@ import {
   isEmpty,
   isString
 } from 'lodash'
+import { replaceSurveyVariables } from 'src/surveyUtils'
 
 // see https://surveyjs.io/form-library/examples/create-custom-question-renderer/reactjs#content-code
 // for details on how to create a custom renderer
@@ -95,13 +96,14 @@ export class SurveyQuestionCheckboxMultipleOther extends SurveyQuestionCheckbox 
     const survey: SurveyModel = this.question.survey as SurveyModel
 
     const text = otherText && renderLocString(otherText, survey.getLocale())
+
     const placeholder = otherPlaceholder && renderLocString(otherPlaceholder, survey.getLocale())
 
     return <>
       <OtherTextbox
         stableId={otherStableId}
-        title={text}
-        placeholder={placeholder}
+        title={text && replaceSurveyVariables(text, survey)}
+        placeholder={placeholder && replaceSurveyVariables(placeholder, survey)}
         value={survey.getValue(otherStableId)}
         onChange={(val: string) => survey.setValue(otherStableId, val)}
       />
