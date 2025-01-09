@@ -1,11 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, {
+  useEffect,
+  useState
+} from 'react'
 import {
   HtmlSection,
   SectionType
 } from '@juniper/ui-core'
 import Select from 'react-select'
 import { IconButton } from 'components/forms/Button'
-import { faChevronDown, faChevronUp, faCode, faTimes } from '@fortawesome/free-solid-svg-icons'
+import {
+  faChevronDown,
+  faChevronUp,
+  faCode,
+  faTimes
+} from '@fortawesome/free-solid-svg-icons'
 import { sectionTemplates } from './sectionTemplates'
 import classNames from 'classnames'
 import { SiteMediaMetadata } from 'api/api'
@@ -158,6 +166,7 @@ const HtmlSectionEditor = ({
         value={editorValue}
         style={{ height: 'calc(100% - 2em)', width: '100%', minHeight: '300px' }}
         disabled={readOnly || (siteHasInvalidSection && !sectionContainsErrors)}
+        data-testid="json-editor"
         className={classNames('w-100 flex-grow-1 form-control font-monospace', {
           'is-invalid': sectionContainsErrors
         })}
