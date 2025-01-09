@@ -18,6 +18,7 @@ import lombok.experimental.SuperBuilder;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.mapper.reflect.BeanMapper;
+import org.jdbi.v3.core.statement.Query;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -114,45 +115,69 @@ public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> impl
         deleteByProperty("enrollee_id", enrolleeId);
     }
 
-    /**
-     * minTimeSinceLastNotification covers *any* notification, not just ones for the given activity, and any status.
-     * Our main goal is to reduce the likelihood of spam/exceeding quotas.
-     *
-     * We assume that a notification that was skipped/failed is just as likely to skip/fail again, so we don't retry
-     * until the next time we would ordinarily send a notification.
-     */
+
     public List<EnrolleeWithTasks> findByStatusAndTime(UUID studyEnvironmentId,
                                                        TaskType taskType,
                                                        Duration minTimeSinceCreation,
                                                        Duration maxTimeSinceCreation,
                                                        Duration minTimeSinceLastNotification,
                                                        List<TaskStatus> statuses) {
+        return findByStatusAndTime(studyEnvironmentId, taskType, minTimeSinceCreation, maxTimeSinceCreation, minTimeSinceLastNotification, statuses, null);
+    }
+
+    /**
+     * minTimeSinceLastNotification covers *any* notification, not just ones for the given activity, and any status.
+     * Our main goal is to reduce the likelihood of spam/exceeding quotas.
+     *
+     * We assume that a notification that was skipped/failed is just as likely to skip/fail again, so we don't retry
+     * until the next time we would ordinarily send a notification.
+     *
+     * if targetStableIds is not null, it will filter to only tasks with those targetStableIds.  If null, all targets will be included
+     */
+    public List<EnrolleeWithTasks> findByStatusAndTime(UUID studyEnvironmentId,
+                                                       TaskType taskType,
+                                                       Duration minTimeSinceCreation,
+                                                       Duration maxTimeSinceCreation,
+                                                       Duration minTimeSinceLastNotification,
+                                                       List<TaskStatus> statuses,
+                                                       List<String> targetStableIds) {
         Instant minTimeSinceCreationInstant = Instant.now().minus(minTimeSinceCreation);
         Instant maxTimeSinceCreationInstant = Instant.now().minus(maxTimeSinceCreation);
         Instant lastNotificationCutoff = Instant.now().minus(minTimeSinceLastNotification);
-        return jdbi.withHandle(handle ->
-                handle.createQuery("""
-                        with enrollee_times as (select enrollee_id as notification_enrollee_id, MAX(created_at) as last_notification_time
-                          from notification where study_environment_id = :studyEnvironmentId group by enrollee_id)
-                        select enrollee_id as enrolleeId, array_agg(target_name) as taskTargetNames, array_agg(id) as taskIds 
-                        from participant_task
-                        left join enrollee_times on enrollee_id = notification_enrollee_id
-                        where study_environment_id = :studyEnvironmentId 
-                        and task_type = :taskType
-                        and created_at < :minTimeSinceCreationInstant 
-                        and created_at > :maxTimeSinceCreationInstant 
-                        and status in (<statuses>)
-                        and (:lastNotificationCutoff > last_notification_time OR last_notification_time IS NULL)
-                        group by enrollee_id order by enrollee_id;
-                        """)
-                        .bind("studyEnvironmentId", studyEnvironmentId)
-                        .bindList("statuses", statuses)
-                        .bind("lastNotificationCutoff", lastNotificationCutoff)
-                        .bind("minTimeSinceCreationInstant", minTimeSinceCreationInstant)
-                        .bind("maxTimeSinceCreationInstant", maxTimeSinceCreationInstant)
-                        .bind("taskType", taskType)
-                        .map(enrolleeWithTasksMapper)
-                        .list()
+
+        // short-circuit if lists are empty
+        if (targetStableIds != null && targetStableIds.isEmpty() || statuses.isEmpty()) {
+            return new ArrayList<>();
+        }
+        String stableIdString = targetStableIds == null ? "" : "and target_stable_id IN (<targetStableIds>)";
+
+        return jdbi.withHandle(handle -> {
+                    Query query = handle.createQuery("""
+                                    with enrollee_times as (select enrollee_id as notification_enrollee_id, MAX(created_at) as last_notification_time
+                                      from notification where study_environment_id = :studyEnvironmentId group by enrollee_id)
+                                    select enrollee_id as enrolleeId, array_agg(target_name) as taskTargetNames, array_agg(id) as taskIds 
+                                    from participant_task
+                                    left join enrollee_times on enrollee_id = notification_enrollee_id
+                                    where study_environment_id = :studyEnvironmentId 
+                                    and task_type = :taskType
+                                    and created_at < :minTimeSinceCreationInstant 
+                                    and created_at > :maxTimeSinceCreationInstant 
+                                    and status in (<statuses>)
+                                    %s
+                                    and (:lastNotificationCutoff > last_notification_time OR last_notification_time IS NULL)
+                                    group by enrollee_id order by enrollee_id;
+                                    """.formatted(stableIdString))
+                            .bind("studyEnvironmentId", studyEnvironmentId)
+                            .bindList("statuses", statuses)
+                            .bind("lastNotificationCutoff", lastNotificationCutoff)
+                            .bind("minTimeSinceCreationInstant", minTimeSinceCreationInstant)
+                            .bind("maxTimeSinceCreationInstant", maxTimeSinceCreationInstant)
+                            .bind("taskType", taskType);
+                    if (targetStableIds != null) {
+                        query.bindList("targetStableIds", targetStableIds);
+                    }
+                    return query.map(enrolleeWithTasksMapper).list();
+                }
         );
     }
 

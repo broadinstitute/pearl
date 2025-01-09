@@ -59,12 +59,15 @@ public class EnrolleeReminderService {
         Duration timeSinceLastNotification = Duration.ofMinutes(trigger.getReminderIntervalMinutes());
         long maxReminders = trigger.getMaxNumReminders() <= 0 ? 100000 : trigger.getMaxNumReminders();
         Duration maxTimeSinceCreation = timeSinceCreation.plus(timeSinceLastNotification.multipliedBy(maxReminders));
+
         List<ParticipantTaskDao.EnrolleeWithTasks> enrolleesWithTasks = participantTaskQueryService
                 .findIncompleteByTime(studyEnv.getId(),
                         trigger.getTaskType(),
                         timeSinceCreation,
                         maxTimeSinceCreation,
-                        timeSinceLastNotification);
+                        timeSinceLastNotification,
+                        // if the list is empty, it applies to all targets, so pass null
+                        trigger.getFilterTargetStableIds().isEmpty() ? null : trigger.getFilterTargetStableIds());
         log.info("Found {} enrollees with tasks needing reminder from config {}: taskType {}",
                 enrolleesWithTasks.size(), trigger.getId(), trigger.getTaskType());
 

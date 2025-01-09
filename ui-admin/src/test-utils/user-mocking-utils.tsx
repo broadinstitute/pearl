@@ -47,8 +47,7 @@ export const mockAdminUserWithPerms = (portalId: string, perms: string[]): Admin
             permissionName: perm,
             permissionDescription: perm
           }))
-        }],
-        portalAdminUserRoles: []
+        }]
       }
     ]
   }

@@ -27,7 +27,8 @@
     "emails/outreachReminder.json",
     "emails/invite.json",
     "emails/adHoc.json",
-    "emails/adminNotificationTest.json"
+    "emails/adminNotificationTest.json",
+    "emails/medHxComplete.json"
   ],
   "studyEnvironmentDtos": [
     {
@@ -70,6 +71,11 @@
         "triggerType": "EVENT",
         "eventType": "STUDY_CONSENT",
         "populateFileName": "emails/studyConsent.json"
+      },{
+        "triggerType": "EVENT",
+        "eventType": "SURVEY_RESPONSE",
+        "filterTargetStableIds": ["hd_hd_medHx"],
+        "populateFileName": "emails/medHxComplete.json"
       },{
         "triggerType": "TASK_REMINDER",
         "taskType": "CONSENT",
