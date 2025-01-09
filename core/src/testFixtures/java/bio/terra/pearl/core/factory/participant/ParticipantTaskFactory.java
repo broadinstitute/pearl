@@ -1,7 +1,9 @@
 package bio.terra.pearl.core.factory.participant;
 
 import bio.terra.pearl.core.dao.dataimport.TimeShiftDao;
+import bio.terra.pearl.core.dao.kit.KitTypeDao;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
+import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
@@ -19,6 +21,8 @@ public class ParticipantTaskFactory {
   ParticipantTaskService participantTaskService;
   @Autowired
   TimeShiftDao timeShiftDao;
+  @Autowired
+  KitTypeDao kitTypeDao;
 
   public static ParticipantTask.ParticipantTaskBuilder DEFAULT_BUILDER = ParticipantTask.builder()
           .status(TaskStatus.NEW)
@@ -32,8 +36,8 @@ public class ParticipantTaskFactory {
   }
 
   public ParticipantTask buildPersisted(EnrolleeBundle enrolleeBundle,
-                                        TaskStatus status, UUID kitRequestId) {
-    return buildPersisted(enrolleeBundle, null, null, status, TaskType.KIT_REQUEST, kitRequestId);
+                                        TaskStatus status, UUID kitRequestId, KitType kitType) {
+    return buildPersisted(enrolleeBundle, kitType.getName(), null, status, TaskType.KIT_REQUEST, kitRequestId);
   }
 
   public ParticipantTask buildPersisted(EnrolleeBundle enrolleeBundle, String targetStableId,

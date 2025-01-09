@@ -162,7 +162,7 @@ const HorizontalBar = () => {
 const eventTypeOptions = [
   { label: 'Study Enrollment', value: 'STUDY_ENROLLMENT' },
   { label: 'Study Consent', value: 'STUDY_CONSENT' },
-  { label: 'Survey Response', value: 'SURVEY_RESPONSE' },
+  { label: 'Survey Completed', value: 'SURVEY_RESPONSE' },
   { label: 'Kit Sent', value: 'KIT_SENT' },
   { label: 'Kit Returned', value: 'KIT_RECEIVED' }
 ]
@@ -482,10 +482,11 @@ const TaskTargetStableIdsEditor = ({ studyEnvParams, stableIds, setStableIds, is
       setOptions(studyEnvSurveys.map(ses => ({ label: ses.survey.name, value: ses.survey.stableId })))
     }
   }, [isKitType])
+
   stableIds = stableIds ?? []
   const inputId = useId()
   return <div className="mt-3">
-    <label className="form-label" htmlFor={inputId}>Limit to these surveys
+    <label className="form-label" htmlFor={inputId}>Limit to these {isKitType ? 'kit types' : 'surveys'}
       <span className="fst-italic ms-2">(leave blank if trigger applies to all)</span></label>
     <Select options={options} inputId={inputId}
       value={stableIds.map(stableId => options.find(option => option.value === stableId))}

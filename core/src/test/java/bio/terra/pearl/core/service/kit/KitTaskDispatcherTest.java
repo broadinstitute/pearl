@@ -15,6 +15,7 @@ import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitRequestStatus;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
+import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
@@ -68,7 +69,7 @@ class KitTaskDispatcherTest extends BaseSpringBootTest {
 
         KitRequest kitRequest = buildKitRequest(enrolleeBundle);
         UUID kitRequestId = kitRequest.getId();
-        ParticipantTask participantTask = KitTaskDispatcher.buildTask(enrolleeBundle.enrollee(), kitRequest,
+        ParticipantTask participantTask = KitTaskDispatcher.buildTask(enrolleeBundle.enrollee(), kitRequest, new KitType(),
                 enrolleeBundle.portalParticipantUser().getId());
         when(mockTaskService.findByKitRequestId(kitRequestId)).thenReturn(Optional.of(participantTask));
 
@@ -99,7 +100,7 @@ class KitTaskDispatcherTest extends BaseSpringBootTest {
 
         KitRequest kitRequest = buildKitRequest(enrolleeBundle);
         UUID kitRequestId = kitRequest.getId();
-        ParticipantTask participantTask = KitTaskDispatcher.buildTask(enrolleeBundle.enrollee(), kitRequest,
+        ParticipantTask participantTask = KitTaskDispatcher.buildTask(enrolleeBundle.enrollee(), kitRequest, new KitType(),
                 enrolleeBundle.portalParticipantUser().getId());
         when(mockTaskService.findByKitRequestId(kitRequestId)).thenReturn(Optional.of(participantTask));
 

@@ -6,7 +6,6 @@ import bio.terra.pearl.core.factory.kit.KitRequestFactory;
 import bio.terra.pearl.core.factory.kit.KitTypeFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
-import bio.terra.pearl.core.factory.participant.ParticipantTaskFactory;
 import bio.terra.pearl.core.factory.portal.PortalEnvironmentFactory;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitRequestStatus;
@@ -15,6 +14,7 @@ import bio.terra.pearl.core.model.notification.*;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
+
 import bio.terra.pearl.core.model.survey.SurveyResponse;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
@@ -175,7 +175,7 @@ public class TriggerActionServiceTests extends BaseSpringBootTest {
                 .triggerType(TriggerType.EVENT)
                 .eventType(TriggerEventType.KIT_SENT)
                 .actionType(TriggerActionType.NOTIFICATION)
-                .filterKitTypeNames(List.of(bloodKitType.getName()))
+                .filterTargetStableIds(List.of(bloodKitType.getName()))
                 .deliveryType(NotificationDeliveryType.EMAIL)
                 .studyEnvironmentId(studyEnv.getId())
                 .portalEnvironmentId(portalEnv.getId())
@@ -184,7 +184,7 @@ public class TriggerActionServiceTests extends BaseSpringBootTest {
         Trigger salivaConfig = Trigger.builder()
                 .triggerType(TriggerType.EVENT)
                 .eventType(TriggerEventType.KIT_SENT)
-                .filterKitTypeNames(List.of(salivaKitType.getName()))
+                .filterTargetStableIds(List.of(salivaKitType.getName()))
                 .actionType(TriggerActionType.NOTIFICATION)
                 .deliveryType(NotificationDeliveryType.EMAIL)
                 .studyEnvironmentId(studyEnv.getId())
@@ -237,10 +237,12 @@ public class TriggerActionServiceTests extends BaseSpringBootTest {
     }
 
     private KitRequest createKitRequest(EnrolleeBundle enrolleeBundle, String testName) {
+        KitType kitType = kitTypeFactory.buildPersisted(testName);
         KitRequest kitRequest = KitRequest.builder()
                 .status(KitRequestStatus.SENT)
                 .enrolleeId(enrolleeBundle.enrollee().getId())
-                .kitType(kitTypeFactory.buildPersisted(testName))
+                .kitType(kitType)
+                .kitTypeId(kitType.getId())
                 .build();
         return kitRequest;
     }

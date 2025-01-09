@@ -6,17 +6,19 @@ import bio.terra.pearl.core.service.survey.SurveyParseUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SurveyParseUtilsTests extends BaseSpringBootTest {
     @Autowired
@@ -54,7 +56,7 @@ public class SurveyParseUtilsTests extends BaseSpringBootTest {
         String expected = """
                 [{"stableId":"cardiacStentPlacement","text":"Cardiac stent placement"},{"stableId":"cardiacBypassSurgery","text":"Cardiac bypass surgery"},{"stableId":"noneOfThese","text":"None of these"}]""";
 
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -101,7 +103,7 @@ public class SurveyParseUtilsTests extends BaseSpringBootTest {
 
         List<JsonNode> actual = SurveyParseUtils.getAllQuestions(questionNode);
 
-        Assertions.assertEquals(2, actual.size());
+        assertEquals(2, actual.size());
     }
 
     @Test
@@ -134,16 +136,16 @@ public class SurveyParseUtilsTests extends BaseSpringBootTest {
 
         List<JsonNode> actual = SurveyParseUtils.getAllQuestions(questionNode);
 
-        Assertions.assertEquals(3, actual.size());
+        assertEquals(3, actual.size());
 
         JsonNode panel = actual.get(0);
         JsonNode firstName = actual.get(1);
         JsonNode lastName = actual.get(2);
 
 
-        Assertions.assertEquals("examplePanel", panel.get("name").asText());
-        Assertions.assertEquals("firstName", firstName.get("name").asText());
-        Assertions.assertEquals("lastName", lastName.get("name").asText());
+        assertEquals("examplePanel", panel.get("name").asText());
+        assertEquals("firstName", firstName.get("name").asText());
+        assertEquals("lastName", lastName.get("name").asText());
     }
 
     @Test
@@ -176,7 +178,7 @@ public class SurveyParseUtilsTests extends BaseSpringBootTest {
         String expected = """
                 [{"stableId":"cardiacStentPlacement","text":"Cardiac stent placement"},{"stableId":"cardiacBypassSurgery","text":"Cardiac bypass surgery"},{"stableId":"noneOfThese","text":"None of these"}]""";
 
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -211,7 +213,7 @@ public class SurveyParseUtilsTests extends BaseSpringBootTest {
                 [{"stableId":"cardiacStentPlacement","text":"Cardiac stent placement"},{"stableId":"cardiacBypassSurgery","text":"Cardiac bypass surgery"},{"stableId":"noneOfThese","text":"None of these"}]
                 """;
 
-        Assertions.assertEquals(expected.strip(), actual.strip());
+        assertEquals(expected.strip(), actual.strip());
     }
 
     @Test
@@ -231,7 +233,7 @@ public class SurveyParseUtilsTests extends BaseSpringBootTest {
         String expected = """
                 [{"stableId":"foo","text":"foo"},{"stableId":"bar","text":"bar"},{"stableId":"baz","text":"baz"}]""";
 
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -363,10 +365,99 @@ public class SurveyParseUtilsTests extends BaseSpringBootTest {
                   "title": {
                     "default": "The Basics",
                     "es"[]]]]]]
-                    """;
+                """;
 
         Map<String, String> parsedTitles = SurveyParseUtils.parseSurveyTitle(unparseableForm, "FallbackName");
         assertThat(parsedTitles, equalTo(Map.of("en", "FallbackName")));
+    }
+
+    @Test
+    public void testParseCheckboxMultiOtherQuestions() throws JsonProcessingException {
+        String form = """
+                {
+                  "elements": [
+                    {
+                      "name": "schools",
+                      "type": "checkbox",
+                      "title": "What schools did you attend?",
+                      "renderAs": "checkbox-multiple-other",
+                      "choices": [
+                        {
+                          "text": "MIT",
+                          "value": "mit",
+                          "otherStableId": "schoolsMitDetail",
+                          "otherText": {
+                              "en": "What did you study at MIT?",
+                              "es": "¿Qué estudiaste en MIT?"
+                          },
+                          "otherPlaceHolder": {
+                              "en": "Your major",
+                              "es": "Tu especialidad"
+                          }
+                        },
+                        {
+                            "text": "Harvard",
+                            "value": "harvard",
+                            "otherStableId": "schoolsHarvardDetail",
+                            "otherText": {
+                              "en": "What did you study at Harvard?",
+                              "es": "¿Qué estudiaste en Harvard?"
+                            },
+                            "otherPlaceHolder": {
+                              "en": "Your major",
+                              "es": "Tu especialidad"
+                            }
+                        },
+                        {
+                          "text": "Northeastern",
+                          "value": "northeastern",
+                          "otherStableId": "schoolsNortheasternDetail",
+                          "otherText": {
+                              "en": "What did you study at Northeastern?",
+                              "es": "¿Qué estudiaste en Northeastern?"
+                          },
+                          "otherPlaceHolder": {
+                              "en": "Your major",
+                              "es": "Tu especialidad"
+                          }
+                        },
+                        {
+                          "text": "Boston University",
+                          "value": "bu",
+                          "otherStableId": "schoolsBuDetail",
+                          "otherText": {
+                              "en": "What did you study at Boston University?",
+                              "es": "¿Qué estudiaste en Boston University?"
+                          },
+                          "otherPlaceHolder": {
+                              "en": "Your major",
+                              "es": "Tu especialidad"
+                          }
+                        },
+                        {
+                          "text": "Other",
+                          "value": "other",
+                          "otherStableId": "schoolsOtherDetail"
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """;
+
+        List<JsonNode> questions = SurveyParseUtils.getAllQuestions(objectMapper.readTree(form));
+
+        assertThat(questions, hasSize(6));
+
+        Set<String> stableIds = questions.stream().map(q -> q.get("name").asText()).collect(Collectors.toSet());
+        assertEquals(Set.of(
+                        "schools",
+                        "schoolsMitDetail",
+                        "schoolsHarvardDetail",
+                        "schoolsNortheasternDetail",
+                        "schoolsBuDetail",
+                        "schoolsOtherDetail"),
+                stableIds);
     }
 
 }

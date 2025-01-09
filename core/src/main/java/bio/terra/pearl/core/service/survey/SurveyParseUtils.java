@@ -7,6 +7,7 @@ import bio.terra.pearl.core.model.survey.SurveyQuestionDefinition;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 
@@ -58,18 +59,44 @@ public class SurveyParseUtils {
         List<JsonNode> subQuestions = new ArrayList<>();
 
         if (parent.get("type").asText().equals("paneldynamic") && parent.has("templateElements")) {
-            subQuestions = getPanelDynamicSubQuestions(parent);
+            // get subquestions and add parent stable id to each
+            subQuestions = getPanelDynamicSubQuestions(parent)
+                    .stream()
+                    .map(q -> (JsonNode) q.deepCopy())
+                    .map(q -> {
+                        ((ObjectNode) q).put("parent", parent.get("name").asText());
+                        return q;
+                    })
+                    .toList();
         }
 
-        // keep track of the parent stableid
-        subQuestions = subQuestions
-                .stream()
-                .map(q -> (JsonNode) q.deepCopy())
-                .map(q -> {
-                    ((ObjectNode) q).put("parent", parent.get("name").asText());
-                    return q;
-                })
-                .toList();
+        if (parent.get("type").asText().equals("checkbox") && parent.has("choices")) {
+            // not a derived value, so doesn't need parent
+            subQuestions = getCheckboxOtherSubquestions(parent);
+        }
+
+        return subQuestions;
+    }
+
+    private static List<JsonNode> getCheckboxOtherSubquestions(JsonNode parent) {
+        List<JsonNode> subQuestions = new ArrayList<>();
+        if (parent.has("choices")) {
+            for (JsonNode choice : parent.get("choices")) {
+                if (choice.has("otherStableId")) {
+                    JsonNode otherQuestion = parent.deepCopy();
+                    ((ObjectNode) otherQuestion).put("name", choice.get("otherStableId").asText());
+                    if (choice.has("otherText")) {
+                        ((ObjectNode) otherQuestion).put("title", nodeToString(choice.get("otherText")));
+                    } else {
+                        ((ObjectNode) otherQuestion).put("title", "Other (" + choice.get("value").asText() + ")");
+                    }
+                    ((ObjectNode) otherQuestion).put("type", "text");
+                    ((ObjectNode) otherQuestion).remove("choices");
+                    ((ObjectNode) otherQuestion).remove("required");
+                    subQuestions.add(otherQuestion);
+                }
+            }
+        }
         return subQuestions;
     }
 
@@ -118,9 +145,9 @@ public class SurveyParseUtils {
         //For normal elements, we'll store the title in the question_text column
         //For HTML elements which don't have a title, we'll store the HTML instead
         if (templatedQuestion.has("title")) {
-            definition.setQuestionText(templatedQuestion.get("title").asText());
+            definition.setQuestionText(nodeToString(templatedQuestion.get("title")));
         } else if (templatedQuestion.has("html")) {
-            definition.setQuestionText(templatedQuestion.get("html").asText());
+            definition.setQuestionText(nodeToString(templatedQuestion.get("html")));
         }
 
         if (templatedQuestion.has("isRequired")) {
@@ -132,6 +159,14 @@ public class SurveyParseUtils {
         }
 
         return definition;
+    }
+
+    private static String nodeToString(JsonNode node) {
+        if (node.getNodeType().equals(JsonNodeType.STRING)) {
+            return node.asText();
+        } else {
+            return node.toString();
+        }
     }
 
 

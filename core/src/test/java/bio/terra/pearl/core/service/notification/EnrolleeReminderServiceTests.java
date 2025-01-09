@@ -98,15 +98,15 @@ public class EnrolleeReminderServiceTests extends BaseSpringBootTest {
     EnrolleeBundle enrolleeBundle2 = enrolleeFactory.buildWithPortalUser(testName, portalEnv, studyEnv, true);
 
     KitRequest kitRequest1 = kitRequestFactory.buildPersisted(testName, enrolleeBundle1.enrollee(), PepperKitStatus.CREATED, bloodKitType.getId());
-    participantTaskFactory.buildPersisted(enrolleeBundle1, TaskStatus.NEW, kitRequest1.getId());
+    participantTaskFactory.buildPersisted(enrolleeBundle1, TaskStatus.NEW, kitRequest1.getId(), bloodKitType);
 
     KitRequest kitRequest2 = kitRequestFactory.buildPersisted(testName, enrolleeBundle2.enrollee(), PepperKitStatus.CREATED, salivaKitType.getId());
-    participantTaskFactory.buildPersisted(enrolleeBundle2, TaskStatus.NEW, kitRequest2.getId());
+    participantTaskFactory.buildPersisted(enrolleeBundle2, TaskStatus.NEW, kitRequest2.getId(), salivaKitType);
 
     Trigger config = Trigger.builder()
             .triggerType(TriggerType.TASK_REMINDER)
             .taskType(TaskType.KIT_REQUEST)
-            .filterKitTypeNames(List.of(bloodKitType.getName()))
+            .filterTargetStableIds(List.of(bloodKitType.getName()))
             .afterMinutesIncomplete(0)
             .deliveryType(NotificationDeliveryType.EMAIL)
             .studyEnvironmentId(studyEnv.getId())
@@ -134,10 +134,10 @@ public class EnrolleeReminderServiceTests extends BaseSpringBootTest {
     EnrolleeBundle enrolleeBundle2 = enrolleeFactory.buildWithPortalUser(testName, portalEnv, studyEnv, true);
 
     KitRequest kitRequest1 = kitRequestFactory.buildPersisted(testName, enrolleeBundle1.enrollee(), PepperKitStatus.CREATED, bloodKitType.getId());
-    participantTaskFactory.buildPersisted(enrolleeBundle1, TaskStatus.NEW, kitRequest1.getId());
+    participantTaskFactory.buildPersisted(enrolleeBundle1, TaskStatus.NEW, kitRequest1.getId(), bloodKitType);
 
     KitRequest kitRequest2 = kitRequestFactory.buildPersisted(testName, enrolleeBundle2.enrollee(), PepperKitStatus.CREATED, bloodKitType.getId());
-    participantTaskFactory.buildPersisted(enrolleeBundle2, TaskStatus.COMPLETE, kitRequest2.getId());
+    participantTaskFactory.buildPersisted(enrolleeBundle2, TaskStatus.COMPLETE, kitRequest2.getId(), bloodKitType);
 
     Trigger config = Trigger.builder()
             .triggerType(TriggerType.TASK_REMINDER)
