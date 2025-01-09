@@ -136,5 +136,18 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Katılımınız için teşekkür ederiz.", "language": "tr"},
   {"keyName": "kitTypeSaliva", "text": "Tükürük kiti", "language": "tr"},
   {"keyName": "kitTypeStool", "text": "Dışkı kiti", "language": "tr"},
-  {"keyName": "kitTypeBlood", "text": "Kan kiti", "language": "tr"}
+  {"keyName": "kitTypeBlood", "text": "Kan kiti", "language": "tr"},
+  {"keyName": "documentDeletionConfirmationMessage", "text": "Bu belgeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.", "language": "tr"},
+  {"keyName": "documentDeletionConfirmationTitle", "text": "Emin misin?", "language": "tr"},
+  {"keyName": "documentDeletionDelete", "text": "Silmek", "language": "tr"},
+  {"keyName": "documentDownloadButton", "text": "İndirmek", "language": "tr"},
+  {"keyName": "documentOptionsButton", "text": "Seçenekler", "language": "tr"},
+  {"keyName": "documentsListNone", "text": "Henüz herhangi bir belge yüklemediniz", "language": "tr"},
+  {"keyName": "documentsListFileName", "text": "Dosya adı", "language": "tr"},
+  {"keyName": "documentsListCreatedOn", "text": "Oluşturuldu", "language": "tr"},
+  {"keyName": "documentsPageTitle", "text": "Belgeler", "language": "tr"},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Yüklenen belgeler", "language": "tr"},
+  {"keyName": "documentsPageMessage", "text": "Bir çalışmaya katılırken, bir form veya anketin parçası olarak belgeleri yüklemeniz istenebilir. Aşağıda, yüklediğiniz belgeleri yönetebilirsiniz.", "language": "tr"},
+  {"keyName": "navbarDocuments", "text": "Belgeler", "language": "tr"}
+
 ]

@@ -136,5 +136,18 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Obrigado pela sua participação.", "language": "pt"},
   {"keyName": "kitTypeSaliva", "text": "Kit de saliva", "language": "pt"},
   {"keyName": "kitTypeStool", "text": "Kit de fezes", "language": "pt"},
-  {"keyName": "kitTypeBlood", "text": "Kit de sangue", "language": "pt"}
+  {"keyName": "kitTypeBlood", "text": "Kit de sangue", "language": "pt"},
+  {"keyName": "documentDeletionConfirmationMessage", "text": "Tem a certeza de que pretende eliminar este documento? Isso não pode ser desfeito.", "language": "pt"},
+  {"keyName": "documentDeletionConfirmationTitle", "text": "Tem a certeza?", "language": "pt"},
+  {"keyName": "documentDeletionDelete", "text": "Eliminar", "language": "pt"},
+  {"keyName": "documentDownloadButton", "text": "Transferir", "language": "pt"},
+  {"keyName": "documentOptionsButton", "text": "Opções", "language": "pt"},
+  {"keyName": "documentsListNone", "text": "Ainda não carregou nenhum documento", "language": "pt"},
+  {"keyName": "documentsListFileName", "text": "Nome do ficheiro", "language": "pt"},
+  {"keyName": "documentsListCreatedOn", "text": "Criado em", "language": "pt"},
+  {"keyName": "documentsPageTitle", "text": "Documentos", "language": "pt"},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Documentos enviados", "language": "pt"},
+  {"keyName": "documentsPageMessage", "text": "Ao participar num estudo, poderá ser-lhe pedido que envie documentos como parte de um formulário ou inquérito. Abaixo, pode gerir os documentos que enviou.", "language": "pt"},
+  {"keyName": "navbarDocuments", "text": "Documentos", "language": "pt"}
+
 ]

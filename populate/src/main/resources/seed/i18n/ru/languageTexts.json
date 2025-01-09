@@ -136,5 +136,18 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Спасибо за участие.", "language": "ru"},
   {"keyName": "kitTypeSaliva", "text": "Набор для сбора образца слюны", "language": "ru"},
   {"keyName": "kitTypeStool", "text": "Набор для сбора образца кала", "language": "ru"},
-  {"keyName": "kitTypeBlood", "text": "Набор для сбора образца крови", "language": "ru"}
+  {"keyName": "kitTypeBlood", "text": "Набор для сбора образца крови", "language": "ru"},
+  {"keyName": "documentDeletionConfirmationMessage", "text": "Вы уверены, что хотите удалить этот документ? Это невозможно отменить.", "language": "ru"},
+  {"keyName": "documentDeletionConfirmationTitle", "text": "Вы уверены?", "language": "ru"},
+  {"keyName": "documentDeletionDelete", "text": "Удалить", "language": "ru"},
+  {"keyName": "documentDownloadButton", "text": "Скачать", "language": "ru"},
+  {"keyName": "documentOptionsButton", "text": "Параметры", "language": "ru"},
+  {"keyName": "documentsListNone", "text": "Вы еще не загрузили ни одного документа", "language": "ru"},
+  {"keyName": "documentsListFileName", "text": "Имя файла", "language": "ru"},
+  {"keyName": "documentsListCreatedOn", "text": "Создано", "language": "ru"},
+  {"keyName": "documentsPageTitle", "text": "Документы", "language": "ru"},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Загруженные документы", "language": "ru"},
+  {"keyName": "documentsPageMessage", "text": "При участии в исследовании вас могут попросить загрузить документы как часть формы или опроса. Ниже вы можете управлять загруженными вами документами.", "language": "ru"},
+  {"keyName": "navbarDocuments", "text": "Документы", "language": "ru"}
+
 ]
