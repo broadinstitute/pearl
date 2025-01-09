@@ -5,7 +5,7 @@ import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.model.survey.Answer;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyQuestionDefinition;
-import bio.terra.pearl.core.model.survey.SurveyResponse;
+import bio.terra.pearl.core.model.survey.SurveyResponseWithTaskDto;
 import bio.terra.pearl.core.service.export.EnrolleeExportData;
 import bio.terra.pearl.core.service.export.formatters.item.AnswerItemFormatter;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,7 +34,7 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
                 .exportOrder(1)
                 .build();
         SurveyFormatter moduleFormatter = new SurveyFormatter(new ExportOptions(), "oh_surveyA", List.of(testSurvey), List.of(questionDef), List.of(), objectMapper);
-        SurveyResponse testResponse = SurveyResponse.builder()
+        SurveyResponseWithTaskDto testResponse = SurveyResponseWithTaskDto.builder()
                 .id(UUID.randomUUID())
                 .surveyId(testSurvey.getId()).build();
         Answer answer = Answer.builder()
@@ -60,7 +60,7 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
                 .exportOrder(1)
                 .build();
         SurveyFormatter moduleFormatter = new SurveyFormatter(new ExportOptions(), "oh_surveyA", List.of(testSurvey), List.of(questionDef), List.of(), objectMapper);
-        SurveyResponse testResponse1 = SurveyResponse.builder()
+        SurveyResponseWithTaskDto testResponse1 = SurveyResponseWithTaskDto.builder()
                 .id(UUID.randomUUID())
                 .surveyId(testSurvey.getId()).build();
         Answer answer1 = Answer.builder()
@@ -69,7 +69,7 @@ public class SurveyFormatterTests extends BaseSpringBootTest {
                 .surveyResponseId(testResponse1.getId())
                 .stringValue("value1")
                 .build();
-        SurveyResponse testResponse2 = SurveyResponse.builder()
+        SurveyResponseWithTaskDto testResponse2 = SurveyResponseWithTaskDto.builder()
                 .id(UUID.randomUUID())
                 .complete(true)
                 .surveyId(testSurvey.getId()).build();

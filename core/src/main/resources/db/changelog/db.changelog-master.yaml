@@ -368,9 +368,6 @@ databaseChangeLog:
   - include:
       file: changesets/2024_11_14_answer_file_format.yaml
       relativeToChangelogFile: true
-  - include:
-      file: changesets/2025_01_08_survey_response_completed_at.yaml
-      relativeToChangelogFile: true
 
 
 # README: it is a best practice to put each DDL statement in its own change set. DDL statements

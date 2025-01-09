@@ -536,7 +536,7 @@ public class EnrolleeImportService {
             ParticipantTaskAssignDto assignDto = new ParticipantTaskAssignDto(
                     TaskType.SURVEY,
                     formatter.getModuleName(),
-                    1,
+                    null, // latest
                     List.of(enrollee.getId()),
                     false,
                     true,
@@ -549,20 +549,41 @@ public class EnrolleeImportService {
             relatedTask = tasks.getFirst();
         }
 
+        participantTaskService.update(relatedTask, auditInfo);
+
+        // we're not worrying about dating the response yet
+        SurveyResponse surveyResponse = surveyResponseService.updateResponse(response, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "importSurveyResponse")),
+                "Imported", ppUser, enrollee, relatedTask.getId(), portalId).getResponse();
+
+
+        shiftTime(surveyResponse, relatedTask, formatter, enrolleeMap);
+
+        return surveyResponse;
+    }
+
+    // preserving response creation and task creation/completion
+    // is important for recurring surveys
+    private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap) {
         // make sure the task reflects created and completion status
         // so that recurrences are properly scheduled
         String completedAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "completedAt";
         String createdAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "createdAt";
+        String lastUpdatedAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "lastUpdatedAt";
+
         if (enrolleeMap.containsKey(completedAtKey)) {
-            relatedTask.setCompletedAt(ExportFormatUtils.importInstant(enrolleeMap.get(completedAtKey)));
+            Instant completedAt = ExportFormatUtils.importInstant(enrolleeMap.get(completedAtKey));
+            timeShiftDao.changeTaskCompleteTime(relatedTask.getId(), completedAt);
         }
         if (enrolleeMap.containsKey(createdAtKey)) {
-            relatedTask.setCreatedAt(ExportFormatUtils.importInstant(enrolleeMap.get(createdAtKey)));
+            Instant createdAt = ExportFormatUtils.importInstant(enrolleeMap.get(createdAtKey));
+            timeShiftDao.changeTasksCreationTime(List.of(relatedTask.getId()), createdAt);
+            timeShiftDao.changeSurveyResponseCreationTime(surveyResponse.getId(), createdAt);
         }
+        if (enrolleeMap.containsKey(lastUpdatedAtKey)) {
+            Instant lastUpdatedAt = ExportFormatUtils.importInstant(enrolleeMap.get(lastUpdatedAtKey));
 
-        // we're not worrying about dating the response yet
-        return surveyResponseService.updateResponse(response, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "importSurveyResponse")),
-                "Imported", ppUser, enrollee, relatedTask.getId(), portalId).getResponse();
+            timeShiftDao.changeSurveyResponseLastUpdatedTime(surveyResponse.getId(), lastUpdatedAt);
+        }
     }
 
     public static void copyNonNullProperties(Object source, Object target, List<String> ignoreProperties) {

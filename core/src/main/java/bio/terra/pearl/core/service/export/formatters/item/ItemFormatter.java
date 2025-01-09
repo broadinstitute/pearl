@@ -2,7 +2,6 @@ package bio.terra.pearl.core.service.export.formatters.item;
 
 import bio.terra.pearl.core.service.export.BaseExporter;
 import bio.terra.pearl.core.service.export.DataValueExportType;
-
 import bio.terra.pearl.core.service.export.formatters.module.ModuleFormatter;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,6 +20,9 @@ public abstract class ItemFormatter<T> {
 
     protected String baseColumnKey;
     protected DataValueExportType dataType;
+
+    @Setter
+    protected boolean importable = true;
 
 
     /** if this item maps to a single column in the export, this function is trivial.

@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +30,6 @@ public class SurveyResponse extends BaseEntity {
     private List<ParticipantFile> participantFiles = new ArrayList<>();
     @Builder.Default
     private boolean complete = false;
-    private Instant completedAt;
     // a json map of userId -> an object with information about where that particular user left off
     // currently, the only property stored on that object is currentPageNo
     private String resumeData;

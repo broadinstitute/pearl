@@ -78,13 +78,6 @@ public class ParticipantTaskService extends ParticipantDataAuditedService<Partic
     public ParticipantTask update(ParticipantTask task, DataAuditInfo dataAuditInfo) {
         if (task.getStatus().isTerminalStatus() && task.getCompletedAt() == null) {
             task.setCompletedAt(Instant.now());
-            if (Objects.nonNull(task.getSurveyResponseId())) {
-                surveyResponseService.find(task.getSurveyResponseId()).ifPresent(surveyResponse -> {
-                    surveyResponse.setComplete(true);
-                    surveyResponse.setCompletedAt(task.getCompletedAt());
-                    surveyResponseService.update(surveyResponse);
-                });
-            }
         }
         return super.update(task, dataAuditInfo);
     }

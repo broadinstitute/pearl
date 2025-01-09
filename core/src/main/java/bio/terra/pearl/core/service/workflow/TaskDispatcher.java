@@ -74,7 +74,7 @@ public abstract class TaskDispatcher<T extends TaskConfig> {
         List<Enrollee> enrollees = findMatchingEnrollees(assignDto, studyEnvironmentId);
         Optional<T> taskConfigOpt = findTaskConfigForAssignDto(studyEnvironmentId, assignDto);
         if (taskConfigOpt.isEmpty()) {
-            throw new IllegalArgumentException("Could not find task config");
+            throw new IllegalArgumentException("Could not find task config: " + assignDto.targetStableId() + " version " + assignDto.targetAssignedVersion());
         }
         return assign(enrollees, taskConfigOpt.get(), assignDto.overrideEligibility(), assignDto.justification(), operator);
     }
