@@ -44,7 +44,7 @@ type SurveyFullDataViewProps = {
   studyEnvContext: StudyEnvContextT
 }
 
-type QuestionMetadata = {
+export type QuestionMetadata = {
   stableId: string
   title: string
   derived: boolean
@@ -179,7 +179,7 @@ export const ItemDisplay = ({
 /** renders the value of the answer, either as plaintext, a matched choice, or an image for signatures */
 export const getDisplayValue = (answer: Answer,
   question: QuestionMetadata): React.ReactNode => {
-  const isCalculatedValue = !!(question as CalculatedValue).expression
+  const isCalculatedValue = question.type === 'calculatedvalue'
   if (!answer) {
     if (!question.visible || isCalculatedValue) {
       return <span className="text-muted fst-italic fw-normal">n/a</span>
@@ -194,13 +194,13 @@ export const getDisplayValue = (answer: Answer,
     if (answer.objectValue) {
       try {
         const valueArray = JSON.parse(answer.objectValue)
-        const textArray = valueArray.map((value: string | number) => getTextForChoice(value, question as Question))
+        const textArray = valueArray.map((value: string | number) => getTextForChoice(value, question))
         displayValue = JSON.stringify(textArray)
       } catch (e) {
         displayValue = renderParseError(answer.objectValue)
       }
     } else {
-      displayValue = getTextForChoice(answerValue, question as Question)
+      displayValue = getTextForChoice(answerValue, question)
     }
   }
   if (answer.booleanValue !== undefined) {
@@ -241,13 +241,12 @@ type ItemValue = { text: string, value: string, jsonObj?: { [index: string]: str
 
 /** gets the question text -- truncates it at 100 chars */
 export const renderQuestionText = (answer: Answer,
-  question: Question | CalculatedValue,
+  question: QuestionMetadata,
   showFullQuestions: boolean) => {
   if (!question) {
     return <span>-</span>
   }
-  const questionText = (question as Question).title
-  return renderTruncatedText(questionText, showFullQuestions ? 10000 : 100)
+  return renderTruncatedText(question.title, showFullQuestions ? 10000 : 100)
 }
 
 /**
@@ -283,7 +282,7 @@ export function getQuestionsWithComputedValues(model: SurveyModel) {
   return questionsAndVals
 }
 
-const toQuestionMetadata = (question: Question | CalculatedValue): QuestionMetadata[] => {
+export const toQuestionMetadata = (question: Question | CalculatedValue): QuestionMetadata[] => {
   if (question.getType() === 'calculatedvalue') {
     return [{ stableId: question.name, title: question.name, derived: true, visible: true, type: 'calculatedvalue' }]
   }

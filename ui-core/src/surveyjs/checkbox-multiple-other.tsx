@@ -16,7 +16,7 @@ import {
   isEmpty,
   isString
 } from 'lodash'
-import { replaceSurveyVariables } from 'src/surveyUtils'
+import { replaceSurveyVariables } from '../surveyUtils'
 
 // see https://surveyjs.io/form-library/examples/create-custom-question-renderer/reactjs#content-code
 // for details on how to create a custom renderer
