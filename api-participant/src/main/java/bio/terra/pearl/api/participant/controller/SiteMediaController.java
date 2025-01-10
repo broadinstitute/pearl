@@ -35,6 +35,7 @@ public class SiteMediaController implements SiteMediaApi {
         "https://gvascdev.b2clogin.com", // gVASC (demo)
         "https://gvascprod.b2clogin.com", // gVASC (prod)
         "https://juniperatcpdev.b2clogin.com", // ATCP (demo)
+        "https://juniperatcp.b2clogin.com", // ATCP (prod)
         "https://trccproject.b2clogin.com" // tRCC (prod)
       },
       maxAge = 3600,
