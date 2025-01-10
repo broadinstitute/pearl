@@ -172,6 +172,7 @@ public class EnrolleeExportService {
     protected List<SurveyFormatter> generateSurveyModules(ExportOptions exportOptions, UUID studyEnvironmentId, List<EnrolleeExportData> enrolleeExportData) {
         List<SurveyFormatter> moduleFormatters = new ArrayList<>();
         // now add the pre-enrollment survey (if it exists)
+        //TODO
         StudyEnvironment studyEnvironment = studyEnvironmentService.find(studyEnvironmentId).orElseThrow();
         if (studyEnvironment.getPreEnrollSurveyId() != null) {
             Survey preEnrollSurvey = surveyService.find(studyEnvironment.getPreEnrollSurveyId()).orElseThrow();
