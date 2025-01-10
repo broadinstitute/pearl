@@ -42,7 +42,7 @@ b2c:
       changePasswordPolicyName: B2C_1A_ddp_participant_change_password_gvasc-prod
     atcp:
       tenantName: juniperatcp
-      clientId: does-not-exist #todo
+      clientId: 0ec0e7c0-8db5-46c0-aac8-474c12521058
       policyName: B2C_1A_ddp_participant_signup_signin_atcp-prod
       changePasswordPolicyName: B2C_1A_ddp_participant_change_password_atcp-prod
     demo:
