@@ -756,6 +756,49 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
 
     }
 
+    @Test
+    @Transactional
+    public void testImportSurveyResponseTime(TestInfo info) {
+        StudyEnvironmentBundle bundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.irb);
+        Survey survey = surveyFactory.buildPersisted(surveyFactory.builder(getTestName(info))
+                .stableId("importTest1")
+                .content(TWO_QUESTION_SURVEY_CONTENT)
+                .portalId(bundle.getPortal().getId())
+                .version(1)
+        );
+        surveyFactory.attachToEnv(survey, bundle.getStudyEnv().getId(), true);
+        String username = "user@asdfasdfasdf.com";
+        Map<String, String> enrolleeMap = Map.of("enrollee.subject", "true", "account.username", username,
+                "importTest1.complete", "true",
+                "importTest1.completedAt", "2023-08-22 05:17AM",
+                "importTest1.createdAt", "2023-08-20 05:17AM",
+                "importTest1.lastUpdatedAt", "2023-08-21 05:17AM",
+                "importTest1.importFirstName", "Jeff",
+                "importTest1.importFavColors", "[\"red\", \"blue\"]");
+
+        Enrollee enrollee = enrolleeImportService.importEnrollee(
+                bundle.getPortal().getShortcode(),
+                bundle.getStudy().getShortcode(),
+                bundle.getStudyEnv(),
+                enrolleeMap,
+                new ExportOptions(), null);
+
+        List<SurveyResponse> responses = surveyResponseService.findByEnrolleeId(enrollee.getId());
+
+        assertThat(responses, hasSize(1));
+
+        SurveyResponse response = responses.get(0);
+
+        assertThat(response.getCreatedAt(), equalTo(Instant.parse("2023-08-20T05:17:00Z")));
+        assertThat(response.getLastUpdatedAt(), equalTo(Instant.parse("2023-08-21T05:17:00Z")));
+
+        PortalParticipantUser ppUser = portalParticipantUserService.findForEnrollee(enrollee);
+
+        ParticipantTask task = participantTaskService.findTaskForActivity(ppUser.getId(), bundle.getStudyEnv().getId(), survey.getStableId()).orElseThrow();
+        assertThat(task.getCompletedAt(), equalTo(Instant.parse("2023-08-22T05:17:00Z")));
+
+    }
+
     private void verifyParticipant(ImportItem importItem, UUID studyEnvId,
                                    ParticipantUser userExpected, Enrollee enrolleeExpected, Profile profileExpected) {
 

@@ -79,6 +79,24 @@ public class TimeShiftDao {
         );
     }
 
+    public void changeSurveyResponseCreationTime(UUID surveyResponseId, Instant creationTime) {
+        jdbi.withHandle(handle ->
+                handle.createUpdate("update survey_response set created_at = :creationTime where id = :surveyResponseId;")
+                        .bind("surveyResponseId", surveyResponseId)
+                        .bind("creationTime", creationTime)
+                        .execute()
+        );
+    }
+
+    public void changeSurveyResponseLastUpdatedTime(UUID surveyResponseId, Instant lastUpdatedTime) {
+        jdbi.withHandle(handle ->
+                handle.createUpdate("update survey_response set last_updated_at = :lastUpdatedTime where id = :surveyResponseId;")
+                        .bind("surveyResponseId", surveyResponseId)
+                        .bind("lastUpdatedTime", lastUpdatedTime)
+                        .execute()
+        );
+    }
+
     /**
      * update both the creation and the lastUpdatedAt times to the given time
      */

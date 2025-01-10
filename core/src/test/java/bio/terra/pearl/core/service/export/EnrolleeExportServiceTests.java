@@ -6,6 +6,7 @@ import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeAndProxy;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
+import bio.terra.pearl.core.factory.participant.ParticipantTaskFactory;
 import bio.terra.pearl.core.factory.survey.AnswerFactory;
 import bio.terra.pearl.core.factory.survey.SurveyFactory;
 import bio.terra.pearl.core.factory.survey.SurveyResponseFactory;
@@ -16,7 +17,7 @@ import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironmentConfig;
 import bio.terra.pearl.core.model.survey.Survey;
-import bio.terra.pearl.core.model.survey.SurveyResponse;
+import bio.terra.pearl.core.model.survey.SurveyResponseWithTaskDto;
 import bio.terra.pearl.core.model.survey.SurveyType;
 import bio.terra.pearl.core.service.export.formatters.item.AnswerItemFormatter;
 import bio.terra.pearl.core.service.export.formatters.item.ItemFormatter;
@@ -79,6 +80,8 @@ public class EnrolleeExportServiceTests extends BaseSpringBootTest {
     private ObjectMapper objectMapper;
     @Autowired
     private SurveyResponseFactory surveyResponseFactory;
+    @Autowired
+    private ParticipantTaskFactory participantTaskFactory;
 
     @Test
     @Transactional
@@ -375,9 +378,9 @@ public class EnrolleeExportServiceTests extends BaseSpringBootTest {
         List<SurveyFormatter> moduleFormatters = enrolleeExportService.generateSurveyModules(new ExportOptions(), studyEnv.getId(), List.of());
 
         assertThat(moduleFormatters, hasSize(1));
-        ModuleFormatter<SurveyResponse, ItemFormatter<SurveyResponse>> socialHealthModule = moduleFormatters.get(0);
+        ModuleFormatter<SurveyResponseWithTaskDto, ItemFormatter<SurveyResponseWithTaskDto>> socialHealthModule = moduleFormatters.get(0);
         assertThat(socialHealthModule.getModuleName(), equalTo(survey.getStableId()));
-        assertThat(socialHealthModule.getItemFormatters(), hasSize(4));
+        assertThat(socialHealthModule.getItemFormatters(), hasSize(6));
         // module should contain both the response properties and question items
         assertThat(socialHealthModule.getItemFormatters().stream()
                 .filter(itemFormatter -> itemFormatter instanceof PropertyItemFormatter)
@@ -451,10 +454,10 @@ public class EnrolleeExportServiceTests extends BaseSpringBootTest {
 
         List<SurveyFormatter> exportModuleInfo = enrolleeExportService.generateSurveyModules(new ExportOptions(), studyEnv.getId(), List.of());
         assertThat(exportModuleInfo, hasSize(1));
-        ModuleFormatter<SurveyResponse, ItemFormatter<SurveyResponse>> socialHealthModule = exportModuleInfo.get(0);
+        ModuleFormatter<SurveyResponseWithTaskDto, ItemFormatter<SurveyResponseWithTaskDto>> socialHealthModule = exportModuleInfo.get(0);
         assertThat(socialHealthModule.getModuleName(), equalTo(survey.getStableId()));
         // module should contain both question items from both surveys, but no duplicates
-        assertThat(socialHealthModule.getItemFormatters(), hasSize(5));
+        assertThat(socialHealthModule.getItemFormatters(), hasSize(7));
         assertThat(socialHealthModule.getItemFormatters().stream()
                         .filter(itemFormatter -> itemFormatter instanceof AnswerItemFormatter)
                         .map(itemFormatter -> ((AnswerItemFormatter) itemFormatter).getQuestionStableId()).toList(),
@@ -535,6 +538,7 @@ public class EnrolleeExportServiceTests extends BaseSpringBootTest {
 
         // 4 responses
         Enrollee enrollee1 = enrolleeFactory.buildPersisted(testName, studyEnv, new Profile());
+
         // 2 responses
         Enrollee enrollee2 = enrolleeFactory.buildPersisted(testName, studyEnv, new Profile());
 

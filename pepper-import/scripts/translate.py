@@ -364,6 +364,8 @@ def create_translations(
 
     translations = []
 
+    create_workflow_translations(dsm_questions, juniper_questions, translations)
+
     for override in translation_overrides + default_translation_overrides:
         dsm_question = next((q for q in all_dsm_questions if q.stable_id == override.dsm_stable_id), None)
         juniper_question = next((q for q in all_juniper_questions if q.stable_id == override.juniper_stable_id), None)
@@ -406,7 +408,6 @@ def create_translations(
         else:
             unmatched_dsm_questions.append(dsm_question)
 
-    create_workflow_translations(unmatched_dsm_questions, juniper_questions, translations)
     return unmatched_dsm_questions, juniper_questions, translations
 
 
@@ -415,28 +416,35 @@ def create_workflow_translations(
         juniper_questions: list[DataDefinition],
         translations: list[Translation]
 ):
+    known_survey_mappings = {
+        'LASTUPDATEDAT': 'lastUpdatedAt',
+        'COMPLETEDAT': 'completedAt',
+        'CREATEDAT': 'createdAt'
+    }
+
     for dsm_question in dsm_questions:
-        # look for known DSM questions, e.g. survey completion
-        if dsm_question.stable_id.endswith(".LASTUPDATEDAT") and dsm_question.stable_id.count('.') == 1:
-            survey_name = dsm_question.stable_id.split('.')[0]
-            last_updated_at_juniper_question = next(
-                (q for q in juniper_questions if q.stable_id == survey_name + '.lastUpdatedAt'), None)
-            if last_updated_at_juniper_question is not None:
-                translations.append(Translation(dsm_question, last_updated_at_juniper_question))
-                juniper_questions.remove(last_updated_at_juniper_question)
-                if dsm_question in dsm_questions:
-                    dsm_questions.remove(dsm_question)
         if dsm_question.stable_id.endswith(".COMPLETEDAT") and dsm_question.stable_id.count('.') == 1:
             survey_name = dsm_question.stable_id.split('.')[0]
             completed_juniper_question = next(
-                (q for q in juniper_questions if q.stable_id == survey_name + '.complete'), None)
+                (q for q in juniper_questions if q.stable_id == (survey_name + '.complete')), None)
             if completed_juniper_question is not None:
                 translations.append(Translation(dsm_question, completed_juniper_question,
                                                 translation_override=TranslationOverride(None, None,
                                                                                          value_if_present='true')))
                 juniper_questions.remove(completed_juniper_question)
-                if dsm_question in dsm_questions:
-                    dsm_questions.remove(dsm_question)
+
+        for (known_dsm_question, known_juniper_question) in known_survey_mappings.items():
+            # look for known DSM questions, e.g. survey completion
+            if dsm_question.stable_id.endswith("." + known_dsm_question) and dsm_question.stable_id.count('.') == 1:
+                survey_name = dsm_question.stable_id.split('.')[0]
+                last_updated_at_juniper_question = next(
+                    (q for q in juniper_questions if q.stable_id == survey_name + '.' + known_juniper_question), None)
+                if last_updated_at_juniper_question is not None:
+                    translations.append(Translation(dsm_question, last_updated_at_juniper_question))
+                    juniper_questions.remove(last_updated_at_juniper_question)
+                    if dsm_question in dsm_questions:
+                        dsm_questions.remove(dsm_question)
+
 
 
 def is_matched(q1: DataDefinition, q2: DataDefinition) -> bool:
