@@ -30,6 +30,10 @@ import { renderTruncatedText } from 'util/pageUtils'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import { doApiLoad } from 'api/api-utils'
 import { AnswerEditHistory } from './AnswerEditHistory'
+import {
+  isNil,
+  isString
+} from 'lodash'
 
 type SurveyFullDataViewProps = {
   responseId?: string,
@@ -38,6 +42,18 @@ type SurveyFullDataViewProps = {
   resumeData?: string,
   enrollee?: Enrollee,
   studyEnvContext: StudyEnvContextT
+}
+
+export type QuestionMetadata = {
+  stableId: string
+  title: string
+  derived: boolean
+  visible: boolean
+  type: string
+  choices?: {
+    text: string
+    value: string
+  }[]
 }
 
 /** renders every item in a survey response */
@@ -53,9 +69,9 @@ export default function SurveyFullDataView({
   answers.forEach(answer => {
     answerMap[answer.questionStableId] = answer
   })
-  let questions = getQuestionsWithComputedValues(surveyJsModel)
+  let questions = getQuestionsWithComputedValues(surveyJsModel).flatMap(toQuestionMetadata)
   if (!showAllQuestions) {
-    questions = questions.filter(q => !!answerMap[q.name])
+    questions = questions.filter(q => !!answerMap[q.stableId])
   }
 
   const portalEnv = studyEnvContext.portal.portalEnvironments.find((env: PortalEnvironment) =>
@@ -114,7 +130,7 @@ export default function SurveyFullDataView({
 }
 
 type ItemDisplayProps = {
-  question: Question | CalculatedValue,
+  question: QuestionMetadata,
   answerMap: Record<string, Answer>,
   surveyVersion: number,
   showFullQuestions: boolean,
@@ -129,16 +145,16 @@ type ItemDisplayProps = {
 export const ItemDisplay = ({
   question, answerMap, surveyVersion, showFullQuestions, supportedLanguages, editHistory = []
 }: ItemDisplayProps) => {
-  const answer = answerMap[question.name]
+  const answer = answerMap[question.stableId]
   const editHistoryForQuestion = editHistory
-    .filter(changeRecord => changeRecord.fieldName === question.name)
+    .filter(changeRecord => changeRecord.fieldName === question.stableId)
     .sort((a, b) => b.createdAt - a.createdAt)
   const displayValue = getDisplayValue(answer, question)
-  let stableIdText = question.name
+  let stableIdText = question.stableId
   if (answer && answer.surveyVersion !== surveyVersion) {
     stableIdText = `${answer.questionStableId} v${answer.surveyVersion}`
   }
-  if ((question as CalculatedValue).expression) {
+  if (question.derived) {
     stableIdText += ' -- derived'
   }
 
@@ -162,10 +178,10 @@ export const ItemDisplay = ({
 
 /** renders the value of the answer, either as plaintext, a matched choice, or an image for signatures */
 export const getDisplayValue = (answer: Answer,
-  question: Question | QuestionWithChoices | CalculatedValue): React.ReactNode => {
-  const isCalculatedValue = !!(question as CalculatedValue).expression
+  question: QuestionMetadata): React.ReactNode => {
+  const isCalculatedValue = question.type === 'calculatedvalue'
   if (!answer) {
-    if (!(question as Question).isVisible || isCalculatedValue) {
+    if (!question.visible || isCalculatedValue) {
       return <span className="text-muted fst-italic fw-normal">n/a</span>
     } else {
       return <span className="text-muted fst-italic fw-normal">no answer</span>
@@ -174,17 +190,17 @@ export const getDisplayValue = (answer: Answer,
   const answerValue = answer.stringValue ?? answer.numberValue ?? answer.objectValue ?? answer.booleanValue
 
   let displayValue: React.ReactNode = answerValue
-  if ((question as Question).choices?.length) {
+  if (!isNil(question.choices)) {
     if (answer.objectValue) {
       try {
         const valueArray = JSON.parse(answer.objectValue)
-        const textArray = valueArray.map((value: string | number) => getTextForChoice(value, question as Question))
+        const textArray = valueArray.map((value: string | number) => getTextForChoice(value, question))
         displayValue = JSON.stringify(textArray)
       } catch (e) {
         displayValue = renderParseError(answer.objectValue)
       }
     } else {
-      displayValue = getTextForChoice(answerValue, question as Question)
+      displayValue = getTextForChoice(answerValue, question)
     }
   }
   if (answer.booleanValue !== undefined) {
@@ -197,7 +213,7 @@ export const getDisplayValue = (answer: Answer,
       displayValue = renderParseError(answer.objectValue)
     }
   }
-  if (question.getType() === 'signaturepad') {
+  if (question.type === 'signaturepad') {
     displayValue = <img src={answer.stringValue}/>
   }
   if (answer.otherDescription) {
@@ -216,25 +232,21 @@ const renderParseError = (value: string) => {
  * matches the answer stableId with the choice of the question.  note that this is not yet version-safe
  * and so, e.g.,  answers to choices that no longer exist may not render correctly
  */
-export const getTextForChoice = (value: string | number | boolean | undefined, question: Question) => {
-  return question.choices.find((choice: ItemValue)  => choice.value === value)?.text ?? value
+export const getTextForChoice = (value: string | number | boolean | undefined, question: QuestionMetadata) => {
+  return question.choices?.find((choice: ItemValue) => choice.value === value)?.text ?? value
 }
 
-type QuestionWithChoices = Question & {
-  choices: ItemValue[]
-}
-type ItemValue = { text: string, value: string }
+type ItemValue = { text: string, value: string, jsonObj?: { [index: string]: string } }
 
 
 /** gets the question text -- truncates it at 100 chars */
 export const renderQuestionText = (answer: Answer,
-  question: Question | CalculatedValue,
+  question: QuestionMetadata,
   showFullQuestions: boolean) => {
   if (!question) {
     return <span>-</span>
   }
-  const questionText = (question as Question).title
-  return renderTruncatedText(questionText, showFullQuestions ? 10000 : 100)
+  return renderTruncatedText(question.title, showFullQuestions ? 10000 : 100)
 }
 
 /**
@@ -268,5 +280,53 @@ export function getQuestionsWithComputedValues(model: SurveyModel) {
       }
     })
   return questionsAndVals
+}
+
+export const toQuestionMetadata = (question: Question | CalculatedValue): QuestionMetadata[] => {
+  if (question.getType() === 'calculatedvalue') {
+    return [{ stableId: question.name, title: question.name, derived: true, visible: true, type: 'calculatedvalue' }]
+  }
+
+  // checkboxes can have multiple other questions stemming from them,
+  // so we need to generate the metadata for those as well
+  const otherQuestions: QuestionMetadata[] = []
+  let choices: { text: string, value: string }[] | undefined = undefined
+  if ((question as Question).choices?.length) {
+    choices = [];
+    ((question as Question).choices as ItemValue[]).forEach(choice => {
+      if (choice.jsonObj?.otherStableId) {
+        otherQuestions.push(otherQuestionMetadata(choice))
+      }
+      choices?.push({ text: choice.text, value: choice.value })
+    })
+  }
+
+  const questionMetadata = {
+    stableId: question.name,
+    title: (question as Question).title,
+    derived: false,
+    choices,
+    type: question.getType(),
+    visible: (question as Question).isVisible
+  }
+  return [questionMetadata, ...otherQuestions]
+}
+
+const otherQuestionMetadata = (otherQuestion: ItemValue): QuestionMetadata => {
+  return {
+    stableId: otherQuestion.jsonObj!.otherStableId,
+    title: renderInEnglish(otherQuestion.jsonObj?.otherText || otherQuestion.jsonObj!.otherStableId || ''),
+    derived: false,
+    visible: true,
+    type: 'text'
+  }
+}
+
+const renderInEnglish = (title: string | { [index: string]: string }) => {
+  if (isString(title)) {
+    return title
+  }
+
+  return title['en'] || title['default'] || ''
 }
 
