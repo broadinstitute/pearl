@@ -137,17 +137,13 @@
   {"keyName": "kitTypeSaliva", "text": "唾液套件", "language": "zh"},
   {"keyName": "kitTypeStool", "text": "粪便套件", "language": "zh"},
   {"keyName": "kitTypeBlood", "text": "血液套件", "language": "zh"},
-  {"keyName": "documentDeletionConfirmationMessage", "text": "您确实要删除此文档吗？此操作无法撤消。", "language": "zh"},
-  {"keyName": "documentDeletionConfirmationTitle", "text": "你确定吗？", "language": "zh"},
-  {"keyName": "documentDeletionDelete", "text": "删除", "language": "zh"},
-  {"keyName": "documentDownloadButton", "text": "下载", "language": "zh"},
-  {"keyName": "documentOptionsButton", "text": "选项", "language": "zh"},
-  {"keyName": "documentsListNone", "text": "您尚未上传任何文件", "language": "zh"},
-  {"keyName": "documentsListFileName", "text": "文件名", "language": "zh"},
-  {"keyName": "documentsListCreatedOn", "text": "创建于", "language": "zh"},
-  {"keyName": "documentsPageTitle", "text": "文件", "language": "zh"},
-  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "已上传文件", "language": "zh"},
-  {"keyName": "documentsPageMessage", "text": "在参与研究期间，您可能会被要求上传文件作为表格或调查的一部分。下面，您可以管理已上传的文件。", "language": "zh"},
-  {"keyName": "navbarDocuments", "text": "文件", "language": "zh"}
+  {"keyName": "documentDownloadButton", "text": "下载", "language": "zh", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "您尚未上传任何文件", "language": "zh", "machineTranslated": true},
+  {"keyName": "documentsListFileName", "text": "文件名", "language": "zh", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "创建于", "language": "zh", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "文件", "language": "zh", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "已上传文件", "language": "zh", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "在参与研究期间，您可能会被要求上传文件作为表格或调查的一部分。下面，您可以管理已上传的文件。", "language": "zh", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "文件", "language": "zh", "machineTranslated": true}
 
 ]

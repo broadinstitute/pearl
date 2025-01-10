@@ -137,17 +137,13 @@
   {"keyName": "kitTypeSaliva", "text": "Zestaw do pobierania śliny", "language": "pl"},
   {"keyName": "kitTypeStool", "text": "Zestaw do pobierania stolca", "language": "pl"},
   {"keyName": "kitTypeBlood", "text": "Zestaw do pobierania krwi", "language": "pl"},
-  {"keyName": "documentDeletionConfirmationMessage", "text": "Czy na pewno chcesz usunąć ten dokument? Tego nie można cofnąć.", "language": "pl"},
-  {"keyName": "documentDeletionConfirmationTitle", "text": "Jesteś pewien?", "language": "pl"},
-  {"keyName": "documentDeletionDelete", "text": "Usuwać", "language": "pl"},
-  {"keyName": "documentDownloadButton", "text": "Pobierać", "language": "pl"},
-  {"keyName": "documentOptionsButton", "text": "Opcje", "language": "pl"},
-  {"keyName": "documentsListNone", "text": "Nie przesłałeś jeszcze żadnych dokumentów", "language": "pl"},
-  {"keyName": "documentsListFileName", "text": "Nazwa pliku", "language": "pl"},
-  {"keyName": "documentsListCreatedOn", "text": "Utworzono dnia", "language": "pl"},
-  {"keyName": "documentsPageTitle", "text": "Dokumenty", "language": "pl"},
-  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Przesłane dokumenty", "language": "pl"},
-  {"keyName": "documentsPageMessage", "text": "Wpodczas uczestnictwa w badaniu możesz zostać poproszony o przesłanie dokumentów jako części formularza lub ankiety. Poniżej możesz zarządzać przesłanymi dokumentami.", "language": "pl"},
-  {"keyName": "navbarDocuments", "text": "Dokumenty", "language": "pl"}
+  {"keyName": "documentDownloadButton", "text": "Pobierać", "language": "pl", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "Nie przesłałeś jeszcze żadnych dokumentów", "language": "pl", "machineTranslated": true},
+  {"keyName": "documentsListFileName", "text": "Nazwa pliku", "language": "pl", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "Utworzono dnia", "language": "pl", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "Dokumenty", "language": "pl", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Przesłane dokumenty", "language": "pl", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "Wpodczas uczestnictwa w badaniu możesz zostać poproszony o przesłanie dokumentów jako części formularza lub ankiety. Poniżej możesz zarządzać przesłanymi dokumentami.", "language": "pl", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "Dokumenty", "language": "pl", "machineTranslated": true}
 
 ]

@@ -137,17 +137,13 @@
   {"keyName": "kitTypeSaliva", "text": "Speichelkit", "language": "de"},
   {"keyName": "kitTypeStool", "text": "Stuhlkit", "language": "de"},
   {"keyName": "kitTypeBlood", "text": "Blutkit", "language": "de"},
-  {"keyName": "documentDeletionConfirmationMessage", "text": "Möchten Sie dieses Dokument wirklich löschen? Dies kann nicht rückgängig gemacht werden.", "language": "de"},
-  {"keyName": "documentDeletionConfirmationTitle", "text": "Bist du sicher?", "language": "de"},
-  {"keyName": "documentDeletionDelete", "text": "Löschen", "language": "de"},
-  {"keyName": "documentDownloadButton", "text": "Herunterladen", "language": "de"},
-  {"keyName": "documentOptionsButton", "text": "Optionen", "language": "de"},
-  {"keyName": "documentsListNone", "text": "Sie haben noch keine Dokumente hochgeladen", "language": "de"},
-  {"keyName": "documentsListFileName", "text": "Dateiname", "language": "de"},
-  {"keyName": "documentsListCreatedOn", "text": "Erstellt am", "language": "de"},
-  {"keyName": "documentsPageTitle", "text": "Unterlagen", "language": "de"},
-  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Hochgeladene Dokumente", "language": "de"},
-  {"keyName": "documentsPageMessage", "text": "Während Sie an einer Studie teilnehmen, werden Sie möglicherweise aufgefordert, im Rahmen eines Formulars oder einer Umfrage Dokumente hochzuladen. Unten können Sie die hochgeladenen Dokumente verwalten.", "language": "de"},
-  {"keyName": "navbarDocuments", "text": "Unterlagen", "language": "de"}
+  {"keyName": "documentDownloadButton", "text": "Herunterladen", "language": "de", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "Sie haben noch keine Dokumente hochgeladen", "language": "de", "machineTranslated": true},
+  {"keyName": "documentsListFileName", "text": "Dateiname", "language": "de", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "Erstellt am", "language": "de", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "Unterlagen", "language": "de", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Hochgeladene Dokumente", "language": "de", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "Während Sie an einer Studie teilnehmen, werden Sie möglicherweise aufgefordert, im Rahmen eines Formulars oder einer Umfrage Dokumente hochzuladen. Unten können Sie die hochgeladenen Dokumente verwalten.", "language": "de", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "Unterlagen", "language": "de", "machineTranslated": true}
 
 ]

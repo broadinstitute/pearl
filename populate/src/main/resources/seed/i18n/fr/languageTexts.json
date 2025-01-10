@@ -137,17 +137,13 @@
   {"keyName": "kitTypeSaliva", "text": "Kit pour la salive", "language": "fr"},
   {"keyName": "kitTypeStool", "text": "Kit pour les fèces", "language": "fr"},
   {"keyName": "kitTypeBlood", "text": "Kit pour le sang", "language": "fr"},
-  {"keyName": "documentDeletionConfirmationMessage", "text": "Etes-vous sûr de vouloir supprimer ce document ? Cette opération est irréversible.", "language": "fr"},
-  {"keyName": "documentDeletionConfirmationTitle", "text": "Es-tu sûr?", "language": "fr"},
-  {"keyName": "documentDeletionDelete", "text": "Supprimer", "language": "fr"},
-  {"keyName": "documentDownloadButton", "text": "Télécharger", "language": "fr"},
-  {"keyName": "documentOptionsButton", "text": "Options", "language": "fr"},
-  {"keyName": "documentsListNone", "text": "Vous n'avez pas encore téléchargé de documents", "language": "fr"},
-  {"keyName": "documentsListFileName", "text": "Nom de fichier", "language": "fr"},
-  {"keyName": "documentsListCreatedOn", "text": "Créé le", "language": "fr"},
-  {"keyName": "documentsPageTitle", "text": "Documents", "language": "fr"},
-  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Documents téléchargés", "language": "fr"},
-  {"keyName": "documentsPageMessage", "text": "Lors de votre participation à une étude, il peut vous être demandé de télécharger des documents dans le cadre d'un formulaire ou d'une enquête. Ci-dessous, vous pouvez gérer les documents que vous avez téléchargés.", "language": "fr"},
-  {"keyName": "navbarDocuments", "text": "Documents", "language": "fr"}
+  {"keyName": "documentDownloadButton", "text": "Télécharger", "language": "fr", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "Vous n'avez pas encore téléchargé de documents", "language": "fr", "machineTranslated": true},
+  {"keyName": "documentsListFileName", "text": "Nom de fichier", "language": "fr", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "Créé le", "language": "fr", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "Documents", "language": "fr", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Documents téléchargés", "language": "fr", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "Lors de votre participation à une étude, il peut vous être demandé de télécharger des documents dans le cadre d'un formulaire ou d'une enquête. Ci-dessous, vous pouvez gérer les documents que vous avez téléchargés.", "language": "fr", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "Documents", "language": "fr", "machineTranslated": true}
 
 ]

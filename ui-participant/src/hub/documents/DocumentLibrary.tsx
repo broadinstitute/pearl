@@ -4,13 +4,12 @@ import { useActiveUser } from 'providers/ActiveUserProvider'
 import Api from 'api/api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  faDownload,
   faFile,
   faFileImage,
   faFileLines,
   faFilePdf
 } from '@fortawesome/free-solid-svg-icons'
-import Modal from 'react-bootstrap/Modal'
-import ThemedModal from 'components/ThemedModal'
 import { usePortalEnv } from 'providers/PortalProvider'
 
 export default function DocumentLibrary() {
@@ -42,9 +41,7 @@ export default function DocumentLibrary() {
             <DocumentsList
               currentStudy={currentStudy!}
               enrollee={enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!}
-              participantFiles={participantFiles}
-              loadDocuments={loadDocuments}
-            />
+              participantFiles={participantFiles}/>
           </div>
         </div>
       </div>
@@ -52,8 +49,8 @@ export default function DocumentLibrary() {
   </div>
 }
 
-const DocumentsList = ({ currentStudy, enrollee, participantFiles, loadDocuments }: {
-  currentStudy: Study, enrollee: Enrollee, participantFiles: ParticipantFile[], loadDocuments: () => void
+const DocumentsList = ({ currentStudy, enrollee, participantFiles }: {
+  currentStudy: Study, enrollee: Enrollee, participantFiles: ParticipantFile[]
 }) => {
   const { i18n } = useI18n()
 
@@ -85,83 +82,28 @@ const DocumentsList = ({ currentStudy, enrollee, participantFiles, loadDocuments
                   </div>
                 </div>
               </td>
-              <td>
-                <FileOptionsDropdown
-                  currentStudy={currentStudy}
-                  loadDocuments={loadDocuments}
-                  participantFile={participantFile}
-                  enrollee={enrollee}/>
+              <td className="align-middle">
+                <div className={'d-flex justify-content-end'}>
+                  <button className="btn btn-outline-primary" onClick={async () => {
+                    const response = await Api.downloadParticipantFile(
+                      currentStudy.shortcode, enrollee.shortcode, participantFile.fileName)
+                    saveBlobAsDownload(await response.blob(), participantFile.fileName)
+                  }}>
+                    <span className="d-flex align-items-center">
+                      <FontAwesomeIcon className="pe-1" icon={faDownload}/>{i18n('documentDownloadButton')}
+                    </span>
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
         </tbody>
-      </table> }
+      </table>}
       {participantFiles.length === 0 &&
-        <div className="text-muted fst-italic my-3">{i18n('documentsListNone')}</div>
+          <div className="text-muted fst-italic my-3">{i18n('documentsListNone')}</div>
       }
     </div>
   </div>
-}
-
-const FileOptionsDropdown = ({ currentStudy, participantFile, enrollee, loadDocuments }: {
-  currentStudy: Study, participantFile: ParticipantFile, enrollee: Enrollee, loadDocuments: () => void
-}) => {
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
-  const { i18n } = useI18n()
-  return (<>
-    <li className="nav-item dropdown d-flex flex-column">
-      <button className="btn btn-outline-primary dropdown-toggle" id="fileOptionsDropdown"
-        data-bs-toggle="dropdown" aria-expanded="false">
-        {i18n('documentOptionsButton')}
-      </button>
-      <ul className="dropdown-menu" aria-labelledby="fileOptionsDropdown">
-        <li>
-          <a role={'button'} className="dropdown-item"
-            onClick={() => setShowConfirmDelete(true)}
-          >
-            {i18n('documentDeletionDelete')}
-          </a>
-        </li>
-        <li>
-          <a className="dropdown-item" role={'button'} onClick={async () => {
-            const response = await Api.downloadParticipantFile(
-              currentStudy.shortcode, enrollee.shortcode, participantFile.fileName)
-            saveBlobAsDownload(await response.blob(), participantFile.fileName)
-          }}>
-            {i18n('documentDownloadButton')}
-          </a>
-        </li>
-      </ul>
-    </li>
-    {showConfirmDelete && <ThemedModal show={true}
-      onHide={() => setShowConfirmDelete(false)} size={'lg'} animation={true}>
-      <Modal.Header>
-        <Modal.Title>
-          <h2 className="fw-bold pb-0 mb-0">{i18n('documentDeletionConfirmationTitle')}</h2>
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p className="m-0">{i18n('documentDeletionConfirmationMessage')}</p>
-      </Modal.Body>
-      <Modal.Footer>
-        <div className={'d-flex w-100'}>
-          <button className={'btn btn-primary m-2'}
-            onClick={async () => {
-              await Api.deleteParticipantFile(currentStudy.shortcode, enrollee.shortcode, participantFile.fileName)
-              loadDocuments()
-              setShowConfirmDelete(false)
-            }}>
-            {i18n('documentDeletionDelete')}
-          </button>
-          <button className={'btn btn-outline-secondary m-2'}
-            onClick={() => setShowConfirmDelete(false)}>
-            {i18n('cancel')}
-          </button>
-        </div>
-      </Modal.Footer>
-    </ThemedModal> }
-  </>
-  )
 }
 
 const fileTypeToIcon = (fileType: string) => {

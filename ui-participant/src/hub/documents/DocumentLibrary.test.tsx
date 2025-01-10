@@ -1,7 +1,7 @@
 import { asMockedFn, MockI18nProvider, setupRouterTest } from '@juniper/ui-core'
 import { usePortalEnv } from 'providers/PortalProvider'
 import { mockUsePortalEnv } from 'test-utils/test-portal-factory'
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import DocumentLibrary from './DocumentLibrary'
 import { useActiveUser } from 'providers/ActiveUserProvider'
@@ -46,7 +46,7 @@ describe('DocumentLibrary', () => {
     })
   })
 
-  it('renders document options dropdown', async () => {
+  it('renders document options', async () => {
     asMockedFn(Api.listParticipantFiles).mockResolvedValue([
       { id: 'file1', fileName: 'file1.pdf', fileType: 'application/pdf', createdAt: 0, lastUpdatedAt: 0 }
     ])
@@ -57,11 +57,6 @@ describe('DocumentLibrary', () => {
       expect(screen.getByText('file1.pdf')).toBeInTheDocument()
     })
 
-    await act(async () => {
-      screen.getByText('{documentOptionsButton}').click()
-    })
-
-    expect(screen.getByText('{documentDeletionDelete}')).toBeInTheDocument()
     expect(screen.getByText('{documentDownloadButton}')).toBeInTheDocument()
   })
 })
