@@ -2,12 +2,14 @@ package bio.terra.pearl.core.service.site;
 
 import bio.terra.pearl.core.dao.site.HtmlSectionDao;
 import bio.terra.pearl.core.dao.site.LocalizedSiteContentDao;
+import bio.terra.pearl.core.model.i18n.LanguageText;
 import bio.terra.pearl.core.model.site.HtmlPage;
 import bio.terra.pearl.core.model.site.HtmlSection;
 import bio.terra.pearl.core.model.site.LocalizedSiteContent;
 import bio.terra.pearl.core.model.site.NavbarItem;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.ImmutableEntityService;
+import bio.terra.pearl.core.service.i18n.LanguageTextService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -17,15 +19,17 @@ import java.util.UUID;
 
 @Component
 public class LocalizedSiteContentService extends ImmutableEntityService<LocalizedSiteContent, LocalizedSiteContentDao> {
+    private final LanguageTextService languageTextService;
     private NavbarItemService navbarItemService;
     private HtmlPageService htmlPageService;
     private HtmlSectionDao htmlSectionDao;
     public LocalizedSiteContentService(LocalizedSiteContentDao dao, NavbarItemService navbarItemService,
-                                       HtmlPageService htmlPageService, HtmlSectionDao htmlSectionDao) {
+                                       HtmlPageService htmlPageService, HtmlSectionDao htmlSectionDao, LanguageTextService languageTextService) {
         super(dao);
         this.navbarItemService = navbarItemService;
         this.htmlPageService = htmlPageService;
         this.htmlSectionDao = htmlSectionDao;
+        this.languageTextService = languageTextService;
     }
 
     public List<LocalizedSiteContent> findBySiteContent(UUID siteContentId) {
@@ -60,6 +64,16 @@ public class LocalizedSiteContentService extends ImmutableEntityService<Localize
             NavbarItem savedItem = navbarItemService.create(navItem);
             savedSite.getNavbarItems().add(savedItem);
         }
+
+        for (int i = 0; i < localSite.getLanguageTextOverrides().size(); i++) {
+            LanguageText languageText = localSite.getLanguageTextOverrides().get(i);
+
+            languageText.setLocalizedSiteContentId(localSite.getId());
+            languageText.setLanguage(localSite.getLanguage());
+
+            languageTextService.create(languageText);
+        }
+
         HtmlPage landingPage = localSite.getLandingPage();
         if (landingPage != null) {
             landingPage.setLocalizedSiteContentId(savedSite.getId());
@@ -93,5 +107,9 @@ public class LocalizedSiteContentService extends ImmutableEntityService<Localize
         navbarItemService.deleteByLocalSiteId(localSiteId, cascades);
         htmlPageService.deleteByLocalSite(localSiteId, cascades);
         dao.delete(localSiteId);
+    }
+
+    public List<LocalizedSiteContent> findByPortalId(UUID portalId) {
+        return dao.findByPortalId(portalId);
     }
 }

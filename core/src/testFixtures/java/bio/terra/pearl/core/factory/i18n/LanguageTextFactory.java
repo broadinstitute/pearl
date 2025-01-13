@@ -24,8 +24,8 @@ public class LanguageTextFactory {
         return languageTextService.create(builder(testName, keyName, language).build());
     }
 
-    public LanguageText buildPersisted(String testName, String keyName, String language, UUID portalId) {
-        return languageTextService.create(builder(testName, keyName, language).portalId(portalId).build());
+    public LanguageText buildPersisted(String testName, String keyName, String language, UUID localSiteContentId) {
+        return languageTextService.create(builder(testName, keyName, language).localizedSiteContentId(localSiteContentId).build());
     }
 
 }

@@ -22,8 +22,8 @@ public class LanguageTextService extends CrudService<LanguageText, LanguageTextD
     }
 
     @Cacheable(value = "languageTexts", key = "#language")
-    public HashMap<String, String> getLanguageTextMapForLanguage(UUID portalId, String language) {
-        List<LanguageText> languageTexts = languageTextDao.findByPortalIdOrNullPortalId(portalId, language);
+    public HashMap<String, String> getLanguageTextMapForLanguage(UUID portalEnvId, String language) {
+        List<LanguageText> languageTexts = languageTextDao.findWithOverridesByPortalEnvId(portalEnvId, language);
 
         HashMap<String, String> languageTextMap = new HashMap<>();
         for (LanguageText languageText : languageTexts) {

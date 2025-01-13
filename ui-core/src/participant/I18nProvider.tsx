@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useApiContext } from './ApiProvider'
 import { SUPPORT_EMAIL_ADDRESS } from '../util/supportUtils'
+import {EnvironmentName} from "src/types/study";
 
 export const I18nContext = createContext<I18nContextT | null>(null)
 
@@ -38,8 +39,8 @@ const SELECTED_LANGUAGE_KEY = 'selectedLanguage'
 /**
  * Provider for the current users i18n context.
  */
-export function I18nProvider({ defaultLanguage, portalShortcode, children }: {
-  defaultLanguage: string, portalShortcode?: string, children: React.ReactNode
+export function I18nProvider({ defaultLanguage, portalShortcode, environmentName, children }: {
+  defaultLanguage: string, portalShortcode?: string, environmentName: EnvironmentName, children: React.ReactNode
 }) {
   const Api = useApiContext()
   const [isLoading, setIsLoading] = useState(true)
@@ -59,7 +60,7 @@ export function I18nProvider({ defaultLanguage, portalShortcode, children }: {
 
   const reloadLanguageTexts = (selectedLanguage: string) => {
     setIsLoading(true)
-    Api.getLanguageTexts(selectedLanguage, portalShortcode).then(result => {
+    Api.getLanguageTexts(selectedLanguage, portalShortcode, environmentName).then(result => {
       setLanguageTexts(result)
       setIsError(false)
       setIsLoading(false)

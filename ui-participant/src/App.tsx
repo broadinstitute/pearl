@@ -31,8 +31,10 @@ import { useCookiesAcknowledged } from './browserPersistentState'
 import { IdleStatusMonitor } from 'login/IdleStatusMonitor'
 import {
   ApiProvider,
-  I18nProvider, initializeMixpanel, MaintenanceMode
-
+  EnvironmentName,
+  I18nProvider,
+  initializeMixpanel,
+  MaintenanceMode
 } from '@juniper/ui-core'
 import {
   BrandConfiguration,
@@ -139,8 +141,10 @@ function App() {
                     }>
                       <UserProvider>
                         <ActiveUserProvider>
-                          <I18nProvider defaultLanguage={portalEnv.portalEnvironmentConfig.defaultLanguage}
-                            portalShortcode={portal.shortcode}>
+                          <I18nProvider
+                            defaultLanguage={portalEnv.portalEnvironmentConfig.defaultLanguage}
+                            portalShortcode={portal.shortcode}
+                            environmentName={portalEnv.environmentName as EnvironmentName}>
                             <Suspense fallback={<PageLoadingIndicator/>}>
                               <IdleStatusMonitor
                                 maxIdleSessionDuration={30 * 60 * 1000} idleWarningDuration={5 * 60 * 1000}/>

@@ -1,7 +1,9 @@
 import {
   AddressValidationResult,
+  Answer,
   Enrollee,
   EnrolleeRelation,
+  EnvironmentName,
   HubResponse,
   LogEvent,
   MailingAddress,
@@ -16,7 +18,7 @@ import {
   StudyEnvParams,
   Survey,
   SurveyResponse,
-  Answer, SystemSettings
+  SystemSettings
 } from '@juniper/ui-core'
 import { defaultApiErrorHandle } from 'util/error-utils'
 import queryString from 'query-string'
@@ -146,8 +148,10 @@ export default {
     return parsedResponse
   },
 
-  async getLanguageTexts(selectedLanguage: string, portalShortcode?: string): Promise<Record<string, string>> {
-    const params = queryString.stringify({ portalShortcode, language: selectedLanguage  })
+  async getLanguageTexts(
+    selectedLanguage: string, portalShortcode?: string, environmentName?: EnvironmentName
+  ): Promise<Record<string, string>> {
+    const params = queryString.stringify({ portalShortcode, language: selectedLanguage, environmentName })
     const url = `${API_ROOT}/public/i18n/v1?${params}`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)

@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.model.site;
 
 import bio.terra.pearl.core.model.BaseEntity;
+import bio.terra.pearl.core.model.i18n.LanguageText;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,8 @@ public class LocalizedSiteContent extends BaseEntity {
     private List<NavbarItem> navbarItems = new ArrayList<>();
     @Builder.Default
     private List<HtmlPage> pages = new ArrayList<>();
-    private String navbarRegisterText;
+    @Builder.Default
+    private List<LanguageText> languageTextOverrides = new ArrayList<>();
     private String navLogoCleanFileName;
     private int navLogoVersion;
     private UUID footerSectionId;

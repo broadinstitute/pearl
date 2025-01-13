@@ -11,10 +11,7 @@ import {
   useSearchParams
 } from 'react-router-dom'
 import { Collapse } from 'bootstrap'
-import {
-  isEmpty,
-  uniqueId
-} from 'lodash'
+import { uniqueId } from 'lodash'
 import classNames from 'classnames'
 import { HashLink } from 'react-router-hash-link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -167,7 +164,7 @@ export function ParticipantNavbar(props: NavbarProps) {
                   )}
                   to={isUserEnrolling ? '#' : mainJoinPath}
                 >
-                  {!isEmpty(localContent.navbarRegisterText) ? localContent.navbarRegisterText : i18n('navbarJoin')}
+                  {i18n('navbarJoin')}
                 </NavLink>
               </li> }
             </>

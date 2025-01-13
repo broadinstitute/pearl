@@ -77,10 +77,6 @@ export function NavbarSectionEditor(
       }}><FontAwesomeIcon icon={faPlus}/> Add Navbar Item
       </Button>
     </div>
-    <TextInput label="Register Text" className="mb-2" value={localSiteContent.navbarRegisterText}
-      onChange={value => {
-        updateLocalContent({ ...localSiteContent, navbarRegisterText: value })
-      }}/>
   </>
 }
 

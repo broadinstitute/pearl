@@ -30,13 +30,23 @@ public class LanguageTextDao extends BaseMutableJdbiDao<LanguageText> {
     }
 
     //returns all language texts that are either global or portal specific
-    public List<LanguageText> findByPortalIdOrNullPortalId(UUID portalId, String language) {
+    public List<LanguageText> findWithOverridesByPortalEnvId(UUID portalEnvId, String language) {
         return jdbi.withHandle(
             handle ->
                 handle
                     .createQuery(
-                        "SELECT * FROM language_text WHERE (portal_id = :portalId OR portal_id IS NULL) AND language = :language")
-                    .bind("portalId", portalId)
+                            """
+                                    SELECT DISTINCT ON(lt.key_name) lt.* FROM language_text lt
+                                    LEFT JOIN localized_site_content lsc ON lsc.id = lt.localized_site_content_id
+                                    LEFT JOIN site_content sc ON sc.id = lsc.site_content_id
+                                    WHERE (
+                                        sc.id = (select site_content_id from portal_environment where id = :portalEnvId)
+                                        OR lt.portal_id = (select portal_id from portal_environment where id = :portalEnvId)
+                                        OR (lt.localized_site_content_id IS NULL and lt.portal_id IS NULL)
+                                    ) AND lt.language = :language
+                                    ORDER BY lt.key_name, lt.localized_site_content_id ASC
+                                    """)
+                        .bind("portalEnvId", portalEnvId)
                     .bind("language", language)
                     .mapToBean(LanguageText.class)
                     .list());

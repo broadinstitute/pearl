@@ -16,5 +16,16 @@ public class LanguageText extends BaseEntity {
     private String keyName;
     private String text;
     private String language;
+
+
+    // can be either portal or site content attached.
+    // if site content attached, it will go through
+    // standard publishing workflows.
+
+
+    // nullable; if null, it's the default language text.
+    //           if specified, then it's a portal-specific
+    //           override for the default language text
+    private UUID localizedSiteContentId;
     private UUID portalId;
 }
