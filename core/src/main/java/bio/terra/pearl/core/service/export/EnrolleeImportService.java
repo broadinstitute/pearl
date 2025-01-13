@@ -542,9 +542,22 @@ public class EnrolleeImportService {
     }
 
     private SurveyResponse importSurveyResponse(PortalParticipantUser ppUser, Enrollee enrollee, StudyEnvironment studyEnv, SurveyFormatter formatter, SurveyResponseWithTaskDto response, UUID portalId, DataAuditInfo auditInfo, Map<String, String> enrolleeMap, Integer repeatNum) {
-        // if its the first repeat, attempt to find existing task to update. other repeats are previous responses and need their own task
-        ParticipantTask relatedTask = repeatNum == 1 ? participantTaskService.findTaskForActivity(ppUser.getId(), studyEnv.getId(), formatter.getModuleName())
-                .orElse(null) : null;
+
+        ParticipantTask relatedTask = findOrCreateTask(ppUser, enrollee, studyEnv, formatter, response, portalId, auditInfo, enrolleeMap, repeatNum);
+
+        SurveyResponse updatedResponse = surveyResponseService.updateResponse(response, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "importSurveyResponse")),
+                "Imported", ppUser, enrollee, relatedTask.getId(), portalId).getResponse();
+
+
+        shiftTime(updatedResponse, relatedTask, formatter, enrolleeMap, repeatNum);
+
+        return updatedResponse;
+    }
+
+    private ParticipantTask findOrCreateTask(PortalParticipantUser ppUser, Enrollee enrollee, StudyEnvironment studyEnv, SurveyFormatter formatter, SurveyResponseWithTaskDto response, UUID portalId, DataAuditInfo auditInfo, Map<String, String> enrolleeMap, Integer repeatNum) {
+
+        ParticipantTask relatedTask = findTask(ppUser, studyEnv, formatter, enrolleeMap, repeatNum);
+
         if (relatedTask == null) {
             ParticipantTaskAssignDto assignDto = new ParticipantTaskAssignDto(
                     TaskType.SURVEY,
@@ -561,41 +574,73 @@ public class EnrolleeImportService {
                     new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "handleSurveyPublished.assignToExistingEnrollees")));
             relatedTask = tasks.getFirst();
         }
-        
+
         participantTaskService.update(relatedTask, auditInfo);
 
-        SurveyResponse updatedResponse = surveyResponseService.updateResponse(response, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "importSurveyResponse")),
-                "Imported", ppUser, enrollee, relatedTask.getId(), portalId).getResponse();
-
-
-        shiftTime(updatedResponse, relatedTask, formatter, enrolleeMap, repeatNum);
-
-        return updatedResponse;
+        return relatedTask;
     }
+
+    private ParticipantTask findTask(PortalParticipantUser ppUser, StudyEnvironment studyEnv, SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum) {
+        ParticipantTask relatedTask = null;
+
+        Optional<Instant> completedAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt");
+
+        // attempt to find existing task to update
+        if (repeatNum == 1 && completedAt.isEmpty()) {
+            // case 1; it's first repeat and no completedAt specified,
+            // just grab latest
+            relatedTask = participantTaskService.findTaskForActivity(ppUser.getId(), studyEnv.getId(), formatter.getModuleName())
+                    .orElse(null);
+        } else if (completedAt.isPresent()) {
+            // case 2: completedAt is specified, find task with that completion time
+            relatedTask = participantTaskService.findTaskForActivityWithCompletionTime(ppUser.getId(), studyEnv.getId(), formatter.getModuleName(), completedAt.get())
+                    .orElse(null);
+
+        }
+
+        if (relatedTask == null) {
+            // case 3: no task found, let's see if there's a task for numRepeat repsonses ago
+
+            List<ParticipantTask> existingTasks = participantTaskService.findAllTasksForActivity(ppUser.getId(), studyEnv.getId(), formatter.getModuleName());
+
+            int repeatIdx = repeatNum - 1;
+
+            if (existingTasks.size() > repeatIdx) {
+                relatedTask = existingTasks.get(repeatIdx);
+            }
+        }
+        
+        return relatedTask;
+    }
+
 
     // preserving response creation and task creation/completion
     // is important for recurring surveys
     private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum) {
         // make sure the task reflects created and completion status
         // so that recurrences are properly scheduled
-        String completedAtKey = formatter.formatColumnKey(repeatNum, "completedAt");
-        String createdAtKey = formatter.formatColumnKey(repeatNum, "createdAt");
-        String lastUpdatedAtKey = formatter.formatColumnKey(repeatNum, "lastUpdatedAt");
+        Optional<Instant> completedAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt");
+        Optional<Instant> createdAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "createdAt");
+        Optional<Instant> lastUpdatedAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "lastUpdatedAt");
 
-        if (enrolleeMap.containsKey(completedAtKey)) {
-            Instant completedAt = ExportFormatUtils.importInstant(enrolleeMap.get(completedAtKey));
-            timeShiftDao.changeTaskCompleteTime(relatedTask.getId(), completedAt);
+        if (completedAt.isPresent()) {
+            timeShiftDao.changeTaskCompleteTime(relatedTask.getId(), completedAt.get());
         }
-        if (enrolleeMap.containsKey(createdAtKey)) {
-            Instant createdAt = ExportFormatUtils.importInstant(enrolleeMap.get(createdAtKey));
-            timeShiftDao.changeTasksCreationTime(List.of(relatedTask.getId()), createdAt);
-            timeShiftDao.changeSurveyResponseCreationTime(surveyResponse.getId(), createdAt);
+        if (createdAt.isPresent()) {
+            timeShiftDao.changeTasksCreationTime(List.of(relatedTask.getId()), createdAt.get());
+            timeShiftDao.changeSurveyResponseCreationTime(surveyResponse.getId(), createdAt.get());
         }
-        if (enrolleeMap.containsKey(lastUpdatedAtKey)) {
-            Instant lastUpdatedAt = ExportFormatUtils.importInstant(enrolleeMap.get(lastUpdatedAtKey));
+        if (lastUpdatedAt.isPresent()) {
+            timeShiftDao.changeSurveyResponseLastUpdatedTime(surveyResponse.getId(), lastUpdatedAt.get());
+        }
+    }
 
-            timeShiftDao.changeSurveyResponseLastUpdatedTime(surveyResponse.getId(), lastUpdatedAt);
+    private Optional<Instant> parseSurveyFieldToInstant(SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum, String field) {
+        String key = formatter.formatColumnKey(repeatNum, field);
+        if (enrolleeMap.containsKey(key)) {
+            return Optional.of(ExportFormatUtils.importInstant(enrolleeMap.get(key)));
         }
+        return Optional.empty();
     }
 
     public static void copyNonNullProperties(Object source, Object target, List<String> ignoreProperties) {
