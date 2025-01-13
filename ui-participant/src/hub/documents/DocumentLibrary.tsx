@@ -66,7 +66,7 @@ const DocumentsList = ({ currentStudy, enrollee, participantFiles }: {
       { participantFiles.length > 0 && <table className="table">
         <thead>
           <tr>
-            <th>{i18n('documentsListFileName')}</th>
+            <th></th>
             <th></th>
           </tr>
         </thead>

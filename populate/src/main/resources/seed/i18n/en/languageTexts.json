@@ -140,7 +140,6 @@
   {"keyName": "kitTypeBlood", "text": "Blood kit", "language": "en"},
   {"keyName": "documentDownloadButton", "text": "Download", "language": "en"},
   {"keyName": "documentsListNone", "text": "You have not uploaded any documents yet", "language": "en"},
-  {"keyName": "documentsListFileName", "text": "File Name", "language": "en"},
   {"keyName": "documentsListCreatedOn", "text": "Created on", "language": "en"},
   {"keyName": "documentsPageTitle", "text": "Documents", "language": "en"},
   {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Uploaded documents", "language": "en"},

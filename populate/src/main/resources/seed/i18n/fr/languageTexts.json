@@ -139,7 +139,6 @@
   {"keyName": "kitTypeBlood", "text": "Kit pour le sang", "language": "fr"},
   {"keyName": "documentDownloadButton", "text": "Télécharger", "language": "fr", "machineTranslated": true},
   {"keyName": "documentsListNone", "text": "Vous n'avez pas encore téléchargé de documents", "language": "fr", "machineTranslated": true},
-  {"keyName": "documentsListFileName", "text": "Nom de fichier", "language": "fr", "machineTranslated": true},
   {"keyName": "documentsListCreatedOn", "text": "Créé le", "language": "fr", "machineTranslated": true},
   {"keyName": "documentsPageTitle", "text": "Documents", "language": "fr", "machineTranslated": true},
   {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Documents téléchargés", "language": "fr", "machineTranslated": true},

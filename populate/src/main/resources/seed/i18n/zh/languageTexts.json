@@ -139,7 +139,6 @@
   {"keyName": "kitTypeBlood", "text": "血液套件", "language": "zh"},
   {"keyName": "documentDownloadButton", "text": "下载", "language": "zh", "machineTranslated": true},
   {"keyName": "documentsListNone", "text": "您尚未上传任何文件", "language": "zh", "machineTranslated": true},
-  {"keyName": "documentsListFileName", "text": "文件名", "language": "zh", "machineTranslated": true},
   {"keyName": "documentsListCreatedOn", "text": "创建于", "language": "zh", "machineTranslated": true},
   {"keyName": "documentsPageTitle", "text": "文件", "language": "zh", "machineTranslated": true},
   {"keyName": "documentsPageUploadedDocumentsTitle", "text": "已上传文件", "language": "zh", "machineTranslated": true},

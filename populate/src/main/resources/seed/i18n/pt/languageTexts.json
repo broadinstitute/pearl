@@ -139,7 +139,6 @@
   {"keyName": "kitTypeBlood", "text": "Kit de sangue", "language": "pt"},
   {"keyName": "documentDownloadButton", "text": "Transferir", "language": "pt", "machineTranslated": true},
   {"keyName": "documentsListNone", "text": "Ainda não carregou nenhum documento", "language": "pt", "machineTranslated": true},
-  {"keyName": "documentsListFileName", "text": "Nome do ficheiro", "language": "pt", "machineTranslated": true},
   {"keyName": "documentsListCreatedOn", "text": "Criado em", "language": "pt", "machineTranslated": true},
   {"keyName": "documentsPageTitle", "text": "Documentos", "language": "pt", "machineTranslated": true},
   {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Documentos enviados", "language": "pt", "machineTranslated": true},

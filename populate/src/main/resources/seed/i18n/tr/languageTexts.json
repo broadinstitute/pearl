@@ -139,7 +139,6 @@
   {"keyName": "kitTypeBlood", "text": "Kan kiti", "language": "tr"},
   {"keyName": "documentDownloadButton", "text": "İndirmek", "language": "tr", "machineTranslated": true},
   {"keyName": "documentsListNone", "text": "Henüz herhangi bir belge yüklemediniz", "language": "tr", "machineTranslated": true},
-  {"keyName": "documentsListFileName", "text": "Dosya adı", "language": "tr", "machineTranslated": true},
   {"keyName": "documentsListCreatedOn", "text": "Oluşturuldu", "language": "tr", "machineTranslated": true},
   {"keyName": "documentsPageTitle", "text": "Belgeler", "language": "tr", "machineTranslated": true},
   {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Yüklenen belgeler", "language": "tr", "machineTranslated": true},

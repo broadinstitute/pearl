@@ -139,7 +139,6 @@
   {"keyName": "kitTypeBlood", "text": "रक्त किट", "language": "hi"},
   {"keyName": "documentDownloadButton", "text": "डाउनलोड करना", "language": "hi", "machineTranslated": true},
   {"keyName": "documentsListNone", "text": "आपने अभी तक कोई दस्तावेज़ अपलोड नहीं किया है", "language": "hi", "machineTranslated": true},
-  {"keyName": "documentsListFileName", "text": "फ़ाइल का नाम", "language": "hi", "machineTranslated": true},
   {"keyName": "documentsListCreatedOn", "text": "पर बनाया", "language": "hi", "machineTranslated": true},
   {"keyName": "documentsPageTitle", "text": "दस्तावेज़", "language": "hi", "machineTranslated": true},
   {"keyName": "documentsPageUploadedDocumentsTitle", "text": "अपलोड किए गए दस्तावेज़", "language": "hi", "machineTranslated": true},

@@ -139,7 +139,6 @@
   {"keyName": "kitTypeBlood", "text": "Blutkit", "language": "de"},
   {"keyName": "documentDownloadButton", "text": "Herunterladen", "language": "de", "machineTranslated": true},
   {"keyName": "documentsListNone", "text": "Sie haben noch keine Dokumente hochgeladen", "language": "de", "machineTranslated": true},
-  {"keyName": "documentsListFileName", "text": "Dateiname", "language": "de", "machineTranslated": true},
   {"keyName": "documentsListCreatedOn", "text": "Erstellt am", "language": "de", "machineTranslated": true},
   {"keyName": "documentsPageTitle", "text": "Unterlagen", "language": "de", "machineTranslated": true},
   {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Hochgeladene Dokumente", "language": "de", "machineTranslated": true},

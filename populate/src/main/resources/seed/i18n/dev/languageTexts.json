@@ -140,7 +140,6 @@
   {"keyName": "kitTypeBlood", "text": "DEV_Blood kit", "language": "dev"},
   {"keyName": "documentDownloadButton", "text": "DEV_Download", "language": "dev", "machineTranslated": true},
   {"keyName": "documentsListNone", "text": "DEV_You have not uploaded any documents yet", "language": "dev", "machineTranslated": true},
-  {"keyName": "documentsListFileName", "text": "DEV_File Name", "language": "dev", "machineTranslated": true},
   {"keyName": "documentsListCreatedOn", "text": "DEV_Created on", "language": "dev", "machineTranslated": true},
   {"keyName": "documentsPageTitle", "text": "DEV_Documents", "language": "dev", "machineTranslated": true},
   {"keyName": "documentsPageUploadedDocumentsTitle", "text": "DEV_Uploaded documents", "language": "dev", "machineTranslated": true},
