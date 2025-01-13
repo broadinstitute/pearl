@@ -454,12 +454,24 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponseWithTaskDto, 
         }
     }
 
+    public List<SurveyResponseWithTaskDto> listFromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap) {
+        List<SurveyResponseWithTaskDto> responses = new ArrayList<>();
+        int moduleRepeatNum = 1;
+        SurveyResponseWithTaskDto response = fromStringMap(studyEnvironmentId, enrolleeMap, moduleRepeatNum);
+        while (response != null) {
+            responses.add(response);
+            moduleRepeatNum++;
+            response = fromStringMap(studyEnvironmentId, enrolleeMap, moduleRepeatNum);
+        }
+        return responses;
+    }
+
     @Override
-    public SurveyResponseWithTaskDto fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap) {
+    public SurveyResponseWithTaskDto fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap, int moduleRepeatNum) {
         SurveyResponseWithTaskDto response = new SurveyResponseWithTaskDto();
         boolean specifiedComplete = false;
         for (ItemFormatter<SurveyResponseWithTaskDto> itemFormatter : itemFormatters) {
-            String columnName = getColumnKey(itemFormatter, false, null, 1);
+            String columnName = getColumnKey(itemFormatter, false, null, moduleRepeatNum);
             if (!enrolleeMap.containsKey(columnName)) {
                 //try stripping surveyName
                 columnName = stripSurveyPrefix(columnName);
@@ -476,6 +488,7 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponseWithTaskDto, 
             }
 
             if (stringVal != null && !stringVal.isEmpty()) {
+
                 itemFormatter.importValueToBean(response, stringVal);
             }
         }

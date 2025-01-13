@@ -8,7 +8,6 @@ import bio.terra.pearl.core.service.export.formatters.item.PropertyItemFormatter
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,7 +39,7 @@ public abstract class BeanModuleFormatter<T> extends ModuleFormatter<T, Property
     }
 
     @Override
-    public T fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap) {
+    public T fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap, int moduleRepeatNum) {
         T bean = newBean();
         for (PropertyItemFormatter<T> itemInfo : getItemFormatters()) {
             String columnName = getColumnKey(itemInfo, false, null, 1);

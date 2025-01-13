@@ -796,6 +796,59 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
 
         ParticipantTask task = participantTaskService.findTaskForActivity(ppUser.getId(), bundle.getStudyEnv().getId(), survey.getStableId()).orElseThrow();
         assertThat(task.getCompletedAt(), equalTo(Instant.parse("2023-08-22T05:17:00Z")));
+    }
+
+    @Test
+    @Transactional
+    public void testImportMultipleSurveyResponses(TestInfo info) {
+        StudyEnvironmentBundle bundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.irb);
+        Survey survey = surveyFactory.buildPersisted(surveyFactory.builder(getTestName(info))
+                .stableId("importTest1")
+                .content(TWO_QUESTION_SURVEY_CONTENT)
+                .portalId(bundle.getPortal().getId())
+                .version(1)
+        );
+        surveyFactory.attachToEnv(survey, bundle.getStudyEnv().getId(), true);
+        String username = "test@test.com";
+
+        Map<String, String> enrolleeMap = Map.of("enrollee.subject", "true", "account.username", username,
+                "importTest1.complete", "true",
+                "importTest1.importFirstName", "Jeff",
+                "importTest1.importFavColors", "[\"red\", \"blue\"]",
+                "importTest1.lastUpdatedAt", "2023-08-21 05:17AM",
+                "importTest1[2].complete", "true",
+                "importTest1[2].importFirstName", "Jeffrey",
+                "importTest1[2].importFavColors", "[\"green\"]",
+                "importTest1[2].lastUpdatedAt", "2023-08-20 05:17AM");
+
+        Enrollee enrollee = enrolleeImportService.importEnrollee(
+                bundle.getPortal().getShortcode(),
+                bundle.getStudy().getShortcode(),
+                bundle.getStudyEnv(),
+                enrolleeMap,
+                new ExportOptions(), null);
+
+        List<SurveyResponse> responses = surveyResponseService.findByEnrolleeId(enrollee.getId());
+
+        assertThat(responses, hasSize(2));
+
+        responses.sort(Comparator.comparing(SurveyResponse::getLastUpdatedAt));
+
+        SurveyResponse previousResponse = surveyResponseService.findOneWithAnswers(responses.get(0).getId()).orElseThrow();
+        SurveyResponse latestResponse = surveyResponseService.findOneWithAnswers(responses.get(1).getId()).orElseThrow();
+
+        assertThat(previousResponse.getSurveyId(), equalTo(survey.getId()));
+        assertThat(previousResponse.isComplete(), equalTo(true));
+        assertThat(previousResponse.getLastUpdatedAt(), equalTo(Instant.parse("2023-08-20T05:17:00Z")));
+        assertThat(previousResponse.getAnswers().stream().filter(answer -> answer.getQuestionStableId().equals("importFirstName"))
+                .findFirst().get().getStringValue(), equalTo("Jeffrey"));
+
+        assertThat(latestResponse.getSurveyId(), equalTo(survey.getId()));
+        assertThat(latestResponse.isComplete(), equalTo(true));
+        assertThat(latestResponse.getLastUpdatedAt(), equalTo(Instant.parse("2023-08-21T05:17:00Z")));
+        assertThat(latestResponse.getAnswers().stream().filter(answer -> answer.getQuestionStableId().equals("importFirstName"))
+                .findFirst().get().getStringValue(), equalTo("Jeff"));
+
 
     }
 
