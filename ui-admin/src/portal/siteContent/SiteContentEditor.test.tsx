@@ -47,7 +47,7 @@ test('enables live-preview json editing', async () => {
   const jsonEditorTab = screen.getByText('JSON Editor')
   await userEvent.click(jsonEditorTab)
 
-  const sectionInput = screen.getByTestId('json-editor')
+  const sectionInput = screen.getByRole('textbox')
   const aboutUsHeading = screen.queryAllByRole('heading')
     .find(el => el.textContent === 'about us')
   expect(aboutUsHeading).toBeInTheDocument()
@@ -112,7 +112,7 @@ test('invalid site JSON disables Save button', async () => {
   await userEvent.click(jsonEditorTab)
 
   //Act
-  const sectionInput = screen.getByTestId('json-editor')
+  const sectionInput = screen.getByRole('textbox')
   await userEvent.type(sectionInput, '{\\\\}}') //testing-library requires escaping, this equates to "}"
 
   //Assert
@@ -134,7 +134,7 @@ test('invalid site JSON disables Add navbar button', async () => {
   await userEvent.click(jsonEditorTab)
 
   //Act
-  const sectionInput = screen.getByTestId('json-editor')
+  const sectionInput = screen.getByRole('textbox')
   await userEvent.type(sectionInput, '{\\\\}}') //testing-library requires escaping, this equates to "}"
 
   //Assert
@@ -156,7 +156,7 @@ test('invalid site JSON disables page selector', async () => {
   await userEvent.click(jsonEditorTab)
 
   //Act
-  const sectionInput = screen.getByTestId('json-editor')
+  const sectionInput = screen.getByRole('textbox')
   await userEvent.type(sectionInput, '{\\\\}}') //testing-library requires escaping, this equates to "}"
 
   //Assert

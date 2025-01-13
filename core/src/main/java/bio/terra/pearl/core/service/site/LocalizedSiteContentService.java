@@ -108,8 +108,4 @@ public class LocalizedSiteContentService extends ImmutableEntityService<Localize
         htmlPageService.deleteByLocalSite(localSiteId, cascades);
         dao.delete(localSiteId);
     }
-
-    public List<LocalizedSiteContent> findByPortalId(UUID portalId) {
-        return dao.findByPortalId(portalId);
-    }
 }

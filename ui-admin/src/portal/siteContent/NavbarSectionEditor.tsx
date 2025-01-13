@@ -20,12 +20,10 @@ import { TextInput } from 'components/forms/TextInput'
 export function NavbarSectionEditor(
   {
     localSiteContent,
-    updateNavbarItems,
-    updateLocalContent
+    updateNavbarItems
   } : {
     localSiteContent: LocalSiteContent,
-    updateNavbarItems: (navbarItems: NavbarItem[]) => void,
-    updateLocalContent: (localContent: LocalSiteContent) => void
+    updateNavbarItems: (navbarItems: NavbarItem[]) => void
   }) {
   const navbarItems = useMemo(() => {
     return localSiteContent.navbarItems || []

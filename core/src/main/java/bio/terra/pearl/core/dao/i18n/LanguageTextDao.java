@@ -35,6 +35,8 @@ public class LanguageTextDao extends BaseMutableJdbiDao<LanguageText> {
             handle ->
                 handle
                     .createQuery(
+                            // distinct on key_name and order by localized_site_content_id is used to ensure that
+                            // if there are conflicting keys, the one with localized_site_content_id will be used
                             """
                                     SELECT DISTINCT ON(lt.key_name) lt.* FROM language_text lt
                                     LEFT JOIN localized_site_content lsc ON lsc.id = lt.localized_site_content_id

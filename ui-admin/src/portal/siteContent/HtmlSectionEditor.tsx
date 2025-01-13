@@ -166,7 +166,6 @@ const HtmlSectionEditor = ({
         value={editorValue}
         style={{ height: 'calc(100% - 2em)', width: '100%', minHeight: '300px' }}
         disabled={readOnly || (siteHasInvalidSection && !sectionContainsErrors)}
-        data-testid="json-editor"
         className={classNames('w-100 flex-grow-1 form-control font-monospace', {
           'is-invalid': sectionContainsErrors
         })}
