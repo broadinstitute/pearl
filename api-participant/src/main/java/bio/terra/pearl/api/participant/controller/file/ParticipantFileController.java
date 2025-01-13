@@ -1,7 +1,6 @@
 package bio.terra.pearl.api.participant.controller.file;
 
 import bio.terra.pearl.api.participant.api.ParticipantFileApi;
-import bio.terra.pearl.api.participant.service.AuthUtilService;
 import bio.terra.pearl.api.participant.service.RequestUtilService;
 import bio.terra.pearl.api.participant.service.file.ParticipantFileExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
@@ -10,6 +9,7 @@ import bio.terra.pearl.core.model.participant.ParticipantUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.InputStream;
+import java.util.List;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -19,19 +19,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 public class ParticipantFileController implements ParticipantFileApi {
-  private final AuthUtilService authUtilService;
   private final ParticipantFileExtService participantFileExtService;
   private final HttpServletRequest request;
   private final ObjectMapper objectMapper;
   private final RequestUtilService requestUtilService;
 
   public ParticipantFileController(
-      AuthUtilService authUtilService,
       ParticipantFileExtService participantFileExtService,
       HttpServletRequest request,
       ObjectMapper objectMapper,
       RequestUtilService requestUtilService) {
-    this.authUtilService = authUtilService;
     this.participantFileExtService = participantFileExtService;
     this.request = request;
     this.objectMapper = objectMapper;
@@ -46,14 +43,22 @@ public class ParticipantFileController implements ParticipantFileApi {
       String enrolleeShortcode,
       String fileName) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
-    authUtilService.authParticipantToPortal(
-        participantUser.getId(), portalShortcode, EnvironmentName.valueOf(envName));
 
     ParticipantFile participantFile =
-        participantFileExtService.get(participantUser, enrolleeShortcode, fileName);
+        participantFileExtService.get(
+            portalShortcode,
+            EnvironmentName.valueOf(envName),
+            participantUser,
+            enrolleeShortcode,
+            fileName);
 
     InputStream content =
-        participantFileExtService.downloadFile(participantUser, enrolleeShortcode, fileName);
+        participantFileExtService.downloadFile(
+            portalShortcode,
+            EnvironmentName.valueOf(envName),
+            participantUser,
+            enrolleeShortcode,
+            fileName);
 
     MediaType mediaType;
     try {
@@ -73,11 +78,14 @@ public class ParticipantFileController implements ParticipantFileApi {
       String enrolleeShortcode,
       MultipartFile participantFile) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
-    authUtilService.authParticipantToPortal(
-        participantUser.getId(), portalShortcode, EnvironmentName.valueOf(envName));
 
     ParticipantFile created =
-        participantFileExtService.uploadFile(participantUser, enrolleeShortcode, participantFile);
+        participantFileExtService.uploadFile(
+            portalShortcode,
+            EnvironmentName.valueOf(envName),
+            participantUser,
+            enrolleeShortcode,
+            participantFile);
 
     return ResponseEntity.ok(created);
   }
@@ -86,10 +94,11 @@ public class ParticipantFileController implements ParticipantFileApi {
   public ResponseEntity<Object> list(
       String portalShortcode, String envName, String studyShortcode, String enrolleeShortcode) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
-    authUtilService.authParticipantToPortal(
-        participantUser.getId(), portalShortcode, EnvironmentName.valueOf(envName));
 
-    return ResponseEntity.ok(participantFileExtService.list(participantUser, enrolleeShortcode));
+    List<ParticipantFile> participantFiles =
+        participantFileExtService.list(
+            portalShortcode, EnvironmentName.valueOf(envName), participantUser, enrolleeShortcode);
+    return ResponseEntity.ok(participantFiles);
   }
 
   @Override
@@ -100,10 +109,13 @@ public class ParticipantFileController implements ParticipantFileApi {
       String enrolleeShortcode,
       String fileName) {
     ParticipantUser participantUser = requestUtilService.requireUser(request);
-    authUtilService.authParticipantToPortal(
-        participantUser.getId(), portalShortcode, EnvironmentName.valueOf(envName));
 
-    participantFileExtService.delete(participantUser, enrolleeShortcode, fileName);
+    participantFileExtService.delete(
+        portalShortcode,
+        EnvironmentName.valueOf(envName),
+        participantUser,
+        enrolleeShortcode,
+        fileName);
 
     return ResponseEntity.noContent().build();
   }

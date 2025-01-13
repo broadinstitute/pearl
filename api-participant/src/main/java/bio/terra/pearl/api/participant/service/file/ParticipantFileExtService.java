@@ -1,6 +1,7 @@
 package bio.terra.pearl.api.participant.service.file;
 
 import bio.terra.pearl.api.participant.service.AuthUtilService;
+import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.file.ParticipantFile;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.ParticipantUser;
@@ -34,7 +35,12 @@ public class ParticipantFileExtService {
   }
 
   public ParticipantFile get(
-      ParticipantUser participantUser, String enrolleeShortcode, String fileName) {
+      String portalShortcode,
+      EnvironmentName envName,
+      ParticipantUser participantUser,
+      String enrolleeShortcode,
+      String fileName) {
+    authUtilService.authParticipantToPortal(participantUser.getId(), portalShortcode, envName);
     Enrollee enrollee =
         authUtilService.authParticipantUserToEnrollee(participantUser.getId(), enrolleeShortcode);
     return participantFileService
@@ -43,7 +49,12 @@ public class ParticipantFileExtService {
   }
 
   public InputStream downloadFile(
-      ParticipantUser participantUser, String enrolleeShortcode, String fileName) {
+      String portalShortcode,
+      EnvironmentName envName,
+      ParticipantUser participantUser,
+      String enrolleeShortcode,
+      String fileName) {
+    authUtilService.authParticipantToPortal(participantUser.getId(), portalShortcode, envName);
     Enrollee enrollee =
         authUtilService.authParticipantUserToEnrollee(participantUser.getId(), enrolleeShortcode);
     ParticipantFile participantFile =
@@ -55,7 +66,12 @@ public class ParticipantFileExtService {
   }
 
   public ParticipantFile uploadFile(
-      ParticipantUser participantUser, String enrolleeShortcode, MultipartFile file) {
+      String portalShortcode,
+      EnvironmentName envName,
+      ParticipantUser participantUser,
+      String enrolleeShortcode,
+      MultipartFile file) {
+    authUtilService.authParticipantToPortal(participantUser.getId(), portalShortcode, envName);
     Enrollee enrollee =
         authUtilService.authParticipantUserToEnrollee(participantUser.getId(), enrolleeShortcode);
 
@@ -63,7 +79,7 @@ public class ParticipantFileExtService {
       return participantFileService.uploadFileAndCreate(
           ParticipantFile.builder()
               .enrolleeId(enrollee.getId())
-              .fileName(cleanFileName(file.getOriginalFilename()))
+              .fileName(getFileName(file.getOriginalFilename()))
               .fileType(file.getContentType())
               .build(),
           file.getInputStream());
@@ -72,13 +88,19 @@ public class ParticipantFileExtService {
     }
   }
 
-  public List<ParticipantFile> list(ParticipantUser participantUser, String enrolleeShortcode) {
+  public List<ParticipantFile> list(
+      String portalShortcode,
+      EnvironmentName envName,
+      ParticipantUser participantUser,
+      String enrolleeShortcode) {
+    authUtilService.authParticipantToPortal(participantUser.getId(), portalShortcode, envName);
     Enrollee enrollee =
         authUtilService.authParticipantUserToEnrollee(participantUser.getId(), enrolleeShortcode);
     return participantFileService.findByEnrolleeId(enrollee.getId());
   }
 
-  public String cleanFileName(String fileName) {
+  //Returns the name of the file without the preceding path
+  public String getFileName(String fileName) {
     if (fileName == null) {
       return "";
     }
@@ -86,7 +108,13 @@ public class ParticipantFileExtService {
     return split[split.length - 1];
   }
 
-  public void delete(ParticipantUser participantUser, String enrolleeShortcode, String fileName) {
+  public void delete(
+      String portalShortcode,
+      EnvironmentName envName,
+      ParticipantUser participantUser,
+      String enrolleeShortcode,
+      String fileName) {
+    authUtilService.authParticipantToPortal(participantUser.getId(), portalShortcode, envName);
     Enrollee enrollee =
         authUtilService.authParticipantUserToEnrollee(participantUser.getId(), enrolleeShortcode);
     ParticipantFile participantFile =
