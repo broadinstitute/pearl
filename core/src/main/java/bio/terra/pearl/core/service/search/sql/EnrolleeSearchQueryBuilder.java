@@ -58,8 +58,13 @@ public class EnrolleeSearchQueryBuilder {
                     ? join.getTable() + " " + join.getAlias()
                     : join.getTable();
 
-            // default to left join to get as much enrollee data as possible
-            selectQuery = selectQuery.leftJoin(tableName).on(join.getOn());
+            String joinType = join.getJoinType() == null ? "left" : join.getJoinType();
+
+            switch (joinType.toLowerCase()) {
+                case "inner" -> selectQuery.innerJoin(tableName).on(join.getOn());
+                case "right" -> selectQuery.rightJoin(tableName).on(join.getOn());
+                default -> selectQuery.leftJoin(tableName).on(join.getOn());
+            }
         }
 
         SelectConditionStep selectConditionStep = selectQuery
@@ -154,11 +159,20 @@ public class EnrolleeSearchQueryBuilder {
      */
     @Getter
     public static class JoinClause {
+        private final String joinType;
         private final String alias;
         private final String table;
         private final String on;
 
         public JoinClause(String table, String alias, String on) {
+            this.joinType = null;
+            this.alias = alias;
+            this.table = table;
+            this.on = on;
+        }
+
+        public JoinClause(String joinType, String table, String alias, String on) {
+            this.joinType = joinType;
             this.alias = alias;
             this.table = table;
             this.on = on;

@@ -12,9 +12,6 @@ import bio.terra.pearl.core.model.study.StudyEnvironmentConfig;
 import bio.terra.pearl.core.service.participant.PortalParticipantUserService;
 import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -70,6 +67,17 @@ public class StudyEnvironmentFactory {
         return studyEnvironmentService.create(studyEnv);
     }
 
+    public StudyEnvironmentBundle buildBundle(String testName, EnvironmentName envName, Portal portal, PortalEnvironment portalEnv) {
+        Study study = studyFactory.buildPersisted(portal.getId(), testName);
+        StudyEnvironment studyEnvironment = buildPersisted(envName, study.getId(), testName);
+        return StudyEnvironmentBundle.builder()
+                .study(study)
+                .studyEnv(studyEnvironment)
+                .portal(portal)
+                .portalEnv(portalEnv)
+                .build();
+    }
+
     public StudyEnvironmentBundle buildBundle(String testName, EnvironmentName envName) {
         Portal portal = portalFactory.buildPersisted(testName);
         Study study = studyFactory.buildPersisted(portal.getId(), testName);
@@ -85,15 +93,6 @@ public class StudyEnvironmentFactory {
                 .portal(portal)
                 .portalEnv(portalEnvironment)
                 .build();
-    }
-
-    @Getter @Setter
-    @Builder
-    public static class StudyEnvironmentBundle {
-        private Study study;
-        private StudyEnvironment studyEnv;
-        private Portal portal;
-        private PortalEnvironment portalEnv;
     }
 
 }

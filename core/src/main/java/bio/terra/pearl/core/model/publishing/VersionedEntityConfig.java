@@ -12,6 +12,7 @@ public interface VersionedEntityConfig {
     Versioned versionedEntity();
     UUID versionedEntityId();
     UUID getId();
+    void setActive(boolean active);
     /** this is called update rather than set so it doesn't register as a bean property, and so doesn't get needlessly
      * duplicated for dao and serialization methods */
     void updateVersionedEntityId(UUID versionedEntityId);

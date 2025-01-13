@@ -14,12 +14,13 @@ import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.exception.NotFoundException;
+import bio.terra.pearl.core.service.file.ParticipantFileService;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.notification.NotificationService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.survey.SurveyResponseService;
-import bio.terra.pearl.core.service.workflow.DataChangeRecordService;
+import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.util.Pair;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,7 +42,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
     private final StudyEnvironmentService studyEnvironmentService;
     private final PreEnrollmentResponseDao preEnrollmentResponseDao;
     private final NotificationService notificationService;
-    private final DataChangeRecordService dataChangeRecordService;
+    private final ParticipantDataChangeService participantDataChangeService;
     private final WithdrawnEnrolleeService withdrawnEnrolleeService;
     private final ParticipantUserService participantUserService;
     private final PortalParticipantUserService portalParticipantUserService;
@@ -52,6 +54,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
     private final FamilyService familyService;
     private final ShortcodeService shortcodeService;
     private final FamilyEnrolleeService familyEnrolleeService;
+    private final ParticipantFileService participantFileService;
 
     public EnrolleeService(EnrolleeDao enrolleeDao,
                            SurveyResponseDao surveyResponseDao,
@@ -62,7 +65,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
                            @Lazy StudyEnvironmentService studyEnvironmentService,
                            PreEnrollmentResponseDao preEnrollmentResponseDao,
                            NotificationService notificationService,
-                           @Lazy DataChangeRecordService dataChangeRecordService,
+                           @Lazy ParticipantDataChangeService participantDataChangeService,
                            @Lazy WithdrawnEnrolleeService withdrawnEnrolleeService,
                            @Lazy ParticipantUserService participantUserService,
                            ParticipantNoteService participantNoteService,
@@ -70,8 +73,8 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
                            SecureRandom secureRandom,
                            RandomUtilService randomUtilService,
                            EnrolleeRelationService enrolleeRelationService,
-                           PortalParticipantUserService portalParticipantUserService,
-                           FamilyService familyService, ShortcodeService shortcodeService, FamilyEnrolleeService familyEnrolleeService) {
+                           @Lazy PortalParticipantUserService portalParticipantUserService,
+                           FamilyService familyService, ShortcodeService shortcodeService, FamilyEnrolleeService familyEnrolleeService, ParticipantFileService participantFileService) {
         super(enrolleeDao);
         this.surveyResponseDao = surveyResponseDao;
         this.participantTaskDao = participantTaskDao;
@@ -81,7 +84,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
         this.studyEnvironmentService = studyEnvironmentService;
         this.preEnrollmentResponseDao = preEnrollmentResponseDao;
         this.notificationService = notificationService;
-        this.dataChangeRecordService = dataChangeRecordService;
+        this.participantDataChangeService = participantDataChangeService;
         this.withdrawnEnrolleeService = withdrawnEnrolleeService;
         this.participantUserService = participantUserService;
         this.participantNoteService = participantNoteService;
@@ -93,6 +96,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
         this.familyService = familyService;
         this.shortcodeService = shortcodeService;
         this.familyEnrolleeService = familyEnrolleeService;
+        this.participantFileService = participantFileService;
     }
 
     public Optional<Enrollee> findOneByShortcode(String shortcode) {
@@ -140,6 +144,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
         enrollee.setProfile(profileService.loadWithMailingAddress(enrollee.getProfileId()).orElseThrow(() -> new IllegalStateException("enrollee does not have a profile")));
         enrollee.setFamilyEnrollees(familyEnrolleeService.findByEnrolleeId(enrollee.getId()));
         enrollee.setRelations(enrolleeRelationService.findAllByEnrolleeOrTargetId(enrollee.getId()));
+        enrollee.setFiles(participantFileService.findByEnrolleeId(enrollee.getId()));
         return enrollee;
     }
 
@@ -193,7 +198,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
     }
 
     public int countByStudyEnvironmentId(UUID studyEnvironmentId) {
-        return dao.countByStudyEnvironment(studyEnvironmentId);
+        return dao.countByStudyEnvironmentId(studyEnvironmentId);
     }
 
     @Override
@@ -209,6 +214,9 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
             throw new UnsupportedOperationException("Cannot delete live, non-withdrawn participants");
         }
         participantTaskService.deleteByEnrolleeId(enrolleeId);
+
+        participantFileService.deleteByEnrolleeId(enrolleeId);
+
         for (SurveyResponse surveyResponse : surveyResponseService.findByEnrolleeId(enrolleeId)) {
             surveyResponseService.delete(surveyResponse.getId(), cascades);
         }
@@ -216,7 +224,7 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
         kitRequestService.deleteByEnrolleeId(enrolleeId, cascades);
 
         notificationService.deleteByEnrolleeId(enrolleeId);
-        dataChangeRecordService.deleteByEnrolleeId(enrolleeId);
+        participantDataChangeService.deleteByEnrolleeId(enrolleeId);
 
         enrolleeRelationService.deleteAllByEnrolleeIdOrTargetId(enrolleeId);
         dao.delete(enrolleeId);
@@ -257,6 +265,10 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
                                      String targetStableId,
                                      Integer targetAssignedVersion) {
         return dao.findUnassignedToTask(studyEnvironmentId, targetStableId, targetAssignedVersion);
+    }
+
+    public List<Enrollee> findWithTaskInPast(UUID studyEnvId, String taskTargetStableId, Duration minTimeSinceMostRecent ) {
+        return dao.findWithTaskInPast(studyEnvId, taskTargetStableId, minTimeSinceMostRecent);
     }
 
     public Optional<Enrollee> findByParticipantUserIdAndStudyEnvId(UUID participantUserId, UUID studyEnvId) {
@@ -307,6 +319,10 @@ public class EnrolleeService extends CrudService<Enrollee, EnrolleeDao> {
 
     public List<Enrollee> findAllByFamilyId(UUID id) {
         return dao.findAllByFamilyId(id);
+    }
+
+    public List<Enrollee> findAllByPortalEnv(UUID portalId, EnvironmentName environmentName) {
+        return dao.findAllByPortalEnv(portalId, environmentName);
     }
 
     public enum AllowedCascades implements CascadeProperty {

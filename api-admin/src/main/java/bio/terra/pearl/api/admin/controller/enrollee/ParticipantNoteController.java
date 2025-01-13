@@ -2,7 +2,9 @@ package bio.terra.pearl.api.admin.controller.enrollee;
 
 import bio.terra.pearl.api.admin.api.ParticipantNoteApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnrolleeAuthContext;
 import bio.terra.pearl.api.admin.service.enrollee.ParticipantNoteExtService;
+import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.participant.ParticipantNote;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,11 +38,18 @@ public class ParticipantNoteController implements ParticipantNoteApi {
       String envName,
       String enrolleeShortcode,
       Object body) {
-    AdminUser adminUser = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     ParticipantNoteDto note = objectMapper.convertValue(body, ParticipantNoteDto.class);
     ParticipantNote savedNote =
         participantNoteExtService.create(
-            adminUser, enrolleeShortcode, note, note.assignedAdminUserId);
+            PortalEnrolleeAuthContext.of(
+                operator,
+                portalShortcode,
+                studyShortcode,
+                EnvironmentName.valueOfCaseInsensitive(envName),
+                enrolleeShortcode),
+            note,
+            note.assignedAdminUserId);
     return ResponseEntity.ok(savedNote);
   }
 

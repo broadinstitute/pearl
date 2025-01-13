@@ -12,6 +12,7 @@ import java.util.*;
 
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.DataAuditedService;
+import bio.terra.pearl.core.service.ParticipantDataAuditedService;
 import bio.terra.pearl.core.service.exception.internal.InternalServerException;
 import bio.terra.pearl.core.service.participant.EnrolleeService;
 import bio.terra.pearl.core.service.participant.ParticipantNoteService;
@@ -23,12 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
-public class ParticipantTaskService extends DataAuditedService<ParticipantTask, ParticipantTaskDao> {
+public class ParticipantTaskService extends ParticipantDataAuditedService<ParticipantTask, ParticipantTaskDao> {
     private final EnrolleeService enrolleeService;
     private final ParticipantNoteService participantNoteService;
 
-    public ParticipantTaskService(ParticipantTaskDao dao, DataChangeRecordService dataChangeRecordService, ObjectMapper objectMapper, @Lazy EnrolleeService enrolleeService, ParticipantNoteService participantNoteService) {
-        super(dao, dataChangeRecordService, objectMapper);
+    public ParticipantTaskService(ParticipantTaskDao dao, ParticipantDataChangeService participantDataChangeService, ObjectMapper objectMapper, @Lazy EnrolleeService enrolleeService, ParticipantNoteService participantNoteService) {
+        super(dao, participantDataChangeService, objectMapper);
         this.enrolleeService = enrolleeService;
         this.participantNoteService = participantNoteService;
     }
@@ -45,7 +46,7 @@ public class ParticipantTaskService extends DataAuditedService<ParticipantTask, 
         return dao.findByPortalParticipantUserId(ppUserId);
     }
 
-    public List<ParticipantTask> findAdminTasksByStudyEnvironmentId(UUID studyEnvId) {
+    public List<ParticipantTask> findByStudyEnvironmentId(UUID studyEnvId) {
         return dao.findByStudyEnvironmentId(studyEnvId);
     }
 
@@ -63,16 +64,12 @@ public class ParticipantTaskService extends DataAuditedService<ParticipantTask, 
         return dao.findTaskForActivity(ppUserId, studyEnvironmentId, activityStableId);
     }
 
-    public Optional<ParticipantTask> findTaskForActivity(Enrollee enrollee, UUID studyEnvironmentId, String activityStableId) {
-        return dao.findTaskForActivity(enrollee, studyEnvironmentId, activityStableId);
+    public Optional<ParticipantTask> findTaskForActivity(UUID ppUserId, UUID studyEnvironmentId, String activityStableId, Instant createdBefore) {
+        return dao.findTaskForActivity(ppUserId, studyEnvironmentId, activityStableId, createdBefore);
     }
 
     public Optional<ParticipantTask> findByKitRequestId(UUID kitRequestId) {
         return dao.findByKitRequestId(kitRequestId);
-    }
-
-    public Optional<ParticipantTask> findByConsentResponseId(UUID consentResponseId) {
-        return dao.findByConsentResponseId(consentResponseId);
     }
 
     @Transactional
@@ -88,6 +85,7 @@ public class ParticipantTaskService extends DataAuditedService<ParticipantTask, 
      * applies the task updates to the given environment. Returns a list of the updated tasks This is
      * assumed to be a relatively rare operation, so this is not particularly optimized for
      * performance.
+     * Note that this method only operates on tasks that are in the given study environment
      */
     @Transactional
     public List<ParticipantTask> updateTasks(

@@ -4,25 +4,25 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
+import bio.terra.pearl.api.admin.AuthAnnotationSpec;
+import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
-import bio.terra.pearl.api.admin.MockAuthServiceAlwaysRejects;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnvAuthContext;
 import bio.terra.pearl.core.factory.admin.AdminUserFactory;
 import bio.terra.pearl.core.factory.portal.MailingListContactFactory;
 import bio.terra.pearl.core.factory.portal.PortalEnvironmentFactory;
-import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.portal.MailingListContact;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
-import bio.terra.pearl.core.service.exception.PermissionDeniedException;
 import bio.terra.pearl.core.service.portal.MailingListContactService;
 import bio.terra.pearl.core.service.portal.PortalService;
-import bio.terra.pearl.core.service.workflow.DataChangeRecordService;
+import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import java.util.UUID;
-import org.junit.jupiter.api.Assertions;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,20 +35,20 @@ public class MailingServiceExtServiceTests extends BaseSpringBootTest {
   @Autowired MailingListContactFactory mailingListContactFactory;
   @Autowired AdminUserFactory adminUserFactory;
   @Autowired PortalService portalService;
-  @Autowired DataChangeRecordService dataChangeRecordService;
+  @Autowired ParticipantDataChangeService participantDataChangeService;
   @Autowired ObjectMapper objectMapper;
 
   @Test
-  public void mailingListRequiresAuth() {
-    MailingListExtService listExtService =
-        new MailingListExtService(new MockAuthServiceAlwaysRejects(), null, null, null, null);
-    // testing that this exception is thrown even when everything else is null is a good check that
-    // no work is done prior to auth
-    Assertions.assertThrows(
-        PermissionDeniedException.class,
-        () ->
-            listExtService.delete(
-                "ourhealth", EnvironmentName.live, UUID.randomUUID(), new AdminUser()));
+  public void testAllMethodsAnnotated() {
+    AuthTestUtils.assertAllMethodsAnnotated(
+        mailingListExtService,
+        Map.of(
+            "getAll",
+            AuthAnnotationSpec.withPortalEnvPerm(AuthUtilService.BASE_PERMISSION),
+            "create",
+            AuthAnnotationSpec.withPortalEnvPerm(AuthUtilService.BASE_PERMISSION),
+            "delete",
+            AuthAnnotationSpec.withPortalEnvPerm(AuthUtilService.BASE_PERMISSION)));
   }
 
   @Test
@@ -69,9 +69,10 @@ public class MailingServiceExtServiceTests extends BaseSpringBootTest {
                 .build(),
             auditInfo);
 
-    MailingListContact createdContact = mailingListService.find(contact.getId()).get();
     mailingListExtService.delete(
-        portal.getShortcode(), portalEnvironment.getEnvironmentName(), contact.getId(), adminUser);
+        PortalEnvAuthContext.of(
+            adminUser, portal.getShortcode(), portalEnvironment.getEnvironmentName()),
+        contact.getId());
     assertThat(mailingListService.find(contact.getId()).isPresent(), equalTo(false));
   }
 
@@ -89,7 +90,9 @@ public class MailingServiceExtServiceTests extends BaseSpringBootTest {
 
     List<MailingListContact> createdContacts =
         mailingListExtService.create(
-            portal.getShortcode(), portalEnvironment.getEnvironmentName(), contacts, adminUser);
+            PortalEnvAuthContext.of(
+                adminUser, portal.getShortcode(), portalEnvironment.getEnvironmentName()),
+            contacts);
 
     assertThat(createdContacts, hasSize(2));
   }

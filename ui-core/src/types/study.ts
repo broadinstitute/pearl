@@ -1,5 +1,6 @@
 import { Survey } from './forms'
 import { ParticipantTaskStatus } from './task'
+import { KitType } from 'src/types/kits'
 
 export type Study = {
   name: string
@@ -16,6 +17,12 @@ export type StudyEnvParams = {
   portalShortcode: string
 }
 
+export type OptionalStudyEnvParams = {
+  studyShortcode?: string
+  envName?: EnvironmentName
+  portalShortcode: string
+}
+
 export type StudyEnvironment = {
   id: string
   environmentName: EnvironmentName
@@ -24,6 +31,7 @@ export type StudyEnvironment = {
   preEnrollSurveyId?: string
   configuredSurveys: StudyEnvironmentSurvey[]
   triggers: Trigger[]
+  kitTypes: KitType[]
 }
 
 export type StudyEnvironmentConfig = {
@@ -35,6 +43,7 @@ export type StudyEnvironmentConfig = {
   password: string
   useStubDsm: boolean
   useDevDsmRealm: boolean
+  enableInPersonKits: boolean
 }
 
 export type StudyEnvironmentSurvey = {
@@ -68,7 +77,8 @@ export type Trigger = {
   eventType: string
   taskType?: string
   actionScope: TriggerScope
-  updateTaskTargetStableId?: string
+  filterTargetStableIds: string[]
+  actionTargetStableIds: string[]
   statusToUpdateTo?: ParticipantTaskStatus
   afterMinutesIncomplete: number
   reminderIntervalMinutes: number

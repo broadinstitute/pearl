@@ -47,11 +47,11 @@ public class EmailTemplatePopulator extends BasePopulator<EmailTemplate, EmailTe
         EmailTemplate template;
         if (configPopDto.getPopulateFileName() != null) {
             template = context.fetchFromPopDto(configPopDto, emailTemplateService).orElseThrow(
-                    () -> new RuntimeException("Email template not found: %s".formatted(configPopDto.getPopulateFileName()))
-            );
+                    () -> new IllegalArgumentException("Email template not found %s".formatted(configPopDto.getPopulateFileName())));
         } else {
             template = emailTemplateService.findByStableIdAndPortalShortcode(configPopDto.getEmailTemplateStableId(),
-                    configPopDto.getEmailTemplateVersion(), context.getPortalShortcode()).get();
+                    configPopDto.getEmailTemplateVersion(), context.getPortalShortcode()).orElseThrow(
+                    () -> new IllegalArgumentException("Email template not found %s".formatted(configPopDto.getEmailTemplateStableId())));
         }
         config.setEmailTemplateId(template.getId());
         config.setEmailTemplate(template);

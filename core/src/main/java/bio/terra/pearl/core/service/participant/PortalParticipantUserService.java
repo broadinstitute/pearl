@@ -5,12 +5,12 @@ import bio.terra.pearl.core.dao.survey.PreregistrationResponseDao;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.participant.Enrollee;
-import bio.terra.pearl.core.model.participant.ParticipantUser;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.participant.Profile;
 import bio.terra.pearl.core.service.CascadeProperty;
+import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.ImmutableEntityService;
-import bio.terra.pearl.core.service.workflow.DataChangeRecordService;
+import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,21 +21,21 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-public class PortalParticipantUserService extends ImmutableEntityService<PortalParticipantUser, PortalParticipantUserDao> {
+public class PortalParticipantUserService extends CrudService<PortalParticipantUser, PortalParticipantUserDao> {
     private final ProfileService profileService;
     private final PreregistrationResponseDao preregistrationResponseDao;
-    private final DataChangeRecordService dataChangeRecordService;
+    private final ParticipantDataChangeService participantDataChangeService;
     private final ParticipantUserService participantUserService;
 
     public PortalParticipantUserService(PortalParticipantUserDao dao,
                                         ProfileService profileService,
                                         PreregistrationResponseDao preregistrationResponseDao,
-                                        @Lazy DataChangeRecordService dataChangeRecordService,
+                                        @Lazy ParticipantDataChangeService participantDataChangeService,
                                         @Lazy ParticipantUserService participantUserService) {
         super(dao);
         this.profileService = profileService;
         this.preregistrationResponseDao = preregistrationResponseDao;
-        this.dataChangeRecordService = dataChangeRecordService;
+        this.participantDataChangeService = participantDataChangeService;
         this.participantUserService = participantUserService;
     }
 
@@ -84,6 +84,10 @@ public class PortalParticipantUserService extends ImmutableEntityService<PortalP
         return dao.findOne(participantUserId, portalShortcode);
     }
 
+    public void attachProfiles(List<PortalParticipantUser> portalParticipantUsers) {
+        dao.attachProfiles(portalParticipantUsers);
+    }
+
     public List<PortalParticipantUser> findByPortalEnvironmentId(UUID portalId) {
         return dao.findByPortalEnvironmentId(portalId);
     }
@@ -106,7 +110,7 @@ public class PortalParticipantUserService extends ImmutableEntityService<PortalP
     public void delete(UUID portalParticipantUserId, Set<CascadeProperty> cascades) {
         PortalParticipantUser ppUser = dao.find(portalParticipantUserId).get();
         preregistrationResponseDao.deleteByPortalParticipantUserId(portalParticipantUserId);
-        dataChangeRecordService.deleteByPortalParticipantUserId(portalParticipantUserId);
+        participantDataChangeService.deleteByPortalParticipantUserId(portalParticipantUserId);
 
         dao.delete(portalParticipantUserId);
         if (ppUser.getProfileId() != null) {
@@ -122,9 +126,9 @@ public class PortalParticipantUserService extends ImmutableEntityService<PortalP
     @Transactional
     public void deleteByParticipantUserId(UUID participantUserId) {
         List<PortalParticipantUser> users = dao.findByParticipantUserId(participantUserId);
-        dataChangeRecordService.deleteByResponsibleUserId(participantUserId);
+        participantDataChangeService.deleteByResponsibleUserId(participantUserId);
         for(PortalParticipantUser ppUser : users) {
-            dataChangeRecordService.deleteByPortalParticipantUserId(ppUser.getId());
+            participantDataChangeService.deleteByPortalParticipantUserId(ppUser.getId());
             delete(ppUser.getId(), CascadeProperty.EMPTY_SET);
         }
     }

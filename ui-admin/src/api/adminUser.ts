@@ -10,18 +10,29 @@ export type AdminUser = {
   portalAdminUsers?: PortalAdminUser[]
 };
 
-export type NewAdminUser = {
+export type AdminUserParams = {
   username: string,
   superuser: boolean,
-  portalShortcode: string | null
+  portalShortcode: string | null,
+  roleNames: string[]
 }
 
 export type PortalAdminUser = {
   portalId: string
   roles: Role[]
+  portalAdminUserRoles: PortalAdminUserRole[]
+}
+
+export type PortalAdminUserRole = {
+  id: string,
+  roleId: string,
+  createdAt: number,
+  portalAdminUserId: string
+  lastUpdatedAt: number
 }
 
 export type Role = {
+  id: string
   name: string
   displayName: string
   description: string

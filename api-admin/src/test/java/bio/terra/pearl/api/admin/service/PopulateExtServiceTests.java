@@ -7,8 +7,10 @@ import static org.hamcrest.Matchers.hasSize;
 import bio.terra.pearl.api.admin.AuthAnnotationSpec;
 import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
+import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.admin.AdminUserFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
@@ -27,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class PopulateExtServiceTests extends BaseSpringBootTest {
   private PopulateExtService emptyService =
-      new PopulateExtService(null, null, null, null, null, null, null, null);
+      new PopulateExtService(null, null, null, null, null, null, null, null, null);
 
   @Autowired private PopulateExtService populateExtService;
   @Autowired private StudyEnvironmentFactory studyEnvironmentFactory;
@@ -48,7 +50,8 @@ public class PopulateExtServiceTests extends BaseSpringBootTest {
             "populateSurvey", AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
             "populateSiteContent",
                 AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
-            "populateEnrollee", AuthAnnotationSpec.withPortalStudyEnvPerm("BASE"),
+            "populateEnrollee",
+                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "bulkPopulateEnrollees",
                 AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
             "extractPortal", AuthAnnotationSpec.withOtherAnnotations(List.of(SuperuserOnly.class)),
@@ -59,7 +62,7 @@ public class PopulateExtServiceTests extends BaseSpringBootTest {
   @Test
   @Transactional
   public void populatesNewEnrolleeType(TestInfo info) {
-    StudyEnvironmentFactory.StudyEnvironmentBundle bundle =
+    StudyEnvironmentBundle bundle =
         studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.live);
     AdminUser operator = adminUserFactory.buildPersisted(getTestName(info), true);
     populateExtService.populateEnrollee(

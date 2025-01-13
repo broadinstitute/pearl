@@ -29,6 +29,7 @@ export type ParticipantTaskStatus =
   | 'COMPLETE'
   | 'REJECTED'
   | 'VIEWED'
+  | 'REMOVED'
 
 export type ParticipantTaskType =
   | 'CONSENT'

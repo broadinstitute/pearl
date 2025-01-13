@@ -9,7 +9,7 @@ import { useFileUploadButton } from 'util/uploadUtils'
 /** control for invoking the populate portal API */
 export default function PopulatePortalControl() {
   const [isLoading, setIsLoading] = useState(false)
-  const [isOverwrite, setIsOverwrite] = useState(false)
+  const [isOverwrite, setIsOverwrite] = useState(true)
   const [shortcodeOverride, setShortcodeOverride] = useState('')
   const [fileName, setFileName] = useState('')
   const { file, FileChooser } = useFileUploadButton(() => 1)
@@ -52,11 +52,12 @@ export default function PopulatePortalControl() {
 
       <OverwriteControl isOverwrite={isOverwrite} setIsOverwrite={setIsOverwrite}
         text={<span>
-                If no, no existing data or forms are touched,
-                except for synthetic participants which are refreshed.<br/>
                 If yes, existing participants, surveys, and site content will be destroyed, and everything reset to
                 from the files.  This method will fail if there are participants in the live environment who
                 have not been withdrawn.  This option has no effect if &quot;Shortcode override&quot; is set.
+          <br/>If no, no existing data or forms are touched,
+                except for synthetic participants which are refreshed,
+          and best effort is made to upgrade versions in place
         </span>}/>
       <div>
         <PopulateButton onClick={populate} isLoading={isLoading}/>

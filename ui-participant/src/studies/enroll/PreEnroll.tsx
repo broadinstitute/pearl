@@ -1,9 +1,13 @@
 import React, { useEffect } from 'react'
-import Api, { PreEnrollmentResponse, Survey } from 'api/api'
+import Api, {
+  PreEnrollmentResponse,
+  Survey
+} from 'api/api'
 import { useNavigate } from 'react-router-dom'
 import { StudyEnrollContext } from './StudyEnrollRouter'
 import {
-  getResumeData, getSurveyJsAnswerList,
+  getResumeData,
+  getSurveyJsAnswerList, makeSurveyJsData,
   SurveyAutoCompleteButton,
   SurveyReviewModeButton,
   useI18n,
@@ -11,6 +15,7 @@ import {
 } from '@juniper/ui-core'
 import { useUser } from '../../providers/UserProvider'
 import { useActiveUser } from '../../providers/ActiveUserProvider'
+import { useEnrollmentParams } from './useEnrollmentParams'
 
 /**
  * pre-enrollment surveys are expected to have a calculated value that indicates
@@ -29,14 +34,19 @@ export default function PreEnrollView({ enrollContext, survey }:
   const navigate = useNavigate()
   // for now, we assume all pre-screeners are a single page
   const pager = { pageNumber: 0, updatePageNumber: () => 0 }
+
+  const { preFilledAnswers, referralSource, clearStoredEnrollmentParams } = useEnrollmentParams()
+  const resumeData = makeSurveyJsData(undefined, preFilledAnswers, user?.id)
+
   const { surveyModel, refreshSurvey, SurveyComponent } = useSurveyJSModel(
     survey,
-    null,
+    resumeData,
     handleComplete,
     pager,
     studyEnv.environmentName,
     profile || undefined,
     proxyProfile,
+    [],
     { extraCssClasses: { container: 'my-0' }, extraVariables: { isProxyEnrollment, isSubjectEnrollment } }
   )
 
@@ -53,6 +63,7 @@ export default function PreEnrollView({ enrollContext, survey }:
       answers: getSurveyJsAnswerList(surveyModel, selectedLanguage),
       surveyId: survey.id,
       studyEnvironmentId: studyEnv.id,
+      referralSource: referralSource || undefined,
       qualified
     }
 
@@ -62,6 +73,9 @@ export default function PreEnrollView({ enrollContext, survey }:
       surveyVersion: survey.version,
       preEnrollResponse: responseDto
     }).then(result => {
+      //clear the stored enrollment params in case someone else uses the same browser
+      //without closing the tab
+      clearStoredEnrollmentParams()
       if (!qualified) {
         navigate('../ineligible')
       } else {
@@ -86,7 +100,7 @@ export default function PreEnrollView({ enrollContext, survey }:
     <div style={{ background: '#f3f3f3' }} className="flex-grow-1">
       <SurveyReviewModeButton surveyModel={surveyModel} envName={studyEnv.environmentName}/>
       <SurveyAutoCompleteButton surveyModel={surveyModel} envName={studyEnv.environmentName}/>
-      {SurveyComponent}
+      <div className="mb-2">{SurveyComponent}</div>
     </div>
   )
 }

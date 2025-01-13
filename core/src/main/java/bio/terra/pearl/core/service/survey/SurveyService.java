@@ -6,12 +6,16 @@ import bio.terra.pearl.core.dao.survey.SurveyDao;
 import bio.terra.pearl.core.dao.survey.SurveyQuestionDefinitionDao;
 import bio.terra.pearl.core.dao.workflow.EventDao;
 import bio.terra.pearl.core.model.i18n.LanguageText;
+import bio.terra.pearl.core.model.portal.PortalEnvironment;
+import bio.terra.pearl.core.model.publishing.StudyEnvironmentChange;
+import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.AnswerMapping;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyQuestionDefinition;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.VersionedEntityService;
 import bio.terra.pearl.core.service.exception.NotFoundException;
+import bio.terra.pearl.core.service.publishing.StudyEnvPublishable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +34,6 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
     private final SurveyQuestionDefinitionDao surveyQuestionDefinitionDao;
     private final LanguageTextDao languageTextDao;
     private final EventDao eventDao;
-    private final SurveyDao surveyDao;
 
     public SurveyService(ObjectMapper objectMapper, SurveyDao surveyDao, AnswerMappingDao answerMappingDao, SurveyQuestionDefinitionDao surveyQuestionDefinitionDao, LanguageTextDao languageTextDao, EventDao eventDao) {
         super(surveyDao);
@@ -39,7 +42,6 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
         this.surveyQuestionDefinitionDao = surveyQuestionDefinitionDao;
         this.languageTextDao = languageTextDao;
         this.eventDao = eventDao;
-        this.surveyDao = surveyDao;
     }
 
     public List<Survey> findByStableIdNoContent(String stableId) {
@@ -57,6 +59,11 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
     public List<Survey> findByStudyEnvironmentIdWithContent(UUID studyId) {
         return dao.findByStudyEnvironmentIdWithContent(studyId);
     }
+
+    public Optional<Survey> findActiveByStudyEnvironmentIdAndStableIdNoContent(UUID studyEnvId, String stableId, Integer version) {
+        return dao.findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvId, stableId, version);
+    }
+
 
     @Transactional
     @Override
@@ -77,6 +84,8 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
         survey.setCreatedAt(now);
         survey.setLastUpdatedAt(now);
         survey.setStableId(survey.getStableId().trim());
+        survey.setReferencedQuestions(SurveyParseUtils.parseReferencedSurveyQuestions(survey).stream().map(Object::toString).toList());
+
         Survey savedSurvey = dao.create(survey);
         for (AnswerMapping answerMapping : survey.getAnswerMappings()) {
             answerMapping.setId(null);
@@ -84,6 +93,7 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
             AnswerMapping savedMapping = answerMappingDao.create(answerMapping);
             savedSurvey.getAnswerMappings().add(savedMapping);
         }
+
         List<LanguageText> texts = SurveyParseUtils.extractLanguageTexts(survey);
         languageTextDao.bulkCreate(texts);
 
@@ -93,7 +103,6 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
 
         return savedSurvey;
     }
-
 
     public List<SurveyQuestionDefinition> getSurveyQuestionDefinitions(Survey survey) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -213,4 +222,11 @@ public class SurveyService extends VersionedEntityService<Survey, SurveyDao> {
         survey.setAnswerMappings(answerMappingDao.findBySurveyId(survey.getId()));
     }
 
+    public List<Survey> findActiveSurveysByPortalId(UUID portalId) {
+        List<Survey> surveys = dao.findActiveSurveysByPortalIdNoPreEnrolls(portalId);
+
+        surveys.addAll(dao.findActivePreEnrolleeSurveysByPortalId(portalId));
+
+        return surveys;
+    }
 }

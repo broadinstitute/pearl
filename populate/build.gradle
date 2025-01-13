@@ -21,15 +21,15 @@ dependencies {
     implementation group: 'org.jdbi', name: 'jdbi3-spring5', version: '3.34.0'
     implementation group: 'org.jdbi', name: 'jdbi3-sqlobject', version: '3.34.0'
     implementation group: 'org.jdbi', name: 'jdbi3-postgres', version: '3.34.0'
-    implementation 'org.apache.commons:commons-text:1.10.0'
+    implementation 'org.apache.commons:commons-text:1.12.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.3.2'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:3.4.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc:3.3.2'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
-    implementation 'org.yaml:snakeyaml:2.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'org.yaml:snakeyaml:2.3'
 
-    testImplementation 'org.apache.commons:commons-text:1.10.0'
-    testImplementation 'org.hamcrest:hamcrest:2.2'
+    testImplementation 'org.apache.commons:commons-text:1.12.0'
+    testImplementation 'org.hamcrest:hamcrest:3.0'
     testImplementation 'com.github.seregamorph:hamcrest-more-matchers:0.1'
     testImplementation(testFixtures(project(":core")))
 }
@@ -45,5 +45,5 @@ jacocoTestReport {
 
 jacoco {
     toolVersion = "0.8.9"
-    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
+    reportsDirectory = layout.buildDirectory.dir('code-coverage')
 }

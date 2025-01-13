@@ -3,14 +3,16 @@ package bio.terra.pearl.core.model.survey;
 import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.PortalAttached;
 import bio.terra.pearl.core.model.Versioned;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import bio.terra.pearl.core.model.workflow.RecurrenceType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Getter @Setter @NoArgsConstructor @SuperBuilder
 public class Survey extends BaseEntity implements Versioned, PortalAttached {
@@ -32,14 +34,16 @@ public class Survey extends BaseEntity implements Versioned, PortalAttached {
     private String footer;
     @Builder.Default
     private List<AnswerMapping> triggers = new ArrayList<>();
+    @Builder.Default
+    private List<String> referencedQuestions = new ArrayList<>();
 
     @Builder.Default
-    private boolean recur = false;
+    private RecurrenceType recurrenceType = RecurrenceType.NONE;
     @Builder.Default
     private boolean required = false; // whether this is required before other non-required surveys can be taken
     // how many days between offerings of this survey (e.g. 365 for one year)
     private Integer recurrenceIntervalDays;
-    // how many days after being eligible (e.g. after consent, or rule triggering) to offer the survey
+    // how many days after enrollment this survey is first offered
     private Integer daysAfterEligible;
     private String eligibilityRule;
     @Builder.Default
@@ -51,7 +55,7 @@ public class Survey extends BaseEntity implements Versioned, PortalAttached {
     @Builder.Default
     private boolean prepopulate = false; // whether to bring forward answers from prior completions (if recur is true)
     @Builder.Default
-    private boolean assignToAllNewEnrollees = true; // whether to assign the survey to all new enrollees by default
+    private boolean autoAssign = true; // whether to assign the survey to enrollees automatically once they meet the eligibility criteria
     @Builder.Default
     private boolean assignToExistingEnrollees = false; // whether to assign the survey automatically to existing enrollees
     @Builder.Default

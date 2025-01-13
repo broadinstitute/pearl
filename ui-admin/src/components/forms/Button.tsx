@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import React, { useRef, useState } from 'react'
 import { Overlay, Tooltip } from 'react-bootstrap'
 import { Placement } from 'react-bootstrap/types'
-import { faEllipsisV } from '@fortawesome/free-solid-svg-icons'
+import { faChevronDown, faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 
 type ButtonVariant =
   | 'primary'
@@ -112,6 +112,18 @@ export const EllipsisDropdownButton = (props: ButtonProps & {'aria-label': strin
     aria-expanded="false"
     {...props}>
     { props.text ? <span className="me-2">{props.text}</span> : '' }
-    <FontAwesomeIcon icon={faEllipsisV} className="fa-lg"/>
+    <FontAwesomeIcon icon={faEllipsisV} />
+  </Button>
+}
+
+/**
+ * button for an ellipsis "More actions" menu
+ */
+export const ChevronDropdownButton = (props: ButtonProps & {'aria-label': string, text?: string}) => {
+  return <Button tooltip={props['aria-label']} data-bs-toggle="dropdown"
+    aria-expanded="false"
+    {...props}>
+    { props.text ? <span className="me-2">{props.text}</span> : '' }
+    <FontAwesomeIcon icon={faChevronDown}/>
   </Button>
 }

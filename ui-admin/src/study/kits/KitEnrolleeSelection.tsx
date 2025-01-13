@@ -12,7 +12,7 @@ import {
   VisibilityState
 } from '@tanstack/react-table'
 
-import Api from 'api/api'
+import Api, { ParticipantTask } from 'api/api'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import {
   basicTableLayout,
@@ -25,10 +25,10 @@ import LoadingSpinner from 'util/LoadingSpinner'
 import { Enrollee, instantToDateString } from '@juniper/ui-core'
 import RequestKitsModal from './RequestKitsModal'
 import { useLoadingEffect } from 'api/api-utils'
-import { enrolleeKitRequestPath } from '../participants/enrolleeView/EnrolleeView'
+import { enrolleeKitRequestPath } from 'study/participants/enrolleeView/EnrolleeView'
 import { Button } from 'components/forms/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
+import { faPaperPlane, faQrcode } from '@fortawesome/free-solid-svg-icons'
 
 type EnrolleeRow = Enrollee & {
   taskCompletionStatus: Record<string, boolean>
@@ -54,14 +54,13 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
   ])
   const [showRequestKitModal, setShowRequestKitModal] = useState(false)
 
-
   const { isLoading, reload } = useLoadingEffect(async () => {
     const enrollees = await Api.fetchEnrolleesWithKits(
       portal.shortcode, study.shortcode, currentEnv.environmentName)
     const enrolleeRows = enrollees.map(enrollee => {
       const taskCompletionStatus = _mapValues(
         _keyBy(enrollee.participantTasks, task => task.targetStableId),
-        task => task.status === 'COMPLETE'
+        task => (task as ParticipantTask).status === 'COMPLETE'
       )
 
       return { ...enrollee, taskCompletionStatus }
@@ -187,6 +186,9 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
         <RowVisibilityCount table={table}/>
       </div>
       <div className="d-flex">
+        <Link to={'../scan'}>
+          <Button variant="light" className="border m-1"><FontAwesomeIcon icon={faQrcode}/> Scan kit</Button>
+        </Link>
         <Button onClick={() => { setShowRequestKitModal(true) }}
           variant="light" className="border m-1" disabled={!enableActionButtons}
           tooltip={enableActionButtons ? 'Send sample collection kit' : 'Select at least one participant'}>

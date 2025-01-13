@@ -1,20 +1,21 @@
 package bio.terra.pearl.api.admin.controller.export;
 
 import bio.terra.pearl.api.admin.api.ExportApi;
-import bio.terra.pearl.api.admin.service.EnrolleeExportExtService;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
+import bio.terra.pearl.api.admin.service.export.EnrolleeExportExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.service.export.ExportFileFormat;
-import bio.terra.pearl.core.service.export.ExportOptions;
+import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpression;
 import bio.terra.pearl.core.service.search.EnrolleeSearchExpressionParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
-import java.util.Objects;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -47,26 +48,16 @@ public class ExportController implements ExportApi {
   /** just gets the export as a row TSV string, with no accompanying data dictionary */
   @Override
   public ResponseEntity<Resource> exportData(
-      String portalShortcode,
-      String studyShortcode,
-      String envName,
-      Boolean splitOptionsIntoColumns,
-      Boolean stableIdsForOptions,
-      Boolean includeOnlyMostRecent,
-      String searchExpression,
-      String fileFormat,
-      Integer limit) {
+      String portalShortcode, String studyShortcode, String envName, Object body) {
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     AdminUser user = authUtilService.requireAdminUser(request);
 
-    ExportOptions exportOptions =
-        optionsFromParams(
-            searchExpression,
-            fileFormat,
-            limit,
-            splitOptionsIntoColumns,
-            stableIdsForOptions,
-            includeOnlyMostRecent);
+    ExportOptionsWithExpression exportOptions =
+        objectMapper.convertValue(body, ExportOptionsWithExpression.class);
+    exportOptions.setFilterExpression(
+        !StringUtils.isBlank(exportOptions.getFilterString())
+            ? enrolleeSearchExpressionParser.parseRule(exportOptions.getFilterString())
+            : null);
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     enrolleeExportExtService.export(
@@ -79,25 +70,15 @@ public class ExportController implements ExportApi {
   /** gets a data dictionary for the environment */
   @Override
   public ResponseEntity<Resource> exportDictionary(
-      String portalShortcode,
-      String studyShortcode,
-      String envName,
-      Boolean splitOptionsIntoColumns,
-      Boolean stableIdsForOptions,
-      Boolean includeOnlyMostRecent,
-      String searchExpression,
-      String fileFormat) {
-
+      String portalShortcode, String studyShortcode, String envName, Object body) {
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     AdminUser user = authUtilService.requireAdminUser(request);
-    ExportOptions exportOptions =
-        optionsFromParams(
-            searchExpression,
-            fileFormat,
-            null,
-            splitOptionsIntoColumns,
-            stableIdsForOptions,
-            includeOnlyMostRecent);
+    ExportOptionsWithExpression exportOptions =
+        objectMapper.convertValue(body, ExportOptionsWithExpression.class);
+    exportOptions.setFilterExpression(
+        !StringUtils.isBlank(exportOptions.getFilterString())
+            ? enrolleeSearchExpressionParser.parseRule(exportOptions.getFilterString())
+            : null);
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     enrolleeExportExtService.exportDictionary(
@@ -107,28 +88,31 @@ public class ExportController implements ExportApi {
     return ResponseEntity.ok().body(new ByteArrayResource(baos.toByteArray()));
   }
 
-  private ExportOptions optionsFromParams(
-      String searchExpression,
+  private ExportOptionsWithExpression optionsFromParams(
+      String filter,
       String fileFormat,
       Integer limit,
       Boolean splitOptionsIntoColumns,
       Boolean stableIdsForOptions,
-      Boolean includeOnlyMostRecent) {
-    EnrolleeSearchExpression filter =
-        Objects.nonNull(searchExpression) && !searchExpression.isEmpty()
-            ? enrolleeSearchExpressionParser.parseRule(searchExpression)
-            : null;
+      Boolean includeOnlyMostRecent,
+      Boolean includeSubHeaders,
+      List<String> excludeModules) {
+    EnrolleeSearchExpression searchExp =
+        !StringUtils.isBlank(filter) ? enrolleeSearchExpressionParser.parseRule(filter) : null;
 
-    ExportOptions exportOptions =
-        ExportOptions.builder()
+    ExportOptionsWithExpression exportOptions =
+        ExportOptionsWithExpression.builder()
             .splitOptionsIntoColumns(
                 splitOptionsIntoColumns != null ? splitOptionsIntoColumns : false)
             .stableIdsForOptions(stableIdsForOptions != null ? stableIdsForOptions : false)
             .onlyIncludeMostRecent(includeOnlyMostRecent != null ? includeOnlyMostRecent : false)
-            .filter(filter)
+            .filterString(filter)
+            .filterExpression(searchExp)
             .fileFormat(
                 fileFormat != null ? ExportFileFormat.valueOf(fileFormat) : ExportFileFormat.TSV)
-            .limit(limit)
+            .rowLimit(limit)
+            .includeSubHeaders(includeSubHeaders)
+            .excludeModules(excludeModules != null ? excludeModules : List.of())
             .build();
     return exportOptions;
   }

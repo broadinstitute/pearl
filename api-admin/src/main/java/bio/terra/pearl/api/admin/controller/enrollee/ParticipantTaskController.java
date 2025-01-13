@@ -2,6 +2,8 @@ package bio.terra.pearl.api.admin.controller.enrollee;
 
 import bio.terra.pearl.api.admin.api.ParticipantTaskApi;
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnrolleeAuthContext;
+import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
 import bio.terra.pearl.api.admin.service.enrollee.ParticipantTaskExtService;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
@@ -44,7 +46,9 @@ public class ParticipantTaskController implements ParticipantTaskApi {
         objectMapper.convertValue(body, ParticipantTaskUpdateDto.class);
     List<ParticipantTask> participantTasks =
         participantTaskExtService.updateTasks(
-            portalShortcode, studyShortcode, environmentName, updateDto, operator);
+            PortalStudyEnvAuthContext.of(
+                operator, portalShortcode, studyShortcode, environmentName),
+            updateDto);
     return ResponseEntity.ok(participantTasks);
   }
 
@@ -57,7 +61,9 @@ public class ParticipantTaskController implements ParticipantTaskApi {
         objectMapper.convertValue(body, ParticipantTaskAssignDto.class);
     List<ParticipantTask> participantTasks =
         participantTaskExtService.assignToEnrollees(
-            portalShortcode, studyShortcode, environmentName, assignDto, operator);
+            PortalStudyEnvAuthContext.of(
+                operator, portalShortcode, studyShortcode, environmentName),
+            assignDto);
     return ResponseEntity.ok(participantTasks);
   }
 
@@ -68,14 +74,16 @@ public class ParticipantTaskController implements ParticipantTaskApi {
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     List<ParticipantTask> participantTasks =
         participantTaskExtService.findAll(
-            portalShortcode, studyShortcode, environmentName, targetStableId, operator);
+            PortalStudyEnvAuthContext.of(
+                operator, portalShortcode, studyShortcode, environmentName),
+            targetStableId);
     return ResponseEntity.ok(participantTasks);
   }
 
   @Override
   public ResponseEntity<Object> getByStudyEnvironment(
       String portalShortcode, String studyShortcode, String envName, String include) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
     List<String> includedRelations = List.of();
     if (!StringUtils.isBlank(include)) {
@@ -83,29 +91,44 @@ public class ParticipantTaskController implements ParticipantTaskApi {
     }
     ParticipantTaskService.ParticipantTaskTaskListDto tasks =
         participantTaskExtService.getByStudyEnvironment(
-            portalShortcode, studyShortcode, environmentName, includedRelations, user);
+            PortalStudyEnvAuthContext.of(
+                operator, portalShortcode, studyShortcode, environmentName),
+            includedRelations);
     return ResponseEntity.ok(tasks);
   }
 
   @Override
   public ResponseEntity<Object> getByEnrollee(
       String portalShortcode, String studyShortcode, String envName, String enrolleeShortcode) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+    AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
-    List<ParticipantTask> tasks = participantTaskExtService.getByEnrollee(enrolleeShortcode, user);
+    List<ParticipantTask> tasks =
+        participantTaskExtService.getByEnrollee(
+            PortalEnrolleeAuthContext.of(
+                operator, portalShortcode, studyShortcode, environmentName, enrolleeShortcode));
     return ResponseEntity.ok(tasks);
   }
 
   @Override
   public ResponseEntity<Object> update(
-      String portalShortcode, String studyShortcode, String envName, UUID taskId, Object body) {
-    AdminUser user = authUtilService.requireAdminUser(request);
+      String portalShortcode,
+      String studyShortcode,
+      String envName,
+      String enrolleeShortcodeOrId,
+      UUID taskId,
+      Object body) {
+    AdminUser operator = authUtilService.requireAdminUser(request);
     EnvironmentName environmentName = EnvironmentName.valueOfCaseInsensitive(envName);
-    ParticipantTask updatedTask = objectMapper.convertValue(body, ParticipantTask.class);
-    updatedTask.setId(taskId);
-    updatedTask =
+    ParticipantTaskUpdate taskUpdate = objectMapper.convertValue(body, ParticipantTaskUpdate.class);
+    taskUpdate.task.setId(taskId);
+    ParticipantTask updatedTask =
         participantTaskExtService.update(
-            portalShortcode, studyShortcode, environmentName, taskId, updatedTask, user);
+            PortalEnrolleeAuthContext.of(
+                operator, portalShortcode, studyShortcode, environmentName, enrolleeShortcodeOrId),
+            taskUpdate.task,
+            taskUpdate.justification);
     return ResponseEntity.ok(updatedTask);
   }
+
+  public record ParticipantTaskUpdate(ParticipantTask task, String justification) {}
 }

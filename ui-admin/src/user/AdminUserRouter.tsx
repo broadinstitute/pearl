@@ -3,8 +3,9 @@ import { Link, Route, Routes } from 'react-router-dom'
 import UserList from './UserList'
 import AdminUserDetail from './AdminUserDetail'
 import { NavBreadcrumb } from 'navbar/AdminNavbar'
-import { studyUsersPath } from 'study/StudyRouter'
-import { Portal, Study } from '@juniper/ui-core'
+import { Portal, StudyEnvParams, OptionalStudyEnvParams } from '@juniper/ui-core'
+import RolesList from './RolesList'
+import { baseStudyEnvPath } from '../study/StudyEnvironmentRouter'
 
 /**
  * Handles user management paths across all users
@@ -15,6 +16,7 @@ export default function AdminUserRouter() {
       <Link to="users">Users</Link>
     </NavBreadcrumb>
     <Routes>
+      <Route path="roles" element={<RolesList/>}/>
       <Route path=":adminUserId" element={<AdminUserDetail/>}/>
       <Route index element={<UserList/>}/>
       <Route path="*" element={<div>Unknown admin user page</div>}/>
@@ -25,15 +27,25 @@ export default function AdminUserRouter() {
 /**
  * handles user management paths for the given portal & study
  */
-export function PortalAdminUserRouter({ portal, study }: {portal: Portal, study: Study}) {
+export function PortalAdminUserRouter({ portal, studyEnvParams }:
+  {portal: Portal, studyEnvParams: OptionalStudyEnvParams}) {
   return <>
     <NavBreadcrumb value="users">
-      <Link to={studyUsersPath(portal.shortcode, study.shortcode)}>Users</Link>
+      <Link to={portalUsersPath(studyEnvParams)}>Users</Link>
     </NavBreadcrumb>
     <Routes>
+      <Route path="roles" element={<RolesList/>}/>
       <Route path=":adminUserId" element={<AdminUserDetail portalShortcode={portal.shortcode}/>}/>
       <Route index element={<UserList portal={portal}/>}/>
       <Route path="*" element={<div>Unknown portal admin user page</div>}/>
     </Routes>
   </>
+}
+
+/** path to portal-specific user list, but keeps study in-context */
+export const portalUsersPath = (studyEnvParams: OptionalStudyEnvParams) => {
+  if (studyEnvParams.studyShortcode) {
+    return `${baseStudyEnvPath(studyEnvParams as StudyEnvParams)}/users`
+  }
+  return `/${studyEnvParams.portalShortcode}/users`
 }

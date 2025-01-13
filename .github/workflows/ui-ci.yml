@@ -14,9 +14,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '16.x'
       - name: Install dependencies
@@ -26,7 +26,7 @@ jobs:
       - name: Run tests
         run: npm test
       - name: Notify slack on failure
-        uses: broadinstitute/action-slack@v3.8.0
+        uses: broadinstitute/action-slack@v3.15.0
         if: failure() && github.ref == 'refs/heads/development'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -36,4 +36,4 @@ jobs:
           author_name: UI CI build failed on merge to development
           fields: job
           text: "UI CI build failed :sadpanda:"
-          username: 'Pearl Build Notifications'
+          username: 'Juniper Build Notifications'

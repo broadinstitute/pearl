@@ -20,9 +20,9 @@
     "description": "View, edit and configure the portal website"
   },
   {
-    "name": "team_roles_edit",
-    "displayName": "Team role management",
-    "description": "View and edit roles assigned to team members"
+    "name": "admin_user_edit",
+    "displayName": "Admin user management",
+    "description": "Create and edit admin users (study staff)"
   },
   {
     "name": "tdr_export",
@@ -43,5 +43,10 @@
     "name": "publish",
     "displayName": "Publish changes to portal content and configs",
     "description": "Allows publishing updates to IRB and Live environments"
+  },
+  {
+    "name": "export_integration",
+    "displayName": "Export integrations",
+    "description": "Configure automated data exports to external systems"
   }
 ]

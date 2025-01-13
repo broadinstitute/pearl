@@ -9,7 +9,16 @@
       "consent_form_edit",
       "site_content_edit",
       "participant_data_edit",
-      "participant_data_view"
+      "participant_data_view",
+      "admin_user_edit"
+    ]
+  },
+  {
+    "name": "exporter",
+    "displayName": "Exporter",
+    "description": "control automatic export settings",
+    "permissionNames": [
+      "export_integration"
     ]
   },
   {
@@ -24,7 +33,7 @@
     "name": "prototype_tester",
     "displayName": "Prototype access",
     "description": "Use features being prototyped",
-    "permissionNames": ["team_roles_edit"]
+    "permissionNames": []
   },
   {
     "name": "power_user",

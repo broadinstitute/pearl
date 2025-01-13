@@ -1,7 +1,9 @@
 {
   "linkedUsernameKey": "invited",
   "shortcode": "HDINVI",
+  "source": "IMPORT",
   "simulateSubmissions": true,
+  "submittedHoursAgo": 300,
   "surveyResponseDtos": [
     {
       "surveyStableId": "hd_hd_basicInfo",
@@ -9,6 +11,7 @@
       "answerPopDtos": [
         {"questionStableId": "hd_hd_basic_firstName", "stringValue": "Invited"},
         {"questionStableId": "hd_hd_basic_lastName", "stringValue": "PriorUser"},
+        {"questionStableId": "hd_hd_basic_dateOfBirth", "stringValue": "05/04/1990"},
         {"questionStableId": "hd_hd_basic_streetAddress", "stringValue": "465 Spruce Street"},
         {"questionStableId": "hd_hd_basic_mghPatient", "stringValue": "yes"},
         {"questionStableId": "hd_hd_basic_sexualOrientation", "stringValue": "preferNoAnswer"}
@@ -21,6 +24,7 @@
     {
       "creatingAdminUsername": "heartdemostaff@gmail.com",
       "kitTypeName": "SALIVA",
+      "distributionMethod": "MAILED",
       "status": "SENT",
       "skipAddressValidation": true,
       "externalKitJson": {

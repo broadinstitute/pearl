@@ -5,10 +5,8 @@ import bio.terra.pearl.core.model.survey.Answer;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class AnswerDao extends BaseMutableJdbiDao<Answer> {
@@ -50,6 +48,15 @@ public class AnswerDao extends BaseMutableJdbiDao<Answer> {
 
     }
 
+    public List<Answer> findByEnrollee(UUID enrolleeId) {
+        return findAllByProperty("enrollee_id", enrolleeId);
+    }
+
+    public Map<UUID, List<Answer>> findByEnrolleeIds(Collection<UUID> enrolleeIds) {
+        return findAllByPropertyCollection("enrollee_id", enrolleeIds)
+                .stream().collect(Collectors.groupingBy(Answer::getEnrolleeId, Collectors.toList()));
+    }
+
     public List<Answer> findByEnrolleeAndSurvey(UUID enrolleeId, String surveyStableId) {
         return findAllByTwoProperties("enrollee_id", enrolleeId, "survey_stable_id", surveyStableId);
     }
@@ -61,7 +68,7 @@ public class AnswerDao extends BaseMutableJdbiDao<Answer> {
     /**
      * Returns the most recent answer for a given enrollee, survey, and question.
      */
-    public Answer findForEnrolleeByQuestion(UUID enrolleeID, String surveyStableId, String questionStableId) {
+    public Optional<Answer> findForEnrolleeByQuestion(UUID enrolleeID, String surveyStableId, String questionStableId) {
         return jdbi.withHandle(handle ->
                 handle.createQuery("select * from " + tableName +
                                 " where enrollee_id = :enrolleeId " +
@@ -73,7 +80,29 @@ public class AnswerDao extends BaseMutableJdbiDao<Answer> {
                         .bind("questionStableId", questionStableId)
                         .mapTo(clazz)
                         .findFirst()
-                        .orElse(null)
+        );
+    }
+
+    public Optional<Answer> findByProfileIdStudyAndQuestion(UUID profileId, String studyName, String surveyStableId, String questionStableId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select a.* from %s a
+                                inner join enrollee e on e.id = a.enrollee_id
+                                inner join study_environment se on se.id = e.study_environment_id
+                                inner join study s on s.id = se.study_id
+                                where e.profile_id = :profileId
+                                and s.name = :studyName
+                                and a.survey_stable_id = :surveyStableId
+                                and a.question_stable_id = :questionStableId
+                                order by last_updated_at
+                                desc limit 1
+                                """.formatted(tableName))
+                        .bind("profileId", profileId)
+                        .bind("studyName", studyName)
+                        .bind("surveyStableId", surveyStableId)
+                        .bind("questionStableId", questionStableId)
+                        .mapTo(clazz)
+                        .findFirst()
         );
     }
 }

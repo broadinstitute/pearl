@@ -1,0 +1,52 @@
+version: 2
+updates:
+  - schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    directories:
+      - "/"
+    package-ecosystem: "github-actions"
+    commit-message:
+      prefix: "[JN-1457]"
+  - schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    directories:
+      - "/"
+    package-ecosystem: "npm"
+    commit-message:
+      prefix: "[JN-1457]"
+  - schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    directories:
+      - "/"
+    package-ecosystem: "gradle"
+    commit-message:
+      prefix: "[JN-1457]"
+  - schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    directories:
+      - "terraform"
+    package-ecosystem: "terraform"
+    commit-message:
+      prefix: "[JN-1457]"
+  - schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/New_York"
+    directories:
+      - "terraform/gcp/k8s"
+    package-ecosystem: "docker"
+    commit-message:
+      prefix: "[JN-1457]"

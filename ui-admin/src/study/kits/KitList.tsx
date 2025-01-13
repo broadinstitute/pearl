@@ -19,15 +19,17 @@ import LoadingSpinner from 'util/LoadingSpinner'
 import { basicTableLayout, ColumnVisibilityControl, renderEmptyMessage } from 'util/tableUtils'
 import { instantToDateString, KitRequest } from '@juniper/ui-core'
 import { doApiLoad, useLoadingEffect } from 'api/api-utils'
-import { enrolleeKitRequestPath } from '../participants/enrolleeView/EnrolleeView'
-import KitStatusCell from '../participants/KitStatusCell'
+import { enrolleeKitRequestPath } from 'study/participants/enrolleeView/EnrolleeView'
+import KitStatusCell from 'study/participants/KitStatusCell'
 import { Button } from 'components/forms/Button'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRefresh } from '@fortawesome/free-solid-svg-icons'
 import { successNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
-import { useUser } from '../../user/UserProvider'
-import { KitRequestDetails } from '../participants/KitRequests'
+import { useUser } from 'user/UserProvider'
+import { prettifyString, KitRequestDetails } from 'study/participants/KitRequests'
+import { useAdminUserContext } from 'providers/AdminUserProvider'
+import { tabLinkStyle } from '../../util/subNavStyles'
 
 type KitStatusTabConfig = {
   statuses: string[],
@@ -47,8 +49,12 @@ const defaultColumns: VisibilityState = {
   'trackingNumber': false,
   'sentAt': false,
   'returnTrackingNumber': false,
+  'creatingAdminUserId': false,
+  'collectingAdminUserId': false,
+  'kitLabel': false,
   'receivedAt': false,
-  'status': false
+  'status': false,
+  'distributionMethod': false
 }
 
 /**
@@ -58,7 +64,7 @@ const statusTabs: KitStatusTabConfig[] = [
   {
     statuses: ['CREATED'],
     key: 'created',
-    additionalColumns: []
+    additionalColumns: ['distributionMethod']
   },
   {
     statuses: ['QUEUED'],
@@ -76,12 +82,21 @@ const statusTabs: KitStatusTabConfig[] = [
     ]
   },
   {
+    statuses: ['COLLECTED_BY_STAFF'],
+    key: 'collected',
+    additionalColumns: [
+      'creatingAdminUserId',
+      'collectingAdminUserId',
+      'returnTrackingNumber'
+    ]
+  },
+  {
     statuses: ['RECEIVED'],
     key: 'returned',
     additionalColumns: [
       'labeledAt', 'trackingNumber',
       'sentAt', 'returnTrackingNumber',
-      'receivedAt'
+      'receivedAt', 'distributionMethod'
     ]
   },
   {
@@ -131,11 +146,6 @@ export default function KitList({ studyEnvContext }: { studyEnvContext: StudyEnv
 
   const kitsByTabKey = _groupBy(kits, kit => {
     return statusTabs.find(tab => tab.statuses.includes(kit.status))?.key || 'issues'
-  })
-
-  const tabLinkStyle = ({ isActive }: {isActive: boolean}) => ({
-    borderBottom: isActive ? '2px solid #708DBC': '',
-    background: isActive ? '#E1E8F7' : ''
   })
 
   const refreshStatuses = async () => {
@@ -194,6 +204,7 @@ function KitListView({ studyEnvContext, tab, kits, initialColumnVisibility }: {
   const [currentTab, setCurrentTab] = useState(tab)
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(initialColumnVisibility)
   const [sorting, setSorting] = useState<SortingState>([])
+  const { users } = useAdminUserContext()
 
   if (tab !== currentTab) {
     setColumnVisibility(initialColumnVisibility)
@@ -227,6 +238,25 @@ function KitListView({ studyEnvContext, tab, kits, initialColumnVisibility }: {
   }, {
     header: 'Tracking Number',
     accessorKey: 'trackingNumber',
+    enableColumnFilter: false
+  }, {
+    header: 'Kit Label',
+    accessorKey: 'kitLabel',
+    enableColumnFilter: false
+  }, {
+    header: 'Distribution Method',
+    accessorKey: 'distributionMethod',
+    enableColumnFilter: false,
+    accessorFn: data => prettifyString(data.distributionMethod)
+  }, {
+    header: 'Requested By',
+    accessorKey: 'creatingAdminUserId',
+    cell: data => users.find(user => user.id === data.getValue())?.username,
+    enableColumnFilter: false
+  }, {
+    header: 'Collected By',
+    accessorKey: 'collectingAdminUserId',
+    cell: data => users.find(user => user.id === data.getValue())?.username,
     enableColumnFilter: false
   }, {
     header: 'Sent',

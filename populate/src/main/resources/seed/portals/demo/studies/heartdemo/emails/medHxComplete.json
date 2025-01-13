@@ -1,0 +1,19 @@
+{
+  "stableId": "hd_hd_medHxComplete",
+  "name": "Medical History complete",
+  "version": 1,
+  "publishedVersion": 1,
+  "localizedEmailTemplateDtos": [{
+    "language": "en",
+    "subject": "Medical History complete",
+    "bodyPopulateFile": "en/medHxComplete.html"
+  },{
+    "language": "es",
+    "subject": "Historial Médico completo",
+    "bodyPopulateFile": "es/medHxComplete.html"
+  },{
+    "language": "dev",
+    "subject": "DEV_Medical History complete",
+    "bodyPopulateFile": "dev/medHxComplete.html"
+  }]
+}

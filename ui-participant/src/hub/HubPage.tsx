@@ -8,7 +8,6 @@ import Api, {
   Portal,
   Study
 } from 'api/api'
-import { isTaskActive } from './TaskLink'
 import { DocumentTitle } from 'util/DocumentTitle'
 
 import {
@@ -18,6 +17,7 @@ import {
 } from './hubUpdates'
 import {
   Enrollee,
+  getJoinLink,
   ParticipantDashboardAlert,
   useI18n
 } from '@juniper/ui-core'
@@ -28,7 +28,7 @@ import { useActiveUser } from 'providers/ActiveUserProvider'
 import { useUser } from 'providers/UserProvider'
 import ParticipantSelector from '../participant/ParticipantSelector'
 import { Link } from 'react-router-dom'
-import { getJoinLink } from '../Navbar'
+import { isTaskActive } from './task/taskUtils'
 
 
 /** renders the logged-in hub page */
@@ -75,7 +75,7 @@ export default function HubPage() {
     <>
       <DocumentTitle title={i18n('navbarDashboard')}/>
       <div
-        className="hub-dashboard-background flex-grow-1 mb-2"
+        className="hub-dashboard-background flex-grow-1 pb-2"
         style={{ background: 'var(--dashboard-background-color)' }}
       >
         {!hasActiveTasks && hasSubjectEnrollee && noActivitiesAlert && <HubMessageAlert
@@ -102,9 +102,9 @@ export default function HubPage() {
 
 
         <div className="my-md-4 mx-auto" style={{ maxWidth: 768 }}>
-          <div className="w-100 mt-2 mb-0 d-flex mb-2">
-            {proxyRelations.length > 0 && <ParticipantSelector/>}
-          </div>
+          { proxyRelations.length > 0 && <div className="w-100 mt-2 mb-0 d-flex mb-2">
+            <ParticipantSelector/>
+          </div> }
           <main
             className="hub-dashboard py-4 px-2 px-md-5 shadow-sm"
             style={{ background: '#fff' }}

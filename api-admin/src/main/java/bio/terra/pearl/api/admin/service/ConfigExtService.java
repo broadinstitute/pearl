@@ -1,10 +1,13 @@
 package bio.terra.pearl.api.admin.service;
 
 import bio.terra.pearl.api.admin.config.B2CConfiguration;
-import bio.terra.pearl.core.model.admin.AdminUser;
+import bio.terra.pearl.api.admin.service.auth.Public;
+import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
+import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
 import bio.terra.pearl.core.service.address.AddressValidationConfig;
-import bio.terra.pearl.core.service.exception.PermissionDeniedException;
+import bio.terra.pearl.core.service.export.integration.AirtableExporter;
 import bio.terra.pearl.core.service.kit.pepper.LivePepperDSMClient;
+import bio.terra.pearl.core.service.logging.MixpanelService;
 import bio.terra.pearl.core.shared.ApplicationRoutingPaths;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -18,19 +21,27 @@ public class ConfigExtService {
   private Map<String, String> configMap;
   private final LivePepperDSMClient.PepperDSMConfig pepperDSMConfig;
   private final AddressValidationConfig addressValidationConfig;
+  private final AirtableExporter.AirtableConfig airtableConfig;
+  private final MixpanelService.MixpanelConfig mixpanelConfig;
 
   public ConfigExtService(
       B2CConfiguration b2CConfiguration,
       ApplicationRoutingPaths applicationRoutingPaths,
       LivePepperDSMClient.PepperDSMConfig pepperDSMConfig,
-      AddressValidationConfig addressValidationConfig) {
+      AddressValidationConfig addressValidationConfig,
+      AirtableExporter.AirtableConfig airtableConfig,
+      MixpanelService.MixpanelConfig mixpanelConfig) {
     this.b2CConfiguration = b2CConfiguration;
     this.pepperDSMConfig = pepperDSMConfig;
     this.applicationRoutingPaths = applicationRoutingPaths;
     this.addressValidationConfig = addressValidationConfig;
+    this.airtableConfig = airtableConfig;
+    this.mixpanelConfig = mixpanelConfig;
+
     configMap = buildConfigMap();
   }
 
+  @Public
   public Map<String, String> getConfigMap() {
     // no auth needed -- the config is all public information sent to the frontend
     return configMap;
@@ -60,11 +71,9 @@ public class ConfigExtService {
    * returns non-public configuration information -- note that this still should not return actual
    * secrets
    */
-  public Map<String, ?> getInternalConfigMap(AdminUser user) {
-    if (!user.isSuperuser()) {
-      throw new PermissionDeniedException("You do not have permission to view this config");
-    }
-    var configMap =
+  @SuperuserOnly
+  public Map<String, ?> getInternalConfigMap(OperatorAuthContext authContext) {
+    Map<String, Map<String, String>> internalConfigMap =
         Map.of(
             "pepperDsmConfig",
             Map.of(
@@ -78,10 +87,17 @@ public class ConfigExtService {
             Map.of(
                 "addrValidationServiceClass", addressValidationConfig.getAddressValidationClass(),
                 "smartyAuthId", addressValidationConfig.getAuthId(),
-                "smartyAuthToken", maskSecret(addressValidationConfig.getAuthToken())));
-    return configMap;
+                "smartyAuthToken", maskSecret(addressValidationConfig.getAuthToken())),
+            "airtable",
+            Map.of("authToken", maskSecret(airtableConfig.getAuthToken())),
+            "mixpanel",
+            Map.of(
+                "enabled", mixpanelConfig.getEnabled(),
+                "token", mixpanelConfig.getToken()));
+    return internalConfigMap;
   }
 
+  @Public
   public static String maskSecret(String secret) {
     if (StringUtils.isBlank(secret)) {
       return "";

@@ -13,13 +13,14 @@ public class JsonExporter extends BaseExporter {
 
     private final ObjectMapper objectMapper;
 
-    public JsonExporter(List<ModuleFormatter> moduleFormatters, List<Map<String, String>> enrolleeMaps,
+    public JsonExporter(List<ModuleFormatter> moduleFormatters, List<Map<String, String>> enrolleeMaps, List<String> columnSorting,
                         ObjectMapper objectMapper) {
-        super(moduleFormatters, enrolleeMaps);
+        super(moduleFormatters, enrolleeMaps, columnSorting);
         this.objectMapper = objectMapper;
     }
 
-    public void export(OutputStream os) {
+    /** the 'includeSubheaders' parameter is ignored for JSON export -- subheaders are always available in the returned JSON object */
+    public void export(OutputStream os, boolean includeSubHeaders) {
         PrintWriter printWriter = new PrintWriter(os);
         List<String> columnKeys = getColumnKeys();
         List<String> headerRowValues = getHeaderRow();

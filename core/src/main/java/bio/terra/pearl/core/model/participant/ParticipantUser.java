@@ -9,13 +9,17 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter @Setter @SuperBuilder
 @NoArgsConstructor
 public class ParticipantUser extends BaseEntity {
     private String username;
+
+    private String shortcode;
 
     private String token;
 
@@ -29,18 +33,7 @@ public class ParticipantUser extends BaseEntity {
     private EnvironmentName environmentName;
 
     @Builder.Default
-    private Set<PortalParticipantUser> portalParticipantUsers = new HashSet<>();
-
-    public static abstract class ParticipantUserBuilder<C extends ParticipantUser, B extends ParticipantUser.ParticipantUserBuilder<C, B>>
-                extends BaseEntity.BaseEntityBuilder<C, B> {
-        @Getter
-        private EnvironmentName environmentName;
-
-        public ParticipantUserBuilder environmentName(EnvironmentName environment) {
-            this.environmentName = environment;
-            return this;
-        }
-    }
+    private List<PortalParticipantUser> portalParticipantUsers = new ArrayList<>();
 }
 
 

@@ -1,3 +1,5 @@
+import { ParticipantFile } from 'src/types/participantFile'
+
 export const answerMappingTargetTypes = ['PROFILE', 'PROXY', 'PROXY_PROFILE'] as const
 export type AnswerMappingTargetType = typeof answerMappingTargetTypes[number];
 
@@ -28,18 +30,19 @@ export type VersionedForm = {
   footer?: string
 }
 
-export type SurveyType = 'RESEARCH' | 'OUTREACH' | 'CONSENT' | 'ADMIN'
-
+export type SurveyType = 'RESEARCH' | 'OUTREACH' | 'CONSENT' | 'ADMIN' | 'DOCUMENT_REQUEST'
+export type RecurrenceType = 'NONE' | 'LONGITUDINAL' | 'UPDATE'
 export type Survey = VersionedForm & {
   surveyType: SurveyType
   blurb?: string
   required: boolean
   rule?: string
-  assignToAllNewEnrollees: boolean
+  autoAssign: boolean
   assignToExistingEnrollees: boolean
   autoUpdateTaskAssignments: boolean
-  recur: boolean
+  recurrenceType: RecurrenceType
   recurrenceIntervalDays: number
+  daysAfterEligible?: number
   allowAdminEdit: boolean
   allowParticipantStart: boolean
   allowParticipantReedit: boolean
@@ -49,10 +52,10 @@ export type Survey = VersionedForm & {
 
 export const defaultSurvey = {
   required: false,
-  assignToAllNewEnrollees: true,
+  autoAssign: true,
   assignToExistingEnrollees: false,
   autoUpdateTaskAssignments: false,
-  recur: false,
+  recurrenceType: 'NONE' as RecurrenceType,
   recurrenceIntervalDays: 0,
   allowAdminEdit: true,
   allowParticipantStart: true,
@@ -89,6 +92,7 @@ export type SurveyResponse = FormResponse & {
   surveyId: string
   enrolleeId: string
   answers: Answer[]
+  participantFiles?: ParticipantFile[]
   complete: boolean
 }
 
@@ -103,12 +107,17 @@ export type PreregistrationResponse = FormResponse & {
   qualified: boolean
 }
 
+export type ReferralSource = {
+  referringSite: string
+}
+
 export type PreEnrollmentResponse = FormResponse & {
   surveyId: string
   studyEnvironmentId: string
   answers: Answer[]
   fullData: string
   qualified: boolean
+  referralSource?: string
 }
 
 // Survey configuration
@@ -152,6 +161,13 @@ export type FormPanel = BaseElement & {
   title: string
   type: 'panel'
   elements: (HtmlElement | Question)[]
+}
+
+export type FormPanelDynamic = BaseElement & {
+  name: string
+  title: string
+  type: 'paneldynamic'
+  templateElements: (HtmlElement | Question)[]
 }
 
 export type HtmlElement = {
@@ -212,6 +228,7 @@ export type TextQuestion = TitledQuestion & {
   size?: number
   min?: number
   max?: number
+  placeholder?: I18nSurveyElement
 }
 
 export type SignatureQuestion = TitledQuestion & {
@@ -236,10 +253,17 @@ export type Question =
   | TemplatedQuestion
   | TextQuestion
   | HtmlQuestion
+  | FormPanelDynamic
 
 export type InteractiveQuestion = Exclude<Question, HtmlQuestion>
-
 /** Possible values for the 'type' field of a Question. */
 export type QuestionType = Exclude<Question, TemplatedQuestion>['type']
+
+export type SimpleInteractiveQuestion = Exclude<InteractiveQuestion, FormPanelDynamic | TemplatedQuestion>
+export type SimpleInteractiveQuestionType = SimpleInteractiveQuestion['type']
+
+export type SimpleQuestion = Exclude<Question, FormPanelDynamic | TemplatedQuestion>
+export type SimpleQuestionType = SimpleQuestion['type']
+
 
 export {}

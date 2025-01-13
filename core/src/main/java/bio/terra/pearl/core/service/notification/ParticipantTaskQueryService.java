@@ -24,17 +24,19 @@ public class ParticipantTaskQueryService {
                                                                           Duration timeSinceCreation,
                                                                           Duration maxTimeSinceCreation,
                                                                           Duration timeSinceLastNotification,
-                                                                          List<TaskStatus> statuses) {
+                                                                          List<TaskStatus> statuses,
+                                                                          List<String> targetStableIds) {
         return participantTaskDao.findByStatusAndTime(studyEnvironmentId, taskType, timeSinceCreation, maxTimeSinceCreation,
-                timeSinceLastNotification, statuses);
+                timeSinceLastNotification, statuses, targetStableIds);
     }
 
     public List<ParticipantTaskDao.EnrolleeWithTasks> findIncompleteByTime(UUID studyEnvironmentId,
                                                                            TaskType taskType,
                                                                            Duration timeSinceCreation,
                                                                            Duration maxTimeSinceCreation,
-                                                                           Duration timeSinceLastNotification) {
+                                                                           Duration timeSinceLastNotification,
+                                                                           List<String> targetStableIds) {
         return findByStatusAndTime(studyEnvironmentId, taskType, timeSinceCreation, maxTimeSinceCreation, timeSinceLastNotification,
-                List.of(TaskStatus.NEW, TaskStatus.IN_PROGRESS));
+                List.of(TaskStatus.NEW, TaskStatus.IN_PROGRESS), targetStableIds);
     }
 }

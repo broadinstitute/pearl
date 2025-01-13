@@ -8,15 +8,18 @@ import {
 import ParticipantList from './ParticipantList'
 import Api, { EnrolleeSearchExpressionResult } from 'api/api'
 import {
+  mockEnrollee,
   mockEnrolleeSearchExpressionResult,
   mockFamily,
-  mockStudyEnvContext
+  mockStudyEnvContext, renderInPortalRouter
 } from 'test-utils/mocking-utils'
 import { userEvent } from '@testing-library/user-event'
 import {
   Family, renderWithRouter,
   setupRouterTest
 } from '@juniper/ui-core'
+import ParticipantsRouter from '../ParticipantsRouter'
+import { mockParticipantUser } from '@juniper/ui-participant/src/test-utils/test-participant-factory'
 
 const mockSearchApi = (numSearchResults: number) => {
   return jest.spyOn(Api, 'executeSearchExpression')
@@ -41,6 +44,34 @@ const mockSearchApiWithFamilies = (numSearchResults: number, numFamilies: number
     .mockImplementation(() => Promise.resolve(families))
 
   return { searchSpy, familySpy }
+}
+
+const mockWithrawnEnrolleeApi = () => {
+  return jest.spyOn(Api, 'fetchWithdrawnEnrollees')
+    .mockResolvedValue([{
+      shortcode: 'HDGONE',
+      userData: '{"createdAt": 345, "username": "good@bye.com"}',
+      createdAt: 123,
+      note: 'some reason',
+      reason: 'PARTICIPANT_REQUEST'
+    }])
+}
+
+const mockParticipantUserApi = () => {
+  return jest.spyOn(Api, 'fetchParticipantUsers')
+    .mockResolvedValue({
+      participantUsers: [
+        {
+          ...mockParticipantUser(),
+          username: 'accountTest@foo.com',
+          id: 'user1'
+        }
+      ],
+      enrollees: [{
+        ...mockEnrollee(),
+        participantUserId: 'user1'
+      }]
+    })
 }
 
 
@@ -145,7 +176,7 @@ test('keyword search sends search api request', async () => {
     'or {enrollee.shortcode} contains \'foo\' ' +
     'or {family.shortcode} contains \'foo\') ' +
     'and {enrollee.subject} = true ' +
-    'and include({user.lastLogin})')
+    'and include({user.username}) and include({portalUser.lastLogin})')
 })
 
 test('allows the user to cycle pages', async () => {
@@ -194,15 +225,13 @@ test('allows the user to group by family', async () => {
   const studyEnvContext = mockStudyEnvContext()
 
   studyEnvContext.currentEnv.studyEnvironmentConfig.enableFamilyLinkage = true
-  const { RoutedComponent } = setupRouterTest(<ParticipantList studyEnvContext={studyEnvContext}/>)
-  render(RoutedComponent)
+  renderInPortalRouter(studyEnvContext.portal, <ParticipantsRouter studyEnvContext={studyEnvContext}/>)
 
   //Wait for results to be rendered
   await screen.findAllByText('JOSALK')
+  await userEvent.click(screen.getByLabelText('Switch to family view'))
 
-  await userEvent.click(screen.getByLabelText('Family view'))
-
-  //Wait for results to be rendered
+  expect(screen.getByText('Families')).toBeInTheDocument()
   expect(screen.getAllByText('F_MOCK')[0]).toBeInTheDocument()
 })
 
@@ -212,11 +241,48 @@ test('ensure cannot group by family if family linkage not enabled', async () => 
   const studyEnvContext = mockStudyEnvContext()
 
   studyEnvContext.currentEnv.studyEnvironmentConfig.enableFamilyLinkage = false
-  const { RoutedComponent } = setupRouterTest(<ParticipantList studyEnvContext={studyEnvContext}/>)
-  render(RoutedComponent)
+  renderInPortalRouter(studyEnvContext.portal, <ParticipantsRouter studyEnvContext={studyEnvContext}/>)
 
   //Wait for results to be rendered
   await screen.findAllByText('JOSALK')
 
-  expect(screen.queryByLabelText('Family view')).not.toBeInTheDocument()
+  expect(screen.queryByLabelText('Switch to family view')).not.toBeInTheDocument()
 })
+
+test('allows the user to switch to withdrawn views', async () => {
+  mockSearchApi(100)
+  mockWithrawnEnrolleeApi()
+  const studyEnvContext = mockStudyEnvContext()
+
+  renderInPortalRouter(studyEnvContext.portal, <ParticipantsRouter studyEnvContext={studyEnvContext}/>)
+
+  //Wait for results to be rendered
+  await screen.findAllByText('JOSALK')
+  await userEvent.click(screen.getByLabelText('Switch to withdrawn view'))
+
+  //Confirm the withdrawal info header is shown
+  expect(screen.getByText('Withdrawn Enrollees')).toBeInTheDocument()
+  expect(screen.getByText('HDGONE')).toBeInTheDocument()
+})
+
+test('allows the user to switch to account view', async () => {
+  const studyEnvContext = mockStudyEnvContext()
+  mockSearchApi(100)
+  mockParticipantUserApi()
+  jest.spyOn(Api, 'fetchStudiesWithEnvs')
+    .mockResolvedValue([{
+      ...studyEnvContext.study,
+      studyEnvironments: [studyEnvContext.currentEnv]
+    }])
+
+  renderInPortalRouter(studyEnvContext.portal, <ParticipantsRouter studyEnvContext={studyEnvContext}/>)
+
+  //Wait for results to be rendered
+  await screen.findAllByText('JOSALK')
+  await userEvent.click(screen.getByLabelText('Switch to account view'))
+
+  //Confirm the withdrawal info header is shown
+  expect(screen.getByText('Accounts')).toBeInTheDocument()
+  expect(screen.getByText('accountTest@foo.com')).toBeInTheDocument()
+})
+

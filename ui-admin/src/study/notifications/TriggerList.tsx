@@ -1,10 +1,20 @@
-import React, { useEffect, useState } from 'react'
-import { NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
+import React, {
+  useEffect,
+  useState
+} from 'react'
+import {
+  NavLink,
+  Outlet,
+  Route,
+  Routes,
+  useNavigate
+} from 'react-router-dom'
 import { deliveryTypeDisplayMap } from './TriggerTypeDisplay'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
-import { paramsFromContext, StudyEnvContextT, triggerPath } from '../StudyEnvironmentRouter'
-import TriggerView from './TriggerView'
+
+import {
+  StudyEnvContextT,
+  triggerPath
+} from '../StudyEnvironmentRouter'
 import { renderPageHeader } from 'util/pageUtils'
 import { LoadedPortalContextT } from '../../portal/PortalProvider'
 import { Trigger } from '@juniper/ui-core'
@@ -12,11 +22,17 @@ import Api from 'api/api'
 import { useLoadingEffect } from 'api/api-utils'
 import LoadingSpinner from 'util/LoadingSpinner'
 import CreateTriggerModal from './CreateTriggerModal'
-import { navDivStyle, navLinkStyleFunc, navListItemStyle } from 'util/subNavStyles'
+import {
+  navDivStyle,
+  navLinkStyleFunc,
+  navListItemStyle
+} from 'util/subNavStyles'
 import CollapsableMenu from 'navbar/CollapsableMenu'
 import TriggerNotifications from './TriggerNotifications'
-import { Button } from '../../components/forms/Button'
-import { triggerName } from '../workflow/WorkflowView'
+import { triggerName } from '../workflow/workflowUtils'
+import { TriggerDesigner } from 'study/notifications/TriggerDesigner'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
 const TRIGGER_GROUPS = [
   { title: 'Events', type: 'EVENT' },
@@ -59,7 +75,7 @@ export default function TriggerList({ studyEnvContext, portalContext }:
   }
 
   return <div className="container-fluid px-4 py-2">
-    { renderPageHeader('Triggers and Emails') }
+    {renderPageHeader('Study Automation')}
     <div className="d-flex">
       {isLoading && <LoadingSpinner/>}
       {!isLoading && <div style={navDivStyle}>
@@ -82,24 +98,24 @@ export default function TriggerList({ studyEnvContext, portalContext }:
               </ul>}
             />
           </li>)}
+          { currentEnv.environmentName == 'sandbox' && <li style={navListItemStyle} className="ps-3">
+            <button className="btn btn-secondary" onClick={() => setShowCreateModal(true)}>
+              <FontAwesomeIcon icon={faPlus}/> Add
+            </button>
+          </li> }
         </ul>
       </div> }
-      <div className="flex-grow-1 bg-white">
-        { currentEnv.environmentName == 'sandbox' && <div className="ps-4">
-          <Button variant="secondary" onClick={() => setShowCreateModal(true)}>
-            <FontAwesomeIcon icon={faPlus}/> Create new trigger
-          </Button>
-        </div> }
+      <div className="flex-grow-1 bg-white px-3">
         <Routes>
-          <Route path="triggers/:triggerId"
-            element={<TriggerView studyEnvContext={studyEnvContext}
+          <Route path=":triggerId"
+            element={<TriggerDesigner studyEnvContext={studyEnvContext}
               portalContext={portalContext} onDelete={onDelete}/>}/>
-          <Route path="triggers/:triggerId/notifications" element={
+          <Route path=":triggerId/notifications" element={
             <TriggerNotifications studyEnvContext={studyEnvContext}/>}/>
         </Routes>
         <Outlet/>
       </div>
-      { showCreateModal && <CreateTriggerModal studyEnvParams={paramsFromContext(studyEnvContext)}
+      {showCreateModal && <CreateTriggerModal studyEnvContext={studyEnvContext}
         onDismiss={() => setShowCreateModal(false)} onCreate={onCreate}
       /> }
     </div>

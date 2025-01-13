@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.participant.controller;
 
+import bio.terra.juniper.core.model.maintenance.SystemSettings;
 import bio.terra.pearl.api.participant.api.PublicApi;
 import bio.terra.pearl.api.participant.config.B2CConfigurationService;
 import bio.terra.pearl.api.participant.config.VersionConfiguration;
@@ -12,7 +13,9 @@ import bio.terra.pearl.core.model.portal.PortalEnvironmentDescriptor;
 import bio.terra.pearl.core.model.site.SiteMedia;
 import bio.terra.pearl.core.service.portal.PortalService;
 import bio.terra.pearl.core.service.site.SiteMediaService;
+import bio.terra.pearl.core.service.system.SystemSettingsService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,7 @@ public class PublicApiController implements PublicApi {
   private final SiteMediaService siteMediaService;
   private final PortalService portalService;
   private final StatusService statusService;
+  private final SystemSettingsService maintenanceModeService;
   private final VersionConfiguration versionConfiguration;
   private final Environment env;
 
@@ -44,12 +48,14 @@ public class PublicApiController implements PublicApi {
       SiteMediaService siteMediaService,
       PortalService portalService,
       StatusService statusService,
+      SystemSettingsService maintenanceModeService,
       VersionConfiguration versionConfiguration,
       Environment env) {
     this.b2CConfigurationService = b2CConfigurationService;
     this.siteMediaService = siteMediaService;
     this.portalService = portalService;
     this.statusService = statusService;
+    this.maintenanceModeService = maintenanceModeService;
     this.versionConfiguration = versionConfiguration;
     this.env = env;
   }
@@ -84,7 +90,17 @@ public class PublicApiController implements PublicApi {
     if (portalConfig == null || portalConfig.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    return ResponseEntity.ok(portalConfig);
+
+    Map<String, Object> configWithSettings = new HashMap<>(portalConfig);
+    SystemSettings settings = maintenanceModeService.getSystemSettings();
+    configWithSettings.put("systemSettings", settings);
+    return ResponseEntity.ok(configWithSettings);
+  }
+
+  @Override
+  public ResponseEntity<Object> getSystemSettings() {
+    SystemSettings settings = maintenanceModeService.getSystemSettings();
+    return ResponseEntity.ok(settings);
   }
 
   /**
@@ -104,7 +120,8 @@ public class PublicApiController implements PublicApi {
 
   @CrossOrigin(
       origins = {
-        "https://juniperdemodev.b2clogin.com", // Heart Demo (demo only)
+        "https://juniperdemodev.b2clogin.com", // Heart Demo (demo)
+        "https://juniperdemoprod.b2clogin.com", // Demo Portal (prod)
         "https://junipercmidemo.b2clogin.com", // CMI (demo only)
         "https://juniperrgpdemo.b2clogin.com", // RGP (demo only)
         "https://ourhealthdev.b2clogin.com", // OurHealth (demo)
@@ -112,7 +129,9 @@ public class PublicApiController implements PublicApi {
         "https://hearthivedev.b2clogin.com", // HeartHive (demo)
         "https://hearthive.b2clogin.com", // HeartHive (prod)
         "https://gvascdev.b2clogin.com", // gVASC (demo)
-        "https://gvascprod.b2clogin.com" // gVASC (prod)
+        "https://gvascprod.b2clogin.com", // gVASC (prod)
+        "https://juniperatcpdev.b2clogin.com", // ATCP (demo)
+        "https://trccproject.b2clogin.com" // tRCC (prod)
       },
       maxAge = 3600,
       methods = {RequestMethod.GET, RequestMethod.OPTIONS})

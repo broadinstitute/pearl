@@ -1,15 +1,14 @@
 import {
-  KitRequest,
   KitType,
   ParticipantTask,
   ParticipantTaskStatus,
-  ParticipantTaskType,
+  ParticipantTaskType, PortalParticipantUser,
   Survey
 } from 'api/api'
 import {
   defaultSurvey,
   Enrollee,
-  HubResponse,
+  HubResponse, KitRequest, KitRequestStatus,
   ParticipantUser,
   Profile
 } from '@juniper/ui-core'
@@ -20,8 +19,19 @@ export const mockParticipantUser: () => ParticipantUser = () => {
   return {
     id: 'user1',
     username: 'mockUser1@mock.com',
+    shortcode: 'ACC_fakeShortcode',
     token: 'fakeToken',
-    lastLogin: 0
+    lastLogin: 0,
+    createdAt: 0
+  }
+}
+
+export const mockPortalParticipantUser = (): PortalParticipantUser => {
+  return {
+    profile: mockProfile(),
+    profileId: 'profile1',
+    id: 'ppUser1',
+    participantUserId: 'user1'
   }
 }
 
@@ -33,9 +43,7 @@ export const mockEnrollee: () => Enrollee = () => {
     subject: true,
     id: 'enrollee1',
     participantUserId: 'user1',
-    profile: {
-      sexAtBirth: 'female'
-    },
+    profile: mockProfile(),
     profileId: 'profile1',
     kitRequests: [],
     surveyResponses: [],
@@ -53,7 +61,15 @@ export const mockEnrollee: () => Enrollee = () => {
 /** mock enrollee profile */
 export const mockProfile = (): Profile => {
   return {
-    sexAtBirth: 'female'
+    sexAtBirth: 'female',
+    mailingAddress: {
+      city: 'city',
+      state: 'state',
+      street1: 'street1',
+      street2: 'street2',
+      country: 'US',
+      postalCode: '02478'
+    }
   }
 }
 
@@ -90,21 +106,33 @@ export const mockSurvey = (stableId: string): Survey => {
     stableId,
     version: 1,
     surveyType: 'RESEARCH',
-    blurb: 'This is a survey'
+    blurb: 'This is a survey',
+    recurrenceType: 'NONE'
   }
 }
 
 /** mock a kit request */
-export const mockKitRequest = (kitStatus: string, kitType: string): KitRequest => {
+export const mockKitRequest = (kitStatus: KitRequestStatus, kitType: string): KitRequest => {
   const now = new Date().getTime() * 1000
   return {
     id: 'kitRequest1',
     kitType: mockKitType(kitType),
+    distributionMethod: 'MAILED',
+    skipAddressValidation: false,
     createdAt: now,
     status: kitStatus,
     sentToAddress: '123 Main St',
     ...(['SENT', 'RECEIVED'].includes(kitStatus) && { sentAt: now }),
     ...(['RECEIVED'].includes(kitStatus) && { receivedAt: now })
+  }
+}
+
+export const mockAssignedKitRequest = (kitStatus: KitRequestStatus, kitType: string): KitRequest => {
+  return {
+    ...mockKitRequest(kitStatus, kitType),
+    distributionMethod: 'IN_PERSON',
+    kitLabel: 'assigned-label',
+    returnTrackingNumber: 'some-tracking'
   }
 }
 
@@ -123,7 +151,13 @@ export const mockHubResponse = (): HubResponse => {
   return {
     enrollee: mockEnrollee(),
     tasks: [],
-    response: {},
+    response: {
+      resumeData: '',
+      enrolleeId: 'enrollee1',
+      surveyId: 'survey1',
+      complete: true,
+      answers: []
+    },
     profile: mockProfile()
   }
 }

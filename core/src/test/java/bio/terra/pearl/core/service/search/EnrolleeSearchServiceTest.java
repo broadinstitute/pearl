@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.service.search;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
+import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.StudyFactory;
 import bio.terra.pearl.core.factory.portal.PortalFactory;
@@ -48,7 +49,7 @@ class EnrolleeSearchServiceTest extends BaseSpringBootTest {
     void testGetSearchFacetsForPortal(TestInfo info) {
         Portal portal = portalFactory.buildPersisted(getTestName(info));
         Study study = studyFactory.buildPersisted(portal.getId(), getTestName(info));
-        StudyEnvironmentFactory.StudyEnvironmentBundle bundle1 = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox, portal, study);
+        StudyEnvironmentBundle bundle1 = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox, portal, study);
         StudyEnvironment se2 = studyEnvironmentFactory.buildPersisted(bundle1.getPortalEnv(), getTestName(info));
 
         Survey survey1 = surveyFactory.buildPersisted(
@@ -197,8 +198,7 @@ class EnrolleeSearchServiceTest extends BaseSpringBootTest {
                 .map(val -> new QuestionChoice(val.name(), val.name()))
                 .collect(Collectors.toList());
 
-        Assertions.assertEquals(28, results.size());
-        Map.ofEntries(
+        Map<String, SearchValueTypeDefinition> expected = Map.ofEntries(
                 Map.entry("profile.givenName", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.familyName", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.name", SearchValueTypeDefinition.builder().type(STRING).build()),
@@ -206,6 +206,8 @@ class EnrolleeSearchServiceTest extends BaseSpringBootTest {
                 Map.entry("profile.phoneNumber", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.birthDate", SearchValueTypeDefinition.builder().type(DATE).build()),
                 Map.entry("profile.sexAtBirth", SearchValueTypeDefinition.builder().type(STRING).build()),
+                Map.entry("profile.doNotEmail", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
+                Map.entry("profile.doNotEmailSolicit", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
                 Map.entry("profile.mailingAddress.street1", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.mailingAddress.street2", SearchValueTypeDefinition.builder().type(STRING).build()),
                 Map.entry("profile.mailingAddress.city", SearchValueTypeDefinition.builder().type(STRING).build()),
@@ -230,9 +232,21 @@ class EnrolleeSearchServiceTest extends BaseSpringBootTest {
                 Map.entry("enrollee.subject", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
                 Map.entry("enrollee.consented", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
                 Map.entry("enrollee.shortcode", SearchValueTypeDefinition.builder().type(STRING).build()),
+                Map.entry("enrollee.createdAt", SearchValueTypeDefinition.builder().type(INSTANT).build()),
+                Map.entry("portalUser.createdAt", SearchValueTypeDefinition.builder().type(INSTANT).build()),
+                Map.entry("portalUser.lastLogin", SearchValueTypeDefinition.builder().type(INSTANT).build()),
                 Map.entry("age", SearchValueTypeDefinition.builder().type(NUMBER).build()),
-                Map.entry("latestKit.status", SearchValueTypeDefinition.builder().type(STRING).choices(kitStatusChoices).build())
-        ).forEach((key, value) -> {
+                Map.entry("latestKit.status", SearchValueTypeDefinition.builder().type(STRING).choices(kitStatusChoices).build()),
+                Map.entry("user.username", SearchValueTypeDefinition.builder().type(STRING).build()),
+                Map.entry("user.createdAt", SearchValueTypeDefinition.builder().type(INSTANT).build()),
+                Map.entry("user.lastLogin", SearchValueTypeDefinition.builder().type(INSTANT).build()),
+                Map.entry("family.shortcode", SearchValueTypeDefinition.builder().type(STRING).build())
+        );
+
+        Assertions.assertEquals(expected.keySet(), results.keySet());
+
+        Assertions.assertEquals(expected.size(), results.size());
+        expected.forEach((key, value) -> {
             Assertions.assertTrue(results.containsKey(key), "Key not found: " + key);
             Assertions.assertEquals(value, results.get(key), "Wrong value for key: " + key + ", expected: " + value + " got: " + results.get(key));
         });

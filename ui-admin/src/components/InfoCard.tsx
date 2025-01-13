@@ -1,5 +1,6 @@
 import React from 'react'
 import { isEmpty } from 'lodash'
+import classNames from 'classnames'
 
 
 /**
@@ -47,7 +48,7 @@ import { isEmpty } from 'lodash'
  * ```
  */
 export function InfoCard({ children }: { children: React.ReactNode }) {
-  return <div className="card w-75 border shadow-sm mb-3">
+  return <div className="card w-100 border shadow-sm mb-3">
     {children}
   </div>
 }
@@ -82,16 +83,18 @@ export function InfoCardBody({ children }: { children: React.ReactNode }) {
  * One row of data in the card, where the title is on the left-hand side and the values are on the right.
  */
 export function InfoCardRow(
-  { title, children }: {
+  { title, children, condensed }: {
         title: string,
-        children: React.ReactNode
+        children: React.ReactNode,
+        condensed?: boolean
     }
 ) {
+  const marginBottom = condensed ? 'mb-2' : 'mb-4'
   return <>
-    <div className="w-25 fw-bold mb-4 mt-2" aria-label={title}>
+    <div className={classNames('w-25 fw-bold mt-2', marginBottom)} aria-label={title}>
       {title}
     </div>
-    <div className="w-75 mb-4">
+    <div className={classNames('w-75', marginBottom)}>
       {children}
     </div>
   </>
@@ -103,12 +106,13 @@ export function InfoCardRow(
  * If the value(s) provided are empty, then "None provided" is displayed.
  */
 export function InfoCardValue(
-  { title, values }: {
+  { title, values, condensed }: {
         title: string,
-        values: string[]
+        values: string[],
+        condensed?: boolean
     }
 ) {
-  return <InfoCardRow title={title}>
+  return <InfoCardRow title={title} condensed={condensed}>
     {(isEmpty(values) || values.every(isEmpty)) && <p className="fst-italic mb-0 mt-2 text-muted">None provided</p>}
     {
       values.filter(val => !isEmpty(val)).map((val, idx) => (

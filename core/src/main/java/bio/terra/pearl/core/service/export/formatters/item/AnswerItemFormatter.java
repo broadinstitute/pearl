@@ -3,7 +3,7 @@ package bio.terra.pearl.core.service.export.formatters.item;
 import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.service.export.BaseExporter;
 import bio.terra.pearl.core.service.export.DataValueExportType;
-import bio.terra.pearl.core.service.export.ExportOptions;
+import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.service.export.formatters.ExportFormatUtils;
 import bio.terra.pearl.core.service.export.formatters.module.ModuleFormatter;
 import bio.terra.pearl.core.service.export.formatters.module.SurveyFormatter;
@@ -107,7 +107,7 @@ public class AnswerItemFormatter extends ItemFormatter<SurveyResponse> {
          * gives much more robustness with respect to representing "prefer not to answer" than trying to convert
          * every possible value of a question to a number/date
          */
-        dataType = isAllowMultiple() || questionDef.getQuestionType().equals("matrix") ? DataValueExportType.OBJECT_STRING : DataValueExportType.STRING;
+        dataType = isAllowMultiple() || questionDef.getQuestionType().equals("matrix") || questionDef.getQuestionType().equals("paneldynamic") ? DataValueExportType.OBJECT_STRING : DataValueExportType.STRING;
         questionType = questionDef.getQuestionType();
         questionText = questionDef.getQuestionText();
         hasOtherDescription = questionDef.isAllowOtherDescription();

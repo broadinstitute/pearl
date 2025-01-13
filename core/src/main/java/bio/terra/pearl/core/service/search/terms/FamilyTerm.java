@@ -11,13 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static bio.terra.pearl.core.dao.BaseJdbiDao.toSnakeCase;
 import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.STRING;
 
 /**
  * This term can be used to search for the age of an enrollee. It uses the `birthDate` field from the enrollee's profile
  * and converts it to an integer representing the age in years.
  */
-public class FamilyTerm implements SearchTerm {
+public class FamilyTerm extends SearchTerm {
 
     private final FamilyDao familyDao;
     private final String field;
@@ -69,7 +70,7 @@ public class FamilyTerm implements SearchTerm {
 
     @Override
     public String termClause() {
-        return "family." + field;
+        return "family." + toSnakeCase(field);
     }
 
     @Override

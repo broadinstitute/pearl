@@ -5,45 +5,59 @@ import Api, {
   EnrolleeSearchExpressionResult,
   Notification,
   NotificationEventDetails,
-  PepperKit,
-  Portal, PortalEnvironmentConfig,
+  Portal,
+  PortalEnvironmentConfig,
   PortalStudy,
   SiteMediaMetadata,
   StudyEnvironment,
+  StudyEnvironmentConfig,
   SurveyResponse,
   Trigger
 } from 'api/api'
 import {
   AlertTrigger,
   defaultSurvey,
+  EmailTemplate,
   Enrollee,
   Family,
   KitRequest,
+  KitRequestStatus,
   KitType,
   LocalizedEmailTemplate,
   ParticipantDashboardAlert,
   ParticipantNote,
   ParticipantTask,
   ParticipantTaskStatus,
-  ParticipantTaskType, renderWithRouter,
+  ParticipantTaskType,
+  PortalEnvironment,
+  renderWithRouter,
+  StudyEnvironmentSurvey,
   StudyEnvParams,
   Survey,
-  SurveyType,
-  EmailTemplate,
-  StudyEnvironmentSurvey,
-  PortalEnvironment
+  SurveyType
 } from '@juniper/ui-core'
 
 import _times from 'lodash/times'
 import _random from 'lodash/random'
-import { LoadedPortalContextT, PortalContext, PortalContextT } from '../portal/PortalProvider'
+import {
+  LoadedPortalContextT,
+  PortalContext,
+  PortalContextT
+} from '../portal/PortalProvider'
 import { PortalEnvContext } from '../portal/PortalRouter'
 import React from 'react'
 import { AdminUserContext } from '../providers/AdminUserProvider'
 import { AdminUser } from '../api/adminUser'
 import { mockAdminUser } from './user-mocking-utils'
 import { UserContext } from '../user/UserProvider'
+import { PortalEnvContextT } from '@juniper/ui-participant/src/providers/PortalProvider'
+import { mockLocalSiteContent } from 'test-utils/mock-site-content'
 import { ReactNotifications } from 'react-notifications-component'
+
+// add all jest-extended matchers
+import * as matchers from 'jest-extended'
+
+expect.extend(matchers)
 
 const randomString = (length: number) => {
   return _times(length, () => _random(35).toString(36)).join('')
@@ -88,6 +102,13 @@ export const mockPortalEnvContext = (envName: string): PortalEnvContext => ({
   portalEnv: mockPortalEnvironment(envName)
 })
 
+export const mockPortalEnvContextT = (): PortalEnvContextT => ({
+  portal: mockPortal(),
+  portalEnv: mockPortalEnvironment('sandbox'),
+  reloadPortal: jest.fn(),
+  localContent: mockLocalSiteContent()
+})
+
 /** returns simple mock portal environment */
 export const mockPortalEnvironment = (envName: string): PortalEnvironment => ({
   portalEnvironmentConfig: mockPortalEnvironmentConfig(),
@@ -123,12 +144,14 @@ export const mockSurvey: (surveyType?: SurveyType) => Survey = (surveyType = 'RE
   name: 'Survey number one',
   lastUpdatedAt: 0,
   createdAt: 0,
-  surveyType
+  surveyType,
+  recurrenceType: 'NONE'
 })
 
 /** returns a mock portal study */
 export const makeMockPortalStudy = (name: string, shortcode: string): PortalStudy => {
   return {
+    createdAt: 0,
     study: {
       name,
       shortcode,
@@ -163,6 +186,20 @@ export const mockSurveyVersionsList: () => Survey[] = () => ([
   }
 ])
 
+export const mockStudyEnvironmentConfig = (): StudyEnvironmentConfig => {
+  return {
+    initialized: true,
+    password: 'blah',
+    passwordProtected: false,
+    acceptingEnrollment: true,
+    enableFamilyLinkage: false,
+    acceptingProxyEnrollment: false,
+    useDevDsmRealm: false,
+    useStubDsm: false,
+    enableInPersonKits: false
+  }
+}
+
 /** returns a simple studyEnvContext object for use/extension in tests */
 export const mockStudyEnvContext: () => StudyEnvContextT = () => {
   const sandboxEnv: StudyEnvironment = {
@@ -170,16 +207,8 @@ export const mockStudyEnvContext: () => StudyEnvContextT = () => {
     id: 'studyEnvId',
     configuredSurveys: [mockConfiguredSurvey()],
     triggers: [],
-    studyEnvironmentConfig: {
-      initialized: true,
-      password: 'blah',
-      passwordProtected: false,
-      acceptingEnrollment: true,
-      enableFamilyLinkage: false,
-      acceptingProxyEnrollment: false,
-      useDevDsmRealm: false,
-      useStubDsm: false
-    }
+    studyEnvironmentConfig: mockStudyEnvironmentConfig(),
+    kitTypes: []
   }
   return {
     study: {
@@ -241,28 +270,15 @@ export const mockKitType: () => KitType = () => ({
   description: 'Test sample collection kit'
 })
 
-/** returns a mock PepperKitStatus */
-export const mockExternalKitRequest = (): PepperKit => {
-  return {
-    kitId: '',
-    currentStatus: 'Kit Without Label',
-    labelDate: '',
-    scanDate: '',
-    receiveDate: '',
-    trackingNumber: '',
-    returnTrackingNumber: '',
-    errorMessage: ''
-  }
-}
-
 /** returns a mock kit request */
 export const mockKitRequest: (args?: {
   enrolleeShortcode?: string,
-  status?: string
+  status?: KitRequestStatus
 }) => KitRequest = ({ enrolleeShortcode, status } = {}) => ({
   id: 'kitRequestId',
   createdAt: 1704393045,
   kitType: mockKitType(),
+  distributionMethod: 'MAILED',
   status: status || 'CREATED',
   // This is intentionally a little different from the enrollee's current mailing address to show that sentToAddress
   // is a capture of the mailing address at the time the kit was sent.
@@ -351,12 +367,13 @@ export const mockFamily = (): Family => {
 }
 
 /** helper function to generate a ParticipantTask object for a survey and enrollee */
-export const taskForForm = (form: Survey, enrolleeId: string, taskType: ParticipantTaskType):
+export const taskForForm = (form: Survey, enrolleeId: string, taskType: ParticipantTaskType
+  , createdAt = 0, surveyResponseId?: string):
     ParticipantTask => {
   return {
     id: randomString(10),
     blocksHub: false,
-    createdAt: 0,
+    createdAt,
     enrolleeId,
     portalParticipantUserId: randomString(10),
     status: 'NEW',
@@ -365,6 +382,7 @@ export const taskForForm = (form: Survey, enrolleeId: string, taskType: Particip
     targetName: form.name,
     targetStableId: form.stableId,
     targetAssignedVersion: form.version,
+    surveyResponseId,
     taskOrder: 1
   }
 }
@@ -384,6 +402,7 @@ export const mockParticipantNote = (): ParticipantNote => {
 /** mock NotificationConfig */
 export const mockTrigger = (): Trigger => {
   return {
+    actionScope: 'STUDY',
     id: 'noteId1',
     triggerType: 'EVENT',
     eventType: 'CONSENT',
@@ -395,7 +414,8 @@ export const mockTrigger = (): Trigger => {
     maxNumReminders: -1,
     afterMinutesIncomplete: -1,
     reminderIntervalMinutes: 10,
-    updateTaskTargetStableId: '',
+    filterTargetStableIds: [],
+    actionTargetStableIds: [],
     active: true,
     emailTemplateId: 'emailTemplateId',
     emailTemplate: mockEmailTemplate(),
@@ -482,7 +502,8 @@ export const mockSurveyResponse = (): SurveyResponse => {
     resumeData: '{}',
     enrolleeId: 'enrollee1',
     complete: false,
-    answers: []
+    answers: [],
+    participantFiles: []
   }
 }
 
@@ -612,12 +633,18 @@ export const renderInPortalRouter = (portal: Portal,
   return renderWithRouter(
     <AdminUserContext.Provider value={{ users: opts.adminUsers ?? [], isLoading: false }}>
       <UserContext.Provider
-        value={{ user: opts.user, logoutUser: jest.fn(), loginUser: jest.fn(), loginUserUnauthed: jest.fn() }}>
+        value={{
+          user: opts.user,
+          logoutUser: jest.fn(),
+          loginUser: jest.fn(),
+          loginUserUnauthed: jest.fn(),
+          toggleSuperuserOverride: jest.fn()
+        }}>
         <PortalContext.Provider value={portalContext}>
           { children }
         </PortalContext.Provider>
         <ReactNotifications/>
       </UserContext.Provider>
     </AdminUserContext.Provider>, [`/${portal.shortcode}/studies/${studyShortcode}/${opts.envName}`],
-    ':portalShortcode/studies/:studyShortcode/:studyEnv')
+    ':portalShortcode/studies/:studyShortcode/:studyEnv/*')
 }

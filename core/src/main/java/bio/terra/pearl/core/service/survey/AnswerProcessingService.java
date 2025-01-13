@@ -1,7 +1,7 @@
 package bio.terra.pearl.core.service.survey;
 
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
-import bio.terra.pearl.core.model.audit.DataChangeRecord;
+import bio.terra.pearl.core.model.audit.ParticipantDataChange;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
@@ -11,6 +11,7 @@ import bio.terra.pearl.core.model.survey.AnswerMapping;
 import bio.terra.pearl.core.model.survey.AnswerMappingMapType;
 import bio.terra.pearl.core.model.survey.AnswerMappingTargetType;
 import bio.terra.pearl.core.model.workflow.ObjectWithChangeLog;
+import bio.terra.pearl.core.service.participant.PortalParticipantUserService;
 import bio.terra.pearl.core.service.participant.ProfileService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -33,8 +34,11 @@ import static java.lang.Boolean.parseBoolean;
 @Slf4j
 public class AnswerProcessingService {
     private final ProfileService profileService;
-    public AnswerProcessingService(ProfileService profileService) {
+    private final PortalParticipantUserService portalParticipantUserService;
+
+    public AnswerProcessingService(ProfileService profileService, PortalParticipantUserService portalParticipantUserService) {
         this.profileService = profileService;
+        this.portalParticipantUserService = portalParticipantUserService;
     }
 
     /** takes a response and a list of mappings and saves any appropriate updates to the data model
@@ -45,14 +49,14 @@ public class AnswerProcessingService {
             Enrollee enrollee,
             List<Answer> answers,
             List<AnswerMapping> mappings,
-            PortalParticipantUser ppUser,
+            PortalParticipantUser operatorPpUser,
             ResponsibleEntity operator,
             DataAuditInfo auditInfo) {
         if (mappings.isEmpty()) {
             return;
         }
         processProfileAnswerMappings(enrollee, answers, mappings, operator, auditInfo);
-        processProxyProfileAnswerMappings(enrollee, answers, mappings, ppUser, auditInfo);
+        processProxyProfileAnswerMappings(enrollee, answers, mappings, operatorPpUser, auditInfo);
     }
 
     /**
@@ -91,15 +95,17 @@ public class AnswerProcessingService {
             DataAuditInfo auditInfo) {
 
         // if the ppUser is the same as the enrollee, we're not in a proxy environment
-        if (operator.getProfileId().equals(enrollee.getProfileId())) {
+        if (operator.getParticipantUserId().equals(enrollee.getParticipantUserId())) {
             return;
         }
 
         List<AnswerMapping> proxyProfileMappings = mappings.stream().filter(mapping ->
                 mapping.getTargetType().equals(AnswerMappingTargetType.PROXY_PROFILE)).toList();
+
         if (proxyProfileMappings.isEmpty() || !hasTargetedChanges(proxyProfileMappings, answers, AnswerMappingTargetType.PROXY_PROFILE)) {
             return;
         }
+
         // grab the operator (which is the proxy) profile to update it
         Profile profile = profileService.loadWithMailingAddress(operator.getProfileId()).get();
         mapValuesToType(
@@ -126,7 +132,7 @@ public class AnswerProcessingService {
     public <T> ObjectWithChangeLog<T> mapValuesToType(List<Answer> answers, List<AnswerMapping> mappings, T targetObj,
                                  AnswerMappingTargetType targetType) {
         HashMap<String, AnswerMapping> fieldTargetMap = new HashMap<>();
-        List<DataChangeRecord> changeRecords = new ArrayList<>();
+        List<ParticipantDataChange> changeRecords = new ArrayList<>();
         mappings.stream().filter(mapping -> mapping.getTargetType().equals(targetType))
                 .forEach(mapping -> fieldTargetMap.put(mapping.getQuestionStableId(), mapping));
         for (Answer answer : answers) {
@@ -138,7 +144,7 @@ public class AnswerProcessingService {
                     BiFunction<Answer, AnswerMapping, Object> mapFunc = JSON_MAPPERS.get(mapping.getMapType());
                     Object newValue = mapFunc.apply(answer, mapping);
                     PropertyUtils.setNestedProperty(targetObj, mapping.getTargetField(), newValue);
-                    DataChangeRecord changeRecord = DataChangeRecord.builder()
+                    ParticipantDataChange changeRecord = ParticipantDataChange.builder()
                             .modelName(targetType.name())
                             .fieldName(mapping.getTargetField())
                             .oldValue(oldValue)

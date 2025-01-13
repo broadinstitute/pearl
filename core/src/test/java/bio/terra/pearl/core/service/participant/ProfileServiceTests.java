@@ -7,17 +7,17 @@ import java.util.List;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.DaoTestUtils;
+import bio.terra.pearl.core.factory.participant.EnrolleeAndProxy;
+import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.model.address.MailingAddress;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
-import bio.terra.pearl.core.model.audit.DataChangeRecord;
+import bio.terra.pearl.core.model.audit.ParticipantDataChange;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.EnrolleeRelation;
-import bio.terra.pearl.core.model.participant.PortalParticipantUser;
 import bio.terra.pearl.core.model.participant.Profile;
 import bio.terra.pearl.core.model.participant.RelationshipType;
-import bio.terra.pearl.core.model.workflow.HubResponse;
-import bio.terra.pearl.core.service.workflow.DataChangeRecordService;
+import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -31,7 +31,7 @@ public class ProfileServiceTests extends BaseSpringBootTest {
     @Autowired
     private ProfileService profileService;
     @Autowired
-    private DataChangeRecordService dataChangeRecordService;
+    private ParticipantDataChangeService participantDataChangeService;
     @Autowired
     private EnrolleeFactory enrolleeFactory;
     @Autowired
@@ -45,10 +45,10 @@ public class ProfileServiceTests extends BaseSpringBootTest {
 
     @Test
     @Transactional
-    public void testProfileCreatesWithMailingAddress() {
+    public void testProfileCreatesWithMailingAddress(TestInfo info) {
         Profile profile = Profile.builder()
                 .familyName("someName" + RandomStringUtils.randomAlphabetic(4)).build();
-        Profile savedProfile = profileService.create(profile, DataAuditInfo.builder().build());
+        Profile savedProfile = profileService.create(profile, getAuditInfo(info));
         DaoTestUtils.assertGeneratedProperties(savedProfile);
         DaoTestUtils.assertGeneratedProperties(savedProfile.getMailingAddress());
         assertThat(savedProfile.getMailingAddressId(), equalTo(savedProfile.getMailingAddress().getId()));
@@ -56,13 +56,13 @@ public class ProfileServiceTests extends BaseSpringBootTest {
 
     @Test
     @Transactional
-    public void testProfileCreatesWithExistingMailingAddress() {
+    public void testProfileCreatesWithExistingMailingAddress(TestInfo info) {
         Profile profile = Profile.builder()
                 .familyName("someName" + RandomStringUtils.randomAlphabetic(4))
                 .mailingAddress(MailingAddress.builder()
                         .city("someCity" + RandomStringUtils.randomAlphabetic(4)).build())
                 .build();
-        Profile savedProfile = profileService.create(profile, DataAuditInfo.builder().build());
+        Profile savedProfile = profileService.create(profile, getAuditInfo(info));
         DaoTestUtils.assertGeneratedProperties(savedProfile);
         DaoTestUtils.assertGeneratedProperties(savedProfile.getMailingAddress());
         assertThat(savedProfile.getMailingAddressId(), equalTo(savedProfile.getMailingAddress().getId()));
@@ -72,7 +72,7 @@ public class ProfileServiceTests extends BaseSpringBootTest {
     @Test
     @Transactional
     public void testProfileAudit(TestInfo info) {
-        EnrolleeFactory.EnrolleeBundle bundle = enrolleeFactory.buildWithPortalUser(getTestName(info));
+        EnrolleeBundle bundle = enrolleeFactory.buildWithPortalUser(getTestName(info));
 
         Profile profile = bundle.enrollee().getProfile();
 
@@ -86,11 +86,11 @@ public class ProfileServiceTests extends BaseSpringBootTest {
                 .enrolleeId(bundle.enrollee().getId())
                 .build());
 
-        List<DataChangeRecord> dataChangeRecords = dataChangeRecordService.findByEnrollee(bundle.enrollee().getId());
+        List<ParticipantDataChange> participantDataChanges = participantDataChangeService.findByEnrollee(bundle.enrollee().getId());
 
-        Assertions.assertEquals(1, dataChangeRecords.size());
+        Assertions.assertEquals(1, participantDataChanges.size());
 
-        DataChangeRecord record = dataChangeRecords.get(0);
+        ParticipantDataChange record = participantDataChanges.get(0);
 
         Assertions.assertFalse(record.getOldValue().contains("NEW GIVEN NAME"));
         Assertions.assertFalse(record.getOldValue().contains("NEW FAMILY NAME"));
@@ -102,7 +102,7 @@ public class ProfileServiceTests extends BaseSpringBootTest {
     @Test
     @Transactional
     public void testProfileAuditContainsMailingList(TestInfo info) {
-        EnrolleeFactory.EnrolleeBundle bundle = enrolleeFactory.buildWithPortalUser(getTestName(info));
+        EnrolleeBundle bundle = enrolleeFactory.buildWithPortalUser(getTestName(info));
 
         Profile profile = bundle.enrollee().getProfile();
 
@@ -119,11 +119,11 @@ public class ProfileServiceTests extends BaseSpringBootTest {
                 .enrolleeId(bundle.enrollee().getId())
                 .build());
 
-        List<DataChangeRecord> dataChangeRecords = dataChangeRecordService.findByEnrollee(bundle.enrollee().getId());
+        List<ParticipantDataChange> participantDataChanges = participantDataChangeService.findByEnrollee(bundle.enrollee().getId());
 
-        Assertions.assertEquals(1, dataChangeRecords.size());
+        Assertions.assertEquals(1, participantDataChanges.size());
 
-        DataChangeRecord record = dataChangeRecords.get(0);
+        ParticipantDataChange record = participantDataChanges.get(0);
         Assertions.assertTrue(record.getNewValue().contains(firstStreet1));
         Assertions.assertTrue(record.getNewValue().contains(firstCity));
 
@@ -141,14 +141,14 @@ public class ProfileServiceTests extends BaseSpringBootTest {
                 .enrolleeId(bundle.enrollee().getId())
                 .build());
 
-        dataChangeRecords = dataChangeRecordService.findByEnrollee(bundle.enrollee().getId());
+        participantDataChanges = participantDataChangeService.findByEnrollee(bundle.enrollee().getId());
 
-        Assertions.assertEquals(2, dataChangeRecords.size());
+        Assertions.assertEquals(2, participantDataChanges.size());
 
         // get most recent of the two
-        record = (dataChangeRecords.get(0).getCreatedAt().isAfter(dataChangeRecords.get(1).getCreatedAt())
-                ? dataChangeRecords.get(0)
-                : dataChangeRecords.get(1));
+        record = (participantDataChanges.get(0).getCreatedAt().isAfter(participantDataChanges.get(1).getCreatedAt())
+                ? participantDataChanges.get(0)
+                : participantDataChanges.get(1));
 
         Assertions.assertTrue(record.getOldValue().contains(firstStreet1));
         Assertions.assertTrue(record.getOldValue().contains(firstCity));
@@ -161,7 +161,7 @@ public class ProfileServiceTests extends BaseSpringBootTest {
     @Test
     @Transactional
     public void testProfileUpdateWithMailingAddress(TestInfo info) {
-        EnrolleeFactory.EnrolleeBundle bundle = enrolleeFactory.buildWithPortalUser(getTestName(info));
+        EnrolleeBundle bundle = enrolleeFactory.buildWithPortalUser(getTestName(info));
 
         Profile profile = bundle.enrollee().getProfile();
 
@@ -188,7 +188,7 @@ public class ProfileServiceTests extends BaseSpringBootTest {
     @Test
     @Transactional
     public void testGovernedUserProfile(TestInfo testInfo){
-        EnrolleeFactory.EnrolleeAndProxy enrolleeAndProxy = enrolleeFactory.buildProxyAndGovernedEnrollee(getTestName(testInfo), getTestName(testInfo));
+        EnrolleeAndProxy enrolleeAndProxy = enrolleeFactory.buildProxyAndGovernedEnrollee(getTestName(testInfo), getTestName(testInfo));
         Enrollee proxyEnrollee = enrolleeAndProxy.proxy();
         Profile proxyUserProfile = profileService.find(proxyEnrollee.getProfileId()).get();
         List<EnrolleeRelation> relations = enrolleeRelationService.findByEnrolleeIdAndRelationType(proxyEnrollee.getId(), RelationshipType.PROXY);

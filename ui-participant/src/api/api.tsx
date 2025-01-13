@@ -15,13 +15,13 @@ import {
   StudyEnvironmentSurvey,
   StudyEnvParams,
   Survey,
-  SurveyResponse
+  SurveyResponse,
+  Answer, SystemSettings
 } from '@juniper/ui-core'
 import { defaultApiErrorHandle } from 'util/error-utils'
 import queryString from 'query-string'
 
 export type {
-  Answer,
   HtmlPage,
   HtmlSection,
   LocalSiteContent,
@@ -58,16 +58,6 @@ export type LoginResult = {
   profile: Profile
 }
 
-export type KitRequest = {
-  id: string,
-  createdAt: number,
-  kitType: KitType,
-  sentToAddress?: string,
-  status: string,
-  sentAt?: number,
-  receivedAt?: number
-}
-
 export type KitType = {
   id: string,
   name: string,
@@ -84,6 +74,7 @@ export type RegistrationResponse = {
 export type SurveyWithResponse = {
   studyEnvironmentSurvey: StudyEnvironmentSurvey,
   surveyResponse?: SurveyResponse
+  referencedAnswers: Answer[]
 }
 
 export type TaskWithSurvey = {
@@ -103,6 +94,7 @@ export type Config = {
   b2cClientId: string,
   b2cPolicyName: string,
   b2cChangePasswordPolicyName: string,
+  systemSettings: SystemSettings
 }
 
 let bearerToken: string | null = null
@@ -281,8 +273,9 @@ export default {
   },
 
   /** creates an enrollee for the signed-in user and study.  */
-  async createEnrollee({ studyShortcode, preEnrollResponseId }:
-                         { studyShortcode: string, preEnrollResponseId: string | null }):
+  async createEnrollee({ studyShortcode, preEnrollResponseId }: {
+    studyShortcode: string, preEnrollResponseId: string | null
+  }):
     Promise<HubResponse> {
     const params = queryString.stringify({ preEnrollResponseId })
     const url = `${baseStudyEnvUrl(false, studyShortcode)}/enrollee?${params}`
@@ -293,9 +286,10 @@ export default {
     return await this.processJsonResponse(response)
   },
 
-  async createGovernedEnrollee(
-    { studyShortcode, preEnrollResponseId, governedPpUserId }
-          : { studyShortcode: string, preEnrollResponseId: string | null, governedPpUserId: string | null }
+  async createGovernedEnrollee({ studyShortcode, preEnrollResponseId, governedPpUserId }: {
+    studyShortcode: string, preEnrollResponseId: string | null,
+    governedPpUserId: string | null
+  }
   ): Promise<HubResponse> {
     const params = queryString.stringify({ preEnrollResponseId, governedPpUserId })
     const url = `${baseStudyEnvUrl(false, studyShortcode)}/enrollee?${params}`
@@ -449,6 +443,12 @@ export default {
 
   setBearerToken(token: string): void {
     bearerToken = token
+  },
+
+  async loadSystemSettings(): Promise<SystemSettings> {
+    const url = `/systemSettings`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
   },
 
   async log(logEvent: LogEvent): Promise<void> {

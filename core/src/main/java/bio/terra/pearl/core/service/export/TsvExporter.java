@@ -12,8 +12,19 @@ import java.util.List;
 import java.util.Map;
 
 public class TsvExporter extends BaseExporter {
+    private final ExportFileFormat fileFormat;
+
+    public TsvExporter(List<ModuleFormatter> moduleExportInfos, List<Map<String, String>> enrolleeMaps, ExportFileFormat fileFormat,
+                       List<String> columnSorting) {
+        super(moduleExportInfos, enrolleeMaps, columnSorting);
+        if (!List.of(ExportFileFormat.CSV, ExportFileFormat.TSV).contains(fileFormat)) {
+            throw new IllegalArgumentException("Invalid file format for TsvExporter: " + fileFormat);
+        }
+        this.fileFormat = fileFormat;
+    }
+
     public TsvExporter(List<ModuleFormatter> moduleExportInfos, List<Map<String, String>> enrolleeMaps) {
-        super(moduleExportInfos, enrolleeMaps);
+        this(moduleExportInfos, enrolleeMaps, ExportFileFormat.TSV, null);
     }
 
     /**
@@ -21,16 +32,20 @@ public class TsvExporter extends BaseExporter {
      * can be supported
      */
     @Override
-    public void export(OutputStream os) {
+    public void export(OutputStream os, boolean includeSubHeaders) {
         try {
-            CSVPrinter writer = CSVFormat.TDF.builder().setRecordSeparator('\n').build().print(new OutputStreamWriter(os));
+            CSVFormat format = fileFormat.equals(ExportFileFormat.TSV) ? CSVFormat.TDF : CSVFormat.DEFAULT;
+            CSVPrinter writer = format.builder().setRecordSeparator('\n').build().print(new OutputStreamWriter(os));
 
             List<String> columnKeys = getColumnKeys();
             List<String> headerRowValues = getHeaderRow();
-            List<String> subHeaderRowValues = getSubHeaderRow();
 
             writer.printRecord(headerRowValues);
-            writer.printRecord(subHeaderRowValues);
+            if (includeSubHeaders) {
+                List<String> subHeaderRowValues = getSubHeaderRow();
+                writer.printRecord(subHeaderRowValues);
+            }
+
             for (Map<String, String> enrolleeMap : enrolleeMaps) {
                 List<String> rowValues = getRowValues(enrolleeMap, columnKeys);
                 writer.printRecord(rowValues);
@@ -42,5 +57,5 @@ public class TsvExporter extends BaseExporter {
             throw new IOInternalException("Error writing TSV file", e);
         }
     }
-    
+
 }

@@ -1,12 +1,12 @@
 package bio.terra.pearl.core.dao.metrics;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
+import bio.terra.pearl.core.dao.dataimport.TimeShiftDao;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.factory.participant.PortalParticipantUserFactory;
 import bio.terra.pearl.core.factory.portal.PortalEnvironmentFactory;
 import bio.terra.pearl.core.factory.survey.SurveyFactory;
-import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.metrics.BasicMetricDatum;
 import bio.terra.pearl.core.model.metrics.TimeRange;
@@ -16,6 +16,7 @@ import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
+import bio.terra.pearl.core.model.survey.SurveyTaskConfigDto;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
@@ -41,10 +42,8 @@ public class MetricsDaoTest extends BaseSpringBootTest {
   public void testStudyEnrollmentMetrics(TestInfo info) {
     StudyEnvironment studyEnvironment = studyEnvironmentFactory.buildPersisted(getTestName(info));
     enrolleeFactory.buildPersisted(getTestName(info), studyEnvironment);
-      BaseEntity.BaseEntityBuilder builder = enrolleeFactory.builderWithDependencies(getTestName(info), studyEnvironment)
-        .createdAt(Instant.now().minus(Duration.ofDays(4)));
-    // The superBuilder 'createdAt' method returns the type of builder the property is contained in, so we have to recast
-    enrolleeFactory.buildPersisted((Enrollee.EnrolleeBuilder) builder);
+    Enrollee pastEnrollee = enrolleeFactory.buildPersisted(getTestName(info), studyEnvironment);
+    timeShiftDao.changeEnrolleeCreationTime(pastEnrollee.getId(), Instant.now().minus(Duration.ofDays(4)));
     List<BasicMetricDatum> metrics = metricsDao.studyEnrollments(studyEnvironment.getId(), new TimeRange(null, null));
     assertThat(metrics, hasSize(2));
 
@@ -102,12 +101,12 @@ public class MetricsDaoTest extends BaseSpringBootTest {
       PortalParticipantUser ppUser2 = portalParticipantUserFactory.buildPersisted(getTestName(info), enrollee2, portalEnv);
     Enrollee enrollee3 = enrolleeFactory.buildPersisted(getTestName(info), studyEnv);
       PortalParticipantUser ppUser3 = portalParticipantUserFactory.buildPersisted(getTestName(info), enrollee3, portalEnv);
-      ParticipantTask task = surveyTaskDispatcher.buildTask( enrollee1, ppUser1, studyEnvSurvey, studyEnvSurvey.getSurvey());
+    ParticipantTask task = surveyTaskDispatcher.buildTask(enrollee1, ppUser1, new SurveyTaskConfigDto(studyEnvSurvey));
     task.setStatus(TaskStatus.COMPLETE);
       DataAuditInfo auditInfo = getAuditInfo(info);
     participantTaskService.create(task, auditInfo);
-    participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee2, ppUser2, studyEnvSurvey, studyEnvSurvey.getSurvey()), auditInfo);
-    ParticipantTask taskToUpdate = participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee3, ppUser3, studyEnvSurvey, studyEnvSurvey.getSurvey()), auditInfo);
+    participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee2, ppUser2, new SurveyTaskConfigDto(studyEnvSurvey)), auditInfo);
+    ParticipantTask taskToUpdate = participantTaskService.create(surveyTaskDispatcher.buildTask(enrollee3, ppUser3, new SurveyTaskConfigDto(studyEnvSurvey)), auditInfo);
 
       List<BasicMetricDatum> rangeMetrics = metricsDao.studyRequiredSurveyCompletions(studyEnv.getId(), new TimeRange(null, null));
     assertThat(rangeMetrics, hasSize(1));
@@ -137,4 +136,6 @@ public class MetricsDaoTest extends BaseSpringBootTest {
   private PortalParticipantUserFactory portalParticipantUserFactory;
   @Autowired
   private ParticipantTaskService participantTaskService;
+  @Autowired
+  private TimeShiftDao timeShiftDao;
 }

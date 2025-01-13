@@ -1,5 +1,6 @@
 package bio.terra.pearl.api.admin.service;
 
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.EnforcePortalStudyEnvPermission;
 import bio.terra.pearl.api.admin.service.auth.SuperuserOnly;
 import bio.terra.pearl.api.admin.service.auth.context.OperatorAuthContext;
@@ -9,6 +10,7 @@ import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.portal.Portal;
 import bio.terra.pearl.core.model.site.SiteContent;
 import bio.terra.pearl.core.model.survey.Survey;
+import bio.terra.pearl.core.service.participant.ParticipantUserService;
 import bio.terra.pearl.populate.service.*;
 import bio.terra.pearl.populate.service.contexts.FilePopulateContext;
 import bio.terra.pearl.populate.service.contexts.PortalPopulateContext;
@@ -33,6 +35,7 @@ public class PopulateExtService {
   private final PortalParticipantUserPopulator portalParticipantUserPopulator;
   private final AdminConfigPopulator adminConfigPopulator;
   private final PortalExtractService portalExtractService;
+  private final ParticipantUserService participantUserService;
 
   public PopulateExtService(
       BaseSeedPopulator baseSeedPopulator,
@@ -42,7 +45,8 @@ public class PopulateExtService {
       SiteContentPopulator siteContentPopulator,
       PortalParticipantUserPopulator portalParticipantUserPopulator,
       AdminConfigPopulator adminConfigPopulator,
-      PortalExtractService portalExtractService) {
+      PortalExtractService portalExtractService,
+      ParticipantUserService participantUserService) {
     this.baseSeedPopulator = baseSeedPopulator;
     this.enrolleePopulator = enrolleePopulator;
     this.surveyPopulator = surveyPopulator;
@@ -51,6 +55,7 @@ public class PopulateExtService {
     this.portalParticipantUserPopulator = portalParticipantUserPopulator;
     this.adminConfigPopulator = adminConfigPopulator;
     this.portalExtractService = portalExtractService;
+    this.participantUserService = participantUserService;
   }
 
   @SuperuserOnly
@@ -128,7 +133,7 @@ public class PopulateExtService {
     }
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Enrollee populateEnrollee(
       PortalStudyEnvAuthContext authContext, String filePathName, boolean overwrite) {
     StudyPopulateContext config =
@@ -143,7 +148,7 @@ public class PopulateExtService {
     return enrolleePopulator.populate(config, overwrite);
   }
 
-  @EnforcePortalStudyEnvPermission(permission = "BASE")
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Enrollee populateEnrollee(
       PortalStudyEnvAuthContext authContext,
       EnrolleePopulateType enrolleePopulateType,
@@ -176,14 +181,21 @@ public class PopulateExtService {
 
   @SuperuserOnly
   public void extractPortal(
-      OperatorAuthContext authContext, String portalShortcode, OutputStream os) throws IOException {
-    portalExtractService.extract(portalShortcode, os);
+      OperatorAuthContext authContext,
+      String portalShortcode,
+      OutputStream os,
+      boolean extractActiveVersionsOnly)
+      throws IOException {
+    portalExtractService.extract(portalShortcode, os, extractActiveVersionsOnly);
   }
 
   @Transactional
   @SuperuserOnly
   public Object populateCommand(
       OperatorAuthContext authContext, String command, Object commandParams) {
+    if ("CREATE_PARTICIPANT_SHORTCODES".equals(command)) {
+      throw new IllegalArgumentException("that command is no longer supported");
+    }
     if ("CONVERT_CONSENTS".equals(command)) {
       throw new IllegalArgumentException("that command is no longer supported");
     }

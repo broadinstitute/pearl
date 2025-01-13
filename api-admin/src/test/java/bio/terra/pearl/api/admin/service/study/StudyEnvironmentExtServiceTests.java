@@ -29,10 +29,11 @@ public class StudyEnvironmentExtServiceTests extends BaseSpringBootTest {
                 AuthAnnotationSpec.withPortalStudyEnvPerm(
                     "study_settings_edit", List.of(SandboxOnly.class)),
             "getKitTypes",
-                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON),
+                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
             "getAllowedKitTypes",
-                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON),
-            "getStats", AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSON)));
+                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION),
+            "getStats",
+                AuthAnnotationSpec.withPortalStudyEnvPerm(AuthUtilService.BASE_PERMISSION)));
   }
 
   @Test

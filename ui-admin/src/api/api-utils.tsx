@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { failureNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
+import { SUPPORT_EMAIL_ADDRESS } from '@juniper/ui-core'
 
 export type ApiErrorResponse = {
   message: string,
@@ -8,7 +9,7 @@ export type ApiErrorResponse = {
   statusCode: number
 }
 
-const errorSuffix = 'If this error persists, please contact support@juniper.terra.bio'
+const errorSuffix = `If this error persists, please contact ${SUPPORT_EMAIL_ADDRESS}`
 
 /**
  * performs default error message alerting if an error occurs during an API request.
@@ -16,12 +17,18 @@ const errorSuffix = 'If this error persists, please contact support@juniper.terr
  */
 export const defaultApiErrorHandle = (error: ApiErrorResponse,
   errorHeader = 'An unexpected error occurred. ') => {
-  if (error.statusCode === 401 || error.statusCode === 403) {
+  if (error.statusCode === 401) {
     Store.addNotification(failureNotification(<div>
       <div>{errorHeader}</div>
-      <div>Request could not be authorized
+      <div>Request could not be authenticated
                 -- you may need to log in again </div>
       <div>{errorSuffix}</div>
+    </div>
+    ))
+  } else if (error.statusCode === 403) {
+    Store.addNotification(failureNotification(<div>
+      <div>Permission denied: {error.message}</div>
+      <div>If this is unexpected, you may need to log out and log in again to refresh your credentials.</div>
     </div>
     ))
   } else {
@@ -57,15 +64,21 @@ export const doApiLoad = async (loadingFunc: () => Promise<unknown>,
   opts: {
         setIsLoading?: (isLoading: boolean) => void,
         setIsError?: (isError: boolean) => void,
-        customErrorMsg?: string
+        customErrorMsg?: string,
+        alertErrors?: boolean,
+        setError?: (error: string) => void
     } = {}) => {
+  if (opts.alertErrors === undefined) {
+    opts.alertErrors = true
+  }
   if (opts.setIsLoading) { opts.setIsLoading(true) }
   try {
     await loadingFunc()
     if (opts.setIsError) { opts.setIsError(false) }
   } catch (e) {
-    defaultApiErrorHandle(e as ApiErrorResponse, opts.customErrorMsg)
+    if (opts.alertErrors) { defaultApiErrorHandle(e as ApiErrorResponse, opts.customErrorMsg) }
     if (opts.setIsError) { opts.setIsError(true) }
+    if (opts.setError) { opts.setError((e as ApiErrorResponse).message) }
   }
   if (opts.setIsLoading) { opts.setIsLoading(false) }
 }

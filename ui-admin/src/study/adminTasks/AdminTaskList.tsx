@@ -107,7 +107,7 @@ export default function AdminTaskList({ studyEnvContext }: {studyEnvContext: Stu
       { renderEmptyMessage(taskData.tasks, 'No tasks') }
     </LoadingSpinner>
     { (showEditModal && selectedTask) && <AdminTaskEditModal task={selectedTask} users={users}
-      onDismiss={onDoneEditing} studyEnvContext={studyEnvContext}/> }
+      onDismiss={onDoneEditing} studyEnvParams={paramsFromContext(studyEnvContext)}/> }
   </div>
 }
 

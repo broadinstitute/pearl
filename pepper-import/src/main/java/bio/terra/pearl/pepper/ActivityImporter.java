@@ -479,8 +479,15 @@ public class ActivityImporter {
      */
     public static Map<String, String> getVariableTranslationsTxt(String templateText, Collection<TemplateVariable> templateVariables) {
         Map<String, String> textMap = new HashMap<>();
+
+        List<TemplateVariable> templateVariableCopy = new ArrayList<>(templateVariables);
+
+        // sort variable names by length to ensure that situations like, e.g., $diagnosis_center and $diagnosis_center_country
+        // are handled in the correct order
+        templateVariableCopy.sort(Comparator.comparingInt(var -> -1 * var.getName().length()));
+
         // for each variable, get the translations and replace the variable name with the translation text in the appropriate language
-        for (TemplateVariable var : templateVariables) {
+        for (TemplateVariable var : templateVariableCopy) {
             for (Translation translation : var.getTranslations()) {
                 String languageText = textMap.getOrDefault(translation.getLanguageCode(), StringUtils.trim(templateText));
                 languageText = languageText.replace("$" + var.getName(), translation.getText());
@@ -608,20 +615,25 @@ public class ActivityImporter {
      * After testing some more surveys, we might want to upgrade this to use a html->markdown parsing library */
     static Map<String, String> JUNIPER_PEPPER_STRING_MAP = Map.ofEntries(
             Map.entry("\\$ddp.participantFirstName\\(\\)", "{profile.givenName}"),
-            Map.entry("\\<p.*?\\>", ""),
-            Map.entry("\\</p\\>", "\\\\n"),
-            Map.entry("\\<span.*?\\>", ""),
-            Map.entry("\\</span\\>", ""),
-            Map.entry("\\<b.*?\\>", "**"),
-            Map.entry("\\</b\\>", "**"),
-            Map.entry("<b.*?>", "**"),
-            Map.entry("</b>", "**"),
-            Map.entry("\\<i.*?\\>", "*"),
-            Map.entry("\\</i\\>", "*"),
-            Map.entry("<i.*?>", "*"),
-            Map.entry("</i>", "*"),
-            Map.entry("\\<em.*?\\>", "*"),
-            Map.entry("\\</em\\>", "*"),
+/**
+ * If uncommented, all the HTML tags will be stripped from the survey. Not always helpful - without
+ * a much more complex system, it removes tags in places that are sometimes helpful. Depends on the survey
+ * which is easier to clean up.
+ */
+//            Map.entry("\\<p.*?\\>", ""),
+//            Map.entry("\\</p\\>", "\\\\n"),
+//            Map.entry("\\<span.*?\\>", ""),
+//            Map.entry("\\</span\\>", ""),
+//            Map.entry("\\<b.*?\\>", "**"),
+//            Map.entry("\\</b\\>", "**"),
+//            Map.entry("<b.*?>", "**"),
+//            Map.entry("</b>", "**"),
+//            Map.entry("\\<i.*?\\>", "*"),
+//            Map.entry("\\</i\\>", "*"),
+//            Map.entry("<i.*?>", "*"),
+//            Map.entry("</i>", "*"),
+//            Map.entry("\\<em.*?\\>", "*"),
+//            Map.entry("\\</em\\>", "*"),
             Map.entry(" +", " ")
     );
 

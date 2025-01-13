@@ -1,0 +1,19 @@
+{
+  "participantUser": {
+    "username": "recurrenceDue@test.com",
+    "lastLoginHoursAgo": 14
+  },
+  "profile": {
+    "givenName": "Recurrence",
+    "familyName": "Due",
+    "contactEmail": "recurrenceDue@test.com",
+    "sexAtBirth": "male",
+    "mailingAddress": {
+      "street1": "99 Beacon Street",
+      "city": "Cambridge",
+      "state": "MA",
+      "country": "US",
+      "postalCode": "10006"
+    }
+  }
+}

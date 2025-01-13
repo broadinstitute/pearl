@@ -4,10 +4,10 @@
 git fetch --tags
 
 # Check what versions demo and production are currently running
-demoResponse=$(curl -s 'https://admin-d2p.ddp-dev.envs.broadinstitute.org/version')
+demoResponse=$(curl -s 'https://juniper-cmi.dev/version')
 demoGitTag=$(echo $demoResponse | jq -r '.gitTag')
 
-prodResponse=$(curl -s 'https://juniper.terra.bio/version')
+prodResponse=$(curl -s 'https://juniper-cmi.org/version')
 prodGitTag=$(echo $prodResponse | jq -r '.gitTag')
 
 echo "Demo is currently running git tag \033[32m$demoGitTag\033[0m"

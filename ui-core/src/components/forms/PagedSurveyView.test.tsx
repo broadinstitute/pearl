@@ -1,17 +1,33 @@
-import { render, screen } from '@testing-library/react'
+import {
+  render,
+  screen
+} from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
-import { ApiContextT, ApiProvider, emptyApi } from 'src/participant/ApiProvider'
+import {
+  ApiContextT,
+  ApiProvider,
+  emptyApi
+} from 'src/participant/ApiProvider'
 import { useAutosaveEffect } from 'src/autoSaveUtils'
 import { setupRouterTest } from 'src/test-utils/router-testing-utils'
 import { MockI18nProvider } from 'src/participant/i18n-testing-utils'
 import { PagedSurveyView } from 'src/components/forms/PagedSurveyView'
 import React from 'react'
 import {
-  generateThreePageSurvey, mockConfiguredSurvey, mockEnrollee, mockHubResponse, mockProfile,
+  generateSurvey,
+  generateSurveyWithQuestion,
+  generateThreePageSurvey,
+  mockConfiguredSurvey,
+  mockEnrollee,
+  mockHubResponse,
+  mockProfile,
   mockSurveyWithHiddenQuestion,
   mockSurveyWithHiddenQuestionClearOnHidden
 } from 'src/test-utils/mocking-utils'
-import { Survey } from 'src/types/forms'
+import {
+  Answer,
+  Survey
+} from 'src/types/forms'
 import { Profile } from 'src/types/user'
 
 jest.mock('src/autoSaveUtils', () => {
@@ -26,7 +42,7 @@ describe('PagedSurveyView', () => {
     await userEvent.click(screen.getByText('Green'))
     await userEvent.click(screen.getByText('Next'))
     expect(screen.getByText('You are on page2')).toBeInTheDocument()
-    await userEvent.type(screen.getByText('text input'), 'my Text')
+    await userEvent.type(screen.getByLabelText('2. text input'), 'my Text')
     await userEvent.click(screen.getByText('Next'))
     expect(screen.getByText('You are on page3')).toBeInTheDocument()
     await userEvent.click(screen.getByText('Complete'))
@@ -41,21 +57,45 @@ describe('PagedSurveyView', () => {
       })
     }))
   })
+
+  it('passes down referenced answers as variables', async () => {
+    setupSurveyTest({
+      ...generateSurvey(),
+      content: `{
+      "pages":[
+        {"elements":[
+          {"type":"html","html":"You are on page1"},
+          {"type":"text","name":"test","title":"test {otherSurvey.question1}"}
+        ]},
+        {"elements":[{"type":"text","name":"otherPage","title":"otherpage"}]}
+      ]
+      }`
+    },
+    undefined,
+    [{
+      surveyStableId: 'otherSurvey',
+      questionStableId: 'question1',
+      stringValue: 'my custom response'
+    }])
+
+    expect(screen.getByText('test my custom response')).toBeInTheDocument()
+  })
   //
   it('autosaves question and page progress', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(generateThreePageSurvey(), profile)
 
     await userEvent.click(screen.getByText('Green'))
     await userEvent.click(screen.getByText('Next'))
     expect(screen.getByText('You are on page2')).toBeInTheDocument()
-    await userEvent.type(screen.getByText('text input'), 'my Text')
+    await userEvent.type(screen.getByLabelText('2. text input'), 'my Text')
     await userEvent.click(screen.getByText('Next'))
     triggerAutosave()
     triggerAutosave()
     // should only have been called once, despite multiple intervals passing, since it only is called on diffs
     expect(submitSpy).toHaveBeenCalledTimes(1)
+
     expect(submitSpy).toHaveBeenCalledWith(expect.objectContaining({
       response: expect.objectContaining({
         answers: expect.arrayContaining([{ questionStableId: 'radio1', stringValue: 'green', viewedLanguage: 'en' },
@@ -68,7 +108,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('autosaves question and page progress with diffs', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(generateThreePageSurvey(), profile)
 
@@ -76,7 +116,7 @@ describe('PagedSurveyView', () => {
     triggerAutosave()
     await userEvent.click(screen.getByText('Next'))
     expect(screen.getByText('You are on page2')).toBeInTheDocument()
-    await userEvent.type(screen.getByText('text input'), 'my Text')
+    await userEvent.type(screen.getByLabelText('2. text input'), 'my Text')
     await userEvent.click(screen.getByText('Next'))
     triggerAutosave()
 
@@ -95,7 +135,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('autosave handles updated questions', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(generateThreePageSurvey(), profile)
     await userEvent.click(screen.getByText('Green'))
@@ -121,7 +161,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('autosave handles hidden questions with default clear-on-submit behavior', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(mockSurveyWithHiddenQuestion(), profile)
     await userEvent.click(screen.getByText('Green'))
@@ -151,7 +191,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('autosave handles hidden questions with clear-on-hidden', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(
       mockSurveyWithHiddenQuestionClearOnHidden(),
@@ -184,7 +224,7 @@ describe('PagedSurveyView', () => {
   })
 
   it('retries autosave if autosave fails', async () => {
-    const profile = { sexAtBirth: 'male' }
+    const profile = mockProfile()
 
     const { submitSpy, triggerAutosave } = setupSurveyTest(generateThreePageSurvey(), profile)
     submitSpy.mockImplementation(() => Promise.reject({}))
@@ -210,12 +250,164 @@ describe('PagedSurveyView', () => {
     // confirm it doesn't spam the user with alerts
     expect(submitSpy).toHaveBeenNthCalledWith(2, expect.objectContaining({ alertErrors: false }))
   })
+  it('submits text questions', async () => {
+    const survey = generateSurveyWithQuestion({
+      type: 'text',
+      name: 'myTextQuestion',
+      title: 'my question'
+    })
+
+    const { submitSpy } = setupSurveyTest(survey)
+
+    await userEvent.type(screen.getByLabelText('1. my question'), 'really smart response')
+    await userEvent.click(screen.getByText('Complete'))
+
+    expect(submitSpy).toHaveBeenCalledTimes(1)
+
+
+    expect(submitSpy).toHaveBeenCalledWith(expect.objectContaining({
+      response: expect.objectContaining({
+        answers: [{ questionStableId: 'myTextQuestion', stringValue: 'really smart response', viewedLanguage: 'en' }]
+      })
+    }))
+  })
+
+  it('submits radiogroup questions', async () => {
+    const survey = generateSurveyWithQuestion({
+      type: 'radiogroup',
+      choices: [
+        { text: 'Choice 1', value: 'choice1' },
+        { text: 'Choice 2', value: 'choice2' }
+      ],
+      name: 'myRadioQuestion',
+      title: 'my radio question'
+    })
+
+    const { submitSpy } = setupSurveyTest(survey)
+
+    await userEvent.click(screen.getByText('Choice 2'))
+    await userEvent.click(screen.getByText('Complete'))
+
+    expect(submitSpy).toHaveBeenCalledTimes(1)
+
+
+    expect(submitSpy).toHaveBeenCalledWith(expect.objectContaining({
+      response: expect.objectContaining({
+        answers: [{ questionStableId: 'myRadioQuestion', stringValue: 'choice2', viewedLanguage: 'en' }]
+      })
+    }))
+  })
+
+  it('submits dropdown questions', async () => {
+    const survey = generateSurveyWithQuestion({
+      type: 'dropdown',
+      choices: [
+        { text: 'Choice 1', value: 'choice1' },
+        { text: 'Choice 2', value: 'choice2' }
+      ],
+      name: 'myDropdownQuestion',
+      title: 'my dropdown question'
+    })
+
+    const { submitSpy } = setupSurveyTest(survey)
+
+    // it's appropriately labelled for accessibility, but for some reason it was also selecting the label
+    await userEvent.click(screen.getByPlaceholderText('Select...'))
+    await userEvent.click(screen.getByText('Choice 2'))
+    await userEvent.click(screen.getByText('Complete'))
+
+    expect(submitSpy).toHaveBeenCalledTimes(1)
+
+
+    expect(submitSpy).toHaveBeenCalledWith(expect.objectContaining({
+      response: expect.objectContaining({
+        answers: [{ questionStableId: 'myDropdownQuestion', stringValue: 'choice2', viewedLanguage: 'en' }]
+      })
+    }))
+  })
+
+  it('submits checkbox questions', async () => {
+    const survey = generateSurveyWithQuestion({
+      type: 'checkbox',
+      choices: [
+        { text: 'Choice 1', value: 'choice1' },
+        { text: 'Choice 2', value: 'choice2' },
+        { text: 'Choice 3', value: 'choice3' }
+      ],
+      name: 'myCheckboxQuestion',
+      title: 'my checkbox question'
+    })
+
+    const { submitSpy } = setupSurveyTest(survey)
+
+    await userEvent.click(screen.getByText('Choice 2'))
+    await userEvent.click(screen.getByText('Choice 1'))
+    await userEvent.click(screen.getByText('Complete'))
+
+    expect(submitSpy).toHaveBeenCalledTimes(1)
+
+
+    expect(submitSpy).toHaveBeenCalledWith(expect.objectContaining({
+      response: expect.objectContaining({
+        answers: [{
+          questionStableId: 'myCheckboxQuestion',
+          objectValue: '["choice2","choice1"]',
+          viewedLanguage: 'en'
+        }]
+      })
+    }))
+  })
+
+  it('submits panelDynamic questions', async () => {
+    const survey = generateSurveyWithQuestion({
+      type: 'paneldynamic',
+      templateElements: [
+        {
+          type: 'text',
+          title: 'My nested text question',
+          name: 'myNestedTextQuestion'
+        },
+        {
+          type: 'text',
+          title: 'My other nested text question',
+          name: 'myOtherNestedTextQuestion'
+        }
+      ],
+      name: 'myPanelDynamicQuestion',
+      title: 'my panel dynamic question'
+    })
+
+    const { submitSpy } = setupSurveyTest(survey)
+
+    await userEvent.click(screen.getByText('Add new'))
+    await userEvent.type(screen.getByLabelText('My nested text question'), 'answer 1')
+    await userEvent.type(screen.getByLabelText('My other nested text question'), 'answer 2')
+    await userEvent.click(screen.getByText('Add new'))
+    await userEvent.type(screen.getAllByLabelText('My nested text question')[1], 'answer 3')
+    await userEvent.type(screen.getAllByLabelText('My other nested text question')[1], 'answer 4')
+
+    await userEvent.click(screen.getByText('Complete'))
+
+    expect(submitSpy).toHaveBeenCalledTimes(1)
+
+
+    expect(submitSpy).toHaveBeenCalledWith(expect.objectContaining({
+      response: expect.objectContaining({
+        answers: [{
+          questionStableId: 'myPanelDynamicQuestion',
+          objectValue: '[{"myNestedTextQuestion":"answer 1","myOtherNestedTextQuestion":"answer 2"},' +
+            '{"myNestedTextQuestion":"answer 3","myOtherNestedTextQuestion":"answer 4"}]',
+          viewedLanguage: 'en'
+        }]
+      })
+    }))
+  })
 })
 
 /**
  *
  */
-const setupSurveyTest = (survey: Survey, profile?: Profile) => {
+const setupSurveyTest = (survey: Survey, profile?: Profile, referencedAnswers?: Answer[]) => {
   const mockUpdateSurveyResponse = jest.fn().mockResolvedValue(mockHubResponse())
 
   const mockApi: ApiContextT = {
@@ -247,7 +439,7 @@ const setupSurveyTest = (survey: Survey, profile?: Profile) => {
       <MockI18nProvider>
         <PagedSurveyView enrollee={enrollee} form={configuredSurvey.survey} response={mockHubResponse().response}
           studyEnvParams={{ studyShortcode: 'study', portalShortcode: 'portal', envName: 'sandbox' }}
-          updateResponseMap={jest.fn()}
+          updateResponseMap={jest.fn()} referencedAnswers={referencedAnswers || []}
           selectedLanguage={'en'} updateProfile={jest.fn()} setAutosaveStatus={jest.fn()}
           taskId={'guid34'} adminUserId={null} updateEnrollee={jest.fn()} onFailure={jest.fn()} onSuccess={jest.fn()}/>
       </MockI18nProvider>

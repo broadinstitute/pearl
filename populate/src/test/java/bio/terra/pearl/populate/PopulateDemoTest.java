@@ -10,15 +10,17 @@ import bio.terra.pearl.core.model.site.SiteContent;
 import bio.terra.pearl.core.model.study.Study;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.Answer;
+import bio.terra.pearl.core.model.survey.StudyEnvironmentSurvey;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.admin.AdminUserService;
 import bio.terra.pearl.core.service.export.EnrolleeExportData;
 import bio.terra.pearl.core.service.export.ExportFileFormat;
-import bio.terra.pearl.core.service.export.ExportOptions;
+import bio.terra.pearl.core.service.export.ExportOptionsWithExpression;
 import bio.terra.pearl.core.service.export.formatters.module.ModuleFormatter;
 import bio.terra.pearl.core.service.publishing.PortalEnvironmentChangeRecordService;
+import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
 import bio.terra.pearl.populate.service.contexts.FilePopulateContext;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -54,13 +57,15 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
                 .findFirst().get().getId();
 
         List<Enrollee> enrollees = enrolleeService.findByStudyEnvironment(sandboxEnvironmentId);
-        Assertions.assertEquals(15, enrollees.size());
+        Assertions.assertEquals(17, enrollees.size());
 
+        checkSurveyPopulation(sandboxEnvironmentId);
         checkOldVersionEnrollee(enrollees);
         checkKeyedEnrollee(enrollees);
         checkProxyWithOneGovernedEnrollee(enrollees);
         checkProxyWithTwoGovernedEnrollee(enrollees);
         checkLostInterestEnrollee(enrollees);
+        checkRecurringSurveyTasks(enrollees);
         checkExportContent(sandboxEnvironmentId);
         checkFamilies(sandboxEnvironmentId);
         checkPortalChangeRecords(portal);
@@ -106,6 +111,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
     private void checkKeyedEnrollee(List<Enrollee> sandboxEnrollees) {
         Enrollee enrollee = sandboxEnrollees.stream().filter(sandboxEnrollee -> "HDINVI".equals(sandboxEnrollee.getShortcode()))
                 .findFirst().get();
+        assertThat(enrollee.getSource(), equalTo(EnrolleeSourceType.IMPORT));
         ParticipantUser user = participantUserService.find(enrollee.getParticipantUserId()).get();
         assertThat(user.getUsername().contains("+invited-"), equalTo(true));
         assertThat(user.getUsername(), endsWith("broadinstitute.org"));
@@ -188,19 +194,25 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
     }
 
     private void checkExportContent(UUID sandboxEnvironmentId) throws Exception {
-        ExportOptions options = ExportOptions
+        ExportOptionsWithExpression options = ExportOptionsWithExpression
                 .builder()
                 .onlyIncludeMostRecent(true)
                 .fileFormat(ExportFileFormat.TSV)
-                .filter(enrolleeSearchExpressionParser.parseRule("{enrollee.subject} = true"))
-                .limit(null)
+                .filterExpression(enrolleeSearchExpressionParser.parseRule("{enrollee.subject} = true"))
+                .rowLimit(null)
                 .build();
 
         List<EnrolleeExportData> enrolleeExportData = enrolleeExportService.loadEnrolleeExportData(sandboxEnvironmentId, options);
         List<ModuleFormatter> moduleInfos = enrolleeExportService.generateModuleInfos(options, sandboxEnvironmentId, enrolleeExportData);
         List<Map<String, String>> exportData = enrolleeExportService.generateExportMaps(enrolleeExportData, moduleInfos);
 
-        assertThat(exportData, hasSize(13));
+        assertThat(exportData, hasSize(15));
+        // confirm pre-enroll questions are included
+        Map<String, String> salkMap = exportData.stream().filter(map -> "HDSALK".equals(map.get("enrollee.shortcode")))
+                .findFirst().get();
+        assertThat(salkMap.get("hd_hd_preenroll.hd_hd_preenroll_livesInUS"), equalTo("Yes"));
+
+
         Map<String, String> oldVersionMap = exportData.stream().filter(map -> "HDVERS".equals(map.get("enrollee.shortcode")))
                 .findFirst().get();
         assertThat(oldVersionMap.get("account.username"), equalTo("oldversion@test.com"));
@@ -228,21 +240,49 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
         Study mainStudy = portal.getPortalStudies().stream().findFirst().get().getStudy();
         assertThat(mainStudy.getShortcode(), equalTo(newShortcode + "_heartdemo"));
         List<Survey> surveys = surveyService.findByPortalId(portal.getId());
-        assertThat(surveys, hasSize(15));
+        assertThat(surveys, hasSize(16));
         List<SiteContent> siteContents = siteContentService.findByPortalId(portal.getId());
         assertThat(siteContents, hasSize(2));
         siteContents.forEach(siteContent -> {
             assertThat(siteContent.getStableId(), Matchers.startsWith(newShortcode));
         });
         List<EmailTemplate> emailTemplates = emailTemplateService.findByPortalId(portal.getId());
-        assertThat(emailTemplates, hasSize(8));
+        assertThat(emailTemplates, hasSize(9));
         emailTemplates.forEach(emailTemplate -> {
             assertThat(emailTemplate.getStableId(), Matchers.startsWith(newShortcode));
         });
+    }
+
+    private void checkRecurringSurveyTasks(List<Enrollee> sandboxEnrollees) {
+        Enrollee jonasSalk = sandboxEnrollees.stream().filter(sandboxEnrollee -> "HDSALK".equals(sandboxEnrollee.getShortcode()))
+                .findFirst().orElseThrow();
+        List<ParticipantTask> tasks = participantTaskService.findByEnrolleeId(jonasSalk.getId());
+        // confirm they have two lifestyle survey tasks, both with responses that aren't the same
+        List<ParticipantTask> lifestyleTasks = tasks.stream().filter(task -> Objects.equals(task.getTargetStableId(),"hd_hd_lifestyle")).toList();
+        assertThat(lifestyleTasks, hasSize(2));
+        assertThat(lifestyleTasks.get(0).getSurveyResponseId() != null &&
+                lifestyleTasks.get(1).getSurveyResponseId() != null &&
+                lifestyleTasks.get(0).getSurveyResponseId() != lifestyleTasks.get(1).getSurveyResponseId(), equalTo(true));
+    }
+
+    private void checkSurveyPopulation(UUID studyEnvironmentId) {
+        // confirm the survey ordering is correct
+        List<StudyEnvironmentSurvey> studyEnvironmentSurveys = studyEnvironmentSurveyService.findAllByStudyEnvIdWithSurveyNoContent(studyEnvironmentId, null);
+        List<StudyEnvironmentSurvey> socialHealthSurveys = studyEnvironmentSurveys.stream().filter((ses) -> ses.getSurvey().getStableId().equals("hd_hd_socialHealth")).toList();
+        // check that the past versions of the social health survey are included
+        assertThat(socialHealthSurveys, hasSize(3));
+        assertThat(socialHealthSurveys.stream().map(ses -> ses.getSurvey().getVersion()).toList(), contains(1, 2, 3));
+        // and they all got assigned to the same ordering
+        assertThat(socialHealthSurveys, everyItem(hasProperty("surveyOrder", equalTo(7))));
+        // check that outreach surveys are independently ordered
+        assertThat(studyEnvironmentSurveys.stream().filter((ses) -> ses.getSurvey().getStableId().equals("depressionOutreach")).findFirst().orElseThrow(),
+                hasProperty("surveyOrder", equalTo(0)));
     }
 
     @Autowired
     private PortalEnvironmentChangeRecordService portalEnvironmentChangeRecordService;
     @Autowired
     private AdminUserService adminUserService;
+    @Autowired
+    private StudyEnvironmentSurveyService studyEnvironmentSurveyService;
 }

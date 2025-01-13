@@ -2,7 +2,14 @@
   "linkedUsername": "jsalk@test.com",
   "shortcode": "HDSALK",
   "simulateSubmissions": true,
-  "submittedHoursAgo": 52,
+  "submittedHoursAgo": 252,
+  "participantFilePopDtos": [
+    {
+      "fileName": "my_file.txt",
+      "fileType": "text/plain",
+      "fileContent": "Hi!"
+    }
+  ],
   "preEnrollmentResponseDto": {
     "qualified": true,
     "surveyStableId": "hd_hd_preenroll",
@@ -25,7 +32,7 @@
       ],
       "currentPageNo": 2,
       "complete": true,
-      "submittedHoursAgo": 48
+      "submittedHoursAgo": 248
     },
     {
       "surveyStableId": "hd_hd_socialHealth",
@@ -37,7 +44,7 @@
       ],
       "currentPageNo": 1,
       "complete": true,
-      "submittedHoursAgo": 46
+      "submittedHoursAgo": 246
     },
     {
       "surveyStableId": "hd_hd_mental",
@@ -48,6 +55,26 @@
       ],
       "currentPageNo": 1,
       "complete": true,
+      "submittedHoursAgo": 247
+    }, {
+      "surveyStableId": "hd_hd_lifestyle",
+      "surveyVersion": 1,
+      "answerPopDtos": [
+        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "2Days"},
+        { "questionStableId": "hd_hd_lifestyle_vigorousActivityMinutes", "stringValue": "30"}
+      ],
+      "currentPageNo": 1,
+      "complete": true,
+      "submittedHoursAgo": 247
+    }, {
+      "surveyStableId": "hd_hd_lifestyle",
+      "surveyVersion": 1,
+      "answerPopDtos": [
+        { "questionStableId": "hd_hd_lifestyle_daysVigorousActivity", "stringValue": "3Days"},
+        { "questionStableId": "hd_hd_lifestyle_vigorousActivityMinutes", "stringValue": "35"}
+      ],
+      "currentPageNo": 1,
+      "complete": true,
       "submittedHoursAgo": 47
     }, {
       "surveyStableId": "hd_hd_basicInfo",
@@ -55,12 +82,14 @@
       "answerPopDtos": [
         {"questionStableId": "hd_hd_basic_firstName", "stringValue": "Jonas", "viewedLanguage": "en"},
         {"questionStableId": "hd_hd_basic_lastName", "stringValue": "Salk", "viewedLanguage": "en"},
+        {"questionStableId": "hd_hd_basic_dateOfBirth", "stringValue": "11/13/1983", "viewedLanguage": "en"},
         {"questionStableId": "hd_hd_basic_streetAddress", "stringValue": "1223 Walnut Street", "viewedLanguage": "es"},
-        {"questionStableId": "hd_hd_basic_mghPatient", "stringValue": "yes", "viewedLanguage": "es"}
+        {"questionStableId": "hd_hd_basic_mghPatient", "stringValue": "yes", "viewedLanguage": "es"},
+        {"questionStableId": "hd_hd_basic_languages", "objectValue": "[{\"language\": \"English\", \"proficiency\": \"native\", \"workUse\": [\"yes\"]}, {\"language\": \"Dutch\", \"proficiency\": \"fluent\", \"workUse\": []}]", "viewedLanguage": "es"}
       ],
       "currentPageNo": 1,
       "complete": true,
-      "submittedHoursAgo": 48
+      "submittedHoursAgo": 248
     }, {
       "surveyStableId": "hd_hd_basicInfo",
       "surveyVersion": 1,
@@ -71,7 +100,7 @@
       "creatingAdminUsername":  "heartdemostaff@gmail.com",
       "currentPageNo": 1,
       "complete": true,
-      "submittedHoursAgo": 48
+      "submittedHoursAgo": 248
     },
     {
       "surveyStableId": "hd_hd_consent",
@@ -87,11 +116,21 @@
         }
       ],
       "currentPageNo": 6
-    }],
+    },
+    {
+      "surveyStableId": "med_record_request",
+      "surveyVersion": 1,
+      "complete": true,
+      "answerPopDtos": [
+        {"questionStableId": "medical_record_document_request", "format": "FILE_NAME", "stringValue":  "my_file.txt"}
+     ]
+    }
+  ],
   "kitRequestDtos": [
     {
       "creatingAdminUsername": "heartdemostaff@gmail.com",
       "kitTypeName": "SALIVA",
+      "distributionMethod": "MAILED",
       "status": "CREATED",
       "externalKitJson": {
         "kitId": "11111111-2222-3333-4444-555555555555",
@@ -122,11 +161,11 @@
     "creatingAdminUsername": "heartdemostaff@gmail.com",
     "text": "Phone call: asked to delay kit shipment as they are travelling for next two months",
     "kitRequestIndex": 0,
-    "submittedHoursAgo": 3
+    "submittedHoursAgo": 203
   },{
     "creatingAdminUsername": "power_user@heartdemo.org",
     "text": "Reviewed survey responses, many are incomplete, send additional reminder email",
-    "submittedHoursAgo": 20,
+    "submittedHoursAgo": 220,
     "task": {
       "assignedToUsername": "heartdemostaff@gmail.com",
       "status": "NEW"
@@ -134,7 +173,7 @@
   },{
     "creatingAdminUsername": "heartdemostaff@gmail.com",
     "text": "Needs address change, call to confirm",
-    "submittedHoursAgo": 25,
+    "submittedHoursAgo": 225,
     "task": {
       "assignedToUsername": "heartdemostaff@gmail.com",
       "status": "NEW"

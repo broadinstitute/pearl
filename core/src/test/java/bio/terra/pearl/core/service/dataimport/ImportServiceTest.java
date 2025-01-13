@@ -2,6 +2,7 @@ package bio.terra.pearl.core.service.dataimport;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.DaoTestUtils;
+import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.admin.AdminUserFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
@@ -10,7 +11,7 @@ import bio.terra.pearl.core.model.dataimport.Import;
 import bio.terra.pearl.core.model.dataimport.ImportStatus;
 import bio.terra.pearl.core.model.dataimport.ImportType;
 import bio.terra.pearl.core.service.CascadeProperty;
-import bio.terra.pearl.core.service.admin.AdminUserService;
+import bio.terra.pearl.core.service.export.dataimport.ImportService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,18 +29,15 @@ public class ImportServiceTest extends BaseSpringBootTest {
     @Autowired
     private StudyEnvironmentFactory studyEnvironmentFactory;
     @Autowired
-    private AdminUserService adminUserService;
-    @Autowired
     private AdminUserFactory adminUserFactory;
 
     @Test
     @Transactional
     public void testCrud(TestInfo info) {
-        StudyEnvironmentFactory.StudyEnvironmentBundle bundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.irb);
-        AdminUser user = adminUserFactory.builder(getTestName(info)).build();
-        AdminUser savedAdmin = adminUserService.create(user);
+        StudyEnvironmentBundle bundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.irb);
+        AdminUser user = adminUserFactory.buildPersisted(getTestName(info));
         Import dataImport = Import.builder()
-                .responsibleUserId(savedAdmin.getId())
+                .responsibleUserId(user.getId())
                 .studyEnvironmentId(bundle.getStudyEnv().getId())
                 .importType(ImportType.PARTICIPANT)
                 .status(ImportStatus.PROCESSING)

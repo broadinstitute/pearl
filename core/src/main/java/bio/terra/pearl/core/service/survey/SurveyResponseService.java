@@ -2,7 +2,7 @@ package bio.terra.pearl.core.service.survey;
 
 import bio.terra.pearl.core.dao.survey.SurveyResponseDao;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
-import bio.terra.pearl.core.model.audit.DataChangeRecord;
+import bio.terra.pearl.core.model.audit.ParticipantDataChange;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.participant.PortalParticipantUser;
@@ -12,12 +12,12 @@ import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
 import bio.terra.pearl.core.service.CascadeProperty;
-import bio.terra.pearl.core.service.ImmutableEntityService;
+import bio.terra.pearl.core.service.CrudService;
 import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
 import bio.terra.pearl.core.service.survey.event.EnrolleeSurveyEvent;
-import bio.terra.pearl.core.service.workflow.DataChangeRecordService;
 import bio.terra.pearl.core.service.workflow.EventService;
+import bio.terra.pearl.core.service.workflow.ParticipantDataChangeService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,34 +25,40 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-public class SurveyResponseService extends ImmutableEntityService<SurveyResponse, SurveyResponseDao> {
+public class SurveyResponseService extends CrudService<SurveyResponse, SurveyResponseDao> {
     private final AnswerService answerService;
     private final SurveyService surveyService;
     private final ParticipantTaskService participantTaskService;
     private final StudyEnvironmentSurveyService studyEnvironmentSurveyService;
     private final AnswerProcessingService answerProcessingService;
-    private final DataChangeRecordService dataChangeRecordService;
+    private final ParticipantDataChangeService participantDataChangeService;
     private final EventService eventService;
     public static final String CONSENTED_ANSWER_STABLE_ID = "consented";
 
-    public SurveyResponseService(SurveyResponseDao dao, AnswerService answerService,
+    public SurveyResponseService(SurveyResponseDao dao,
+                                 AnswerService answerService,
                                  SurveyService surveyService,
                                  ParticipantTaskService participantTaskService,
                                  StudyEnvironmentSurveyService studyEnvironmentSurveyService,
                                  AnswerProcessingService answerProcessingService,
-                                 DataChangeRecordService dataChangeRecordService, EventService eventService) {
+                                 ParticipantDataChangeService participantDataChangeService, EventService eventService) {
         super(dao);
         this.answerService = answerService;
         this.surveyService = surveyService;
         this.participantTaskService = participantTaskService;
         this.studyEnvironmentSurveyService = studyEnvironmentSurveyService;
         this.answerProcessingService = answerProcessingService;
-        this.dataChangeRecordService = dataChangeRecordService;
+        this.participantDataChangeService = participantDataChangeService;
         this.eventService = eventService;
     }
 
     public List<SurveyResponse> findByEnrolleeId(UUID enrolleeId) {
         return dao.findByEnrolleeId(enrolleeId);
+    }
+
+
+    public Map<UUID, List<SurveyResponse>> findByEnrolleeIdsNotRemoved(List<UUID> enrolleeIds) {
+        return dao.findByEnrolleeIdsNotRemoved(enrolleeIds);
     }
 
     public Optional<SurveyResponse> findOneWithAnswers(UUID responseId) {
@@ -83,7 +89,7 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
 
     /**
      * will load the survey and the surveyResponse associated with the task,
-     * or the most recent survey response, with answers attached
+     * if no task is specified, will return the survey with no response
      */
     public SurveyWithResponse findWithActiveResponse(UUID studyEnvId, UUID portalId, String stableId, Integer version,
                                                      Enrollee enrollee, UUID taskId) {
@@ -94,22 +100,36 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
             ParticipantTask task = participantTaskService.find(taskId).get();
             // if there is an associated task, try to find an associated response
             lastResponse = dao.findOneWithAnswers(task.getSurveyResponseId()).orElse(null);
-        }
-
-        if (lastResponse == null) {
-            // if there's no response already associated with the task, grab the most recently created
+        } else {
+            // if there's no task specified, grab the most recently created response
             lastResponse = dao.findMostRecent(enrollee.getId(), form.getId()).orElse(null);
             if (lastResponse != null) {
                 dao.attachAnswers(lastResponse);
+                dao.attachParticipantFiles(lastResponse);
             }
         }
+
         StudyEnvironmentSurvey configSurvey = studyEnvironmentSurveyService
                 .findActiveBySurvey(studyEnvId, stableId)
                 .stream().findFirst().orElseThrow(() -> new NotFoundException("no active survey found"));
         configSurvey.setSurvey(form);
         return new SurveyWithResponse(
-                configSurvey, lastResponse
+                configSurvey, lastResponse, getReferencedAnswers(enrollee, form)
         );
+    }
+
+    private List<Answer> getReferencedAnswers(Enrollee enrollee, Survey survey) {
+        List<Answer> answers = new ArrayList<>();
+
+        List<SurveyParseUtils.QuestionReference> referencedQuestions = survey.getReferencedQuestions().stream().map(SurveyParseUtils.QuestionReference::fromString).toList();
+
+        for (SurveyParseUtils.QuestionReference referencedQuestion : referencedQuestions) {
+            answerService
+                    .findForEnrolleeByQuestion(enrollee.getId(), referencedQuestion.surveyStableId(), referencedQuestion.questionStableId())
+                    .ifPresent(answers::add);
+        }
+
+        return answers;
     }
 
     /**
@@ -251,7 +271,7 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
         for (Answer answer : existingAnswers) {
             existingAnswerMap.put(answer.getQuestionStableId(), answer);
         }
-        List<DataChangeRecord> changeRecords = new ArrayList<>();
+        List<ParticipantDataChange> changeRecords = new ArrayList<>();
         List<Answer> updatedAnswers = answers.stream().map(answer -> {
             Answer existing = existingAnswerMap.get(answer.getQuestionStableId());
             if (existing != null) {
@@ -259,13 +279,13 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
             }
             return createAnswer(answer, response, survey, ppUser, operator);
         }).toList();
-        dataChangeRecordService.bulkCreate(changeRecords);
+        participantDataChangeService.bulkCreate(changeRecords);
         return updatedAnswers;
     }
 
     @Transactional
     public Answer updateAnswer(Answer existing, Answer updated, SurveyResponse response, String justification,
-                               Survey survey, PortalParticipantUser ppUser, List<DataChangeRecord> changeRecords,
+                               Survey survey, PortalParticipantUser ppUser, List<ParticipantDataChange> changeRecords,
                                ResponsibleEntity operator) {
         if (existing.valuesEqual(updated)) {
             // if the values are the same, don't bother with an update
@@ -280,9 +300,10 @@ public class SurveyResponseService extends ImmutableEntityService<SurveyResponse
                 .build();
         auditInfo.setResponsibleEntity(operator);
 
-        DataChangeRecord change = DataChangeRecord.fromAuditInfo(auditInfo)
+        ParticipantDataChange change = ParticipantDataChange.fromAuditInfo(auditInfo)
                 .operationId(response.getId())
                 .modelName(survey.getStableId())
+                .modelId(response.getId())
                 .fieldName(existing.getQuestionStableId())
                 .oldValue(existing.valueAsString())
                 .newValue(updated.valueAsString())

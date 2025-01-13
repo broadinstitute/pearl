@@ -1,7 +1,8 @@
 package bio.terra.pearl.api.admin.service.enrollee;
 
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
-import bio.terra.pearl.core.model.admin.AdminUser;
+import bio.terra.pearl.api.admin.service.auth.EnforcePortalEnrolleePermission;
+import bio.terra.pearl.api.admin.service.auth.context.PortalEnrolleeAuthContext;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.participant.Enrollee;
@@ -40,12 +41,12 @@ public class ParticipantNoteExtService {
   }
 
   @Transactional
+  @EnforcePortalEnrolleePermission(permission = "participant_data_edit")
   public ParticipantNote create(
-      AdminUser user,
-      String enrolleeShortcode,
+      PortalEnrolleeAuthContext authContext,
       ParticipantNote participantNote,
       UUID assignedAdminUserId) {
-    Enrollee enrollee = authUtilService.authAdminUserToEnrollee(user, enrolleeShortcode);
+    Enrollee enrollee = authContext.getEnrollee();
     PortalParticipantUser portalParticipantUser =
         portalParticipantUserService.findForEnrollee(enrollee);
     if (participantNote.getKitRequestId() != null) {
@@ -54,7 +55,7 @@ public class ParticipantNoteExtService {
         throw new IllegalArgumentException("kit request does not match enrollee");
       }
     }
-    participantNote.setCreatingAdminUserId(user.getId());
+    participantNote.setCreatingAdminUserId(authContext.getOperator().getId());
     participantNote.setEnrolleeId(enrollee.getId());
     ParticipantNote savedNote = participantNoteService.create(participantNote);
     if (assignedAdminUserId != null) {
@@ -69,7 +70,10 @@ public class ParticipantNoteExtService {
               .status(TaskStatus.NEW)
               .build();
       participantTaskService.create(
-          task, DataAuditInfo.builder().responsibleAdminUserId(user.getId()).build());
+          task,
+          DataAuditInfo.builder()
+              .responsibleAdminUserId(authContext.getOperator().getId())
+              .build());
     }
     return savedNote;
   }

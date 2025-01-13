@@ -1,16 +1,31 @@
-import React, { useEffect, useState } from 'react'
-import { CalculatedValue, Question, SurveyModel } from 'survey-core'
+import React, {
+  useEffect,
+  useState
+} from 'react'
+import {
+  CalculatedValue,
+  Question,
+  SurveyModel
+} from 'survey-core'
 
 import {
-  createAddressValidator, Enrollee,
+  createAddressValidator,
+  Enrollee,
   PortalEnvironment,
   PortalEnvironmentLanguage,
   surveyJSModelFromForm
 } from '@juniper/ui-core'
-import Api, { Answer, DataChangeRecord, Survey } from 'api/api'
+import Api, {
+  Answer,
+  DataChangeRecord,
+  Survey
+} from 'api/api'
 import InfoPopup from 'components/forms/InfoPopup'
 import PrintFormModal from './PrintFormModal'
-import { Route, Routes } from 'react-router-dom'
+import {
+  Route,
+  Routes
+} from 'react-router-dom'
 import { renderTruncatedText } from 'util/pageUtils'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import { doApiLoad } from 'api/api-utils'
@@ -56,7 +71,10 @@ export default function SurveyFullDataView({
           studyEnvContext.currentEnv.environmentName,
           enrollee.shortcode,
           survey.stableId)
-        setChangeRecords(changeRecords)
+        const responseRecords = changeRecords
+          // limit the record to this response or to records that are not tied to a specific response
+          .filter(record => record.modelId === responseId || !record.modelId)
+        setChangeRecords(responseRecords)
       })
     }
   }, [responseId])

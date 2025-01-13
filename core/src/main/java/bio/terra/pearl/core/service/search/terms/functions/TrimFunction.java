@@ -10,7 +10,7 @@ import org.jooq.Condition;
 import java.util.List;
 import java.util.Optional;
 
-public class TrimFunction implements SearchTerm {
+public class TrimFunction extends SearchTerm {
 
     private final SearchTerm term;
 

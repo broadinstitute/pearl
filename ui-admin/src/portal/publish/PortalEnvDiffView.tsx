@@ -21,25 +21,9 @@ import { Button } from 'components/forms/Button'
 import { isEmpty } from 'lodash'
 import Modal from 'react-bootstrap/Modal'
 import LoadingSpinner from 'util/LoadingSpinner'
-
-export const emptyChangeSet: PortalEnvironmentChange = {
-  siteContentChange: { changed: false },
-  configChanges: [],
-  preRegSurveyChanges: { changed: false },
-  triggerChanges: { addedItems: [], removedItems: [], changedItems: [] },
-  participantDashboardAlertChanges: [],
-  studyEnvChanges: [],
-  languageChanges: { addedItems: [], removedItems: [], changedItems: [] }
-}
-
-export const emptyStudyEnvChange: StudyEnvironmentChange = {
-  studyShortcode: '',
-  configChanges: [],
-  preEnrollSurveyChanges: { changed: false },
-  surveyChanges: { addedItems: [], removedItems: [], changedItems: [] },
-  triggerChanges: { addedItems: [], removedItems: [], changedItems: [] },
-  kitTypeChanges: { addedItems: [], removedItems: [], changedItems: [] }
-}
+import { studyDiffPath } from '../../study/StudyRouter'
+import { useStudyEnvParamsFromPath } from '../../study/StudyEnvironmentRouter'
+import { emptyChangeSet, emptyStudyEnvChange } from 'util/publishUtils'
 
 const EXCLUDED_PROPS = ['participantHostname']
 
@@ -104,6 +88,7 @@ export default function PortalEnvDiffView(
   const [selectedChanges, setSelectedChanges] = useState<PortalEnvironmentChange>(getDefaultPortalEnvChanges(changeSet))
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const { user } = useUser()
+  const { studyShortcode } = useStudyEnvParamsFromPath()
   const updateSelectedStudyEnvChanges = (update: StudyEnvironmentChange) => {
     const matchedIndex = selectedChanges.studyEnvChanges
       .findIndex(change => change.studyShortcode === update.studyShortcode)
@@ -124,6 +109,8 @@ export default function PortalEnvDiffView(
     { userHasPermission(user, portal.id, 'publish') &&
       <span>Select changes to publish</span>
     }
+    <Link to={studyDiffPath(portal.shortcode, studyShortcode!, destEnvName, sourceEnvName)}
+      className="ms-3">reverse diff</Link>
 
     <div className="bg-white p-3">
       <div className="my-2">
@@ -200,7 +187,7 @@ export default function PortalEnvDiffView(
       </div>
       <div className="my-2">
         <h2 className="h6">
-          Notification Configs</h2>
+          Triggers</h2>
         <div className="ms-4">
           <ConfigChangeListView configChangeList={changeSet.triggerChanges}
             selectedChanges={selectedChanges.triggerChanges}

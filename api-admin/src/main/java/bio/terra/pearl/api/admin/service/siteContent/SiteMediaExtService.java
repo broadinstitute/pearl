@@ -1,7 +1,8 @@
 package bio.terra.pearl.api.admin.service.siteContent;
 
 import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
-import bio.terra.pearl.core.model.admin.AdminUser;
+import bio.terra.pearl.api.admin.service.auth.EnforcePortalPermission;
+import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.core.model.site.SiteMedia;
 import bio.terra.pearl.core.model.site.SiteMediaMetadata;
 import bio.terra.pearl.core.service.CascadeProperty;
@@ -36,19 +37,18 @@ public class SiteMediaExtService {
     return siteMediaService.findOneLatestVersion(portalShortcode, cleanFileName);
   }
 
-  public List<SiteMediaMetadata> list(String portalShortcode, AdminUser operator) {
-    authUtilService.authUserToPortal(operator, portalShortcode);
-    return siteMediaService.findMetadataByPortal(portalShortcode);
+  @EnforcePortalPermission(permission = AuthUtilService.BASE_PERMISSION)
+  public List<SiteMediaMetadata> list(PortalAuthContext authContext) {
+    return siteMediaService.findMetadataByPortal(authContext.getPortalShortcode());
   }
 
-  public SiteMedia upload(
-      String portalShortcode, String uploadFileName, byte[] imageData, AdminUser operator) {
-    authUtilService.authUserToPortal(operator, portalShortcode);
+  @EnforcePortalPermission(permission = "site_content_edit")
+  public SiteMedia upload(PortalAuthContext authContext, String uploadFileName, byte[] imageData) {
     String cleanFileName = SiteMediaService.cleanFileName(uploadFileName);
-    int version = siteMediaService.getNextVersion(cleanFileName, portalShortcode);
+    int version = siteMediaService.getNextVersion(cleanFileName, authContext.getPortalShortcode());
     SiteMedia image =
         SiteMedia.builder()
-            .portalShortcode(portalShortcode)
+            .portalShortcode(authContext.getPortalShortcode())
             .version(version)
             .data(imageData)
             .cleanFileName(cleanFileName)
@@ -57,8 +57,8 @@ public class SiteMediaExtService {
     return siteMediaService.create(image);
   }
 
-  public void delete(String portalShortcode, UUID id, AdminUser operator) {
-    authUtilService.authUserToPortal(operator, portalShortcode);
+  @EnforcePortalPermission(permission = "site_content_edit")
+  public void delete(PortalAuthContext authContext, UUID id) {
     siteMediaService.delete(id, CascadeProperty.EMPTY_SET);
   }
 }

@@ -8,10 +8,10 @@ import { isEmpty } from 'lodash'
  * would return 'Tester, Reviewer and Examiner'.
  */
 export const getFamilyNameString = (family: Family): string => {
-  const familyNames = family
+  const familyNames: string[] = family
     ?.members
     ?.filter(enrollee => !isEmpty(enrollee?.profile?.familyName))
-    ?.map(enrollee => enrollee?.profile?.familyName) || ['']
+    ?.map(enrollee => enrollee?.profile?.familyName ?? '') || ['']
   const uniqNames = uniq(familyNames)
   if (uniqNames.length === 1) {
     return uniqNames[0]

@@ -1,13 +1,13 @@
 package bio.terra.pearl.core.service.site;
 
 import bio.terra.pearl.core.dao.site.SiteContentDao;
-import bio.terra.pearl.core.model.site.HtmlPage;
-import bio.terra.pearl.core.model.site.HtmlSection;
-import bio.terra.pearl.core.model.site.LocalizedSiteContent;
-import bio.terra.pearl.core.model.site.NavbarItem;
-import bio.terra.pearl.core.model.site.SiteContent;
+import bio.terra.pearl.core.model.portal.PortalEnvironment;
+import bio.terra.pearl.core.model.publishing.PortalEnvironmentChange;
+import bio.terra.pearl.core.model.publishing.VersionedEntityChange;
+import bio.terra.pearl.core.model.site.*;
 import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.VersionedEntityService;
+import bio.terra.pearl.core.service.publishing.PortalEnvPublishable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-public class SiteContentService extends VersionedEntityService<SiteContent, SiteContentDao> {
+public class SiteContentService extends VersionedEntityService<SiteContent, SiteContentDao> implements PortalEnvPublishable {
     private LocalizedSiteContentService localizedSiteContentService;
 
     public SiteContentService(SiteContentDao dao, LocalizedSiteContentService localizedSiteContentService) {
@@ -86,6 +86,7 @@ public class SiteContentService extends VersionedEntityService<SiteContent, Site
     protected void cleanForCopying(LocalizedSiteContent lsc) {
         lsc.cleanForCopying();
         lsc.getNavbarItems().stream().forEach(navbarItem -> cleanForCopying(navbarItem));
+        lsc.getPages().stream().forEach(page -> cleanForCopying(page));
         cleanForCopying(lsc.getFooterSection());
         lsc.setFooterSectionId(null);
         cleanForCopying(lsc.getLandingPage());
@@ -95,14 +96,16 @@ public class SiteContentService extends VersionedEntityService<SiteContent, Site
 
     protected void cleanForCopying(NavbarItem navbarItem) {
         navbarItem.cleanForCopying();
-        navbarItem.setHtmlPageId(null);
-        cleanForCopying(navbarItem.getHtmlPage());
+        if (navbarItem.getItems() != null) {
+            navbarItem.getItems().stream().forEach(item -> cleanForCopying(item));
+        }
     }
 
     protected  void cleanForCopying(HtmlPage htmlPage) {
         if (htmlPage != null) {
             htmlPage.cleanForCopying();
             htmlPage.setLocalizedSiteContentId(null);
+            htmlPage.setId(null);
             htmlPage.getSections().stream().forEach(section -> cleanForCopying(section));
         }
     }
@@ -112,5 +115,27 @@ public class SiteContentService extends VersionedEntityService<SiteContent, Site
             section.cleanForCopying();
             section.setHtmlPageId(null);
         }
+    }
+
+    public List<SiteContent> findActiveContentByPortalId(UUID portalId) {
+        return dao.findActiveContentByPortalId(portalId);
+    }
+
+    @Override
+    public void loadForPublishing(PortalEnvironment portalEnv) {
+        if (portalEnv.getSiteContentId() != null) {
+            portalEnv.setSiteContent(find(portalEnv.getSiteContentId()).orElseThrow());
+        }
+    }
+
+    @Override
+    public void updateDiff(PortalEnvironmentChange change, PortalEnvironment sourceEnv, PortalEnvironment destEnv) {
+        VersionedEntityChange<SiteContent> siteContentRecord = new VersionedEntityChange<SiteContent>(sourceEnv.getSiteContent(), destEnv.getSiteContent());
+        change.setSiteContentChange(siteContentRecord);
+    }
+
+    @Override
+    public void applyDiff(PortalEnvironmentChange change, PortalEnvironment destEnv) {
+
     }
 }

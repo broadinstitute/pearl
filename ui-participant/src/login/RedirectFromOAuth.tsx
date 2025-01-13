@@ -13,9 +13,15 @@ import {
 } from 'browserPersistentState'
 import { enrollCurrentUserInStudy } from 'util/enrolleeUtils'
 import { PageLoadingIndicator } from 'util/LoadingSpinner'
-import { filterUnjoinableStudies } from 'Navbar'
-import { logError } from 'util/loggingUtils'
-import { useI18n } from '@juniper/ui-core'
+import {
+  filterUnjoinableStudies,
+  useI18n
+} from '@juniper/ui-core'
+import {
+  log,
+  logError
+} from 'util/loggingUtils'
+import { handleNewStudyEnroll } from '../studies/enroll/StudyEnrollRouter'
 
 export const RedirectFromOAuth = () => {
   const auth = useAuth()
@@ -31,13 +37,24 @@ export const RedirectFromOAuth = () => {
 
   const defaultEnrollStudy = findDefaultEnrollmentStudy(returnToStudy, portal.portalStudies)
 
-
   useEffect(() => {
     const handleRedirectFromOauth = async () => {
       // RedirectFromOAuth may be rendered before react-oidc-context's AuthProvider has finished doing its thing. If so,
       // do nothing and wait until a render after AuthProvider is done.
       // Also, we'll be manipulating state, so we may get rendered more than once before we navigate away, so make sure
       // we only process the return from OAuth once (when the user is still "anonymous")
+
+      if (auth.error && user) {
+        // This case can happen if the user is already logged in and tries to log in again with a consumed oauth state.
+        // The user already has a valid session, so we'll log that this happened but navigate to the hub without hassle.
+        // Note: this logs as INFO because we want to know that this happened, but it's a non-fatal error.
+        log({
+          eventType: 'INFO', eventName: 'oauth-error',
+          stackTrace: auth.error.stack, eventDetail: auth.error.message
+        })
+        navigate('/hub', { replace: true })
+        return
+      }
 
       if (auth.error) {
         logError({ message: auth.error.message || 'error' }, auth.error.stack || 'stack', 'oauth-error')
@@ -74,9 +91,10 @@ export const RedirectFromOAuth = () => {
 
             // Enroll in the study if not already enrolled in any other study
             if (defaultEnrollStudy && !loginResult.enrollees.length) {
-              const hubUpdate = await enrollCurrentUserInStudy(defaultEnrollStudy.shortcode,
-                defaultEnrollStudy.name, preEnrollResponseId, refreshLoginState, i18n)
-              navigate('/hub', { replace: true, state: hubUpdate })
+              const hubResponse = await enrollCurrentUserInStudy(
+                defaultEnrollStudy.shortcode, preEnrollResponseId, refreshLoginState)
+
+              handleNewStudyEnroll(hubResponse, defaultEnrollStudy.shortcode, navigate, i18n, defaultEnrollStudy.name)
             } else {
               navigate('/hub', { replace: true })
             }

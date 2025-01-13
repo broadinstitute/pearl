@@ -10,6 +10,7 @@ test('renders the study selector and sub menus', async () => {
   const { study } = mockStudyEnvContext()
   const portal = mockPortal()
   portal.portalStudies.push({
+    createdAt: 0,
     study
   })
   const { RoutedComponent } = setupRouterTest(
@@ -19,6 +20,6 @@ test('renders the study selector and sub menus', async () => {
   render(RoutedComponent)
   expect(screen.getByText(study.name)).toBeInTheDocument()
   expect(screen.getByText('Research Coordination')).toBeVisible()
-  expect(screen.getByText('Participant List')).toBeVisible()
-  expect(screen.getByText('Analytics & Data')).toBeVisible()
+  expect(screen.getByText('Participants')).toBeVisible()
+  expect(screen.getByText('Study Trends')).toBeVisible()
 })

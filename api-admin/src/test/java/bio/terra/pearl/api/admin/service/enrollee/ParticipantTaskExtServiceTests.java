@@ -2,31 +2,30 @@ package bio.terra.pearl.api.admin.service.enrollee;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.when;
 
+import bio.terra.pearl.api.admin.AuthAnnotationSpec;
+import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
-import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
+import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
+import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.admin.PortalAdminUserFactory;
+import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.factory.participant.ParticipantTaskFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
-import bio.terra.pearl.core.service.exception.PermissionDeniedException;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskUpdateDto;
 import java.util.List;
-import java.util.UUID;
-import org.junit.jupiter.api.Assertions;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
 public class ParticipantTaskExtServiceTests extends BaseSpringBootTest {
-  @MockBean private AuthUtilService mockAuthUtilService;
   @Autowired private StudyEnvironmentFactory studyEnvironmentFactory;
   @Autowired private EnrolleeFactory enrolleeFactory;
   @Autowired private ParticipantTaskFactory participantTaskFactory;
@@ -35,18 +34,38 @@ public class ParticipantTaskExtServiceTests extends BaseSpringBootTest {
   @Autowired private ParticipantTaskService participantTaskService;
 
   @Test
+  public void testAllMethodsAnnotated(TestInfo info) {
+    AuthTestUtils.assertAllMethodsAnnotated(
+        participantTaskExtService,
+        Map.of(
+            "findAll",
+            AuthAnnotationSpec.withPortalStudyEnvPerm("participant_data_view"),
+            "assignToEnrollees",
+            AuthAnnotationSpec.withPortalStudyEnvPerm("participant_data_edit"),
+            "updateTasks",
+            AuthAnnotationSpec.withPortalStudyEnvPerm("participant_data_edit"),
+            "getByStudyEnvironment",
+            AuthAnnotationSpec.withPortalStudyEnvPerm("participant_data_view"),
+            "getByEnrollee",
+            AuthAnnotationSpec.withPortalEnrolleePerm("participant_data_view"),
+            "update",
+            AuthAnnotationSpec.withPortalEnrolleePerm("participant_data_edit")));
+  }
+
+  @Test
   @Transactional
   public void testUpdateTasksForSurvey(TestInfo info) {
-    StudyEnvironmentFactory.StudyEnvironmentBundle bundle =
+    StudyEnvironmentBundle bundle =
         studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.sandbox);
     AdminUser operator =
         portalAdminUserFactory
-            .buildPersistedWithPortals(getTestName(info), List.of(bundle.getPortal()))
+            .buildPersistedWithPermissions(
+                getTestName(info), bundle.getPortal(), List.of("participant_data_edit"))
             .user();
-    EnrolleeFactory.EnrolleeBundle enrollee1 =
+    EnrolleeBundle enrollee1 =
         enrolleeFactory.buildWithPortalUser(
             getTestName(info), bundle.getPortalEnv(), bundle.getStudyEnv());
-    EnrolleeFactory.EnrolleeBundle enrollee2 =
+    EnrolleeBundle enrollee2 =
         enrolleeFactory.buildWithPortalUser(
             getTestName(info), bundle.getPortalEnv(), bundle.getStudyEnv());
 
@@ -75,11 +94,12 @@ public class ParticipantTaskExtServiceTests extends BaseSpringBootTest {
     ParticipantTaskUpdateDto updateDto =
         new ParticipantTaskUpdateDto(List.of(updateSpec), null, true);
     participantTaskExtService.updateTasks(
-        bundle.getPortal().getShortcode(),
-        bundle.getStudy().getShortcode(),
-        EnvironmentName.sandbox,
-        updateDto,
-        operator);
+        PortalStudyEnvAuthContext.of(
+            operator,
+            bundle.getPortal().getShortcode(),
+            bundle.getStudy().getShortcode(),
+            EnvironmentName.sandbox),
+        updateDto);
 
     // check that the task for the specified survey (surveyA) got updated, but that the surveyB task
     // did not
@@ -88,39 +108,5 @@ public class ParticipantTaskExtServiceTests extends BaseSpringBootTest {
     ParticipantTask unaffectedTaskUpdate =
         participantTaskService.find(differentSurveyTask.getId()).orElseThrow();
     assertThat(unaffectedTaskUpdate.getTargetAssignedVersion(), equalTo(1));
-  }
-
-  @Test
-  public void testGetByStudyAuthsToStudy() {
-    AdminUser user = AdminUser.builder().superuser(false).build();
-    when(mockAuthUtilService.authUserToStudy(user, "foo", "bar"))
-        .thenThrow(new PermissionDeniedException("test1"));
-    Assertions.assertThrows(
-        PermissionDeniedException.class,
-        () ->
-            participantTaskExtService.getByStudyEnvironment(
-                "foo", "bar", EnvironmentName.irb, List.of(), user));
-  }
-
-  @Test
-  public void testGetByEnrolleeAuthsToEnrollee() {
-    AdminUser user = AdminUser.builder().superuser(false).build();
-    when(mockAuthUtilService.authAdminUserToEnrollee(user, "code12"))
-        .thenThrow(new PermissionDeniedException("test1"));
-    Assertions.assertThrows(
-        PermissionDeniedException.class,
-        () -> participantTaskExtService.getByEnrollee("code12", user));
-  }
-
-  @Test
-  public void testUpdateAuthsToStudy() {
-    AdminUser user = AdminUser.builder().superuser(false).build();
-    when(mockAuthUtilService.authUserToStudy(user, "foo", "bar"))
-        .thenThrow(new PermissionDeniedException("test1"));
-    Assertions.assertThrows(
-        PermissionDeniedException.class,
-        () ->
-            participantTaskExtService.update(
-                "foo", "bar", EnvironmentName.irb, UUID.randomUUID(), new ParticipantTask(), user));
   }
 }

@@ -154,7 +154,7 @@ const SurveyEditorView = (props: SurveyEditorViewProps) => {
                 onClick={() => setShowErrors(!showErrors)} aria-label="view errors">
                     View errors <FontAwesomeIcon icon={faExclamationCircle} className="fa-lg"/>
               </button>
-              { showErrors && <div className="position-absolute border border-gray rounded bg-white p-3"
+              { showErrors && <div className="position-absolute border border-gray rounded bg-white p-3 z-1"
                 style={{ width: '750px', right: 0 }}>
                 <div className="border-b border-black">
                   <label>
@@ -248,7 +248,6 @@ const SurveyEditorView = (props: SurveyEditorViewProps) => {
       </div>
       <ApiProvider api={previewApi(portal.shortcode, currentEnv.environmentName)}>
         <FormContentEditor
-          portal={portal}
           initialContent={draft?.content || currentForm.content} //favor loading the draft, if we find one
           initialAnswerMappings={draft?.answerMappings || currentForm.answerMappings || []}
           supportedLanguages={portalEnv?.supportedLanguages || []}
@@ -257,14 +256,17 @@ const SurveyEditorView = (props: SurveyEditorViewProps) => {
           onFormContentChange={(newValidationErrors, newContent) => {
             if (isEmpty(newValidationErrors)) {
               setShowErrors(false)
-              setDraft({ ...currentForm, ...draft, content: JSON.stringify(newContent), date: Date.now() })
+              setDraft({
+                ...currentForm, ...draft as FormDraft,
+                content: JSON.stringify(newContent), date: Date.now()
+              })
             }
             setValidationErrors(newValidationErrors)
           }}
           onAnswerMappingChange={(newValidationErrors, newAnswerMappings) => {
             if (isEmpty(newValidationErrors)) {
               setDraft({
-                ...draft,
+                ...draft as FormDraft,
                 content: draft?.content || currentForm.content,
                 answerMappings: newAnswerMappings,
                 date: Date.now()

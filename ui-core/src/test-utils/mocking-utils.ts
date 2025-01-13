@@ -1,5 +1,13 @@
-import { Survey, SurveyResponse } from 'src/types/forms'
-import { Enrollee, HubResponse, Profile } from 'src/types/user'
+import {
+  Question,
+  Survey,
+  SurveyResponse
+} from 'src/types/forms'
+import {
+  Enrollee,
+  HubResponse,
+  Profile
+} from 'src/types/user'
 import { StudyEnvironmentSurvey } from 'src/types/study'
 
 /** simplest survey.  one page, no interactive elements */
@@ -38,7 +46,7 @@ export function generateThreePageSurvey(overrideObj?: any): Survey { // eslint-d
         elements: [
           { type: 'html', html: '<span>You are on page2</span>' },
           {
-            type: 'text', title: 'text input', name: 'text1'
+            type: 'text', title: 'text input', name: 'text1', placeholder: 'text placeholder'
           }
         ]
       },
@@ -56,8 +64,25 @@ export function generateThreePageSurvey(overrideObj?: any): Survey { // eslint-d
       }
     ]
   }
+
   const survey = generateSurvey({ content: JSON.stringify(surveyContent) })
   return Object.assign(survey, overrideObj)
+}
+
+export function generateSurveyWithQuestion(q: Question): Survey {
+  const surveyContent = {
+    pages: [
+      {
+        elements: [
+          { type: 'html', html: '<span>You are on page1</span>' },
+          q
+        ]
+      }
+    ],
+    'calculatedValues': []
+  }
+
+  return generateSurvey({ content: JSON.stringify(surveyContent) })
 }
 
 /** survey with a hidden question -- uses surveyjs default clear-on-submit behavior */
@@ -114,9 +139,7 @@ export const mockEnrollee: () => Enrollee = () => {
     subject: true,
     id: 'enrollee1',
     participantUserId: 'user1',
-    profile: {
-      sexAtBirth: 'female'
-    },
+    profile: mockProfile(),
     profileId: 'profile1',
     kitRequests: [],
     surveyResponses: [],
@@ -161,13 +184,22 @@ export const mockSurveyResponse = (): SurveyResponse => {
     resumeData: '{}',
     enrolleeId: 'enrollee1',
     complete: false,
-    answers: []
+    answers: [],
+    participantFiles: []
   }
 }
 
 /** mock enrollee profile */
 export const mockProfile = (): Profile => {
   return {
-    sexAtBirth: 'female'
+    sexAtBirth: 'female',
+    mailingAddress: {
+      city: 'city',
+      state: 'state',
+      street1: 'street1',
+      street2: 'street2',
+      country: 'US',
+      postalCode: '02478'
+    }
   }
 }

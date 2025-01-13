@@ -2,6 +2,7 @@ package bio.terra.pearl.core.model.survey;
 
 import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,12 +31,15 @@ public class Answer extends BaseEntity {
     private int surveyVersion;
     private String viewedLanguage;
     private AnswerType answerType;
+    private AnswerFormat format;
     private String stringValue;
     // objects are stored as JSON strings
     private String objectValue;
     // store all numbers as doubles to match Javascript/JSON.
     private Double numberValue;
     private Boolean booleanValue;
+    // used in processing to cache parsed values -- not stored in DB
+    private JsonNode parsedObjectValue;
 
     public void setCreatingEntity(ResponsibleEntity responsibleEntity) {
         this.creatingParticipantUserId = responsibleEntity.getParticipantUser() != null ? responsibleEntity.getParticipantUser().getId() : null;

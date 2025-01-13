@@ -49,7 +49,7 @@ public class TriggerExtService {
     this.emailTemplateService = emailTemplateService;
   }
 
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public List<Trigger> findForStudy(PortalStudyEnvAuthContext authContext) {
     List<Trigger> configs =
         triggerService.findByStudyEnvironmentId(authContext.getStudyEnvironment().getId(), true);
@@ -58,7 +58,7 @@ public class TriggerExtService {
   }
 
   /** Gets the config specified by id, and confirms it belongs to the given portal and study */
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Optional<Trigger> find(PortalStudyEnvAuthContext authContext, UUID configId) {
 
     Optional<Trigger> configOpt = triggerService.find(configId);
@@ -73,7 +73,7 @@ public class TriggerExtService {
   /**
    * tests the notification config with configId, and sends a notification to the enrollee specified
    */
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public void test(
       PortalStudyEnvAuthContext authContext, UUID actionId, EnrolleeContext enrolleeContext) {
     Trigger trigger =
@@ -116,7 +116,7 @@ public class TriggerExtService {
    * that template will be created as well.
    */
   @Transactional
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Trigger replace(PortalStudyEnvAuthContext authContext, UUID configId, Trigger update) {
     PortalEnvironment portalEnvironment =
         portalEnvironmentService
@@ -125,6 +125,9 @@ public class TriggerExtService {
 
     Trigger existing = triggerService.find(configId).get();
     verifyTrigger(authContext, existing);
+    if (!existing.isActive()) {
+      throw new IllegalArgumentException("Cannot edit inactive trigger");
+    }
 
     Trigger newConfig = create(update, authContext.getStudyEnvironment(), portalEnvironment);
     // after creating the new config, deactivate the old config
@@ -139,7 +142,7 @@ public class TriggerExtService {
    * update contains a new email template, that template will be created as well.
    */
   @Transactional
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public Trigger create(PortalStudyEnvAuthContext authContext, Trigger newConfig) {
 
     PortalEnvironment portalEnvironment =
@@ -156,7 +159,7 @@ public class TriggerExtService {
    * but deactivated by setting `active = false`.
    */
   @Transactional
-  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSON)
+  @EnforcePortalStudyEnvPermission(permission = AuthUtilService.BASE_PERMISSION)
   public void delete(PortalStudyEnvAuthContext authContext, UUID configId) {
     Optional<Trigger> configOpt = triggerService.find(configId);
     if (configOpt.isEmpty()) {
@@ -186,6 +189,10 @@ public class TriggerExtService {
 
   private Trigger create(
       Trigger newConfig, StudyEnvironment studyEnvironment, PortalEnvironment portalEnvironment) {
+    if (!newConfig.isActive()) {
+      throw new IllegalArgumentException("Cannot create inactive trigger");
+    }
+
     newConfig.cleanForCopying();
     newConfig.setStudyEnvironmentId(studyEnvironment.getId());
     newConfig.setPortalEnvironmentId(portalEnvironment.getId());

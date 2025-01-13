@@ -1,0 +1,12 @@
+databaseChangeLog: # this will need a follow-up PR in a subsequent release to remove the update_task_target_stable_id column
+  - changeSet:
+      id: "task_targets"
+      author: dbush
+      changes:
+        - sql:
+            sql: ALTER TABLE trigger ADD COLUMN filter_target_stable_ids text[];
+        - sql:
+            sql: ALTER TABLE trigger ADD COLUMN action_target_stable_ids text[];
+        - sql:
+            sql: update trigger set action_target_stable_ids = ARRAY[update_task_target_stable_id];
+

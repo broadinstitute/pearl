@@ -21,7 +21,7 @@
               {
                 "name": "maSurveyHeader",
                 "type": "html",
-                "html": "<p>You, {profile.givenName} {profile.familyName}, say you live in Massachusetts</p>"
+                "html": "<p>You, {hd_hd_basicInfo.hd_hd_basic_firstName} {hd_hd_basicInfo.hd_hd_basic_lastName}, say you live in Massachusetts</p>"
               }
             ]
           },
@@ -41,6 +41,71 @@
               {
                 "text": "Not sure",
                 "value": "unsure"
+              }
+            ]
+          },
+          {
+            "name": "schools",
+            "type": "checkbox",
+            "title": "What schools did you attend?",
+            "renderAs": "checkbox-multiple-other",
+            "choices": [
+              {
+                "text": "MIT",
+                "value": "mit",
+                "otherStableId": "schoolsMitDetail",
+                "otherText": {
+                    "en": "What did you study at MIT?",
+                    "es": "¿Qué estudiaste en MIT?"
+                },
+                "otherPlaceholder": {
+                    "en": "Your major",
+                    "es": "Tu especialidad"
+                }
+              },
+              {
+                  "text": "Harvard",
+                  "value": "harvard",
+                  "otherStableId": "schoolsHarvardDetail",
+                  "otherText": {
+                    "en": "What did you study at Harvard?",
+                    "es": "¿Qué estudiaste en Harvard?"
+                  },
+                  "otherPlaceholder": {
+                    "en": "Your major",
+                    "es": "Tu especialidad"
+                  }
+              },
+              {
+                "text": "Northeastern",
+                "value": "northeastern",
+                "otherStableId": "schoolsNortheasternDetail",
+                "otherText": {
+                    "en": "What did you study at Northeastern?",
+                    "es": "¿Qué estudiaste en Northeastern?"
+                },
+                "otherPlaceholder": {
+                    "en": "Your major",
+                    "es": "Tu especialidad"
+                }
+              },
+              {
+                "text": "Boston University",
+                "value": "bu",
+                "otherStableId": "schoolsBuDetail",
+                "otherText": {
+                    "en": "What did you study at Boston University?",
+                    "es": "¿Qué estudiaste en Boston University?"
+                },
+                "otherPlaceholder": {
+                    "en": "Your major",
+                    "es": "Tu especialidad"
+                }
+              },
+              {
+                "text": "Other",
+                "value": "other",
+                "otherStableId": "schoolsOtherDetail"
               }
             ]
           }

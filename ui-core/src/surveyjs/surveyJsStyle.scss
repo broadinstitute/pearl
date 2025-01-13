@@ -15,7 +15,6 @@
 }
 
 .sd-html h2 {
-  padding-top: 1em;
   margin-bottom: 0.5em;
   font-weight: 600;
 
@@ -24,8 +23,44 @@
   }
 }
 
+.sd-progress__text {
+  padding: 1em 0em 0em 0em;
+}
+
+//scale down all html headers for mobile devices
+@media (max-width: 768px) {
+  .sd-html h1 {
+    font-size: 1.5em;
+    line-height: 1.8em;
+  }
+
+  .sd-html h2 {
+    font-size: 1.25em;
+    line-height: 1.5em;
+  }
+
+  .sd-html h3 {
+    font-size: 1.1em;
+    line-height: 1.32em;
+  }
+
+  .sd-html h4 {
+    font-size: 1em;
+    line-height: 1.2em;
+  }
+
+  .sd-html h5 {
+    font-size: 0.9em;
+    line-height: 1.08em;
+  }
+
+  .sd-html h6 {
+    font-size: 0.8em;
+    line-height: 0.96em;
+  }
+}
+
 .sd-html p:only-child {
-  padding-top: 2em;
   margin-bottom: 0;
 }
 

@@ -1,0 +1,4 @@
+formatter: markdown
+output:
+  file: README.md
+  mode: inject # inject content between <!-- BEGIN_TF_DOCS --> and <!-- END_TF_DOCS -->

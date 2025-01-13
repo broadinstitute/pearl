@@ -1,6 +1,7 @@
 import { KitRequest } from 'src/types/kits'
 import { ParticipantTask } from 'src/types/task'
 import {
+  PreEnrollmentResponse,
   PreregistrationResponse,
   SurveyResponse
 } from 'src/types/forms'
@@ -18,10 +19,20 @@ export type ParticipantNote = {
 }
 
 export type ParticipantUser = {
-    id: string,
-    username: string,
-    token: string,
+    id: string
+    username: string
+    shortcode: string
+    token: string
     lastLogin: number
+    createdAt: number
+    portalParticipantUsers?: PortalParticipantUser[]
+}
+
+export type PortalParticipantUser = {
+    id: string
+    createdAt: number
+    lastLogin: number
+    profile?: Profile
 }
 
 export type Enrollee = {
@@ -36,7 +47,7 @@ export type Enrollee = {
     relations?: EnrolleeRelation[]
     participantUserId: string
     preRegResponse?: PreregistrationResponse
-    preEnrollmentResponse?: PreregistrationResponse
+    preEnrollmentResponse?: PreEnrollmentResponse
     profile: Profile
     profileId: string
     shortcode: string
@@ -59,7 +70,7 @@ export type Profile = {
     contactEmail?: string,
     doNotEmail?: boolean,
     doNotEmailSolicit?: boolean,
-    mailingAddress?: MailingAddress,
+    mailingAddress: MailingAddress,
     phoneNumber?: string,
     birthDate?: number[],
     sexAtBirth?: string,

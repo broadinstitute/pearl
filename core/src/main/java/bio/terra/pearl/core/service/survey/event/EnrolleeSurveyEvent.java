@@ -16,4 +16,9 @@ import lombok.experimental.SuperBuilder;
 public class EnrolleeSurveyEvent extends EnrolleeEvent {
     private SurveyResponse surveyResponse;
     private ParticipantTask participantTask; // the task corresponding to the response
+
+    @Override
+    public String getTargetStableId() {
+        return participantTask.getTargetStableId();
+    }
 }

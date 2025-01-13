@@ -28,11 +28,24 @@ public class BaseSeedPopulator {
     public static final List<String> ADMIN_USERS_TO_POPULATE =
             Arrays.asList("adminUsers/dbush.json", "adminUsers/myanaman.json",
                     "adminUsers/connor.json", "adminUsers/egwozdz.json",
-                    "adminUsers/mflinn.json", "adminUsers/nwatts.json",
-                    "adminUsers/mbemis.json", "adminUsers/cunningh.json",
-                    "adminUsers/andrew.json", "adminUsers/pegah.json", "adminUsers/sampath.json");
+                    "adminUsers/mflinn.json", "adminUsers/mbemis.json",
+                    "adminUsers/cunningh.json", "adminUsers/andrew.json",
+                    "adminUsers/sampath.json");
     public static final List<String> LANGUAGE_TEXTS_TO_POPULATE =
-            Arrays.asList("i18n/en/languageTexts.json", "i18n/es/languageTexts.json", "i18n/dev/languageTexts.json");
+            Arrays.asList(
+                    "i18n/de/languageTexts.json",
+                    "i18n/dev/languageTexts.json",
+                    "i18n/en/languageTexts.json",
+                    "i18n/es/languageTexts.json",
+                    "i18n/fr/languageTexts.json",
+                    "i18n/hi/languageTexts.json",
+                    "i18n/it/languageTexts.json",
+                    "i18n/ja/languageTexts.json",
+                    "i18n/pl/languageTexts.json",
+                    "i18n/pt/languageTexts.json",
+                    "i18n/ru/languageTexts.json",
+                    "i18n/tr/languageTexts.json",
+                    "i18n/zh/languageTexts.json");
 
     public BaseSeedPopulator(AdminUserPopulator adminUserPopulator, AdminConfigPopulator adminConfigPopulator,
                              AdminUserService adminUserService, KitTypePopulator kitTypePopulator,

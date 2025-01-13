@@ -6,9 +6,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import bio.terra.pearl.api.admin.AuthAnnotationSpec;
 import bio.terra.pearl.api.admin.AuthTestUtils;
 import bio.terra.pearl.api.admin.BaseSpringBootTest;
+import bio.terra.pearl.api.admin.service.auth.AuthUtilService;
 import bio.terra.pearl.api.admin.service.auth.SandboxOnly;
 import bio.terra.pearl.api.admin.service.auth.context.PortalAuthContext;
 import bio.terra.pearl.api.admin.service.auth.context.PortalStudyEnvAuthContext;
+import bio.terra.pearl.core.factory.StudyEnvironmentBundle;
 import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.admin.AdminUserBundle;
 import bio.terra.pearl.core.factory.admin.AdminUserFactory;
@@ -47,11 +49,11 @@ public class SurveyExtServiceTests extends BaseSpringBootTest {
         surveyExtService,
         Map.of(
             "get",
-            AuthAnnotationSpec.withPortalPerm("BASE"),
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
             "listVersions",
-            AuthAnnotationSpec.withPortalPerm("BASE"),
+            AuthAnnotationSpec.withPortalPerm(AuthUtilService.BASE_PERMISSION),
             "findWithSurveyNoContent",
-            AuthAnnotationSpec.withPortalStudyPerm("BASE"),
+            AuthAnnotationSpec.withPortalStudyPerm(AuthUtilService.BASE_PERMISSION),
             "create",
             AuthAnnotationSpec.withPortalPerm("survey_edit"),
             "delete",
@@ -97,7 +99,7 @@ public class SurveyExtServiceTests extends BaseSpringBootTest {
   @Transactional
   public void replaceStudyEnvSurvey(TestInfo testInfo) {
     AdminUser operator = adminUserFactory.buildPersisted(getTestName(testInfo), true);
-    StudyEnvironmentFactory.StudyEnvironmentBundle bundle =
+    StudyEnvironmentBundle bundle =
         studyEnvironmentFactory.buildBundle(getTestName(testInfo), EnvironmentName.sandbox);
     Survey survey1 = surveyFactory.buildPersisted(getTestName(testInfo));
     Survey survey2 = surveyService.createNewVersion(bundle.getPortal().getId(), survey1);
@@ -133,7 +135,7 @@ public class SurveyExtServiceTests extends BaseSpringBootTest {
   @Transactional
   public void updateConfiguredSurveys(TestInfo testInfo) {
     AdminUser operator = adminUserFactory.buildPersisted(getTestName(testInfo), true);
-    StudyEnvironmentFactory.StudyEnvironmentBundle bundle =
+    StudyEnvironmentBundle bundle =
         studyEnvironmentFactory.buildBundle(getTestName(testInfo), EnvironmentName.sandbox);
     Survey survey1 =
         surveyFactory.buildPersisted(getTestName(testInfo), bundle.getPortal().getId());

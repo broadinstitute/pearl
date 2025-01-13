@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.BOOLEAN;
-import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.STRING;
+import static bio.terra.pearl.core.dao.BaseJdbiDao.toSnakeCase;
+import static bio.terra.pearl.core.service.search.terms.SearchValue.SearchValueType.*;
 
 /**
  * Allows searching on basic properties of the enrollee, e.g. "consented"
  */
-public class EnrolleeTerm implements SearchTerm {
+public class EnrolleeTerm extends SearchTerm {
 
     private final String field;
 
@@ -50,7 +50,7 @@ public class EnrolleeTerm implements SearchTerm {
 
     @Override
     public String termClause() {
-        return "enrollee." + field;
+        return "enrollee." + toSnakeCase(field);
     }
 
     @Override
@@ -66,6 +66,6 @@ public class EnrolleeTerm implements SearchTerm {
     public static final Map<String, SearchValueTypeDefinition> FIELDS = Map.ofEntries(
             Map.entry("shortcode", SearchValueTypeDefinition.builder().type(STRING).build()),
             Map.entry("subject", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
-            Map.entry("consented", SearchValueTypeDefinition.builder().type(BOOLEAN).build()));
-
+            Map.entry("consented", SearchValueTypeDefinition.builder().type(BOOLEAN).build()),
+            Map.entry("createdAt", SearchValueTypeDefinition.builder().type(INSTANT).build()));
 }

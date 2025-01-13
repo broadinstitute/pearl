@@ -1,10 +1,8 @@
 package bio.terra.pearl.core.service.survey.event;
 
 import bio.terra.pearl.core.model.survey.Survey;
-import bio.terra.pearl.core.model.survey.SurveyResponse;
 import bio.terra.pearl.core.model.workflow.Event;
 import bio.terra.pearl.core.service.workflow.BaseEvent;
-import bio.terra.pearl.core.service.workflow.EnrolleeEvent;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
@@ -17,4 +15,12 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class SurveyPublishedEvent extends Event implements BaseEvent {
     private Survey survey;  // the survey that is being published -- the content does not need to be attached
+
+    public String getStableId() {
+        return survey.getStableId();
+    }
+
+    public Integer getVersion() {
+        return survey.getVersion();
+    }
 }

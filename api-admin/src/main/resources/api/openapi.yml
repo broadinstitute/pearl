@@ -37,6 +37,18 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /systemSettings:
+    get:
+      summary: Get system settings
+      tags: [ public ]
+      operationId: getSystemSettings
+      security: [ ]
+      responses:
+        '200':
+          description: System settings
+          content: &jsonContent { application/json: { schema: { type: object } } }
+        '500':
+          $ref: '#/components/responses/ServerError'
   /config:
     get:
       summary: Get configuration info for authenticating with and using the API
@@ -86,35 +98,6 @@ paths:
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
-  /api/portals/v1/{portalShortcode}/adminUsers:
-    get:
-      summary: Gets the admin users specific to this portal
-      tags: [ adminUser ]
-      operationId: getByPortal
-      parameters:
-        - *portalShortcodeParam
-      responses:
-        '200':
-          description: List of admin users
-          content: *jsonContent
-        '500':
-          $ref: '#/components/responses/ServerError'
-
-  /api/portals/v1/{portalShortcode}/adminUser/{adminUserId}:
-    delete:
-      summary: Remove an admin user for portal
-      tags: [ portal ]
-      operationId: removePortalUser
-      parameters:
-        - *portalShortcodeParam
-        - { name: adminUserId, in: path, required: true, schema: { type: string, format: uuid } }
-      responses:
-        '204':
-          description: admin user removed
-        '404':
-          description: admin user not found
-        '500':
-          $ref: '#/components/responses/ServerError'
 
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/adminTasks:
     get:
@@ -129,25 +112,6 @@ paths:
       responses:
         '200':
           description: List of admin-assigned participant tasks
-          content: *jsonContent
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/adminTasks/{id}:
-    patch:
-      summary: Updates the specified task
-      tags: [ participantTask ]
-      operationId: update
-      parameters:
-        - *portalShortcodeParam
-        - *studyShortcodeParam
-        - *envNameParam
-        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
-      requestBody:
-        required: true
-        content: *jsonContent
-      responses:
-        '200':
-          description: The updated task
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
@@ -408,6 +372,19 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies:
+    get:
+      summary: gets all the studies for the given portal
+      tags: [ study ]
+      operationId: getByPortalWithEnvs
+      parameters:
+        - *portalShortcodeParam
+        - { name: envName, in: query, required: false, schema: { type: string } }
+      responses:
+        '200':
+          description: new study object
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
     post:
       summary: creates a new study for the given portal
       tags: [ study ]
@@ -434,6 +411,22 @@ paths:
       responses:
         '204':
           description: no content
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      summary: updates a study
+      tags: [ study ]
+      operationId: update
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: updated study object
+          content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/kitTypes:
@@ -554,6 +547,69 @@ paths:
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/env/{envName}/participantUsers:
+    get:
+      summary: lists all the participant users for the given portal environment
+      tags: [ participantUser ]
+      operationId: list
+      parameters:
+        - *portalShortcodeParam
+        - *envNameParam
+      responses:
+        '200':
+          description: list of participant users and list of enrollees
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/env/{envName}/participantUsers/{id}:
+    get:
+      summary: lists all the participant users for the given portal environment
+      tags: [ participantUser ]
+      operationId: findWithPortalUser
+      parameters:
+        - *portalShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: the participantuser with the portalParticipantUser object included too
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/env/{envName}/participantUsers/merge/plan:
+    post:
+      summary: gets a merge plan for the given participant users. This does not perform the merge.
+      tags: [ participantMerge ]
+      operationId: plan
+      parameters:
+        - *portalShortcodeParam
+        - *envNameParam
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: the merge plan
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/env/{envName}/participantUsers/merge/execute:
+    post:
+      summary: executes a merge plan
+      tags: [ participantMerge ]
+      operationId: execute
+      parameters:
+        - *portalShortcodeParam
+        - *envNameParam
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: the merge plan
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrollee/search/v2/facets:
     get:
       summary: Gets all of the possible fields which can be searched on within the provided portal.
@@ -663,7 +719,7 @@ paths:
         - *portalShortcodeParam
         - *studyShortcodeParam
         - *envNameParam
-        - { name: enrolleeShortcodeOrId, in: path, required: true, schema: { type: string } }
+        - &enrolleeShortcodeOrIdParam { name: enrolleeShortcodeOrId, in: path, required: true, schema: { type: string } }
       responses:
         '200':
           description: Enrollee object
@@ -680,6 +736,10 @@ paths:
         - *studyShortcodeParam
         - *envNameParam
         - *enrolleeShortcodeParam
+      requestBody:
+        required: true
+        description: withdrawal params
+        content: *jsonContent
       responses:
         '200':
           description: withdrawnEnrollee id
@@ -692,9 +752,9 @@ paths:
       tags: [ withdrawnEnrollee ]
       operationId: getAll
       parameters:
-        - { name: portalShortcode, in: path, required: true, schema: { type: string } }
-        - { name: studyShortcode, in: path, required: true, schema: { type: string } }
-        - { name: envName, in: path, required: true, schema: { type: string } }
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
       responses:
         '200':
           description: withdrawnEnrollee list
@@ -763,6 +823,26 @@ paths:
       responses:
         '200':
           description: List of DataChangeRecords
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrollees/{enrolleeShortcodeOrId}/participantTasks/{id}:
+    patch:
+      summary: Updates the specified task
+      tags: [ participantTask ]
+      operationId: update
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - *enrolleeShortcodeOrIdParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: The updated task
           content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
@@ -876,6 +956,26 @@ paths:
       summary: Request a sample kit for an enrollee
       tags: [ kit ]
       operationId: requestKit
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - *enrolleeShortcodeParam
+      requestBody:
+        required: true
+        description: kit request creation dto
+        content: *jsonContent
+      responses:
+        '200':
+          description: Kit request
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrollees/{enrolleeShortcode}/collectKit:
+    post:
+      summary: Collects a sample kit from an enrollee and updates the kit status
+      tags: [ kit ]
+      operationId: collectKit
       parameters:
         - *portalShortcodeParam
         - *studyShortcodeParam
@@ -1181,7 +1281,7 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/export/data:
-    get:
+    post:
       summary: Gets the export data in the specified format
       tags: [ export ]
       operationId: exportData
@@ -1189,12 +1289,9 @@ paths:
         - *portalShortcodeParam
         - *studyShortcodeParam
         - *envNameParam
-        - { name: splitOptionsIntoColumns, in: query, required: false, schema: { type: boolean, default: false } }
-        - { name: stableIdsForOptions, in: query, required: false, schema: { type: boolean, default: false } }
-        - { name: onlyIncludeMostRecent, in: query, required: false, schema: { type: boolean, default: true } }
-        - { name: filter, in: query, required: false, schema: { type: string, default: '' } }
-        - { name: fileFormat, in: query, required: false, schema: { type: string, default: "TSV" } }
-        - { name: limit, in: query, required: false, schema: { type: integer } }
+      requestBody:
+        required: true
+        content: *jsonContent
       responses:
         '200':
           description: export data
@@ -1202,7 +1299,7 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/export/dictionary:
-    get:
+    post:
       summary: Gets the export data dictionary
       tags: [ export ]
       operationId: exportDictionary
@@ -1210,15 +1307,124 @@ paths:
         - *portalShortcodeParam
         - *studyShortcodeParam
         - *envNameParam
-        - { name: splitOptionsIntoColumns, in: query, required: false, schema: { type: boolean, default: false } }
-        - { name: stableIdsForOptions, in: query, required: false, schema: { type: boolean, default: false } }
-        - { name: onlyIncludeMostRecent, in: query, required: false, schema: { type: boolean, default: true } }
-        - { name: filter, in: query, required: false, schema: { type: string, default: '' } }
-        - { name: fileFormat, in: query, required: false, schema: { type: string, default: "TSV" } }
+      requestBody:
+        required: true
+        content: *jsonContent
       responses:
         '200':
           description: export data
           content: { text/plain: { schema: { type: string, format: binary } } }
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/exportIntegrations:
+    get:
+      summary: gets all the active exportIntegrations for the environment
+      tags: [ exportIntegration ]
+      operationId: findByStudy
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+      responses:
+        '200':
+          description: The exportIntegrations
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      summary: create a new exportIntegration for the environment
+      tags: [ exportIntegration ]
+      operationId: create
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: The exportIntegration
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/exportIntegrations/{id}:
+    get:
+      summary: gets the exportIntegration by id
+      tags: [ exportIntegration ]
+      operationId: get
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: The exportIntegration
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      summary: deletes the exportIntegration by id
+      tags: [ exportIntegration ]
+      operationId: delete
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '204':
+          description: Successful deletion
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: saves an exportIntegration
+      tags: [ exportIntegration ]
+      operationId: save
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: The exportIntegration
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/exportIntegrations/{id}/run:
+    post:
+      summary: runs the exportIntegration by id
+      tags: [ exportIntegration ]
+      operationId: run
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: The exportIntegration result
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/exportIntegrationJobs:
+    get:
+      summary: gets all the exportIntegrationJobs for the environment
+      tags: [ exportIntegration ]
+      operationId: findJobsByStudy
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+      responses:
+        '200':
+          description: The exportIntegrationJobs
+          content: *jsonContent
         '500':
           $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/env/{envName}/mailingList:
@@ -1378,6 +1584,94 @@ paths:
         '200':
           description: admin user object with associated roles
           content: *jsonContent
+        '404':
+          description: admin user not found
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      summary: Remove an admin user and all associated portal users
+      tags: [ admin_user ]
+      operationId: delete
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '204':
+          description: admin user removed
+        '404':
+          description: admin user not found
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/roles/v1:
+    get:
+      summary: Gets the list of roles
+      tags: [ roles ]
+      operationId: list
+      responses:
+        '200':
+          description: list of available roles
+          content: *jsonContent
+        '404':
+          description: admin user not found
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/adminUsers:
+    get:
+      summary: Gets the admin users specific to this portal
+      tags: [ adminUser ]
+      operationId: getByPortal
+      parameters:
+        - *portalShortcodeParam
+      responses:
+        '200':
+          description: List of admin users
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      summary: Creates a new admin user within a portal
+      tags: [ admin_user ]
+      operationId: createInPortal
+      parameters:
+        - *portalShortcodeParam
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: the new user
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/portals/v1/{portalShortcode}/adminUsers/{adminUserId}:
+    patch:
+      summary: Update roles for a portal admin user
+      tags: [ admin_user ]
+      operationId: setRolesInPortal
+      parameters:
+        - *portalShortcodeParam
+        - { name: adminUserId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: list of roles updated
+          content: *jsonContent
+        '404':
+          description: admin user not found
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      summary: Remove an admin user for portal
+      tags: [ admin_user ]
+      operationId: deleteInPortal
+      parameters:
+        - *portalShortcodeParam
+        - { name: adminUserId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '204':
+          description: admin user removed
         '404':
           description: admin user not found
         '500':
@@ -1619,6 +1913,7 @@ paths:
       operationId: extractPortal
       parameters:
         - *portalShortcodeParam
+        - { name: onlyExtractActiveVersions, in: query, required: false, schema: { type: boolean, default: false } }
       responses:
         '200':
           description: zip file of portal configs
@@ -1827,6 +2122,27 @@ paths:
                 format: binary
         '500':
           $ref: '#/components/responses/ServerError'
+  /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrollees/{enrolleeShortcode}/file/{fileName}:
+    get:
+      summary: Returns the binary file data of the given file name
+      tags: [ participantFile ]
+      operationId: download
+      parameters:
+        - *portalShortcodeParam
+        - *studyShortcodeParam
+        - *envNameParam
+        - *enrolleeShortcodeParam
+        - { name: fileName, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: file data
+          content:
+            application/*: # any file type
+              schema:
+                type: string
+                format: binary
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/portals/v1/{portalShortcode}/studies/{studyShortcode}/env/{envName}/enrolleesWithKits:
     get:
       summary: Gets a list of enrollees with tasks and kit requests
@@ -1962,6 +2278,20 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
 
+  /api/systemSettings:
+    patch:
+      summary: Updates the system settings
+      tags: [ systemSettings ]
+      operationId: update
+      requestBody:
+        required: true
+        content: *jsonContent
+      responses:
+        '200':
+          description: system settings
+          content: *jsonContent
+        '500':
+          $ref: '#/components/responses/ServerError'
   /api/logEvents:
     get:
       summary: Get log events. Filterable by event type and number of days.
@@ -1975,6 +2305,73 @@ paths:
         '200':
           description: logs
           content: { application/json: { schema: { type: object } } }
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/public/log/v1/track:
+    post:
+      summary: Tracks a user event
+      tags: [ logging ]
+      operationId: trackEvent
+      requestBody:
+        required: false
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: string
+                  description: The event data
+          text/plain:
+            schema:
+              type: string
+              description: The event data
+      responses:
+        '202':
+          description: the id of the generated event
+          content: { application/json: { schema: { type: string } } }
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/public/log/v1/engage:
+    post:
+      summary: Tracks a user engagement event (stub)
+      tags: [ logging ]
+      operationId: trackEngage
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: string
+                  description: The event data
+      responses:
+        '202':
+          description: the id of the generated event
+          content: { application/json: { schema: { type: string } } }
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/public/log/v1/groups:
+    post:
+      summary: Tracks user groups (stub)
+      tags: [ logging ]
+      operationId: trackGroups
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: string
+                  description: The event data
+      responses:
+        '202':
+          description: the id of the generated event
+          content: { application/json: { schema: { type: string } } }
         '500':
           $ref: '#/components/responses/ServerError'
 
