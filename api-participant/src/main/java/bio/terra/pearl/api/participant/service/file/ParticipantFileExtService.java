@@ -99,7 +99,7 @@ public class ParticipantFileExtService {
     return participantFileService.findByEnrolleeId(enrollee.getId());
   }
 
-  //Returns the name of the file without the preceding path
+  // Returns the name of the file without the preceding path
   public String getFileName(String fileName) {
     if (fileName == null) {
       return "";
