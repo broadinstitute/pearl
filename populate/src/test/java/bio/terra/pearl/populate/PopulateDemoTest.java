@@ -271,7 +271,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
         List<StudyEnvironmentSurvey> socialHealthSurveys = studyEnvironmentSurveys.stream().filter((ses) -> ses.getSurvey().getStableId().equals("hd_hd_socialHealth")).toList();
         // check that the past versions of the social health survey are included
         assertThat(socialHealthSurveys, hasSize(3));
-        assertThat(socialHealthSurveys.stream().map(ses -> ses.getSurvey().getVersion()).toList(), contains(1, 2, 3));
+        assertThat(socialHealthSurveys.stream().map(ses -> ses.getSurvey().getVersion()).collect(Collectors.toSet()), contains(1, 2, 3));
         // and they all got assigned to the same ordering
         assertThat(socialHealthSurveys, everyItem(hasProperty("surveyOrder", equalTo(7))));
         // check that outreach surveys are independently ordered

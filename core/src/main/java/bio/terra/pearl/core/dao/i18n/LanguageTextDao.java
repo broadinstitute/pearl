@@ -61,4 +61,8 @@ public class LanguageTextDao extends BaseMutableJdbiDao<LanguageText> {
     public List<LanguageText> findByPortalId(UUID id, String lang) {
         return findAllByTwoProperties("portal_id", id, "language", lang);
     }
+
+    public void deleteByLocalSite(UUID localSiteId) {
+        deleteByProperty("localized_site_content_id", localSiteId);
+    }
 }

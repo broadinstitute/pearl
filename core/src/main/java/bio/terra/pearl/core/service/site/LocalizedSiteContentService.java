@@ -106,6 +106,7 @@ public class LocalizedSiteContentService extends ImmutableEntityService<Localize
         dao.clearLandingPageId(localSiteId);
         navbarItemService.deleteByLocalSiteId(localSiteId, cascades);
         htmlPageService.deleteByLocalSite(localSiteId, cascades);
+        languageTextService.deleteByLocalSite(localSiteId, cascades);
         dao.delete(localSiteId);
     }
 }
