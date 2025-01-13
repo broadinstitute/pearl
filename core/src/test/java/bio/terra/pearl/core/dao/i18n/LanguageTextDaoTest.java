@@ -40,9 +40,7 @@ public class LanguageTextDaoTest extends BaseSpringBootTest {
 
     @Test
     @Transactional
-    public void testFindForLocalSiteContentWithOverrides(TestInfo info) {
-
-
+    public void testFindWithOverrides(TestInfo info) {
         LanguageText defaultProfileEn = LanguageText.builder()
                 .language("en")
                 .keyName("profile")
@@ -106,7 +104,51 @@ public class LanguageTextDaoTest extends BaseSpringBootTest {
 
         assertEquals("profile", profileFr.getKeyName());
         assertEquals("Profil", profileFr.getText());
+    }
 
+    @Test
+    @Transactional
+    public void testFindWithOverridesIncludesPortalAttached(TestInfo info) {
+
+        PortalEnvironment portalEnvironment = portalEnvironmentFactory.buildPersisted(getTestName(info));
+
+
+        LanguageText portalAttachedEn = LanguageText.builder()
+                .language("en")
+                .keyName("test")
+                .text("Test")
+                .portalId(portalEnvironment.getPortalId())
+                .build();
+        LanguageText portalAttachedDev = LanguageText.builder()
+                .language("dev")
+                .keyName("test")
+                .text("dev_Test")
+                .portalId(portalEnvironment.getPortalId())
+                .build();
+
+        LanguageText globalAttachedEn = LanguageText.builder()
+                .language("en")
+                .keyName("global")
+                .text("Global")
+                .build();
+
+        languageTextDao.create(portalAttachedEn);
+        languageTextDao.create(portalAttachedDev);
+        languageTextDao.create(globalAttachedEn);
+
+        List<LanguageText> enResults = languageTextDao.findWithOverridesByPortalEnvId(portalEnvironment.getId(), "en");
+
+        assertEquals(2, enResults.size());
+        assertEquals("global", enResults.get(0).getKeyName());
+        assertEquals("Global", enResults.get(0).getText());
+        assertEquals("test", enResults.get(1).getKeyName());
+        assertEquals("Test", enResults.get(1).getText());
+
+        List<LanguageText> devResults = languageTextDao.findWithOverridesByPortalEnvId(portalEnvironment.getId(), "dev");
+
+        assertEquals(1, devResults.size());
+        assertEquals("test", devResults.get(0).getKeyName());
+        assertEquals("dev_Test", devResults.get(0).getText());
 
     }
 }

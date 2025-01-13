@@ -29,7 +29,7 @@ public class LanguageTextDao extends BaseMutableJdbiDao<LanguageText> {
         deleteByTwoProperties("key_name", keyName, "portal_id", portalId);
     }
 
-    //returns all language texts that are either global or portal specific
+    //returns all language texts for a portal environment, with overrides for the given language
     public List<LanguageText> findWithOverridesByPortalEnvId(UUID portalEnvId, String language) {
         return jdbi.withHandle(
             handle ->

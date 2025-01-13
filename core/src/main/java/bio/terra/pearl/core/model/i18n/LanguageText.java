@@ -18,7 +18,8 @@ public class LanguageText extends BaseEntity {
     private String language;
 
 
-    // can be either portal or site content attached.
+    // can be portal or site content attached. if
+    // neither, then it's a global system text.
     // if site content attached, it will go through
     // standard publishing workflows.
 
