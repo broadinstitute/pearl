@@ -136,5 +136,13 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "ご参加いただきありがとうございます。", "language": "ja"},
   {"keyName": "kitTypeSaliva", "text": "唾液キット", "language": "ja"},
   {"keyName": "kitTypeStool", "text": "便キット", "language": "ja"},
-  {"keyName": "kitTypeBlood", "text": "血液キット", "language": "ja"}
+  {"keyName": "kitTypeBlood", "text": "血液キット", "language": "ja"},
+  {"keyName": "documentDownloadButton", "text": "ダウンロード", "language": "ja", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "まだ書類をアップロードしていません", "language": "ja", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "作成日", "language": "ja", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "文書", "language": "ja", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "アップロードされた文書", "language": "ja", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "調査に参加する際に、フォームまたはアンケートの一部としてドキュメントをアップロードするよう求められる場合があります。以下で、アップロードしたドキュメントを管理できます。", "language": "ja", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "文書", "language": "ja", "machineTranslated": true}
+
 ]

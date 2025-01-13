@@ -136,5 +136,13 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Спасибо за участие.", "language": "ru"},
   {"keyName": "kitTypeSaliva", "text": "Набор для сбора образца слюны", "language": "ru"},
   {"keyName": "kitTypeStool", "text": "Набор для сбора образца кала", "language": "ru"},
-  {"keyName": "kitTypeBlood", "text": "Набор для сбора образца крови", "language": "ru"}
+  {"keyName": "kitTypeBlood", "text": "Набор для сбора образца крови", "language": "ru"},
+  {"keyName": "documentDownloadButton", "text": "Скачать", "language": "ru", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "Вы еще не загрузили ни одного документа", "language": "ru", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "Создано", "language": "ru", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "Документы", "language": "ru", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Загруженные документы", "language": "ru", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "При участии в исследовании вас могут попросить загрузить документы как часть формы или опроса. Ниже вы можете управлять загруженными вами документами.", "language": "ru", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "Документы", "language": "ru", "machineTranslated": true}
+
 ]
