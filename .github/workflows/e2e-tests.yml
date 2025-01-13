@@ -11,7 +11,7 @@ on:
 jobs:
   test:
     timeout-minutes: 60
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres
@@ -41,6 +41,11 @@ jobs:
         node-version: 16
     - name: Install dependencies
       run: npm ci
+    - name: Install additional dependencies
+      run: |
+        add-apt-repository ppa:ubuntu-toolchain-r/test
+        apt-get update
+        apt-get install -y libasound2 libicu70 libffi7 libx264-163
     - name: Build applications
       run: |
         ./scripts/run_dockerized.sh participant
