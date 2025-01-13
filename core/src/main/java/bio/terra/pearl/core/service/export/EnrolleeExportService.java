@@ -176,7 +176,6 @@ public class EnrolleeExportService {
     protected List<SurveyFormatter> generateSurveyModules(ExportOptions exportOptions, UUID studyEnvironmentId, List<EnrolleeExportData> enrolleeExportData) {
         List<SurveyFormatter> moduleFormatters = new ArrayList<>();
         // now add the pre-enrollment survey (if it exists)
-        //TODO
         StudyEnvironment studyEnvironment = studyEnvironmentService.find(studyEnvironmentId).orElseThrow();
         if (studyEnvironment.getPreEnrollSurveyId() != null) {
             Survey preEnrollSurvey = surveyService.find(studyEnvironment.getPreEnrollSurveyId()).orElseThrow();
@@ -229,7 +228,7 @@ public class EnrolleeExportService {
         // batch load the following modules to reduce the number of queries and reduce the memory footprint of data exports.
         // eventually, the in-clauses of these sql queries will be too large, and we'll need to batch load these in smaller chunks
         Map<UUID, Profile> profiles = profileService.loadAllWithMailingAddress(profileIds);
-        Map<UUID, PreEnrollmentResponse> preEnrollmentResponses = preEnrollmentResponseService.findByParticipantUserIds(participantUserIds);
+        Map<UUID, PreEnrollmentResponse> preEnrollmentResponses = preEnrollmentResponseService.findByStudyEnvIdAndParticipantUserIds(studyEnvironmentId, participantUserIds);
         Map<UUID, ParticipantUser> participantUsers = participantUserService.findByParticipantUserIds(participantUserIds);
         Map<UUID, List<Answer>> answers = answerDao.findByEnrolleeIds(enrolleeIds);
         Map<UUID, List<ParticipantTask>> tasks = participantTaskService.findByEnrolleeIds(enrolleeIds);
