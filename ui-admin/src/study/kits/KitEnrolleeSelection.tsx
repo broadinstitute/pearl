@@ -97,6 +97,20 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
     ).length
   }
 
+  const kitTypeColumns = currentEnv.kitTypes.map(kitType => ({
+    header: `${kitType} requested`,
+    id: `${kitType}Requested`,
+    accessorFn: (enrollee: Enrollee) => enrollee.kitRequests.some(request => request.kitType === kitType),
+    meta: {
+      columnType: 'boolean',
+      filterOptions: [
+        { value: true, label: 'Requested' },
+        { value: false, label: 'Not Requested' }
+      ]
+    },
+    filterFn: 'equals',
+    cell: checkboxColumnCell
+  }))
 
   const columns: ColumnDef<EnrolleeRow, string | boolean | number>[] = [{
     id: 'select',
