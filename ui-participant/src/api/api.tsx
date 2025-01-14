@@ -1,5 +1,6 @@
 import {
   AddressValidationResult,
+  Answer,
   Enrollee,
   EnrolleeRelation,
   HubResponse,
@@ -16,7 +17,7 @@ import {
   StudyEnvParams,
   Survey,
   SurveyResponse,
-  Answer, SystemSettings
+  SystemSettings
 } from '@juniper/ui-core'
 import { defaultApiErrorHandle } from 'util/error-utils'
 import queryString from 'query-string'

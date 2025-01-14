@@ -586,28 +586,18 @@ public class EnrolleeImportService {
         Optional<Instant> completedAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt");
 
         // attempt to find existing task to update
-        if (repeatNum == 1 && completedAt.isEmpty()) {
+        if (repeatNum == 1) {
             // case 1; it's first repeat and no completedAt specified,
             // just grab latest
             relatedTask = participantTaskService.findTaskForActivity(ppUser.getId(), studyEnv.getId(), formatter.getModuleName())
                     .orElse(null);
-        } else if (completedAt.isPresent()) {
+        } else {
+            if (completedAt.isEmpty()) {
+                throw new IllegalStateException("completedAt must be specified for importing survey response history");
+            }
             // case 2: completedAt is specified, find task with that completion time
             relatedTask = participantTaskService.findTaskForActivityWithCompletionTime(ppUser.getId(), studyEnv.getId(), formatter.getModuleName(), completedAt.get())
                     .orElse(null);
-
-        }
-
-        if (relatedTask == null) {
-            // case 3: no task found, let's see if there's a task for numRepeat repsonses ago
-
-            List<ParticipantTask> existingTasks = participantTaskService.findAllTasksForActivity(ppUser.getId(), studyEnv.getId(), formatter.getModuleName());
-
-            int repeatIdx = repeatNum - 1;
-
-            if (existingTasks.size() > repeatIdx) {
-                relatedTask = existingTasks.get(repeatIdx);
-            }
         }
         
         return relatedTask;
@@ -619,19 +609,24 @@ public class EnrolleeImportService {
     private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum) {
         // make sure the task reflects created and completion status
         // so that recurrences are properly scheduled
-        Optional<Instant> completedAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt");
-        Optional<Instant> createdAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "createdAt");
-        Optional<Instant> lastUpdatedAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "lastUpdatedAt");
+        Optional<Instant> completedAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt");
+        Optional<Instant> createdAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "createdAt");
+        Optional<Instant> lastUpdatedAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "lastUpdatedAt");
 
-        if (completedAt.isPresent()) {
-            timeShiftDao.changeTaskCompleteTime(relatedTask.getId(), completedAt.get());
+        // use any of the three times if available
+        Instant completedAt = completedAtOpt.orElseGet(() -> createdAtOpt.orElseGet(() -> lastUpdatedAtOpt.orElse(null)));
+        Instant createdAt = createdAtOpt.orElseGet(() -> completedAtOpt.orElseGet(() -> lastUpdatedAtOpt.orElse(null)));
+        Instant lastUpdatedAt = lastUpdatedAtOpt.orElseGet(() -> completedAtOpt.orElseGet(() -> createdAtOpt.orElse(null)));
+
+        if (completedAt != null) {
+            timeShiftDao.changeTaskCompleteTime(relatedTask.getId(), completedAt);
         }
-        if (createdAt.isPresent()) {
-            timeShiftDao.changeTasksCreationTime(List.of(relatedTask.getId()), createdAt.get());
-            timeShiftDao.changeSurveyResponseCreationTime(surveyResponse.getId(), createdAt.get());
+        if (createdAt != null) {
+            timeShiftDao.changeTasksCreationTime(List.of(relatedTask.getId()), createdAt);
+            timeShiftDao.changeSurveyResponseCreationTime(surveyResponse.getId(), createdAt);
         }
-        if (lastUpdatedAt.isPresent()) {
-            timeShiftDao.changeSurveyResponseLastUpdatedTime(surveyResponse.getId(), lastUpdatedAt.get());
+        if (lastUpdatedAt != null) {
+            timeShiftDao.changeSurveyResponseLastUpdatedTime(surveyResponse.getId(), lastUpdatedAt);
         }
     }
 

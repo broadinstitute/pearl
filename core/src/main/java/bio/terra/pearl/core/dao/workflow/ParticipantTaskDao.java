@@ -16,6 +16,7 @@ import org.jdbi.v3.core.mapper.reflect.BeanMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -91,18 +92,20 @@ public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> impl
 
     public Optional<ParticipantTask> findTaskForActivityWithCompletionTime(UUID ppUserId, UUID studyEnvironmentId, String activityStableId, Instant completedAt) {
         return jdbi.withHandle(handle ->
+                // Note: 43200 seconds is 12 hours. Any task that was completed within 12 hours of the given time is considered a match
                 handle.createQuery("""
-                                select * from %s 
+                                select * from %s
                                 where portal_participant_user_id = :ppUserId
-                                and target_stable_id = :activityStableId 
+                                and target_stable_id = :activityStableId
                                 and study_environment_id = :studyEnvironmentId
-                                and ABS(DATEDIFF('second', completed_at, :completedAt)) < 5 
-                                limit 1""".formatted(tableName)
+                                and ABS(EXTRACT(EPOCH FROM completed_at) - EXTRACT(EPOCH FROM :completedAt::timestamp)) < 43200
+                                limit 1
+                                """.formatted(tableName)
                         )
                         .bind("ppUserId", ppUserId)
                         .bind("activityStableId", activityStableId)
                         .bind("studyEnvironmentId", studyEnvironmentId)
-                        .bind("completedAt", completedAt)
+                        .bind("completedAt", Timestamp.from(completedAt))
                         .mapTo(clazz)
                         .findOne()
         );
