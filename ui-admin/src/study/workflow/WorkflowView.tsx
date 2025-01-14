@@ -25,7 +25,7 @@ import { faCalendarAlt, faClipboard, faEnvelope,   faCheckSquare } from '@fortaw
 import InfoPopup from 'components/forms/InfoPopup'
 import _sortBy from 'lodash/sortBy'
 import { minutesToDayString, triggerName } from './workflowUtils'
-import { EllipsisDropdownButton } from '../../components/forms/Button'
+import { EllipsisDropdownButton } from 'components/forms/Button'
 
 /** shows configuration of notifications for a study */
 export default function WorkflowView({ studyEnvContext, portalContext }:
@@ -299,8 +299,6 @@ const SurveyListItem = ({ studyEnvSurvey, studyEnvParams, triggers, triggerOpts,
     </ul>
   </li>
 }
-
-
 const TriggerListItem = ({ trigger, studyEnvParams }:
   { trigger: Trigger, studyEnvParams: StudyEnvParams }) => {
   return <li className="py-2">
@@ -310,8 +308,8 @@ const TriggerListItem = ({ trigger, studyEnvParams }:
         <Link to={studyEnvTriggerPath(studyEnvParams, trigger)}>
           {triggerName(trigger)}
           <span className="text-muted fst-italic ms-3">
-            ({trigger.emailTemplate.localizedEmailTemplates[0].subject})
-          </span>
+    ({trigger.emailTemplate.localizedEmailTemplates[0].subject})
+      </span>
         </Link>
       </div>
     }
@@ -326,11 +324,14 @@ const TriggerListItem = ({ trigger, studyEnvParams }:
     }
     { trigger.triggerType === 'TASK_REMINDER' &&
       <span className="text-muted fst-italic">
-        <FontAwesomeIcon icon={faCalendarAlt} className="ms-3 me-2"/>
-        <span>
-          reminds after {minutesToDayString(trigger.afterMinutesIncomplete)} (max { trigger.maxNumReminders } reminders)
-        </span>
-      </span>
+    <FontAwesomeIcon icon={faCalendarAlt} className="ms-3 me-2"/>
+    <span>
+      reminds after {minutesToDayString(trigger.afterMinutesIncomplete)} (max { trigger.maxNumReminders } reminders)
+    </span>
+  </span>
     }
   </li>
 }
+
+
+

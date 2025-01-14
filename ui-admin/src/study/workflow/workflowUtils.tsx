@@ -13,4 +13,3 @@ export const triggerName = (trigger: Trigger) => {
 export const minutesToDayString = (minutes: number) => {
   return `${Math.round(minutes * 10 / (60 * 24)) / 10  } days`
 }
-

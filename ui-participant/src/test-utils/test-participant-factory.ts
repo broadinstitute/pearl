@@ -2,10 +2,9 @@ import {
   KitType,
   ParticipantTask,
   ParticipantTaskStatus,
-  ParticipantTaskType, PortalParticipantUser,
-  Survey
-} from 'api/api'
-import {
+  ParticipantTaskType,
+  PortalParticipantUser,
+  Survey,
   defaultSurvey,
   Enrollee,
   HubResponse, KitRequest, KitRequestStatus,
@@ -31,7 +30,9 @@ export const mockPortalParticipantUser = (): PortalParticipantUser => {
     profile: mockProfile(),
     profileId: 'profile1',
     id: 'ppUser1',
-    participantUserId: 'user1'
+    participantUserId: 'user1',
+    createdAt: 0,
+    lastLogin: 0
   }
 }
 

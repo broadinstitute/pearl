@@ -37,6 +37,7 @@ export * from './util/mixpanelUtils'
 export * from './util/supportUtils'
 
 export * from './test-utils/asMockedFn'
+export * from './test-utils/mocking-utils'
 export * from './test-utils/router-testing-utils'
 
 export * from './participant/dashboard/Alert'
