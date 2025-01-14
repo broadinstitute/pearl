@@ -487,7 +487,7 @@ const TaskTargetStableIdsEditor = ({ studyEnvParams, stableIds, setStableIds, is
   const inputId = useId()
   return <div className="mt-3">
     <label className="form-label" htmlFor={inputId}>Limit to these {isKitType ? 'kit types' : 'surveys'}
-      <span className="fst-italic ms-2">(leave blank if trigger applies to all)</span></label>
+      <span className="fst-italic ms-2">(leave blank if automation applies to all)</span></label>
     <Select options={options} inputId={inputId}
       value={stableIds.map(stableId => options.find(option => option.value === stableId))}
       isMulti={true}
