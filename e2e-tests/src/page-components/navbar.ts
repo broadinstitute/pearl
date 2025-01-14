@@ -1,4 +1,7 @@
-import { Locator, Page } from '@playwright/test'
+import {
+  Locator,
+  Page
+} from '@playwright/test'
 import WebComponentBase from 'src/page-components/web-component-base'
 
 /* navbar is located at the top of OurHealth page */
@@ -29,7 +32,7 @@ export default class Navbar extends WebComponentBase {
     this.linkFAQ = this.root.locator('a.nav-link', { hasText: new RegExp(/^FAQ$/) })
     this.linkParticipation = this.root.locator('a.nav-link', { hasText: new RegExp(/^Participation$/) })
     this.linkScientificBackground = this.root.locator('a.nav-link', { hasText: new RegExp(/^Scientific Background$/) })
-    this.linkRegister = this.root.locator('a.btn', { hasText: new RegExp(/^Register$/) })
+    this.linkRegister = this.root.locator('a.btn', { hasText: new RegExp(/^(Register|Join us)$/) })
     this.linkLogIn = this.root.locator('a.btn', { hasText: new RegExp(/^Log In$/) })
     this.languageSelector = this.root.locator('button.dropdown-toggle')
   }
