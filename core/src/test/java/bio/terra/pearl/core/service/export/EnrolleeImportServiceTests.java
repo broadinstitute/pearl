@@ -815,11 +815,11 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
                 "importTest1.complete", "true",
                 "importTest1.importFirstName", "Jeff",
                 "importTest1.importFavColors", "[\"red\", \"blue\"]",
-                "importTest1.lastUpdatedAt", "2023-08-21 05:17AM",
+                "importTest1.completedAt", "2023-08-21 05:17AM",
                 "importTest1[2].complete", "true",
                 "importTest1[2].importFirstName", "Jeffrey",
                 "importTest1[2].importFavColors", "[\"green\"]",
-                "importTest1[2].lastUpdatedAt", "2023-08-20 05:17AM");
+                "importTest1[2].completedAt", "2023-08-20 05:17AM");
 
         Enrollee enrollee = enrolleeImportService.importEnrollee(
                 bundle.getPortal().getShortcode(),
