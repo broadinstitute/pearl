@@ -88,8 +88,12 @@ export default function TriggerList({ studyEnvContext, portalContext }:
                     <div className="d-flex">
                       <NavLink to={`triggers/${trigger.id}`} style={navLinkStyleFunc}>
                         <TriggerTypeDisplay config={trigger}/>
-                        <span
-                          className="text-muted fst-italic"> ({deliveryTypeDisplayMap[trigger.deliveryType]})</span>
+                        <span className="text-muted fst-italic ms-2">
+                          {trigger.filterTargetStableIds?.length ?
+                            `(${trigger.filterTargetStableIds.join(', ')})` : ''}
+                          ({deliveryTypeDisplayMap[trigger.deliveryType]})
+
+                        </span>
                       </NavLink>
                     </div>
                   </li>
