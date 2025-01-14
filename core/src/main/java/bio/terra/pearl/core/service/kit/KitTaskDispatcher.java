@@ -1,9 +1,11 @@
 package bio.terra.pearl.core.service.kit;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
 
 import bio.terra.pearl.core.model.kit.KitRequest;
+import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.audit.DataAuditInfo;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
@@ -40,7 +42,7 @@ public class KitTaskDispatcher {
             resetTask(task.get(), enrollee, portalParticipantUserId, auditInfo);
             return;
         }
-        participantTaskService.create(buildTask(enrollee, kitRequest, portalParticipantUserId), auditInfo);
+        participantTaskService.create(buildTask(enrollee, kitRequest, kitSentEvent.getKitType(), portalParticipantUserId), auditInfo);
         log.info("Created kit task for enrollee {} with kit request {}",
                 enrollee.getShortcode(), kitRequest.getId());
     }
@@ -66,7 +68,7 @@ public class KitTaskDispatcher {
         participantTaskService.update(participantTask, auditInfo);
     }
 
-    protected static ParticipantTask buildTask(Enrollee enrollee, KitRequest kitRequest, UUID portalParticipantUserId) {
+    protected static ParticipantTask buildTask(Enrollee enrollee, KitRequest kitRequest, KitType kitType, UUID portalParticipantUserId) {
         return ParticipantTask.builder()
                 .enrolleeId(enrollee.getId())
                 .portalParticipantUserId(portalParticipantUserId)
@@ -78,6 +80,8 @@ public class KitTaskDispatcher {
                 .targetStableId("kit_request")
                 .status(TaskStatus.NEW)
                 .kitRequestId(kitRequest.getId())
+                .targetStableId(kitType.getName())
+                .targetName(kitType.getDisplayName())
                 .build();
     }
 

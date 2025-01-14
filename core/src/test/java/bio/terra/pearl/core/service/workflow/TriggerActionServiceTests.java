@@ -1,17 +1,26 @@
 package bio.terra.pearl.core.service.workflow;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
+import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
+import bio.terra.pearl.core.factory.kit.KitRequestFactory;
 import bio.terra.pearl.core.factory.kit.KitTypeFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
+import bio.terra.pearl.core.factory.portal.PortalEnvironmentFactory;
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitRequestStatus;
+import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.model.notification.*;
 import bio.terra.pearl.core.model.participant.Enrollee;
+import bio.terra.pearl.core.model.portal.PortalEnvironment;
+import bio.terra.pearl.core.model.study.StudyEnvironment;
+
 import bio.terra.pearl.core.model.survey.SurveyResponse;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
+import bio.terra.pearl.core.service.kit.pepper.PepperKitStatus;
+import bio.terra.pearl.core.service.notification.NotificationService;
 import bio.terra.pearl.core.service.notification.TriggerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -31,9 +40,17 @@ public class TriggerActionServiceTests extends BaseSpringBootTest {
     @Autowired
     private ParticipantTaskService participantTaskService;
     @Autowired
+    private StudyEnvironmentFactory studyEnvironmentFactory;
+    @Autowired
+    private PortalEnvironmentFactory portalEnvironmentFactory;
+    @Autowired
     private EventService eventService;
     @Autowired
     private KitTypeFactory kitTypeFactory;
+    @Autowired
+    private KitRequestFactory kitRequestFactory;
+    @Autowired
+    private NotificationService notificationService;
 
     @Test
     @Transactional
@@ -69,7 +86,6 @@ public class TriggerActionServiceTests extends BaseSpringBootTest {
     @Test
     @Transactional
     public void testTargetStableIdFilter(TestInfo testInfo) {
-        // simulate sending a reminder email for a single survey type
         EnrolleeBundle enrolleeBundle = enrolleeFactory
                 .buildWithPortalUser(getTestName(testInfo));
         ParticipantTask targetTask = createTask(enrolleeBundle, "targetedSurvey", TaskStatus.NEW);
@@ -105,6 +121,94 @@ public class TriggerActionServiceTests extends BaseSpringBootTest {
         assertThat(otherUpdateTask.getStatus(), equalTo(TaskStatus.NEW));
     }
 
+    @Test
+    @Transactional
+    public void testKitNotifications(TestInfo testInfo) {
+        String testName = getTestName(testInfo);
+        KitType bloodKitType = kitTypeFactory.buildPersisted("Blood");
+        PortalEnvironment portalEnv = portalEnvironmentFactory.buildPersisted(testName);
+        StudyEnvironment studyEnv = studyEnvironmentFactory.buildPersisted(portalEnv, testName);
+        EnrolleeBundle enrolleeBundle = enrolleeFactory.buildWithPortalUser(testName, portalEnv, studyEnv, true);
+        KitRequest kitRequest1 = kitRequestFactory.buildPersisted(testName, enrolleeBundle.enrollee(), PepperKitStatus.SENT, bloodKitType.getId());
+        Trigger config = Trigger.builder()
+                .triggerType(TriggerType.EVENT)
+                .eventType(TriggerEventType.KIT_SENT)
+                .actionType(TriggerActionType.NOTIFICATION)
+                .deliveryType(NotificationDeliveryType.EMAIL)
+                .studyEnvironmentId(studyEnv.getId())
+                .portalEnvironmentId(portalEnv.getId())
+                .build();
+        config = triggerService.create(config);
+
+
+        eventService.publishKitStatusEvent(kitRequest1, enrolleeBundle.enrollee(),
+                enrolleeBundle.portalParticipantUser(),
+                KitRequestStatus.CREATED);
+
+        // confirm that a kit task got created
+        List<ParticipantTask> tasks = participantTaskService.findByEnrolleeId(enrolleeBundle.enrollee().getId());
+        assertThat(tasks.size(), equalTo(1));
+        assertThat(tasks.get(0).getKitRequestId(), equalTo(kitRequest1.getId()));
+
+        // confirm that a notification got sent
+        List<Notification> notifications = notificationService.findByEnrolleeId(enrolleeBundle.enrollee().getId());
+        assertThat(notifications.size(), equalTo(1));
+        assertThat(notifications.get(0).getTriggerId(), equalTo(config.getId()));
+    }
+
+    @Test
+    @Transactional
+    public void testKitTypeNotifications(TestInfo testInfo) {
+        String testName = getTestName(testInfo);
+        KitType bloodKitType = kitTypeFactory.buildPersisted("Blood");
+        KitType salivaKitType = kitTypeFactory.buildPersisted("Saliva");
+        PortalEnvironment portalEnv = portalEnvironmentFactory.buildPersisted(testName);
+        StudyEnvironment studyEnv = studyEnvironmentFactory.buildPersisted(portalEnv, testName);
+        EnrolleeBundle enrolleeBundle1 = enrolleeFactory.buildWithPortalUser(testName, portalEnv, studyEnv, true);
+        EnrolleeBundle enrolleeBundle2 = enrolleeFactory.buildWithPortalUser(testName, portalEnv, studyEnv, true);
+
+        KitRequest kitRequest1 = kitRequestFactory.buildPersisted(testName, enrolleeBundle1.enrollee(), PepperKitStatus.SENT, bloodKitType.getId());
+        KitRequest kitRequest2 = kitRequestFactory.buildPersisted(testName, enrolleeBundle2.enrollee(), PepperKitStatus.SENT, salivaKitType.getId());
+
+
+        Trigger bloodConfig = Trigger.builder()
+                .triggerType(TriggerType.EVENT)
+                .eventType(TriggerEventType.KIT_SENT)
+                .actionType(TriggerActionType.NOTIFICATION)
+                .filterTargetStableIds(List.of(bloodKitType.getName()))
+                .deliveryType(NotificationDeliveryType.EMAIL)
+                .studyEnvironmentId(studyEnv.getId())
+                .portalEnvironmentId(portalEnv.getId())
+                .build();
+        bloodConfig = triggerService.create(bloodConfig);
+        Trigger salivaConfig = Trigger.builder()
+                .triggerType(TriggerType.EVENT)
+                .eventType(TriggerEventType.KIT_SENT)
+                .filterTargetStableIds(List.of(salivaKitType.getName()))
+                .actionType(TriggerActionType.NOTIFICATION)
+                .deliveryType(NotificationDeliveryType.EMAIL)
+                .studyEnvironmentId(studyEnv.getId())
+                .portalEnvironmentId(portalEnv.getId())
+                .build();
+        salivaConfig = triggerService.create(salivaConfig);
+
+
+        eventService.publishKitStatusEvent(kitRequest1, enrolleeBundle1.enrollee(),
+                enrolleeBundle1.portalParticipantUser(),
+                KitRequestStatus.CREATED);
+        eventService.publishKitStatusEvent(kitRequest2, enrolleeBundle2.enrollee(),
+                enrolleeBundle2.portalParticipantUser(),
+                KitRequestStatus.CREATED);
+
+        // confirm that the correct notification got sent to each
+        List<Notification> notifications = notificationService.findByEnrolleeId(enrolleeBundle1.enrollee().getId());
+        assertThat(notifications.get(0).getTriggerId(), equalTo(bloodConfig.getId()));
+
+        notifications = notificationService.findByEnrolleeId(enrolleeBundle2.enrollee().getId());
+        assertThat(notifications.get(0).getTriggerId(), equalTo(salivaConfig.getId()));
+
+    }
+
     private ParticipantTask createTask(EnrolleeBundle enrolleeBundle, String taskStableId, TaskStatus status ) {
         Enrollee enrollee = enrolleeBundle.enrollee();
         ParticipantTask task = ParticipantTask.builder()
@@ -133,10 +237,12 @@ public class TriggerActionServiceTests extends BaseSpringBootTest {
     }
 
     private KitRequest createKitRequest(EnrolleeBundle enrolleeBundle, String testName) {
+        KitType kitType = kitTypeFactory.buildPersisted(testName);
         KitRequest kitRequest = KitRequest.builder()
                 .status(KitRequestStatus.SENT)
                 .enrolleeId(enrolleeBundle.enrollee().getId())
-                .kitType(kitTypeFactory.buildPersisted(testName))
+                .kitType(kitType)
+                .kitTypeId(kitType.getId())
                 .build();
         return kitRequest;
     }

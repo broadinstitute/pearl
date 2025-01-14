@@ -372,8 +372,12 @@ databaseChangeLog:
       file: changesets/2024_12_16_task_targets.yaml
       relativeToChangelogFile: true
   - include:
+      file: changesets/2025_01_08_kit_trigger_filters.yaml
+      relativeToChangelogFile: true
+  - include:
       file: changesets/2025_01_09_attach_language_text_to_local_site_content.yaml
       relativeToChangelogFile: true
+
 
 # README: it is a best practice to put each DDL statement in its own change set. DDL statements
 # are atomic. When they are grouped in a changeset and one fails the changeset cannot be

@@ -5,6 +5,7 @@ import bio.terra.pearl.core.model.kit.KitType;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -20,5 +21,9 @@ public class KitTypeDao extends BaseMutableJdbiDao<KitType> {
 
     public Optional<KitType> findByName(String name) {
         return findByProperty("name", name);
+    }
+
+    public List<KitType> findByNames(List<String> names) {
+        return findAllByPropertyCollection("name", names);
     }
 }

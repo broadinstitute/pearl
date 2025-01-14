@@ -29,23 +29,28 @@ public class KitRequestFactory {
     private AdminUserFactory adminUserFactory;
 
 
-    public KitRequest.KitRequestBuilder builder(String testName) throws JsonProcessingException {
+    public KitRequest.KitRequestBuilder builder(String testName) {
         PepperKitAddress address = PepperKitAddress.builder()
                 .lastName(testName + "last name")
                 .build();
-        return KitRequest.builder()
-                .sentToAddress(objectMapper.writeValueAsString(address))
-                .status(KitRequestStatus.CREATED);
+        try {
+            return KitRequest.builder()
+                    .sentToAddress(objectMapper.writeValueAsString(address))
+                    .status(KitRequestStatus.CREATED);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error serializing address", e);
+        }
+
     }
 
-    public KitRequest buildPersisted(String testName, Enrollee enrollee) throws JsonProcessingException {
+    public KitRequest buildPersisted(String testName, Enrollee enrollee) {
         KitType kitType = kitTypeFactory.buildPersisted(testName);
         KitRequest kitRequest = buildPersisted(testName, enrollee, PepperKitStatus.CREATED, kitType.getId());
         kitRequest.setKitType(kitType);
         return kitRequest;
     }
 
-    public KitRequest buildPersisted(String testName, Enrollee enrollee, PepperKitStatus pepperKitStatus) throws JsonProcessingException {
+    public KitRequest buildPersisted(String testName, Enrollee enrollee, PepperKitStatus pepperKitStatus) {
         KitType kitType = kitTypeFactory.buildPersisted(testName);
         KitRequest kitRequest = buildPersisted(testName, enrollee, pepperKitStatus, kitType.getId());
         kitRequest.setKitType(kitType);
@@ -53,14 +58,13 @@ public class KitRequestFactory {
     }
 
     public KitRequest buildPersisted(String testName, Enrollee enrollee, PepperKitStatus pepperKitStatus,
-                                     UUID kitTypeId) throws JsonProcessingException {
+                                     UUID kitTypeId) {
         AdminUser adminUser = adminUserFactory.buildPersisted(testName);
         return buildPersisted(testName, enrollee, pepperKitStatus, kitTypeId, adminUser.getId());
     }
 
     public KitRequest buildPersisted(String testName, Enrollee enrollee, PepperKitStatus pepperKitStatus,
-                                     UUID kitTypeId, UUID adminUserId)
-        throws JsonProcessingException {
+                                     UUID kitTypeId, UUID adminUserId) {
         PepperKit pepperKit = PepperKit.builder()
             .dsmShippingLabel(UUID.randomUUID().toString())
             .currentStatus(pepperKitStatus.pepperString)
@@ -70,8 +74,7 @@ public class KitRequestFactory {
     }
 
     public KitRequest buildPersisted(String testName, Enrollee enrollee, PepperKit pepperKit,
-                                     UUID kitTypeId, UUID adminUserId)
-        throws JsonProcessingException {
+                                     UUID kitTypeId, UUID adminUserId) {
         KitRequest kitRequest = builder(testName)
             .creatingAdminUserId(adminUserId)
             .enrolleeId(enrollee.getId())
@@ -81,8 +84,14 @@ public class KitRequestFactory {
             .build();
         KitRequest savedKitRequest = kitRequestDao.create(kitRequest);
         pepperKit.setJuniperKitId(savedKitRequest.getId().toString());
-        savedKitRequest.setExternalKit(objectMapper.writeValueAsString(pepperKit));
-        savedKitRequest.setExternalKitFetchedAt(Instant.now());
-        return kitRequestDao.update(savedKitRequest);
+        try {
+            savedKitRequest.setExternalKit(objectMapper.writeValueAsString(pepperKit));
+            savedKitRequest.setExternalKitFetchedAt(Instant.now());
+            return kitRequestDao.update(savedKitRequest);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error serializing address", e);
+        }
+
+
     }
 }
