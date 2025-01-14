@@ -48,17 +48,24 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
   ])
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([
     { id: 'consented', value: true },
-    { id: 'bloodKitRequested', value: false },
     { id: 'requiredSurveysComplete', value: true }
   ])
+
   const [showRequestKitModal, setShowRequestKitModal] = useState(false)
 
   const { isLoading: isLoadingKitTypes } = useLoadingEffect(async () => {
     const studyEnvParams: StudyEnvParams = paramsFromContext(studyEnvContext)
     const kitTypes = await Api.fetchKitTypes(studyEnvParams)
     setStudyEnvKitTypes(kitTypes)
+    setColumnFilters(prevState => [
+      ...prevState,
+      ...kitTypes.map(kitType => ({
+        id: `${kitType.name}KitRequested`, value: false
+      }))
+    ])
   }, [studyEnvContext.currentEnvPath])
 
   const { isLoading, reload } = useLoadingEffect(async () => {
@@ -103,23 +110,6 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
       task => !task.blocksHub && task.status === 'COMPLETE' && task.taskType === 'SURVEY'
     ).length
   }
-
-  console.log(currentEnv.kitTypes)
-
-  const kitTypeColumns = currentEnv.kitTypes.map(kitType => ({
-    header: `${kitType.displayName} kit requested`,
-    id: `${kitType}KitRequested`,
-    accessorFn: (enrollee: Enrollee) => enrollee.kitRequests.some(request => request.kitType === kitType),
-    meta: {
-      columnType: 'boolean',
-      filterOptions: [
-        { value: true, label: 'Requested' },
-        { value: false, label: 'Not Requested' }
-      ]
-    },
-    // filterFn: 'equals',
-    cell: checkboxColumnCell
-  }))
 
   const columns: ColumnDef<EnrolleeRow, string | boolean | number>[] = [{
     id: 'select',
@@ -175,21 +165,19 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
     enableColumnFilter: false,
     accessorFn: enrollee => optionalSurveysCompleted(enrollee)
   },
-  //   {
-  //   header: 'Kit requested',
-  //   id: 'kitRequested',
-  //   accessorFn: enrollee => enrollee.kitRequests.length !== 0,
-  //   meta: {
-  //     columnType: 'boolean',
-  //     filterOptions: [
-  //       { value: true, label: 'Requested' },
-  //       { value: false, label: 'Not Requested' }
-  //     ]
-  //   },
-  //   filterFn: 'equals',
-  //   cell: checkboxColumnCell
-  // },
-  ...kitTypeColumns]
+  ...studyEnvKitTypes.map(kitType => ({
+    header: `${kitType.displayName} kit requested`,
+    id: `${kitType.name}KitRequested`,
+    accessorFn: (enrollee: Enrollee) => enrollee.kitRequests.some(request => request.kitType.name === kitType.name),
+    meta: {
+      columnType: 'boolean',
+      filterOptions: [
+        { value: true, label: 'Requested' },
+        { value: false, label: 'Not Requested' }
+      ]
+    },
+    cell: checkboxColumnCell
+  }))]
 
   const table = useReactTable({
     data: enrollees,
