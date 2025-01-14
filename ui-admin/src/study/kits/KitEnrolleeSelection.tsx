@@ -55,9 +55,14 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
 
   const [showRequestKitModal, setShowRequestKitModal] = useState(false)
 
-  const { isLoading: isLoadingKitTypes } = useLoadingEffect(async () => {
+  const { isLoading, reload } = useLoadingEffect(async () => {
     const studyEnvParams: StudyEnvParams = paramsFromContext(studyEnvContext)
-    const kitTypes = await Api.fetchKitTypes(studyEnvParams)
+
+    const [kitTypes, enrollees] = await Promise.all([
+      Api.fetchKitTypes(studyEnvParams),
+      Api.fetchEnrolleesWithKits(portal.shortcode, study.shortcode, currentEnv.environmentName)
+    ])
+
     setStudyEnvKitTypes(kitTypes)
     setColumnFilters(prevState => [
       ...prevState,
@@ -65,21 +70,16 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
         id: `${kitType.name}KitRequested`, value: false
       }))
     ])
-  }, [studyEnvContext.currentEnvPath])
 
-  const { isLoading, reload } = useLoadingEffect(async () => {
-    const enrollees = await Api.fetchEnrolleesWithKits(
-      portal.shortcode, study.shortcode, currentEnv.environmentName)
     const enrolleeRows = enrollees.map(enrollee => {
       const taskCompletionStatus = _mapValues(
         _keyBy(enrollee.participantTasks, task => task.targetStableId),
         task => (task as ParticipantTask).status === 'COMPLETE'
       )
-
       return { ...enrollee, taskCompletionStatus }
     })
     setEnrollees(enrolleeRows)
-  }, [studyEnvContext.study.shortcode, studyEnvContext.currentEnv.environmentName])
+  }, [studyEnvContext.currentEnvPath])
 
   const onSubmit = async (anyKitWasCreated: boolean) => {
     setShowRequestKitModal(false)
@@ -192,7 +192,7 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
     getFilteredRowModel: getFilteredRowModel()
   })
 
-  return <LoadingSpinner isLoading={isLoading || isLoadingKitTypes}>
+  return <LoadingSpinner isLoading={isLoading}>
     <div className="d-flex align-items-center justify-content-between">
       <div className="d-flex align-items-center">
         <RowVisibilityCount table={table}/>
