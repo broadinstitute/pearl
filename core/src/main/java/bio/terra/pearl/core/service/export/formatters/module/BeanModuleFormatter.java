@@ -42,7 +42,7 @@ public abstract class BeanModuleFormatter<T> extends ModuleFormatter<T, Property
     public T fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap, int moduleRepeatNum) {
         T bean = newBean();
         for (PropertyItemFormatter<T> itemInfo : getItemFormatters()) {
-            String columnName = getColumnKey(itemInfo, false, null, 1);
+            String columnName = getColumnKey(itemInfo, false, null, moduleRepeatNum);
 
             String stringVal = enrolleeMap.get(columnName);
             itemInfo.importValueToBean(bean, stringVal);

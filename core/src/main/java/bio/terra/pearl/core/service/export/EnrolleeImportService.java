@@ -529,7 +529,7 @@ public class EnrolleeImportService {
                                                   StudyEnvironment studyEnv, PortalParticipantUser ppUser, Enrollee enrollee, DataAuditInfo auditInfo) {
         List<SurveyResponseWithTaskDto> responses = formatter.listFromStringMap(studyEnv.getId(), enrolleeMap);
         if (responses == null || responses.isEmpty()) {
-            return null;
+            return List.of();
         }
 
         List<SurveyResponse> imported = new ArrayList<>();
