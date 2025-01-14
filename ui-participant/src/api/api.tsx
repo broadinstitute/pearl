@@ -7,6 +7,7 @@ import {
   LogEvent,
   MailingAddress,
   ParticipantDashboardAlert,
+  ParticipantFile,
   ParticipantTask,
   ParticipantUser,
   Portal,
@@ -132,6 +133,13 @@ export default {
     return Promise.reject(obj)
   },
 
+  async processResponse(response: Response) {
+    if (response.ok) {
+      return response
+    }
+    return Promise.reject(response)
+  },
+
   async getConfig(): Promise<Config> {
     const response = await fetch(`/config`)
     return await this.processJsonResponse(response)
@@ -165,6 +173,32 @@ export default {
     const url = `${baseEnvUrl(false)}/tasks?taskType=outreach`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)
+  },
+
+  async listParticipantFiles(
+    studyShortcode: string, enrolleeShortcode: string
+  ): Promise<ParticipantFile[]> {
+    const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file`
+    const response = await fetch(url, this.getGetInit())
+    return await this.processJsonResponse(response)
+  },
+
+  async downloadParticipantFile(
+    studyShortcode: string, enrolleeShortcode: string, fileName: string
+  ): Promise<Response> {
+    const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file/${fileName}`
+    const response = await fetch(url, this.getGetInit())
+    return this.processResponse(response)
+  },
+
+  async deleteParticipantFile(
+    studyShortcode: string, enrolleeShortcode: string, fileName: string
+  ): Promise<void> {
+    const url = `${baseEnvUrl(false)}/studies/${studyShortcode}/enrollee/${enrolleeShortcode}/file/${fileName}`
+    await fetch(url, {
+      method: 'DELETE',
+      headers: this.getInitHeaders()
+    })
   },
 
   /** submit portal preregistration survey data */

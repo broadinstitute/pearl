@@ -4,6 +4,8 @@ import {
   cloneDeep,
   get,
   isNil,
+  isObject,
+  isString,
   set
 } from 'lodash'
 import {
@@ -420,3 +422,22 @@ export function SurveyFooter({ survey, surveyModel }: { survey: Survey, surveyMo
   </div>
 }
 
+export const replaceSurveyVariables = (text: string, surveyModel: SurveyModel): string => {
+  // could probably be more efficient, but performance seems OK
+  for (const variable of surveyModel.getVariableNames()) {
+    text = replaceVariable(text, variable, surveyModel)
+  }
+  return text
+}
+
+const replaceVariable = (text: string, variableName: string, surveyModel: SurveyModel): string => {
+  const value = surveyModel.getVariable(variableName)
+  if (isString(value)) {
+    return text.replace(`{${variableName}}`, value)
+  } else if (isObject(value)) {
+    Object.keys(value).forEach(key => {
+      text = replaceVariable(text, `${variableName}.${key}`, surveyModel)
+    })
+  }
+  return text
+}

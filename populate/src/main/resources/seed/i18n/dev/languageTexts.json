@@ -137,5 +137,12 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "DEV_Thank you for your participation.", "language": "dev"},
   {"keyName": "kitTypeSaliva", "text": "DEV_Saliva kit", "language": "dev"},
   {"keyName": "kitTypeStool", "text": "DEV_Stool kit", "language": "dev"},
-  {"keyName": "kitTypeBlood", "text": "DEV_Blood kit", "language": "dev"}
+  {"keyName": "kitTypeBlood", "text": "DEV_Blood kit", "language": "dev"},
+  {"keyName": "documentDownloadButton", "text": "DEV_Download", "language": "dev", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "DEV_You have not uploaded any documents yet", "language": "dev", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "DEV_Created on", "language": "dev", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "DEV_Documents", "language": "dev", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "DEV_Uploaded documents", "language": "dev", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "DEV_While participating in a study, you may be asked to upload documents as part of a form or survey. Below, you can review the documents you have uploaded.", "language": "dev", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "DEV_Documents", "language": "dev", "machineTranslated": true}
 ]

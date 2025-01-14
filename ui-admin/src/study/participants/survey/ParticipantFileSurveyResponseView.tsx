@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-table'
 import {
   Enrollee,
-  ParticipantFile,
+  ParticipantFile, saveBlobAsDownload,
   SurveyResponse
 } from '@juniper/ui-core'
 import { basicTableLayout } from 'util/tableUtils'
@@ -15,7 +15,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDownload } from '@fortawesome/free-solid-svg-icons'
 import Api from 'api/api'
 import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
-import { saveBlobAsDownload } from 'util/downloadUtils'
 
 export const ParticipantFileSurveyResponseView = ({
   studyEnvContext,

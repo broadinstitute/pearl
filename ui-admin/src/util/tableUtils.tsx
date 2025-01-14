@@ -26,10 +26,9 @@ import Select from 'react-select'
 import Modal from 'react-bootstrap/Modal'
 import { Button } from 'components/forms/Button'
 import {
-  escapeCsvValue,
-  saveBlobAsDownload
+  escapeCsvValue
 } from './downloadUtils'
-import { instantToDefaultString } from '@juniper/ui-core'
+import { instantToDefaultString, saveBlobAsDownload } from '@juniper/ui-core'
 import {
   isEmpty,
   isNil

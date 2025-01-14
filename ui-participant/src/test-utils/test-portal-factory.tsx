@@ -3,7 +3,7 @@ import {
   LocalSiteContent,
   Portal,
   PortalEnvironment,
-  PortalEnvironmentConfig,
+  PortalEnvironmentConfig, PortalStudy,
   SiteContent,
   Study,
   StudyEnvironment
@@ -15,8 +15,20 @@ export const mockPortal = (): Portal => {
     name: 'mock portal',
     id: 'portal123',
     shortcode: 'mockportal',
-    portalStudies: [],
+    portalStudies: [makeMockPortalStudy('mock study', 'study1')],
     portalEnvironments: [mockPortalEnvironment()]
+  }
+}
+
+/** returns a mock portal study */
+export const makeMockPortalStudy = (name: string, shortcode: string): PortalStudy => {
+  return {
+    createdAt: 0,
+    study: {
+      name,
+      shortcode,
+      studyEnvironments: [mockStudyEnv()]
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 import { UserContextT } from 'providers/UserProvider'
 import { ActiveUserContextT } from 'providers/ActiveUserProvider'
+import { mockEnrollee } from './test-participant-factory'
 
 /**
  * Returns a mock object that can be returned by the useUser hook
@@ -27,11 +28,11 @@ export const mockUseActiveUser = (): ActiveUserContextT => {
     ppUser: {
       id: '',
       profile: {},
-      profileId: 'asdf',
+      profileId: 'profile1',
       participantUserId: ''
     },
     profile: {},
-    enrollees: [],
+    enrollees: [mockEnrollee()],
     proxyRelations: [],
     setActiveUser: jest.fn(),
     updateProfile: jest.fn()
