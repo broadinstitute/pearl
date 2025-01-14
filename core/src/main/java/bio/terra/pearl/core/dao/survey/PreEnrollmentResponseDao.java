@@ -3,10 +3,7 @@ package bio.terra.pearl.core.dao.survey;
 import bio.terra.pearl.core.dao.BaseMutableJdbiDao;
 import bio.terra.pearl.core.model.survey.PreEnrollmentResponse;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
-
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Component;
 
