@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.service.notification;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
+import bio.terra.pearl.core.factory.kit.KitRequestFactory;
 import bio.terra.pearl.core.factory.kit.KitTypeFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
@@ -8,6 +9,7 @@ import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitRequestStatus;
 import bio.terra.pearl.core.model.notification.*;
 import bio.terra.pearl.core.model.participant.Enrollee;
+import bio.terra.pearl.core.service.kit.pepper.PepperKitStatus;
 import bio.terra.pearl.core.service.workflow.EventService;
 import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,12 +39,8 @@ public class NotificationDispatcherTests extends BaseSpringBootTest {
         EnrolleeBundle enrolleeBundle = enrolleeFactory
                 .buildWithPortalUser(testName);
         Trigger config = createNotificationConfig(enrolleeBundle, TriggerEventType.KIT_SENT);
-        KitRequest kitRequest = KitRequest.builder()
-                .status(KitRequestStatus.SENT)
-                .enrolleeId(enrolleeBundle.enrollee().getId())
-                .kitType(kitTypeFactory.buildPersisted(testName))
-                .build();
 
+        KitRequest kitRequest = kitRequestFactory.buildPersisted(testName, enrolleeBundle.enrollee(), PepperKitStatus.SENT);
         eventService.publishKitStatusEvent(kitRequest, enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(),
                 KitRequestStatus.CREATED);
         verifyNotification(config, enrolleeBundle);
@@ -55,11 +53,7 @@ public class NotificationDispatcherTests extends BaseSpringBootTest {
         EnrolleeBundle enrolleeBundle = enrolleeFactory
                 .buildWithPortalUser(testName);
         Trigger config = createNotificationConfig(enrolleeBundle, TriggerEventType.KIT_RECEIVED);
-        KitRequest kitRequest = KitRequest.builder()
-                .status(KitRequestStatus.RECEIVED)
-                .enrolleeId(enrolleeBundle.enrollee().getId())
-                .kitType(kitTypeFactory.buildPersisted(testName))
-                .build();
+        KitRequest kitRequest = kitRequestFactory.buildPersisted(testName, enrolleeBundle.enrollee(), PepperKitStatus.RECEIVED);
 
         eventService.publishKitStatusEvent(kitRequest, enrolleeBundle.enrollee(), enrolleeBundle.portalParticipantUser(),
                 KitRequestStatus.SENT);
@@ -107,4 +101,6 @@ public class NotificationDispatcherTests extends BaseSpringBootTest {
     private KitTypeFactory kitTypeFactory;
     @Autowired
     private TriggerService triggerService;
+    @Autowired
+    private KitRequestFactory kitRequestFactory;
 }

@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.service.workflow;
 
 import bio.terra.pearl.core.BaseSpringBootTest;
+import bio.terra.pearl.core.factory.kit.KitRequestFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.factory.portal.PortalEnvironmentFactory;
@@ -26,6 +27,8 @@ public class EventServiceTests extends BaseSpringBootTest {
     private EventService eventService;
     @Autowired
     private EnrolleeFactory enrolleeFactory;
+    @Autowired
+    private KitRequestFactory kitRequestFactory;
 
     @Test
     @Transactional
@@ -82,11 +85,10 @@ public class EventServiceTests extends BaseSpringBootTest {
     @Test
     @Transactional
     public void testPersistsKitStatusEvent() {
-
         EnrolleeBundle bundle = enrolleeFactory.buildWithPortalUser("testPersistsKitStatusEvent");
         Assertions.assertEquals(0, eventService.findAll().size());
         eventService.publishKitStatusEvent(
-                KitRequest.builder().build(),
+                kitRequestFactory.buildPersisted("testPersistsKitStatusEvent", bundle.enrollee()),
                 bundle.enrollee(),
                 bundle.portalParticipantUser(),
                 KitRequestStatus.CREATED);

@@ -1,13 +1,12 @@
 import React from 'react'
 import Modal from 'react-bootstrap/Modal'
-import { SiteContent } from '@juniper/ui-core'
+import { saveBlobAsDownload, SiteContent } from '@juniper/ui-core'
 import { languageExtractToCSV, languageImportFromCSV } from './siteContentLanguageUtils'
-import { saveBlobAsDownload } from 'util/downloadUtils'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faDownload, faUpload } from '@fortawesome/free-solid-svg-icons'
-import { Button } from '../../components/forms/Button'
-import { useFileUploadButton } from '../../util/uploadUtils'
-import { successNotification } from '../../util/notifications'
+import { Button } from 'components/forms/Button'
+import { useFileUploadButton } from 'util/uploadUtils'
+import { successNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
 
 /** renders a modal for selecting translation functions */

@@ -137,5 +137,12 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Thank you for your participation.", "language": "en"},
   {"keyName": "kitTypeSaliva", "text": "Saliva kit", "language": "en"},
   {"keyName": "kitTypeStool", "text": "Stool kit", "language": "en"},
-  {"keyName": "kitTypeBlood", "text": "Blood kit", "language": "en"}
+  {"keyName": "kitTypeBlood", "text": "Blood kit", "language": "en"},
+  {"keyName": "documentDownloadButton", "text": "Download", "language": "en"},
+  {"keyName": "documentsListNone", "text": "You have not uploaded any documents yet", "language": "en"},
+  {"keyName": "documentsListCreatedOn", "text": "Created on", "language": "en"},
+  {"keyName": "documentsPageTitle", "text": "Documents", "language": "en"},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Uploaded documents", "language": "en"},
+  {"keyName": "documentsPageMessage", "text": "While participating in a study, you may be asked to upload documents as part of a form or survey. Below, you can review the documents you have uploaded.", "language": "en"},
+  {"keyName": "navbarDocuments", "text": "Documents", "language": "en"}
 ]

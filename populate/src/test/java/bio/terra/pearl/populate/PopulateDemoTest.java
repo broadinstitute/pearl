@@ -45,6 +45,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
     @Transactional
     public void testPopulateDemo() throws Exception {
         baseSeedPopulator.populateRolesAndPermissions();
+        baseSeedPopulator.populateKitTypes();
         Portal portal = portalPopulator.populate(new FilePopulateContext("portals/demo/portal.json"), true);
         Assertions.assertEquals("demo", portal.getShortcode());
         PortalEnvironment sandbox = portalEnvironmentService.findOne("demo", EnvironmentName.sandbox).get();

@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: "kit_filters"
+      author: dbush
+      changes:
+        - sql:  # update participant tasks to have kit type names stored on them
+            sql:
+              update participant_task 
+              set target_name = kit_type.display_name, target_stable_id = kit_type.name 
+              from kit_request join kit_type on kit_request.kit_type_id = kit_type.id
+              where participant_task.kit_request_id = kit_request.id

@@ -1,19 +1,19 @@
 {
-  "stableId": "kitSent",
-  "name": "Kit sent email",
+  "stableId": "bloodKitSent",
+  "name": "Blood Kit sent email",
   "version": 1,
   "publishedVersion": 1,
   "localizedEmailTemplateDtos": [{
     "language": "en",
-    "subject": "Your kit is on its way!",
+    "subject": "Your blood kit is on its way!",
     "bodyPopulateFile": "en/kitSent.html"
   },{
     "language": "es",
-    "subject": "¡Tu kit está en camino!",
+    "subject": "¡Tu kit sangre está en camino!",
     "bodyPopulateFile": "es/kitSent.html"
   },{
     "language": "dev",
-    "subject": "DEV_Your kit is on its way!",
+    "subject": "DEV_Your blood kit is on its way!",
     "bodyPopulateFile": "dev/kitSent.html"
   }]
 }

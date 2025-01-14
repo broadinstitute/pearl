@@ -155,7 +155,10 @@ public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> impl
                     Query query = handle.createQuery("""
                                     with enrollee_times as (select enrollee_id as notification_enrollee_id, MAX(created_at) as last_notification_time
                                       from notification where study_environment_id = :studyEnvironmentId group by enrollee_id)
-                                    select enrollee_id as enrolleeId, array_agg(target_name) as taskTargetNames, array_agg(id) as taskIds 
+                                    select enrollee_id as enrolleeId,
+                                          array_agg(target_name) as taskTargetNames, 
+                                          array_agg(id) as taskIds,
+                                          array_agg(kit_request_id)  as kitRequestIds
                                     from participant_task
                                     left join enrollee_times on enrollee_id = notification_enrollee_id
                                     where study_environment_id = :studyEnvironmentId 
@@ -180,6 +183,8 @@ public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> impl
                 }
         );
     }
+
+
 
     /**
      * returns the unique task names associated witht he given study environment, useful for e.g. populating
@@ -210,6 +215,7 @@ public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> impl
         private UUID enrolleeId;
         private List<String> taskTargetNames;
         private List<UUID> taskIds;
+        private List<UUID> kitRequestIds;
     }
 
     public final RowMapper<EnrolleeWithTasks> enrolleeWithTasksMapper = BeanMapper.of(EnrolleeWithTasks.class);

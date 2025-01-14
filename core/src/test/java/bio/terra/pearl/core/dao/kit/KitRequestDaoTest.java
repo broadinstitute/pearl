@@ -69,17 +69,14 @@ public class KitRequestDaoTest extends BaseSpringBootTest {
         KitType kitType = kitTypeFactory.buildPersisted(getTestName(info));
 
         Function<KitRequestStatus, KitRequest> makeKit = status -> {
-            try {
-                KitRequest kit = kitRequestFactory.builder(getTestName(info) + " " + status.name())
-                        .creatingAdminUserId(adminUser.getId())
-                        .enrolleeId(enrollee.getId())
-                        .kitTypeId(kitType.getId())
-                        .status(status)
-                        .build();
-                return kitRequestDao.create(kit);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+            KitRequest kit = kitRequestFactory.builder(getTestName(info) + " " + status.name())
+                    .creatingAdminUserId(adminUser.getId())
+                    .enrolleeId(enrollee.getId())
+                    .kitTypeId(kitType.getId())
+                    .status(status)
+                    .build();
+            return kitRequestDao.create(kit);
+
         };
         List<KitRequest> incompleteKits = Stream.of(KitRequestStatus.CREATED, KitRequestStatus.SENT).map(makeKit).toList();
         List<KitRequest> completeKits = Stream.of(KitRequestStatus.RECEIVED, KitRequestStatus.ERRORED).map(makeKit).toList();

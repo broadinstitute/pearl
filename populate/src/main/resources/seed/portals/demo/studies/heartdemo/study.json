@@ -26,7 +26,8 @@
     "emails/surveyReminder.json",
     "emails/outreachReminder.json",
     "emails/invite.json",
-    "emails/kitSent.json",
+    "emails/bloodKitSent.json",
+    "emails/salivaKitSent.json",
     "emails/kitReceived.json",
     "emails/kitReminder.json",
     "emails/adHoc.json",
@@ -36,7 +37,7 @@
   "studyEnvironmentDtos": [
     {
       "environmentName": "sandbox",
-      "kitTypeNames": [ "SALIVA" ],
+      "kitTypeNames": [ "SALIVA", "BLOOD" ],
       "studyEnvironmentConfig": {
         "acceptingEnrollment": true,
         "acceptingProxyEnrollment": true,
@@ -99,7 +100,13 @@
       },{
         "triggerType": "EVENT",
         "eventType": "KIT_SENT",
-        "populateFileName": "emails/kitSent.json"
+        "filterTargetStableIds": ["BLOOD"],
+        "populateFileName": "emails/bloodKitSent.json"
+      },{
+        "triggerType": "EVENT",
+        "eventType": "KIT_SENT",
+        "filterTargetStableIds": ["SALIVA"],
+        "populateFileName": "emails/salivaKitSent.json"
       },{
         "triggerType": "EVENT",
         "eventType": "KIT_RECEIVED",
@@ -243,10 +250,6 @@
         "populateFileName": "emails/surveyReminder.json"
       },{
         "triggerType": "EVENT",
-        "eventType": "KIT_SENT",
-        "populateFileName": "emails/kitSent.json"
-      },{
-        "triggerType": "EVENT",
         "eventType": "KIT_RECEIVED",
         "populateFileName": "emails/kitReceived.json"
       },{
@@ -303,10 +306,6 @@
         "reminderIntervalMinutes": 10080,
         "maxNumReminders": 2,
         "populateFileName": "emails/surveyReminder.json"
-      },{
-        "triggerType": "EVENT",
-        "eventType": "KIT_SENT",
-        "populateFileName": "emails/kitSent.json"
       },{
         "triggerType": "EVENT",
         "eventType": "KIT_RECEIVED",

@@ -27,8 +27,7 @@ import {
 import { failureNotification } from 'util/notifications'
 import { Store } from 'react-notifications-component'
 import { basicTableLayout } from 'util/tableUtils'
-import { currentIsoDate } from '@juniper/ui-core'
-import { saveBlobAsDownload } from 'util/downloadUtils'
+import { currentIsoDate, saveBlobAsDownload } from '@juniper/ui-core'
 import ExportOptionsForm, { FILE_FORMATS } from './ExportOptionsForm'
 import { useSearchParams } from 'react-router-dom'
 

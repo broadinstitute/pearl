@@ -136,5 +136,13 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Obrigado pela sua participação.", "language": "pt"},
   {"keyName": "kitTypeSaliva", "text": "Kit de saliva", "language": "pt"},
   {"keyName": "kitTypeStool", "text": "Kit de fezes", "language": "pt"},
-  {"keyName": "kitTypeBlood", "text": "Kit de sangue", "language": "pt"}
+  {"keyName": "kitTypeBlood", "text": "Kit de sangue", "language": "pt"},
+  {"keyName": "documentDownloadButton", "text": "Transferir", "language": "pt", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "Ainda não carregou nenhum documento", "language": "pt", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "Criado em", "language": "pt", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "Documentos", "language": "pt", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Documentos enviados", "language": "pt", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "Ao participar num estudo, poderá ser-lhe pedido que envie documentos como parte de um formulário ou inquérito. Abaixo, pode gerir os documentos que enviou.", "language": "pt", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "Documentos", "language": "pt", "machineTranslated": true}
+
 ]
