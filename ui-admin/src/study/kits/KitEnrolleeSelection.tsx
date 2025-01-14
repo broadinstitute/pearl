@@ -13,7 +13,7 @@ import {
 } from '@tanstack/react-table'
 
 import Api, { ParticipantTask } from 'api/api'
-import { StudyEnvContextT } from 'study/StudyEnvironmentRouter'
+import { paramsFromContext, StudyEnvContextT } from 'study/StudyEnvironmentRouter'
 import {
   basicTableLayout,
   checkboxColumnCell,
@@ -22,7 +22,7 @@ import {
   RowVisibilityCount
 } from 'util/tableUtils'
 import LoadingSpinner from 'util/LoadingSpinner'
-import { Enrollee, instantToDateString } from '@juniper/ui-core'
+import { Enrollee, instantToDateString, KitType, StudyEnvParams } from '@juniper/ui-core'
 import RequestKitsModal from './RequestKitsModal'
 import { useLoadingEffect } from 'api/api-utils'
 import { enrolleeKitRequestPath } from 'study/participants/enrolleeView/EnrolleeView'
@@ -39,6 +39,7 @@ type EnrolleeRow = Enrollee & {
  */
 export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvContext: StudyEnvContextT }) {
   const { portal, study, currentEnv, currentEnvPath } = studyEnvContext
+  const [studyEnvKitTypes, setStudyEnvKitTypes] = useState<KitType[]>([])
   const [enrollees, setEnrollees] = useState<EnrolleeRow[]>([])
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'createdAt', desc: true },
@@ -49,24 +50,36 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([
     { id: 'consented', value: true },
-    { id: 'kitRequested', value: false },
     { id: 'requiredSurveysComplete', value: true }
   ])
+
   const [showRequestKitModal, setShowRequestKitModal] = useState(false)
 
   const { isLoading, reload } = useLoadingEffect(async () => {
-    const enrollees = await Api.fetchEnrolleesWithKits(
-      portal.shortcode, study.shortcode, currentEnv.environmentName)
+    const studyEnvParams: StudyEnvParams = paramsFromContext(studyEnvContext)
+
+    const [kitTypes, enrollees] = await Promise.all([
+      Api.fetchKitTypes(studyEnvParams),
+      Api.fetchEnrolleesWithKits(portal.shortcode, study.shortcode, currentEnv.environmentName)
+    ])
+
+    setStudyEnvKitTypes(kitTypes)
+    setColumnFilters(prevState => [
+      ...prevState,
+      ...kitTypes.map(kitType => ({
+        id: `${kitType.name}KitRequested`, value: false
+      }))
+    ])
+
     const enrolleeRows = enrollees.map(enrollee => {
       const taskCompletionStatus = _mapValues(
         _keyBy(enrollee.participantTasks, task => task.targetStableId),
         task => (task as ParticipantTask).status === 'COMPLETE'
       )
-
       return { ...enrollee, taskCompletionStatus }
     })
     setEnrollees(enrolleeRows)
-  }, [studyEnvContext.study.shortcode, studyEnvContext.currentEnv.environmentName])
+  }, [studyEnvContext.currentEnvPath])
 
   const onSubmit = async (anyKitWasCreated: boolean) => {
     setShowRequestKitModal(false)
@@ -96,7 +109,6 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
       task => !task.blocksHub && task.status === 'COMPLETE' && task.taskType === 'SURVEY'
     ).length
   }
-
 
   const columns: ColumnDef<EnrolleeRow, string | boolean | number>[] = [{
     id: 'select',
@@ -151,10 +163,11 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
     id: 'optionalSurveys',
     enableColumnFilter: false,
     accessorFn: enrollee => optionalSurveysCompleted(enrollee)
-  }, {
-    header: 'Kit requested',
-    id: 'kitRequested',
-    accessorFn: enrollee => enrollee.kitRequests.length !== 0,
+  },
+  ...studyEnvKitTypes.map(kitType => ({
+    header: `${kitType.displayName} kit requested`,
+    id: `${kitType.name}KitRequested`,
+    accessorFn: (enrollee: Enrollee) => enrollee.kitRequests.some(request => request.kitType.name === kitType.name),
     meta: {
       columnType: 'boolean',
       filterOptions: [
@@ -162,9 +175,8 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
         { value: false, label: 'Not Requested' }
       ]
     },
-    filterFn: 'equals',
     cell: checkboxColumnCell
-  }]
+  }))]
 
   const table = useReactTable({
     data: enrollees,
