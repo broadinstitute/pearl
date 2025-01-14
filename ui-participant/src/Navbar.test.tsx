@@ -371,7 +371,6 @@ describe('language selector', () => {
     render(RoutedComponent)
 
     const buttons = screen.queryAllByRole('button')
-    expect(buttons[0]).toHaveTextContent('Select a language')
     expect(buttons[1]).toHaveTextContent('English')
     expect(buttons[2]).toHaveTextContent('Spanish')
   })

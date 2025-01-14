@@ -315,7 +315,7 @@ export function LanguageDropdown({ languageOptions, selectedLanguage, changeLang
 
   return (
     languageOptions.length > 1 ? (
-      <li className="nav-item dropdown d-flex flex-column">
+      <li className="nav-item dropdown d-flex flex-column mb-2">
         <button
           aria-expanded="false"
           aria-label="Select a language"
@@ -327,7 +327,6 @@ export function LanguageDropdown({ languageOptions, selectedLanguage, changeLang
         >
           <FontAwesomeIcon className="d-none d-lg-inline mx-1" icon={faGlobe}/>
           {languageOptions.find(l => l.languageCode === selectedLanguage)?.languageName}
-          <span className="d-lg-none">Select a language</span>
         </button>
         <div className="dropdown-menu dropdown-menu-end">
           {languageOptions.map((lang, index) => {
@@ -420,6 +419,11 @@ export const AccountOptionsDropdown = (
                 </button>
               </NavLink>
           }
+          <NavLink to="/hub/documents">
+            <button className="dropdown-item" aria-label="documents">
+              {i18n('navbarDocuments')}
+            </button>
+          </NavLink>
           <button className="dropdown-item" aria-label="change password" onClick={() => {
             doChangePassword()
           }}>

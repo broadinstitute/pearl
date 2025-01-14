@@ -1,9 +1,9 @@
 package bio.terra.pearl.core.service.export.formatters.item;
 
+import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.service.export.BaseExporter;
 import bio.terra.pearl.core.service.export.DataValueExportType;
-import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.service.export.formatters.ExportFormatUtils;
 import bio.terra.pearl.core.service.export.formatters.module.ModuleFormatter;
 import bio.terra.pearl.core.service.export.formatters.module.SurveyFormatter;
@@ -19,7 +19,7 @@ import java.util.*;
 
 @SuperBuilder
 @Getter
-public class AnswerItemFormatter extends ItemFormatter<SurveyResponse> {
+public class AnswerItemFormatter extends ItemFormatter<SurveyResponseWithTaskDto> {
     private ObjectMapper objectMapper;
 
     private String questionStableId;
@@ -156,7 +156,7 @@ public class AnswerItemFormatter extends ItemFormatter<SurveyResponse> {
     }
 
     @Override
-    public void importValueToBean(SurveyResponse response, String exportString) {
+    public void importValueToBean(SurveyResponseWithTaskDto response, String exportString) {
         if (exportString == null) {
             // we don't create empty answers if the participant doesn't have a value specified
             return;

@@ -55,7 +55,7 @@
                 "value": "mit",
                 "otherStableId": "schoolsMitDetail",
                 "otherText": {
-                    "en": "What did you study at MIT?",
+                    "en": "What did you, {profile.givenName}, study at MIT?",
                     "es": "¿Qué estudiaste en MIT?"
                 },
                 "otherPlaceholder": {
@@ -68,7 +68,7 @@
                   "value": "harvard",
                   "otherStableId": "schoolsHarvardDetail",
                   "otherText": {
-                    "en": "What did you study at Harvard?",
+                    "en": "What did you, {profile.givenName}, study at Harvard?",
                     "es": "¿Qué estudiaste en Harvard?"
                   },
                   "otherPlaceholder": {
@@ -81,7 +81,7 @@
                 "value": "northeastern",
                 "otherStableId": "schoolsNortheasternDetail",
                 "otherText": {
-                    "en": "What did you study at Northeastern?",
+                    "en": "What did you, {profile.givenName}, study at Northeastern?",
                     "es": "¿Qué estudiaste en Northeastern?"
                 },
                 "otherPlaceholder": {
@@ -94,7 +94,7 @@
                 "value": "bu",
                 "otherStableId": "schoolsBuDetail",
                 "otherText": {
-                    "en": "What did you study at Boston University?",
+                    "en": "What did you, {profile.givenName}, study at Boston University?",
                     "es": "¿Qué estudiaste en Boston University?"
                 },
                 "otherPlaceholder": {

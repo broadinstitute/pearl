@@ -6,9 +6,12 @@ import bio.terra.pearl.core.factory.StudyEnvironmentFactory;
 import bio.terra.pearl.core.factory.participant.EnrolleeBundle;
 import bio.terra.pearl.core.factory.participant.EnrolleeFactory;
 import bio.terra.pearl.core.factory.participant.ParticipantTaskFactory;
+import bio.terra.pearl.core.factory.survey.SurveyFactory;
+import bio.terra.pearl.core.factory.survey.SurveyResponseFactory;
 import bio.terra.pearl.core.model.EnvironmentName;
 import bio.terra.pearl.core.model.audit.ResponsibleEntity;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
+import bio.terra.pearl.core.service.survey.SurveyResponseService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,12 @@ public class ParticipantTaskServiceTests extends BaseSpringBootTest {
     @Autowired private EnrolleeFactory enrolleeFactory;
     @Autowired private ParticipantTaskFactory participantTaskFactory;
     @Autowired private ParticipantTaskService participantTaskService;
+    @Autowired
+    private SurveyResponseFactory surveyResponseFactory;
+    @Autowired
+    private SurveyFactory surveyFactory;
+    @Autowired
+    private SurveyResponseService surveyResponseService;
 
     @Test
     @Transactional

@@ -136,5 +136,13 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "आपकी भागीदारी के लिए धन्यवाद।", "language": "hi"},
   {"keyName": "kitTypeSaliva", "text": "लार किट", "language": "hi"},
   {"keyName": "kitTypeStool", "text": "मल किट", "language": "hi"},
-  {"keyName": "kitTypeBlood", "text": "रक्त किट", "language": "hi"}
+  {"keyName": "kitTypeBlood", "text": "रक्त किट", "language": "hi"},
+  {"keyName": "documentDownloadButton", "text": "डाउनलोड करना", "language": "hi", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "आपने अभी तक कोई दस्तावेज़ अपलोड नहीं किया है", "language": "hi", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "पर बनाया", "language": "hi", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "दस्तावेज़", "language": "hi", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "अपलोड किए गए दस्तावेज़", "language": "hi", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "अध्ययन में भाग लेने के दौरान, आपसे किसी फ़ॉर्म या सर्वेक्षण के भाग के रूप में दस्तावेज़ अपलोड करने के लिए कहा जा सकता है। नीचे, आप अपने द्वारा अपलोड किए गए दस्तावेज़ों को प्रबंधित कर सकते हैं।", "language": "hi", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "दस्तावेज़", "language": "hi", "machineTranslated": true}
+
 ]

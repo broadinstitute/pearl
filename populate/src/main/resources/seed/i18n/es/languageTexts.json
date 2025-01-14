@@ -136,5 +136,12 @@
   {"keyName": "kitsInPersonCollectedThankYou", "text": "Gracias por su participación.", "language": "es"},
   {"keyName": "kitTypeSaliva", "text": "Kit para saliva", "language": "es"},
   {"keyName": "kitTypeStool", "text": "Kit para heces", "language": "es"},
-  {"keyName": "kitTypeBlood", "text": "Kit para sangre", "language": "es"}
+  {"keyName": "kitTypeBlood", "text": "Kit para sangre", "language": "es"},
+  {"keyName": "documentDownloadButton", "text": "Descargar", "language": "es", "machineTranslated": true},
+  {"keyName": "documentsListNone", "text": "Aún no has subido ningún documento", "language": "es", "machineTranslated": true},
+  {"keyName": "documentsListCreatedOn", "text": "Creado el", "language": "es", "machineTranslated": true},
+  {"keyName": "documentsPageTitle", "text": "Documentos", "language": "es", "machineTranslated": true},
+  {"keyName": "documentsPageUploadedDocumentsTitle", "text": "Documentos cargados", "language": "es", "machineTranslated": true},
+  {"keyName": "documentsPageMessage", "text": "Mientras participa en un estudio, es posible que se le solicite que cargue documentos como parte de un formulario o encuesta. A continuación, puede administrar los documentos que ha cargado.", "language": "es", "machineTranslated": true},
+  {"keyName": "navbarDocuments", "text": "Documentos", "language": "es", "machineTranslated": true}
 ]

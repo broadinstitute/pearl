@@ -209,6 +209,8 @@ public class SurveyResponseService extends CrudService<SurveyResponse, SurveyRes
                     .surveyId(survey.getId())
                     .complete(responseDto.isComplete())
                     .resumeData(responseDto.getResumeData())
+                    .createdAt(responseDto.getCreatedAt())
+                    .lastUpdatedAt(responseDto.getLastUpdatedAt())
                     .build();
             newResponse.setResponsibleUser(operator);
             response = dao.create(newResponse);
