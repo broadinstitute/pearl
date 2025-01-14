@@ -36,7 +36,7 @@ export default function InfoPopup({
   </Popover>
   return <OverlayTrigger rootClose trigger={trigger} placement={placement} overlay={popoverContent}>
     <button type="button" aria-label="info popup"
-      className={classNames("btn btn-secondary p-0", marginClass)}
+      className={classNames('btn btn-secondary p-0', marginClass)}
       style={{ color: '#777' }}>{target}</button>
   </OverlayTrigger>
 }

@@ -9,7 +9,6 @@ import {
   Routes,
   useNavigate
 } from 'react-router-dom'
-import { deliveryTypeDisplayMap } from './TriggerTypeDisplay'
 
 import {
   StudyEnvContextT,

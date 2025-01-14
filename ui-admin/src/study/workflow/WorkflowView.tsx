@@ -309,7 +309,7 @@ const TriggerListItem = ({ trigger, studyEnvParams }:
           {triggerName(trigger)}
           <span className="text-muted fst-italic ms-3">
     ({trigger.emailTemplate.localizedEmailTemplates[0].subject})
-      </span>
+          </span>
         </Link>
       </div>
     }
@@ -324,14 +324,13 @@ const TriggerListItem = ({ trigger, studyEnvParams }:
     }
     { trigger.triggerType === 'TASK_REMINDER' &&
       <span className="text-muted fst-italic">
-    <FontAwesomeIcon icon={faCalendarAlt} className="ms-3 me-2"/>
-    <span>
+        <FontAwesomeIcon icon={faCalendarAlt} className="ms-3 me-2"/>
+        <span>
       reminds after {minutesToDayString(trigger.afterMinutesIncomplete)} (max { trigger.maxNumReminders } reminders)
-    </span>
-  </span>
+        </span>
+      </span>
     }
   </li>
 }
-
 
 
