@@ -8,6 +8,7 @@ import {
   LogEvent,
   MailingAddress,
   ParticipantDashboardAlert,
+  ParticipantFile,
   ParticipantTask,
   ParticipantUser,
   Portal,
@@ -19,7 +20,6 @@ import {
   Survey,
   SurveyResponse,
   SystemSettings
-  Answer, SystemSettings, ParticipantFile
 } from '@juniper/ui-core'
 import { defaultApiErrorHandle } from 'util/error-utils'
 import queryString from 'query-string'
