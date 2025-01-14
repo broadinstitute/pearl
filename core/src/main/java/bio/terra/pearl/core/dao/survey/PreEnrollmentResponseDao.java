@@ -24,8 +24,4 @@ public class PreEnrollmentResponseDao extends BaseMutableJdbiDao<PreEnrollmentRe
     public void deleteByStudyEnvironmentId(UUID studyEnvironmentId) {
         deleteByProperty("study_environment_id", studyEnvironmentId);
     }
-
-    public List<PreEnrollmentResponse> findByStudyEnvIdAndParticipantUserIds(UUID studyEnvironmentId, Collection<UUID> participantUserIds) {
-        return findAllByTwoProperties("study_environment_id", studyEnvironmentId, "creating_participant_user_id", participantUserIds);
-    }
 }

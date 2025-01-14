@@ -24,7 +24,6 @@ import bio.terra.pearl.core.service.study.StudyEnvironmentConfigService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentService;
 import bio.terra.pearl.core.service.study.StudyEnvironmentSurveyService;
 import bio.terra.pearl.core.service.study.StudyService;
-import bio.terra.pearl.core.service.survey.PreEnrollmentResponseService;
 import bio.terra.pearl.core.service.survey.SurveyResponseService;
 import bio.terra.pearl.core.service.survey.SurveyService;
 import bio.terra.pearl.core.service.workflow.ParticipantTaskService;
@@ -46,7 +45,6 @@ public class EnrolleeExportService {
     private final SurveyQuestionDefinitionDao surveyQuestionDefinitionDao;
     private final StudyEnvironmentSurveyService studyEnvironmentSurveyService;
     private final SurveyService surveyService;
-    private final PreEnrollmentResponseService preEnrollmentResponseService;
     private final StudyEnvironmentService studyEnvironmentService;
     private final SurveyResponseService surveyResponseService;
     private final ParticipantTaskService participantTaskService;
@@ -63,7 +61,7 @@ public class EnrolleeExportService {
                                  AnswerDao answerDao,
                                  SurveyQuestionDefinitionDao surveyQuestionDefinitionDao,
                                  StudyEnvironmentSurveyService studyEnvironmentSurveyService,
-                                 SurveyService surveyService, PreEnrollmentResponseService preEnrollmentResponseService, StudyEnvironmentService studyEnvironmentService, SurveyResponseService surveyResponseService,
+                                 SurveyService surveyService, StudyEnvironmentService studyEnvironmentService, SurveyResponseService surveyResponseService,
                                  ParticipantTaskService participantTaskService,
                                  KitRequestService kitRequestService,
                                  ParticipantUserService participantUserService,
@@ -78,7 +76,6 @@ public class EnrolleeExportService {
         this.surveyQuestionDefinitionDao = surveyQuestionDefinitionDao;
         this.studyEnvironmentSurveyService = studyEnvironmentSurveyService;
         this.surveyService = surveyService;
-        this.preEnrollmentResponseService = preEnrollmentResponseService;
         this.studyEnvironmentService = studyEnvironmentService;
         this.surveyResponseService = surveyResponseService;
         this.participantTaskService = participantTaskService;
@@ -149,7 +146,6 @@ public class EnrolleeExportService {
     public List<ModuleFormatter> generateModuleInfos(ExportOptions exportOptions, UUID studyEnvironmentId, List<EnrolleeExportData> enrolleeExportData) {
         List<ModuleFormatter> allSimpleFormatters = List.of(
                 new EnrolleeFormatter(exportOptions),
-                new PreEnrollmentResponseFormatter(exportOptions),
                 new StudyFormatter(exportOptions),
                 new ParticipantUserFormatter(exportOptions),
                 new ProfileFormatter(exportOptions),
@@ -228,7 +224,6 @@ public class EnrolleeExportService {
         // batch load the following modules to reduce the number of queries and reduce the memory footprint of data exports.
         // eventually, the in-clauses of these sql queries will be too large, and we'll need to batch load these in smaller chunks
         Map<UUID, Profile> profiles = profileService.loadAllWithMailingAddress(profileIds);
-        Map<UUID, PreEnrollmentResponse> preEnrollmentResponses = preEnrollmentResponseService.findByStudyEnvIdAndParticipantUserIds(studyEnvironmentId, participantUserIds);
         Map<UUID, ParticipantUser> participantUsers = participantUserService.findByParticipantUserIds(participantUserIds);
         Map<UUID, List<Answer>> answers = answerDao.findByEnrolleeIds(enrolleeIds);
         Map<UUID, List<ParticipantTask>> tasks = participantTaskService.findByEnrolleeIds(enrolleeIds);
@@ -239,13 +234,12 @@ public class EnrolleeExportService {
         Map<UUID, List<KitRequestDto>> kitRequests = kitRequestService.findByEnrollees(enrollees);
 
         return enrollees.stream()
-                .map(enrollee -> loadEnrolleeData(study, studyEnvironmentConfigService.findByStudyEnvironmentId(studyEnvironmentId), enrollee, profiles, preEnrollmentResponses, participantUsers, answers, tasks, surveyResponses, kitRequests))
+                .map(enrollee -> loadEnrolleeData(study, studyEnvironmentConfigService.findByStudyEnvironmentId(studyEnvironmentId), enrollee, profiles, participantUsers, answers, tasks, surveyResponses, kitRequests))
                 .toList();
     }
 
     protected EnrolleeExportData loadEnrolleeData(Study study, StudyEnvironmentConfig config, Enrollee enrollee,
-                                                  Map<UUID, Profile> profiles, Map<UUID, PreEnrollmentResponse> preEnrollmentResponses,
-                                                  Map<UUID, ParticipantUser> participantUsers,
+                                                  Map<UUID, Profile> profiles, Map<UUID, ParticipantUser> participantUsers,
                                                   Map<UUID, List<Answer>> answers, Map<UUID, List<ParticipantTask>> tasks,
                                                   Map<UUID, List<SurveyResponseWithTaskDto>> surveyResponses, Map<UUID, List<KitRequestDto>> kitRequests) {
 
@@ -257,7 +251,6 @@ public class EnrolleeExportService {
                 enrollee,
                 participantUsers.get(enrollee.getParticipantUserId()),
                 profiles.get(enrollee.getProfileId()),
-                preEnrollmentResponses.get(enrollee.getParticipantUserId()),
                 answers.getOrDefault(enrollee.getId(), Collections.emptyList()),
                 tasks.getOrDefault(enrollee.getId(), Collections.emptyList()),
                 surveyResponses

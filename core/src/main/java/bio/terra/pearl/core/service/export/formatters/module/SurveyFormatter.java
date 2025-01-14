@@ -56,6 +56,7 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponseWithTaskDto, 
         List<ItemFormatter<SurveyResponseWithTaskDto>> formatters = new ArrayList<>();
         formatters.add(new PropertyItemFormatter<>("lastUpdatedAt", SurveyResponseWithTaskDto.class));
         formatters.add(new PropertyItemFormatter<>("createdAt", SurveyResponseWithTaskDto.class));
+        formatters.add(new PropertyItemFormatter<>("responseMetadata", SurveyResponseWithTaskDto.class));
 
         PropertyItemFormatter<SurveyResponseWithTaskDto> taskCompletedFormatter = new PropertyItemFormatter<>("task.completedAt", SurveyResponseWithTaskDto.class, "completedAt");
         taskCompletedFormatter.setImportable(false); // task will be null at time of initial import, but time shifting will occur after
