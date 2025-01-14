@@ -29,10 +29,10 @@ import {
 } from 'util/subNavStyles'
 import CollapsableMenu from 'navbar/CollapsableMenu'
 import TriggerNotifications from './TriggerNotifications'
-import { triggerName } from '../workflow/workflowUtils'
 import { TriggerDesigner } from 'study/notifications/TriggerDesigner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { triggerName } from '../workflow/workflowUtils'
 
 const TRIGGER_GROUPS = [
   { title: 'Events', type: 'EVENT' },
