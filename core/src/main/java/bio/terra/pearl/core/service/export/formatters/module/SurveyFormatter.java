@@ -1,8 +1,8 @@
 package bio.terra.pearl.core.service.export.formatters.module;
 
+import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.model.survey.*;
 import bio.terra.pearl.core.service.export.EnrolleeExportData;
-import bio.terra.pearl.core.model.export.ExportOptions;
 import bio.terra.pearl.core.service.export.formatters.ExportFormatUtils;
 import bio.terra.pearl.core.service.export.formatters.item.AnswerItemFormatter;
 import bio.terra.pearl.core.service.export.formatters.item.ItemFormatter;
@@ -12,7 +12,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
@@ -21,14 +20,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.reducing;
 
 /**
  * See https://broad-juniper.zendesk.com/hc/en-us/articles/18259824756123-Participant-List-Export-details
  * for information on the export format of survey questions
  */
 @Slf4j
-public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormatter<SurveyResponse>> {
+public class SurveyFormatter extends ModuleFormatter<SurveyResponseWithTaskDto, ItemFormatter<SurveyResponseWithTaskDto>> {
     public static String OTHER_DESCRIPTION_KEY_SUFFIX = "_description";
     public static String OTHER_DESCRIPTION_HEADER = "other description";
     public static String SPLIT_OPTION_SELECTED_VALUE = "1";
@@ -53,11 +51,17 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
     }
 
     @Override
-    protected List<ItemFormatter<SurveyResponse>> generateItemFormatters(ExportOptions options) {
+    protected List<ItemFormatter<SurveyResponseWithTaskDto>> generateItemFormatters(ExportOptions options) {
         // Note that we generate and add answer formatters to this list later in the constructor
-        List<ItemFormatter<SurveyResponse>> formatters = new ArrayList<>();
-        formatters.add(new PropertyItemFormatter<>("lastUpdatedAt", SurveyResponse.class));
-        formatters.add(new PropertyItemFormatter<>("complete", SurveyResponse.class));
+        List<ItemFormatter<SurveyResponseWithTaskDto>> formatters = new ArrayList<>();
+        formatters.add(new PropertyItemFormatter<>("lastUpdatedAt", SurveyResponseWithTaskDto.class));
+        formatters.add(new PropertyItemFormatter<>("createdAt", SurveyResponseWithTaskDto.class));
+
+        PropertyItemFormatter<SurveyResponseWithTaskDto> taskCompletedFormatter = new PropertyItemFormatter<>("task.completedAt", SurveyResponseWithTaskDto.class, "completedAt");
+        taskCompletedFormatter.setImportable(false); // task will be null at time of initial import, but time shifting will occur after
+        formatters.add(taskCompletedFormatter);
+
+        formatters.add(new PropertyItemFormatter<>("complete", SurveyResponseWithTaskDto.class));
         return formatters;
     }
 
@@ -94,7 +98,7 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
         return questionDefs.stream().filter(questionDef -> parent.getQuestionStableId().equals(questionDef.get(0).getParentStableId())).toList();
     }
 
-    private List<ItemFormatter<SurveyResponse>> buildChildrenItemFormatters(
+    private List<ItemFormatter<SurveyResponseWithTaskDto>> buildChildrenItemFormatters(
             ExportOptions exportOptions,
             Collection<List<SurveyQuestionDefinition>> questionDefs,
             List<EnrolleeExportData> data,
@@ -109,14 +113,14 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
             return buildRepeatableChildrenItemFormatters(exportOptions, data, parent, children);
         }
 
-        List<ItemFormatter<SurveyResponse>> childrenItemFormatters = new ArrayList<>();
+        List<ItemFormatter<SurveyResponseWithTaskDto>> childrenItemFormatters = new ArrayList<>();
         for (List<SurveyQuestionDefinition> childVersions : children) {
             childrenItemFormatters.add(new AnswerItemFormatter(exportOptions, moduleName, childVersions, objectMapper));
         }
         return childrenItemFormatters;
     }
 
-    private List<ItemFormatter<SurveyResponse>> buildRepeatableChildrenItemFormatters(
+    private List<ItemFormatter<SurveyResponseWithTaskDto>> buildRepeatableChildrenItemFormatters(
             ExportOptions exportOptions,
             List<EnrolleeExportData> data,
             SurveyQuestionDefinition parent,
@@ -147,7 +151,7 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
             maxParentResponseLength = 1;
         }
 
-        List<ItemFormatter<SurveyResponse>> childrenItemFormatters = new ArrayList<>();
+        List<ItemFormatter<SurveyResponseWithTaskDto>> childrenItemFormatters = new ArrayList<>();
         for (int repeat = 0; repeat < maxParentResponseLength; repeat++) {
             for (List<SurveyQuestionDefinition> childVersions : children) {
                 childrenItemFormatters.add(new AnswerItemFormatter(exportOptions, moduleName, childVersions, objectMapper, repeat));
@@ -252,7 +256,7 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
     @Override
     public Map<String, String> toStringMap(EnrolleeExportData exportData) {
         Map<String, String> valueMap = new HashMap<>();
-        List<SurveyResponse> responses = exportData.getResponses().stream()
+        List<SurveyResponseWithTaskDto> responses = exportData.getResponses().stream()
                 .filter(response -> surveyIds.contains(response.getSurveyId()))
                 .toList();
         for (int i = 0; i < responses.size(); i++) {
@@ -451,10 +455,10 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
     }
 
     @Override
-    public SurveyResponse fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap) {
-        SurveyResponse response = new SurveyResponse();
+    public SurveyResponseWithTaskDto fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap) {
+        SurveyResponseWithTaskDto response = new SurveyResponseWithTaskDto();
         boolean specifiedComplete = false;
-        for (ItemFormatter<SurveyResponse> itemFormatter : itemFormatters) {
+        for (ItemFormatter<SurveyResponseWithTaskDto> itemFormatter : itemFormatters) {
             String columnName = getColumnKey(itemFormatter, false, null, 1);
             if (!enrolleeMap.containsKey(columnName)) {
                 //try stripping surveyName
@@ -465,6 +469,10 @@ public class  SurveyFormatter extends ModuleFormatter<SurveyResponse, ItemFormat
             // track whether the complete field was explicitly set
             if (itemFormatter.getBaseColumnKey().equals("complete") && stringVal != null) {
                 specifiedComplete = true;
+            }
+
+            if (!itemFormatter.isImportable()) {
+                continue;
             }
 
             if (stringVal != null && !stringVal.isEmpty()) {

@@ -1,19 +1,30 @@
-import { CalculatedValue, Question } from 'survey-core'
-import { Answer, instantToDefaultString, PortalEnvironmentLanguage } from '@juniper/ui-core'
+import {
+  Answer,
+  instantToDefaultString,
+  PortalEnvironmentLanguage
+} from '@juniper/ui-core'
 import { DataChangeRecord } from 'api/api'
 import { useAdminUserContext } from 'providers/AdminUserProvider'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowRight, faChevronDown, faHistory, faPencil } from '@fortawesome/free-solid-svg-icons'
+import {
+  faArrowRight,
+  faChevronDown,
+  faHistory,
+  faPencil
+} from '@fortawesome/free-solid-svg-icons'
 import { AdminUser } from 'api/adminUser'
 import React from 'react'
-import { getDisplayValue } from './SurveyFullDataView'
+import {
+  getDisplayValue,
+  QuestionMetadata
+} from './SurveyFullDataView'
 import { sortBy } from 'lodash'
 
 /**
  * Renders a dropdown with the edit history for a question response
  */
 export const AnswerEditHistory = ({ question, answer, editHistory, supportedLanguages }: {
-    question: Question | CalculatedValue, answer: Answer,
+  question: QuestionMetadata, answer: Answer,
   editHistory: DataChangeRecord[], supportedLanguages: PortalEnvironmentLanguage[]
 }) => {
   const { users } = useAdminUserContext()
@@ -74,7 +85,7 @@ const renderChangeRecordSimple = (changeRecord: DataChangeRecord) => {
  * been made to the answer, we backtrack through the change records to find the original answer.
  */
 const renderOriginalAnswer = (
-  question: Question | CalculatedValue, answer: Answer, changeRecords: DataChangeRecord[], users: AdminUser[]
+  question: QuestionMetadata, answer: Answer, changeRecords: DataChangeRecord[], users: AdminUser[]
 ) => {
   const originalChangeRecord = sortBy(changeRecords, 'createdAt')[0]
   return <div className="dropdown-item d-flex align-items-center" style={{ pointerEvents: 'none' }}>

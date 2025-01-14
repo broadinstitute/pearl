@@ -115,8 +115,9 @@ public class SurveyTaskDispatcher extends TaskDispatcher<SurveyTaskConfigDto> {
     );
 
     protected Optional<SurveyTaskConfigDto> findTaskConfigByStableId(UUID studyEnvironmentId, String stableId, Integer version) {
-        Optional<Survey> surveyOpt = surveyService
-                .findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId, version);
+        Optional<Survey> surveyOpt = version != null ?
+                surveyService.findActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId, version)
+                : surveyService.findLatestActiveByStudyEnvironmentIdAndStableIdNoContent(studyEnvironmentId, stableId);
         if (surveyOpt.isEmpty()) {
             return Optional.empty();
         }

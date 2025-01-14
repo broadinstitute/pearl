@@ -8,7 +8,8 @@ import java.util.UUID;
 public record ParticipantTaskAssignDto (
         TaskType taskType,
         String targetStableId,
-        int targetAssignedVersion,
+        // if null, the latest version will be used
+        Integer targetAssignedVersion,
         List<UUID> enrolleeIds,
         // if true, the enrolleeIds list will be ignored and tasks will be assigned to all enrollees
         // not already having the task in the duplicate window

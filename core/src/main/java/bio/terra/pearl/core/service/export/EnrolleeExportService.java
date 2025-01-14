@@ -4,9 +4,6 @@ import bio.terra.pearl.core.dao.search.EnrolleeSearchExpressionDao;
 import bio.terra.pearl.core.dao.survey.AnswerDao;
 import bio.terra.pearl.core.dao.survey.SurveyQuestionDefinitionDao;
 import bio.terra.pearl.core.model.export.ExportOptions;
-import bio.terra.pearl.core.model.participant.Enrollee;
-import bio.terra.pearl.core.model.participant.EnrolleeRelation;
-import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.participant.*;
 import bio.terra.pearl.core.model.search.EnrolleeSearchExpressionResult;
 import bio.terra.pearl.core.model.study.Study;
@@ -230,7 +227,10 @@ public class EnrolleeExportService {
         Map<UUID, ParticipantUser> participantUsers = participantUserService.findByParticipantUserIds(participantUserIds);
         Map<UUID, List<Answer>> answers = answerDao.findByEnrolleeIds(enrolleeIds);
         Map<UUID, List<ParticipantTask>> tasks = participantTaskService.findByEnrolleeIds(enrolleeIds);
-        Map<UUID, List<SurveyResponse>> surveyResponses = surveyResponseService.findByEnrolleeIdsNotRemoved(enrolleeIds);
+        Map<UUID, List<SurveyResponseWithTaskDto>> surveyResponses =
+                attachTasksToSurveyResponses(
+                        tasks,
+                        surveyResponseService.findByEnrolleeIdsNotRemoved(enrolleeIds));
         Map<UUID, List<KitRequestDto>> kitRequests = kitRequestService.findByEnrollees(enrollees);
 
         return enrollees.stream()
@@ -241,7 +241,7 @@ public class EnrolleeExportService {
     protected EnrolleeExportData loadEnrolleeData(Study study, StudyEnvironmentConfig config, Enrollee enrollee,
                                                   Map<UUID, Profile> profiles, Map<UUID, ParticipantUser> participantUsers,
                                                   Map<UUID, List<Answer>> answers, Map<UUID, List<ParticipantTask>> tasks,
-                                                  Map<UUID, List<SurveyResponse>> surveyResponses, Map<UUID, List<KitRequestDto>> kitRequests) {
+                                                  Map<UUID, List<SurveyResponseWithTaskDto>> surveyResponses, Map<UUID, List<KitRequestDto>> kitRequests) {
 
         List<EnrolleeRelation> enrolleeRelations = loadRelations(config, enrollee);
         List<ParticipantUser> proxies = loadProxyUsers(config, enrolleeRelations);
@@ -253,8 +253,10 @@ public class EnrolleeExportService {
                 profiles.get(enrollee.getProfileId()),
                 answers.getOrDefault(enrollee.getId(), Collections.emptyList()),
                 tasks.getOrDefault(enrollee.getId(), Collections.emptyList()),
-                surveyResponses.getOrDefault(enrollee.getId(), Collections.emptyList())
-                        .stream().sorted(Comparator.comparing(SurveyResponse::getCreatedAt).reversed()).toList(),
+                surveyResponses
+                        .getOrDefault(enrollee.getId(), Collections.emptyList())
+                        .stream()
+                        .sorted(Comparator.comparing(SurveyResponse::getCreatedAt).reversed()).toList(),
                 kitRequests.getOrDefault(enrollee.getId(), Collections.emptyList()),
                 enrolleeRelations,
                 config.isEnableFamilyLinkage() ? familyService.findByEnrolleeIdWithProband(enrollee.getId()) : Collections.emptyList(),
@@ -294,6 +296,35 @@ public class EnrolleeExportService {
             return new ExcelExporter(moduleFormatters, enrolleeMaps, columnSorting);
         }
         return new TsvExporter(moduleFormatters, enrolleeMaps, fileFormat, columnSorting);
+    }
+
+    private Map<UUID, List<SurveyResponseWithTaskDto>> attachTasksToSurveyResponses(Map<UUID, List<ParticipantTask>> taskMap, Map<UUID, List<SurveyResponse>> surveyResponseMap) {
+        Map<UUID, List<SurveyResponseWithTaskDto>> surveyResponseWithTaskMap = new HashMap<>();
+
+        for (UUID enrolleeId : surveyResponseMap.keySet()) {
+            List<ParticipantTask> tasks = taskMap.getOrDefault(enrolleeId, new ArrayList<>());
+            List<SurveyResponse> surveyResponses = surveyResponseMap.getOrDefault(enrolleeId, new ArrayList<>());
+            List<SurveyResponseWithTaskDto> surveyResponseWithTaskDtos = new ArrayList<>();
+
+            for (SurveyResponse surveyResponse : surveyResponses) {
+                ParticipantTask taskForSurveyResponse = tasks.stream()
+                        .filter(task -> surveyResponse.getId().equals(task.getSurveyResponseId()))
+                        .sorted(Comparator.comparing(ParticipantTask::getCreatedAt).reversed())
+                        .findAny()
+                        .orElse(null);
+
+                surveyResponseWithTaskDtos.add(
+                        new SurveyResponseWithTaskDto(
+                                surveyResponse,
+                                taskForSurveyResponse
+                        )
+                );
+            }
+
+            surveyResponseWithTaskMap.put(enrolleeId, surveyResponseWithTaskDtos);
+        }
+
+        return surveyResponseWithTaskMap;
     }
 
 

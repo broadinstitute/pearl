@@ -30,6 +30,13 @@ public class PropertyItemFormatter<T> extends ItemFormatter<T> {
         this.baseColumnKey = propertyName;
     }
 
+    public PropertyItemFormatter(String propertyName, Class<T> beanClass, String alias) {
+        this.propertyName = propertyName;
+        this.propertyClass = getPropertyClass(beanClass, propertyName);
+        this.dataType = DATA_TYPE_MAP.getOrDefault(propertyClass, DataValueExportType.STRING);
+        this.baseColumnKey = alias;
+    }
+
     public Class<?> getPropertyClass(Class<?> beanClass, String propertyName) {
         try {
             BeanInfo info = Introspector.getBeanInfo(beanClass);
@@ -83,6 +90,8 @@ public class PropertyItemFormatter<T> extends ItemFormatter<T> {
             Object value = ExportFormatUtils.getValueFromString(exportString, dataType);
             try {
                 PropertyUtils.setNestedProperty(bean, getPropertyName(), value);
+            } catch (NestedNullException e) {
+                log.error("cannot set nested property " + getPropertyName() + " on " + bean + " because a null value was encountered");
             } catch (Exception e) {
                 log.error("error setting property " + getPropertyName(), e);
             }

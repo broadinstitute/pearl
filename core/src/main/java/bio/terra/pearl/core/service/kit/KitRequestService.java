@@ -415,6 +415,7 @@ public class KitRequestService extends CrudService<KitRequest, KitRequestDao> {
             if(pepperKit.getReturnTrackingNumber() != null) {
                 kitRequest.setReturnTrackingNumber(pepperKit.getReturnTrackingNumber());
             }
+            kitRequest.setKitLabel(pepperKit.getMfBarcode());
             kitRequest.setErrorMessage(pepperKit.getErrorMessage());
             dao.update(kitRequest);
         } catch (JsonProcessingException e) {
