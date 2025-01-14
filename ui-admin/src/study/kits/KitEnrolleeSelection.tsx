@@ -48,7 +48,6 @@ export default function KitEnrolleeSelection({ studyEnvContext }: { studyEnvCont
   ])
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([
     { id: 'consented', value: true },
     { id: 'requiredSurveysComplete', value: true }
