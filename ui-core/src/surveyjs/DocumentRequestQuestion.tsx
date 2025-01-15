@@ -76,7 +76,6 @@ export class SurveyQuestionDocumentRequest extends SurveyQuestionElementBase {
       studyEnvParams={studyEnvParams}
       enrolleeShortcode={enrolleeShortcode}
       selectedFileNames={this.fileNames}
-      ModalComponent={this.baseModal}
       setSelectedFileNames={fileNames => {
         // clear files
         const numOldFiles = this.fileNames.length

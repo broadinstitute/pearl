@@ -6,20 +6,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCaretDown,
   faCaretUp,
-  faFile,
-  faFilePdf,
-  faImage,
-  faTrashCan,
-  faUpload,
-  faX
+  faFile, faFileImage,
+  faFilePdf, faInfoCircle, faSquareMinus, faSquarePlus,
+  faUpload
 } from '@fortawesome/free-solid-svg-icons'
-import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { isNil } from 'lodash'
 import { useApiContext } from 'src/participant/ApiProvider'
 import { StudyEnvParams } from 'src/types/study'
 import LoadingSpinner from '@juniper/ui-admin/src/util/LoadingSpinner'
-import Modal from 'react-bootstrap/Modal'
-import { ModalProps } from 'react-bootstrap'
 import { saveBlobAsDownload } from '@juniper/ui-core'
 
 export const DocumentRequestUpload = (
@@ -27,14 +21,12 @@ export const DocumentRequestUpload = (
     studyEnvParams,
     enrolleeShortcode,
     selectedFileNames,
-    setSelectedFileNames,
-    ModalComponent
+    setSelectedFileNames
   } : {
         studyEnvParams: StudyEnvParams,
         enrolleeShortcode: string,
         selectedFileNames: string[]
-        setSelectedFileNames: (fileNames: string[]) => void,
-        ModalComponent: React.ElementType<ModalProps>
+        setSelectedFileNames: (fileNames: string[]) => void
     }) => {
   const [files, setFiles] = useState<ParticipantFile[]>([])
   const [selectedFiles, setSelectedFiles] = useState<ParticipantFile[]>([])
@@ -75,20 +67,13 @@ export const DocumentRequestUpload = (
     selectFile(newFile)
   }
 
-  const deleteFile = async (file: ParticipantFile) => {
-    await Api.deleteParticipantFile({ studyEnvParams, enrolleeShortcode, fileName: file.fileName })
-    setFiles(oldFiles => oldFiles.filter(f => f.id !== file.id))
-    setSelectedFiles(oldFiles => oldFiles.filter(f => f.id !== file.id))
-    setSelectedFileNames(selectedFileNames.filter(f => f !== file.fileName))
-  }
-
   const downloadFile = async (file: ParticipantFile) => {
     const response = await Api.downloadParticipantFile({ studyEnvParams, enrolleeShortcode, fileName: file.fileName })
 
     saveBlobAsDownload(await response.blob(), file.fileName)
   }
 
-  return <div className='p-3'>
+  return <div className='pt-2'>
     <div className='mb-2'>
       <SelectedFiles selectedFiles={selectedFiles} removeFile={unselectFile}/>
     </div>
@@ -109,9 +94,7 @@ export const DocumentRequestUpload = (
       selectFile={selectFile}
       unselectFile={unselectFile}
       selectedFiles={selectedFiles}
-      deleteFile={deleteFile}
       downloadFile={downloadFile}
-      ModalComponent={ModalComponent}
     />
   </div>
 }
@@ -125,22 +108,22 @@ const SelectedFiles = (
         removeFile: (file: ParticipantFile) => void
     }
 ) => {
-  return <div>
-    <p>Selected files ({selectedFiles.length})</p>
-    {selectedFiles.map(selectedFile => {
-      return <div key={selectedFile.id} className='w-100 justify-content-between d-flex'>
-        <div>
-          <FileIcon mimeType={selectedFile.fileType}/>
-          <span> {selectedFile.fileName}</span>
-        </div>
-        <button
-          className={'btn btn-link'}
-          onClick={() => removeFile(selectedFile)}
-        >
-          <FontAwesomeIcon icon={faX}/>
-        </button>
-      </div>
-    })}
+  return <div className='card'>
+    <div className='card-body'>
+      <p className='card-title mb-1'>Selected documents ({selectedFiles.length})</p>
+      {selectedFiles.length === 0 && <div className='fst-italic text-muted mt-3'>No documents selected</div>}
+      {selectedFiles.map(selectedFile => {
+        return <FileRow
+          fileType={selectedFile.fileType}
+          fileName={selectedFile.fileName}
+          isUploading={false}
+          isSelected={true}
+          onUnselect={() => removeFile(selectedFile)}
+          onSelect={() => removeFile(selectedFile)}
+          key={selectedFile.id}
+        />
+      })}
+    </div>
   </div>
 }
 
@@ -151,18 +134,14 @@ const Library = (
     selectedFiles,
     selectFile,
     unselectFile,
-    deleteFile,
-    downloadFile,
-    ModalComponent
+    downloadFile
   }: {
         uploadingFile?: string,
         files: ParticipantFile[],
         selectedFiles: ParticipantFile[],
         selectFile: (file: ParticipantFile) => void,
         unselectFile: (file: ParticipantFile) => void,
-        deleteFile: (file: ParticipantFile) => void,
-        downloadFile: (file: ParticipantFile) => void,
-        ModalComponent: React.ElementType<ModalProps>
+        downloadFile: (file: ParticipantFile) => void
     }
 ) => {
   const isSelected = (file: ParticipantFile) => {
@@ -171,11 +150,13 @@ const Library = (
 
   const [expanded, setExpanded] = React.useState(true)
 
+  const unselectedFiles = files.filter(f => !isSelected(f))
+
   return <div className='card'>
     <div className='card-body'>
-      <p className='card-title'>
-                My files <span>({files.length})</span>
-        <button className='btn btn-link' onClick={() => setExpanded(!expanded)}>
+      <p className='card-title mb-0'>
+            My documents <span>({unselectedFiles.length})</span>
+        <button className='btn btn-link p-0 ps-2' onClick={() => setExpanded(!expanded)}>
           <FontAwesomeIcon icon={expanded ? faCaretUp : faCaretDown}/>
         </button>
       </p>
@@ -185,22 +166,23 @@ const Library = (
         fileName={uploadingFile}
         isUploading={true}
         isSelected={false}
-        ModalComponent={ModalComponent}
       />}
-      {expanded && files.map(file => {
-        return <FileRow
-          fileType={file.fileType}
-          fileName={file.fileName}
-          isUploading={false}
-          isSelected={isSelected(file)}
-          onUnselect={() => unselectFile(file)}
-          onSelect={() => selectFile(file)}
-          onDelete={() => deleteFile(file)}
-          onDownload={() => downloadFile(file)}
-          ModalComponent={ModalComponent}
-          key={file.id}
-        />
-      })}
+      {expanded && <>
+        <div className="text-muted mb-2">
+          <FontAwesomeIcon icon={faInfoCircle}/> You may also add existing documents to your response
+        </div>
+        {unselectedFiles.map(file => {
+          return <FileRow
+            fileType={file.fileType}
+            fileName={file.fileName}
+            isUploading={false}
+            isSelected={isSelected(file)}
+            onUnselect={() => unselectFile(file)}
+            onSelect={() => selectFile(file)}
+            onDownload={() => downloadFile(file)}
+            key={file.id}
+          />
+        })}</>}
     </div>
 
   </div>
@@ -213,9 +195,7 @@ const FileRow = ({
   isSelected,
   onSelect,
   onUnselect,
-  onDelete,
-  onDownload,
-  ModalComponent
+  onDownload
 }: {
     fileType: string,
     fileName: string,
@@ -223,14 +203,10 @@ const FileRow = ({
     isSelected: boolean,
     onSelect?: () => void,
     onUnselect?: () => void,
-    onDelete?: () => void,
-    onDownload?: () => void,
-    ModalComponent: React.ElementType<ModalProps>
+    onDownload?: () => void
 }) => {
-  const [showDeleteModal, setShowDeleteModal] = React.useState(false)
-
   return <div
-    className={'border border-1 rounded-1 bg-light-subtle p-2 d-flex align-items-center justify-content-between'}>
+    className={'border border-1 rounded-1 bg-light-subtle p-2 d-flex align-items-center justify-content-between mb-2'}>
     <div className='d-flex align-items-center justify-content-between'>
       <FileIcon mimeType={fileType}/>
       <button className='btn btn-link'>{fileName}</button>
@@ -239,68 +215,24 @@ const FileRow = ({
     {isUploading && <LoadingSpinner/>}
 
     <div className='d-flex justify-content-end'>
-      {onDelete && <button
-        onClick={() => setShowDeleteModal(true)}
-        className='float-end btn btn-outline-danger text-decoration-none border-0'>
-        <FontAwesomeIcon icon={faTrashCan}/>
-      </button>}
       {isSelected
         ? <button
           onClick={onUnselect}
           className='float-end btn btn-outline-primary text-decoration-none border-0'>
-          <FontAwesomeIcon icon={faX}/>
+          <FontAwesomeIcon icon={faSquareMinus}/>
         </button>
         : <button
           onClick={onSelect}
           className='float-end btn btn-outline-primary text-decoration-none border-0'>
-          <FontAwesomeIcon icon={faPlus}/>
+          <FontAwesomeIcon icon={faSquarePlus}/>
         </button>}
     </div>
-
-    {onDelete && showDeleteModal && <DeleteModal
-      fileName={fileName}
-      onDelete={() => {
-        setShowDeleteModal(false)
-        onDelete()
-      }}
-      onClose={() => setShowDeleteModal(false)}
-      ModalComponent={ModalComponent}
-    />}
-
   </div>
-}
-
-const DeleteModal = ({
-  fileName,
-  onDelete,
-  onClose,
-  ModalComponent
-}: {
-    fileName: string,
-    onDelete: () => void,
-    onClose: () => void,
-    ModalComponent: React.ElementType<ModalProps>
-}) => {
-  return <ModalComponent show={true}>
-    <Modal.Header>
-      <Modal.Title>
-                Delete {fileName}
-      </Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <p>Are you sure you want to delete {fileName}? This action cannot be undone.</p>
-    </Modal.Body>
-
-    <Modal.Footer>
-      <button className='btn btn-danger' onClick={onDelete}>Delete</button>
-      <button className='btn btn-link' onClick={onClose}>Cancel</button>
-    </Modal.Footer>
-  </ModalComponent>
 }
 
 const getIcon = (mimeType: string) => {
   if (mimeType.startsWith('image')) {
-    return faImage
+    return faFileImage
   } else if (mimeType === 'application/pdf') {
     return faFilePdf
   } else {
@@ -324,12 +256,11 @@ const DragAndDrop = ({ uploadNewFile }: { uploadNewFile: (file: File) => void })
 
   return <div {...getRootProps()}>
     <input {...getInputProps()} />
-    <div className="file-dropper w-100">
+    <div className="file-dropper w-100 my-4">
       <div className={'d-flex w-100 h-100 align-items-center justify-content-center flex-column'}>
         <span className='py-5'>
-          <FontAwesomeIcon
-            icon={faUpload} className={'text-primary'}
-          /> Drop files here or <a type="button" className='text-decoration-underline'>
+          <FontAwesomeIcon icon={faUpload} className={'text-primary me-1'}/>
+            Drop files here or <a type="button" className='text-decoration-underline'>
           click to upload
           </a>
         </span>
