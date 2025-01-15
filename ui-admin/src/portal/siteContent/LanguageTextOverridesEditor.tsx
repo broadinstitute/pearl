@@ -218,20 +218,6 @@ export default function LanguageTextOverridesEditor(
   </div>
 }
 
-const LanguageTextInput = (
-  { value, onChange } : { value: string, onChange: (val: string) => void }
-) => {
-  const [val, setVal] = useState(value)
-  return <TextInput
-    aria-label={'Language text override text'}
-    onChange={newVal => {
-      setVal(newVal)
-      onChange(newVal)
-    }}
-    value={val}
-  />
-}
-
 const DeleteOverrideModal = (
   { onConfirm, onCancel } : { onConfirm: () => void, onCancel: () => void }
 ) => {
