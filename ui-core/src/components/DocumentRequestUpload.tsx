@@ -169,7 +169,7 @@ const Library = (
       />}
       {expanded && <>
         <div className="text-muted mb-2">
-          <FontAwesomeIcon icon={faInfoCircle}/> You may also add existing documents to your response
+          <FontAwesomeIcon icon={faInfoCircle}/> You may also add these existing documents to your response
         </div>
         {unselectedFiles.map(file => {
           return <FileRow
