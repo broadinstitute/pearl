@@ -59,7 +59,7 @@ public class ExportFormatUtils {
         }
         return Instant.from(
                 DateTimeFormatter.ofPattern(ANALYSIS_DATE_TIME_FORMAT)
-                        .withZone(timeZone) // for now do everything in UTC
+                        .withZone(timeZone)
                         .parse(instantString)
         );
     }

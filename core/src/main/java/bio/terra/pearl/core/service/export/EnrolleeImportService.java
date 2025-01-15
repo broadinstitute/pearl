@@ -571,6 +571,9 @@ public class EnrolleeImportService {
     // preserving response creation and task creation/completion
     // is important for recurring surveys
     private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap, ZoneId zoneId) {
+        if (zoneId == null) {
+            zoneId = ZoneId.of("America/New_York");
+        }
         // make sure the task reflects created and completion status
         // so that recurrences are properly scheduled
         String completedAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "completedAt";

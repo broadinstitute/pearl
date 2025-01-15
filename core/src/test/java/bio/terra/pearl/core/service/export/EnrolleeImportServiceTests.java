@@ -22,6 +22,7 @@ import bio.terra.pearl.core.service.admin.AdminUserService;
 import bio.terra.pearl.core.service.export.dataimport.ImportFileFormat;
 import bio.terra.pearl.core.service.export.dataimport.ImportItemService;
 import bio.terra.pearl.core.service.export.dataimport.ImportService;
+import bio.terra.pearl.core.service.export.formatters.ExportFormatUtils;
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.participant.*;
@@ -40,8 +41,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -107,6 +108,16 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
                 .build();
     }
 
+    private Instant instantFromZone(String timeString, ZoneId zoneId) {
+        return Instant.from(
+                DateTimeFormatter.ofPattern(ExportFormatUtils.ANALYSIS_DATE_TIME_FORMAT)
+                        .withZone(zoneId) // for now do everything in UTC
+                        .parse(timeString));
+    }
+
+    private Instant instantFromZone(String timeString) {
+        return  instantFromZone(timeString, ZoneId.of("America/New_York"));
+    }
 
     @Test
     @Transactional
@@ -124,9 +135,9 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
 
         /*create participantUser, enrollee, profile with expected data to assert*/
         Enrollee enrolleeExpected = new Enrollee();
-        enrolleeExpected.setCreatedAt(Instant.parse("2024-05-09T13:38:00Z"));
+        enrolleeExpected.setCreatedAt(instantFromZone("2024-05-09 01:38PM"));
         ParticipantUser userExpected = new ParticipantUser();
-        userExpected.setCreatedAt(Instant.parse("2024-05-09T13:37:00Z"));
+        userExpected.setCreatedAt(instantFromZone("2024-05-09 01:37PM"));
         userExpected.setUsername("userName1");
         Profile profileExpected = new Profile();
         profileExpected.setBirthDate(LocalDate.parse("1980-10-10"));
@@ -135,9 +146,9 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
         verifyParticipant(imports.get(0), studyEnvId, userExpected, enrolleeExpected, profileExpected);
 
         Enrollee enrolleeExpected2 = new Enrollee();
-        enrolleeExpected2.setCreatedAt(Instant.parse("2024-05-11T10:00:00Z"));
+        enrolleeExpected2.setCreatedAt(instantFromZone("2024-05-11 10:00AM"));
         ParticipantUser userExpected2 = new ParticipantUser();
-        userExpected2.setCreatedAt(Instant.parse("2024-05-11T10:00:00Z"));
+        userExpected2.setCreatedAt(instantFromZone("2024-05-11 10:00AM"));
         userExpected2.setUsername("userName2");
         Profile profileExpected2 = new Profile();
         profileExpected2.setContactEmail(userExpected2.getUsername());
@@ -173,10 +184,10 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
         verifyImport(dataImportUpdate, 2);
         /*create participantUser, enrollee, profile with expected data to assert*/
         ParticipantUser userExpected = new ParticipantUser();
-        userExpected.setCreatedAt(Instant.parse("2024-05-09T13:37:00Z"));
+        userExpected.setCreatedAt(instantFromZone("2024-05-09 01:37PM"));
         userExpected.setUsername("userName1");
         Enrollee enrolleeExpected = new Enrollee();
-        enrolleeExpected.setCreatedAt(Instant.parse("2024-05-09T13:38:00Z"));
+        enrolleeExpected.setCreatedAt(instantFromZone("2024-05-09 01:38PM"));
         Profile profileExpected = new Profile();
         profileExpected.setId(enrollee.getProfileId()); //should be same profile
         profileExpected.setBirthDate(LocalDate.parse("1982-10-10"));
@@ -187,9 +198,9 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
         ParticipantUser user2 = participantUserService.find(imports.get(1).getCreatedParticipantUserId()).orElseThrow();
         Enrollee enrollee2 = enrolleeService.findByParticipantUserIdAndStudyEnvId(user2.getId(), studyEnvId).orElseThrow();
         Enrollee enrolleeExpected2 = new Enrollee();
-        enrolleeExpected2.setCreatedAt(Instant.parse("2024-05-11T10:00:00Z"));
+        enrolleeExpected2.setCreatedAt(instantFromZone("2024-05-11 10:00AM"));
         ParticipantUser userExpected2 = new ParticipantUser();
-        userExpected2.setCreatedAt(Instant.parse("2024-05-11T10:00:00Z"));
+        userExpected2.setCreatedAt(instantFromZone("2024-05-11 10:00AM"));
         userExpected2.setUsername("userName2");
         Profile profileExpected2 = new Profile();
         profileExpected2.setId(enrollee2.getProfileId()); //should be same profile
@@ -217,7 +228,7 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
                 .kitType(salivaKit)
                 .status(KitRequestStatus.SENT)
                 .trackingNumber("KITTRACKNUMBER12345")
-                .createdAt(Instant.parse("2024-05-09T10:10:00Z"))
+                .createdAt(instantFromZone("2024-05-09 10:10AM"))
                 .build();
         kitRequestDtoList.add(kitRequestDto);
         verifyKitRequests(dataImport.getImportItems().get(0), kitRequestDtoList);
@@ -239,13 +250,13 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
                 .kitType(salivaKit)
                 .status(KitRequestStatus.SENT)
                 .trackingNumber("KITTRACKNUMBER_1")
-                .createdAt(Instant.parse("2024-05-09T10:10:00Z"))
+                .createdAt(instantFromZone("2024-05-09 10:10AM"))
                 .build();
         KitRequestDto kitRequestDto2 = KitRequestDto.builder()
                 .kitType(salivaKit)
                 .status(KitRequestStatus.RECEIVED)
                 .trackingNumber("KITTRACKNUMBER_2")
-                .createdAt(Instant.parse("2024-05-21T11:10:00Z"))
+                .createdAt(instantFromZone("2024-05-21 11:10AM"))
                 .build();
         kitRequestDtoList.add(kitRequestDto);
         kitRequestDtoList.add(kitRequestDto2);
@@ -284,10 +295,10 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
         Enrollee enrolleeUpd = enrolleeService.findByParticipantUserIdAndStudyEnvId(userUpd.getId(), studyEnvId).orElseThrow();
         /*create participantUser, enrollee, profile with expected data to assert*/
         ParticipantUser userExpected = new ParticipantUser();
-        userExpected.setCreatedAt(Instant.parse("2024-05-09T13:37:00Z"));
+        userExpected.setCreatedAt(instantFromZone("2024-05-09 01:37PM"));
         userExpected.setUsername("userName1");
         Enrollee enrolleeExpected = new Enrollee();
-        enrolleeExpected.setCreatedAt(Instant.parse("2024-05-09T13:38:00Z"));
+        enrolleeExpected.setCreatedAt(instantFromZone("2024-05-09 01:38PM"));
         Profile profileExpected = new Profile();
         profileExpected.setBirthDate(LocalDate.parse("1990-10-10"));
         verifyParticipant(importItem, setupData2.bundle.getStudyEnv().getId(), userExpected, enrolleeExpected, profileExpected);
@@ -789,13 +800,13 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
 
         SurveyResponse response = responses.get(0);
 
-        assertThat(response.getCreatedAt(), equalTo(Instant.parse("2023-08-20T05:17:00Z")));
-        assertThat(response.getLastUpdatedAt(), equalTo(Instant.parse("2023-08-21T05:17:00Z")));
+        assertThat(response.getCreatedAt(), equalTo(instantFromZone("2023-08-20 05:17AM")));
+        assertThat(response.getLastUpdatedAt(), equalTo(instantFromZone("2023-08-21 05:17AM")));
 
         PortalParticipantUser ppUser = portalParticipantUserService.findForEnrollee(enrollee);
 
         ParticipantTask task = participantTaskService.findTaskForActivity(ppUser.getId(), bundle.getStudyEnv().getId(), survey.getStableId()).orElseThrow();
-        assertThat(task.getCompletedAt(), equalTo(Instant.parse("2023-08-22T05:17:00Z")));
+        assertThat(task.getCompletedAt(), equalTo(instantFromZone("2023-08-22 05:17AM")));
 
     }
 

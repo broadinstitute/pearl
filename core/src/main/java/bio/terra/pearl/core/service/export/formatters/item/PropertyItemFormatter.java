@@ -33,7 +33,7 @@ public class PropertyItemFormatter<T> extends ItemFormatter<T> {
         this.propertyClass = getPropertyClass(beanClass, propertyName);
         this.dataType = DATA_TYPE_MAP.getOrDefault(propertyClass, DataValueExportType.STRING);
         this.baseColumnKey = alias;
-        this.zoneId = zoneId;
+        this.zoneId = zoneId == null ? ZoneId.of("America/New_York") : zoneId;
     }
 
     public Class<?> getPropertyClass(Class<?> beanClass, String propertyName) {
