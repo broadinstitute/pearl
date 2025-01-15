@@ -29,10 +29,10 @@ public class ProfileFormatter extends BeanModuleFormatter<Profile> {
     @Override
     protected List<PropertyItemFormatter<Profile>> generateItemFormatters(ExportOptions options) {
         List<PropertyItemFormatter<Profile>> formatters = ExportFormatUtils.getIncludedProperties(Profile.class, PROFILE_EXCLUDED_PROPERTIES)
-                .stream().map(propName -> new PropertyItemFormatter<Profile>(propName, Profile.class))
+                .stream().map(propName -> new PropertyItemFormatter<Profile>(propName, Profile.class, options.getZoneId()))
                 .collect(Collectors.toList());
         formatters.addAll(ExportFormatUtils.getIncludedProperties(MailingAddress.class, MAILING_ADDRESS_EXCLUDED_PROPERTIES)
-                .stream().map(propName -> new PropertyItemFormatter<Profile>("mailingAddress." + propName, Profile.class))
+                .stream().map(propName -> new PropertyItemFormatter<Profile>("mailingAddress." + propName, Profile.class, options.getZoneId()))
                 .toList());
         return formatters;
     }

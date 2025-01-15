@@ -10,6 +10,7 @@ import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.model.participant.*;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
+import bio.terra.pearl.core.model.study.StudyEnvironmentConfig;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyResponse;
 import bio.terra.pearl.core.model.workflow.HubResponse;
@@ -24,6 +25,7 @@ import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.participant.*;
 import bio.terra.pearl.core.service.portal.PortalService;
+import bio.terra.pearl.core.service.study.StudyEnvironmentConfigService;
 import bio.terra.pearl.core.service.survey.AnswerProcessingService;
 import bio.terra.pearl.core.service.survey.SurveyResponseService;
 import bio.terra.pearl.core.service.survey.SurveyService;
@@ -50,6 +52,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -92,6 +95,7 @@ public class EnrolleeImportService {
     private final ImportService importService;
     private final ImportItemService importItemService;
     private final KitRequestService kitRequestService;
+    private final StudyEnvironmentConfigService studyEnvironmentConfigService;
     private final char CSV_DELIMITER = ',';
     private final char TSV_DELIMITER = '\t';
 
@@ -99,9 +103,9 @@ public class EnrolleeImportService {
                                  ProfileService profileService, EnrolleeExportService enrolleeExportService,
                                  SurveyResponseService surveyResponseService, ParticipantTaskService participantTaskService, PortalService portalService,
                                  ImportService importService, ImportItemService importItemService, SurveyTaskDispatcher surveyTaskDispatcher,
-                                EnrolleeRelationService enrolleeRelationService,
+                                 EnrolleeRelationService enrolleeRelationService,
                                  TimeShiftDao timeShiftDao, EnrolleeService enrolleeService, ParticipantUserService participantUserService,
-                                 PortalParticipantUserService portalParticipantUserService, KitRequestService kitRequestService, SurveyService surveyService, AnswerProcessingService answerProcessingService, AnswerMappingDao answerMappingDao) {
+                                 PortalParticipantUserService portalParticipantUserService, KitRequestService kitRequestService, SurveyService surveyService, AnswerProcessingService answerProcessingService, AnswerMappingDao answerMappingDao, StudyEnvironmentConfigService studyEnvironmentConfigService) {
         this.registrationService = registrationService;
         this.enrollmentService = enrollmentService;
         this.profileService = profileService;
@@ -121,6 +125,7 @@ public class EnrolleeImportService {
         this.surveyService = surveyService;
         this.answerProcessingService = answerProcessingService;
         this.answerMappingDao = answerMappingDao;
+        this.studyEnvironmentConfigService = studyEnvironmentConfigService;
     }
 
     @Transactional
@@ -145,6 +150,8 @@ public class EnrolleeImportService {
         if (ImportFileFormat.CSV.equals(fileFormat)) {
             exportOptions = IMPORT_OPTIONS_CSV;
         }
+        StudyEnvironmentConfig studyEnvConfig = studyEnvironmentConfigService.findByStudyEnvironmentId(studyEnv.getId());
+        exportOptions.setTimeZone(studyEnvConfig.getTimeZone());
         List<Map<String, String>> enrolleeMaps = generateImportMaps(in, fileFormat);
         List<AccountImportData> accountData = groupImportMapsByAccount(enrolleeMaps);
 
@@ -556,14 +563,14 @@ public class EnrolleeImportService {
                 "Imported", ppUser, enrollee, relatedTask.getId(), portalId).getResponse();
 
 
-        shiftTime(surveyResponse, relatedTask, formatter, enrolleeMap);
+        shiftTime(surveyResponse, relatedTask, formatter, enrolleeMap, exportOptions.getZoneId());
 
         return surveyResponse;
     }
 
     // preserving response creation and task creation/completion
     // is important for recurring surveys
-    private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap) {
+    private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap, ZoneId zoneId) {
         // make sure the task reflects created and completion status
         // so that recurrences are properly scheduled
         String completedAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "completedAt";
@@ -571,16 +578,16 @@ public class EnrolleeImportService {
         String lastUpdatedAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "lastUpdatedAt";
 
         if (enrolleeMap.containsKey(completedAtKey)) {
-            Instant completedAt = ExportFormatUtils.importInstant(enrolleeMap.get(completedAtKey));
+            Instant completedAt = ExportFormatUtils.importInstant(enrolleeMap.get(completedAtKey), zoneId);
             timeShiftDao.changeTaskCompleteTime(relatedTask.getId(), completedAt);
         }
         if (enrolleeMap.containsKey(createdAtKey)) {
-            Instant createdAt = ExportFormatUtils.importInstant(enrolleeMap.get(createdAtKey));
+            Instant createdAt = ExportFormatUtils.importInstant(enrolleeMap.get(createdAtKey), zoneId);
             timeShiftDao.changeTasksCreationTime(List.of(relatedTask.getId()), createdAt);
             timeShiftDao.changeSurveyResponseCreationTime(surveyResponse.getId(), createdAt);
         }
         if (enrolleeMap.containsKey(lastUpdatedAtKey)) {
-            Instant lastUpdatedAt = ExportFormatUtils.importInstant(enrolleeMap.get(lastUpdatedAtKey));
+            Instant lastUpdatedAt = ExportFormatUtils.importInstant(enrolleeMap.get(lastUpdatedAtKey), zoneId);
 
             timeShiftDao.changeSurveyResponseLastUpdatedTime(surveyResponse.getId(), lastUpdatedAt);
         }

@@ -26,10 +26,10 @@ public class KitRequestFormatter extends BeanListModuleFormatter<KitRequestDto> 
     @Override
     protected List<PropertyItemFormatter<KitRequestDto>> generateItemFormatters(ExportOptions options) {
         itemFormatters = KIT_REQUEST_INCLUDED_PROPERTIES.stream()
-                .map(propName -> new PropertyItemFormatter<>(propName, KitRequestDto.class))
+                .map(propName -> new PropertyItemFormatter<>(propName, KitRequestDto.class, options.getZoneId()))
                 .collect(Collectors.toList());
         // we have to handle kitType separately because we'll need to match it to the kitType name
-        itemFormatters.add(new KitTypeFormatter());
+        itemFormatters.add(new KitTypeFormatter(options.getZoneId()));
         return itemFormatters;
     }
 

@@ -11,6 +11,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.time.ZoneId;
 import java.util.Arrays;
 
 import static bio.terra.pearl.core.service.export.formatters.ExportFormatUtils.DATA_TYPE_MAP;
@@ -23,18 +24,16 @@ public class PropertyItemFormatter<T> extends ItemFormatter<T> {
     @Getter
     private Class<?> propertyClass;
 
-    public PropertyItemFormatter(String propertyName, Class<T> beanClass) {
-        this.propertyName = propertyName;
-        this.propertyClass = getPropertyClass(beanClass, propertyName);
-        this.dataType = DATA_TYPE_MAP.getOrDefault(propertyClass, DataValueExportType.STRING);
-        this.baseColumnKey = propertyName;
+    public PropertyItemFormatter(String propertyName, Class<T> beanClass, ZoneId zoneId) {
+        this(propertyName, beanClass, propertyName, zoneId);
     }
 
-    public PropertyItemFormatter(String propertyName, Class<T> beanClass, String alias) {
+    public PropertyItemFormatter(String propertyName, Class<T> beanClass, String alias, ZoneId zoneId) {
         this.propertyName = propertyName;
         this.propertyClass = getPropertyClass(beanClass, propertyName);
         this.dataType = DATA_TYPE_MAP.getOrDefault(propertyClass, DataValueExportType.STRING);
         this.baseColumnKey = alias;
+        this.zoneId = zoneId;
     }
 
     public Class<?> getPropertyClass(Class<?> beanClass, String propertyName) {
@@ -76,7 +75,7 @@ public class PropertyItemFormatter<T> extends ItemFormatter<T> {
      * the metadata will include information on the actual data type
      */
     public String getExportString(T bean) {
-        return ExportFormatUtils.formatForExport(getRawExportValue(bean));
+        return ExportFormatUtils.formatForExport(getRawExportValue(bean), zoneId);
     }
 
 
@@ -87,7 +86,7 @@ public class PropertyItemFormatter<T> extends ItemFormatter<T> {
          * the application default
          */
         if (exportString != null) {
-            Object value = ExportFormatUtils.getValueFromString(exportString, dataType);
+            Object value = ExportFormatUtils.getValueFromString(exportString, dataType, zoneId);
             try {
                 PropertyUtils.setNestedProperty(bean, getPropertyName(), value);
             } catch (NestedNullException e) {

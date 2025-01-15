@@ -20,7 +20,7 @@ public class StudyFormatter extends BeanModuleFormatter<Study> {
 
     @Override
     protected List<PropertyItemFormatter<Study>> generateItemFormatters(ExportOptions options) {
-        return INCLUDED_PROPERTIES.stream().map(propName -> new PropertyItemFormatter<>(propName, Study.class))
+        return INCLUDED_PROPERTIES.stream().map(propName -> new PropertyItemFormatter<>(propName, Study.class, options.getZoneId()))
                 .collect(Collectors.toList());
     }
 

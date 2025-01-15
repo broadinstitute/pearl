@@ -6,10 +6,12 @@ import bio.terra.pearl.core.service.kit.KitRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.PropertyUtils;
 
+import java.time.ZoneId;
+
 @Slf4j
 public class KitTypeFormatter extends PropertyItemFormatter<KitRequestDto> {
-    public KitTypeFormatter() {
-        super("kitType", KitRequestDto.class);
+    public KitTypeFormatter(ZoneId zoneId) {
+        super("kitType", KitRequestDto.class, zoneId);
         this.baseColumnKey = "kitType";
         this.dataType = DataValueExportType.STRING;
     }

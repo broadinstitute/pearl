@@ -56,7 +56,8 @@ export const mockStudyEnv = (): StudyEnvironment => {
       password: 'password',
       useDevDsmRealm: true,
       useStubDsm: true,
-      enableInPersonKits: true
+      enableInPersonKits: true,
+      timeZone: 'America/New_York'
     },
     configuredSurveys: [],
     triggers: []

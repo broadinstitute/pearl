@@ -122,6 +122,7 @@ public class PopulateOurhealthTest extends BasePopulatePortalsTest {
                 .onlyIncludeMostRecent(true)
                 .fileFormat(ExportFileFormat.TSV)
                 .rowLimit(null)
+                .timeZone("America/New_York")
                 .build();
         List<EnrolleeExportData> enrolleeExportData = enrolleeExportService.loadEnrolleeExportData(sandboxEnvironmentId, options);
         List<ModuleFormatter> moduleInfos = enrolleeExportService.generateModuleInfos(options, sandboxEnvironmentId, enrolleeExportData);

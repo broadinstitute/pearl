@@ -8,6 +8,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ public class ParticipantUserFormatterTests {
         ParticipantUserFormatter moduleFormatter = new ParticipantUserFormatter(new ExportOptions());
         ParticipantUser user = moduleFormatter.fromStringMap(UUID.randomUUID(), valueMap);
         assertThat(user.getUsername(), equalTo(valueMap.get("account.username")));
-        assertThat(ExportFormatUtils.formatInstant(user.getCreatedAt()),
+    assertThat(ExportFormatUtils.formatInstant(user.getCreatedAt(), ZoneId.of("UTC")),
                 equalTo(valueMap.get("account.createdAt")));
     }
 }

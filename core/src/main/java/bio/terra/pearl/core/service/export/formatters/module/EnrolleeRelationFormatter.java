@@ -20,7 +20,7 @@ public class EnrolleeRelationFormatter extends BeanListModuleFormatter<EnrolleeR
     @Override
     protected List<PropertyItemFormatter<EnrolleeRelation>> generateItemFormatters(ExportOptions options) {
         return INCLUDED_PROPERTIES.stream()
-                .map(propName -> new PropertyItemFormatter<>(propName, EnrolleeRelation.class))
+                .map(propName -> new PropertyItemFormatter<>(propName, EnrolleeRelation.class, options.getZoneId()))
                 .collect(Collectors.toList());
     }
 

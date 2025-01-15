@@ -10,6 +10,9 @@ import {
   userHasPermission,
   useUser
 } from 'user/UserProvider'
+import { useNonNullReactSingleSelect } from '../../../util/react-select-utils'
+import Select from 'react-select'
+
 
 export const StudyEnrollmentSettings = (
   {
@@ -22,6 +25,19 @@ export const StudyEnrollmentSettings = (
     updateConfig: (key: keyof StudyEnvironmentConfig, value: unknown) => void
   }) => {
   const { user } = useUser()
+
+  // @ts-ignore
+  const {
+    onChange: onTimeZoneChange,
+    options: timeZoneOptions,
+    selectedOption: selectedTimeZone,
+    selectInputId: timeZoneSelectId
+  } = useNonNullReactSingleSelect<string>(
+    // Intl won't be recognized by TypeScript until we upgrade to 5.1+, so do some funky casting for now
+    (Intl as unknown as {supportedValuesOf: (key: string) => string[]}).supportedValuesOf('timeZone'),
+    timeZone => ({ label: timeZone, value: timeZone }),
+    (opt: string) => updateConfig('timeZone', opt),
+    config.timeZone)
 
   return <div>
     <p>Configure whether participants can access study content, such as surveys and consents.</p>
@@ -59,7 +75,6 @@ export const StudyEnrollmentSettings = (
           onChange={e => updateConfig('acceptingProxyEnrollment', e.target.checked)}/>
       </label>
     </div>
-
     {
       userHasPermission(user, studyEnvContext.portal.id, 'prototype') && (
         <div>
@@ -71,5 +86,17 @@ export const StudyEnrollmentSettings = (
         </div>
       )
     }
+    <div>
+      <label className="form-label" htmlFor={timeZoneSelectId}>
+        Study staff time zone <InfoPopup content={
+          <span>
+            The &quot;home&quot; time zone for the study.
+          This only determines times used in data exported from the portal.
+            Participants and staff users see things in their own time zone when using the website.
+          </span>}/>
+      </label>
+      <Select options={timeZoneOptions} onChange={onTimeZoneChange}
+        value={selectedTimeZone} inputId={timeZoneSelectId}/>
+    </div>
   </div>
 }
