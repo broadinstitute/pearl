@@ -375,6 +375,9 @@ databaseChangeLog:
       file: changesets/2025_01_08_kit_trigger_filters.yaml
       relativeToChangelogFile: true
   - include:
+      file: changesets/2025_01_09_attach_language_text_to_local_site_content.yaml
+      relativeToChangelogFile: true
+  - include:
       file: changesets/2025_01_14_survey_response_metadata.yaml
       relativeToChangelogFile: true
 

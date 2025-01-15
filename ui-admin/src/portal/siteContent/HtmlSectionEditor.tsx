@@ -1,11 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, {
+  useEffect,
+  useState
+} from 'react'
 import {
   HtmlSection,
   SectionType
 } from '@juniper/ui-core'
 import Select from 'react-select'
 import { IconButton } from 'components/forms/Button'
-import { faChevronDown, faChevronUp, faCode, faTimes } from '@fortawesome/free-solid-svg-icons'
+import {
+  faChevronDown,
+  faChevronUp,
+  faCode,
+  faTimes
+} from '@fortawesome/free-solid-svg-icons'
 import { sectionTemplates } from './sectionTemplates'
 import classNames from 'classnames'
 import { SiteMediaMetadata } from 'api/api'

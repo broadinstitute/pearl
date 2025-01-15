@@ -1,6 +1,7 @@
 package bio.terra.pearl.core.service.site;
 
 import bio.terra.pearl.core.dao.site.SiteContentDao;
+import bio.terra.pearl.core.model.i18n.LanguageText;
 import bio.terra.pearl.core.model.portal.PortalEnvironment;
 import bio.terra.pearl.core.model.publishing.PortalEnvironmentChange;
 import bio.terra.pearl.core.model.publishing.VersionedEntityChange;
@@ -87,6 +88,7 @@ public class SiteContentService extends VersionedEntityService<SiteContent, Site
         lsc.cleanForCopying();
         lsc.getNavbarItems().stream().forEach(navbarItem -> cleanForCopying(navbarItem));
         lsc.getPages().stream().forEach(page -> cleanForCopying(page));
+        lsc.getLanguageTextOverrides().stream().forEach(languageText -> cleanForCopying(languageText));
         cleanForCopying(lsc.getFooterSection());
         lsc.setFooterSectionId(null);
         cleanForCopying(lsc.getLandingPage());
@@ -115,6 +117,11 @@ public class SiteContentService extends VersionedEntityService<SiteContent, Site
             section.cleanForCopying();
             section.setHtmlPageId(null);
         }
+    }
+
+    protected void cleanForCopying(LanguageText languageText) {
+        languageText.cleanForCopying();
+        languageText.setLocalizedSiteContentId(null);
     }
 
     public List<SiteContent> findActiveContentByPortalId(UUID portalId) {

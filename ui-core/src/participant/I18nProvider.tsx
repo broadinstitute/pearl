@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState
+} from 'react'
 import { useApiContext } from './ApiProvider'
 import { SUPPORT_EMAIL_ADDRESS } from '../util/supportUtils'
+import { EnvironmentName } from 'src/types/study'
 
 export const I18nContext = createContext<I18nContextT | null>(null)
 
@@ -38,8 +44,8 @@ const SELECTED_LANGUAGE_KEY = 'selectedLanguage'
 /**
  * Provider for the current users i18n context.
  */
-export function I18nProvider({ defaultLanguage, portalShortcode, children }: {
-  defaultLanguage: string, portalShortcode?: string, children: React.ReactNode
+export function I18nProvider({ defaultLanguage, portalShortcode, environmentName, children }: {
+  defaultLanguage: string, portalShortcode?: string, environmentName: EnvironmentName, children: React.ReactNode
 }) {
   const Api = useApiContext()
   const [isLoading, setIsLoading] = useState(true)
@@ -59,7 +65,7 @@ export function I18nProvider({ defaultLanguage, portalShortcode, children }: {
 
   const reloadLanguageTexts = (selectedLanguage: string) => {
     setIsLoading(true)
-    Api.getLanguageTexts(selectedLanguage, portalShortcode).then(result => {
+    Api.getLanguageTexts(selectedLanguage, portalShortcode, environmentName).then(result => {
       setLanguageTexts(result)
       setIsError(false)
       setIsLoading(false)
@@ -89,8 +95,8 @@ export function I18nProvider({ defaultLanguage, portalShortcode, children }: {
     </div>}
     {isError && <div className="bg-white h-100 w-100">
       <div className="position-absolute top-50 start-50 translate-middle text-center">
-        There is no Juniper site configured for this url.<br/>
-        If this is an error, contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>.
+            There is no Juniper site configured for this url.<br/>
+            If this is an error, contact <a href={`mailto:${SUPPORT_EMAIL_ADDRESS}`}>{SUPPORT_EMAIL_ADDRESS}</a>.
       </div>
     </div>}
     {!isLoading && !isError && <I18nContext.Provider value={{ languageTexts, i18n, selectedLanguage, changeLanguage }}>

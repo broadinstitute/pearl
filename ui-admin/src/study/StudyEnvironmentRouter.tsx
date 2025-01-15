@@ -39,9 +39,11 @@ import SiteMediaList from '../portal/media/SiteMediaList'
 import PreRegView from './surveys/PreRegView'
 import {
   ApiProvider,
+  ENVIRONMENT_NAMES,
+  EnvironmentName,
   I18nProvider,
-  StudyEnvParams,
-  OptionalStudyEnvParams, ENVIRONMENT_NAMES, EnvironmentName
+  OptionalStudyEnvParams,
+  StudyEnvParams
 } from '@juniper/ui-core'
 import DashboardSettings from 'dashboard/DashboardSettings'
 import { previewApi } from 'util/apiContextUtils'
@@ -56,7 +58,10 @@ import LoadedSettingsView from './settings/SettingsView'
 import { ENVIRONMENT_ICON_MAP } from 'util/publishUtils'
 import SiteContentLoader from '../portal/siteContent/SiteContentLoader'
 import PortalDashboard from '../portal/dashboard/PortalDashboard'
-import { mailingListPath, PortalEnvContext } from '../portal/PortalRouter'
+import {
+  mailingListPath,
+  PortalEnvContext
+} from '../portal/PortalRouter'
 import { PortalAdminUserRouter } from '../user/AdminUserRouter'
 
 export type StudyEnvContextT = { study: Study, currentEnv: StudyEnvironment, currentEnvPath: string, portal: Portal }
@@ -115,7 +120,8 @@ function StudyEnvironmentRouter({ study }: { study: Study }) {
       />
     </NavBreadcrumb>
     <ApiProvider api={previewApi(portal.shortcode, currentEnv.environmentName)}>
-      <I18nProvider defaultLanguage={'en'} portalShortcode={portal.shortcode}>
+      <I18nProvider defaultLanguage={'en'} portalShortcode={portal.shortcode}
+        environmentName={portalEnv.environmentName as EnvironmentName}>
         <Routes>
           <Route path="portalDashboard" element={<PortalDashboard portal={portalContext.portal}/>}/>
           <Route path="users/*" element={<PortalAdminUserRouter portal={portal} studyEnvParams={studyEnvParams}/>}/>

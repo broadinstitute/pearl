@@ -29,4 +29,8 @@ public class SiteContentFactory {
     public SiteContent buildPersisted(String testName) {
         return siteContentService.create(builderWithDependencies(testName).build());
     }
+
+    public SiteContent buildPersisted(SiteContent.SiteContentBuilder builder) {
+        return siteContentService.create(builder.build());
+    }
 }

@@ -92,6 +92,7 @@ paths:
       parameters:
         - { name: language, in: query, required: true, schema: { type: string } }
         - { name: portalShortcode, in: query, required: false, schema: { type: string } }
+        - { name: environmentName, in: query, required: false, schema: { type: string } }
       responses:
         '200':
           description: OK

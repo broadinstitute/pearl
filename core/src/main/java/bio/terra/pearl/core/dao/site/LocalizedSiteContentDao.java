@@ -51,4 +51,18 @@ public class LocalizedSiteContentDao  extends BaseJdbiDao<LocalizedSiteContent> 
                         .execute()
         );
     }
+
+    public List<LocalizedSiteContent> findByPortalId(UUID portalId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                SELECT lsc.*
+                                FROM localized_site_content lsc
+                                INNER JOIN site_content sc ON lsc.site_content_id = sc.id
+                                WHERE sc.portal_id = :portalId
+                                """)
+                        .bind("portalId", portalId)
+                        .mapTo(clazz)
+                        .list()
+        );
+    }
 }

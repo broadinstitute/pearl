@@ -1,8 +1,12 @@
-import React, { useContext, useEffect } from 'react'
+import React, {
+  useContext,
+  useEffect
+} from 'react'
 import {
   Link,
   Route,
-  Routes, useNavigate,
+  Routes,
+  useNavigate,
   useParams
 } from 'react-router-dom'
 import StudyRouter, { studyShortcodeFromPath } from '../study/StudyRouter'
@@ -17,6 +21,7 @@ import PortalEnvView from './PortalEnvView'
 import PortalParticipantsView from './PortalParticipantView'
 import {
   ApiProvider,
+  EnvironmentName,
   I18nProvider,
   Portal,
   PortalEnvironment
@@ -26,7 +31,10 @@ import { NavBreadcrumb } from 'navbar/AdminNavbar'
 import Select from 'react-select'
 import { portalEnvPath } from 'study/StudyEnvironmentRouter'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronRight, faHome } from '@fortawesome/free-solid-svg-icons'
+import {
+  faChevronRight,
+  faHome
+} from '@fortawesome/free-solid-svg-icons'
 import SiteMediaList from './media/SiteMediaList'
 import { previewApi } from 'util/apiContextUtils'
 import { ENVIRONMENT_ICON_MAP } from '../util/publishUtils'
@@ -141,7 +149,10 @@ function PortalEnvRouter({ portalContext }: {portalContext: LoadedPortalContextT
       />
     </NavBreadcrumb>
     <ApiProvider api={previewApi(portal.shortcode, portalEnv.environmentName)}>
-      <I18nProvider defaultLanguage={'en'} portalShortcode={portal.shortcode}>
+      <I18nProvider
+        defaultLanguage={'en'}
+        portalShortcode={portal.shortcode}
+        environmentName={portalEnv.environmentName as EnvironmentName}>
         <Routes>
           <Route path="participants" element={<PortalParticipantsView portalEnv={portalEnv} portal={portal}/>}/>
           <Route path="siteContent" element={<SiteContentLoader portalEnvContext={portalEnvContext}/>}/>
