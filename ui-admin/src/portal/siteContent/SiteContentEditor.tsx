@@ -388,6 +388,24 @@ const SiteContentEditor = (props: InitializedSiteContentViewProps) => {
               </ErrorBoundary>
             </Tab>
             <Tab
+              eventKey={'systemTextOverride'}
+              title={'Text Overrides'}
+              disabled={hasInvalidSection}
+            >
+              <ErrorBoundary>
+                <LanguageTextOverridesEditor
+                  initialLanguageTextOverrides={localContent.languageTextOverrides}
+                  onChange={overrides => {
+                    const updatedLocalContent = {
+                      ...localContent,
+                      languageTextOverrides: overrides
+                    }
+                    updateLocalContent(updatedLocalContent)
+                  }}
+                />
+              </ErrorBoundary>
+            </Tab>
+            <Tab
               eventKey="preview"
               title="Preview"
               disabled={hasInvalidSection}
@@ -404,24 +422,6 @@ const SiteContentEditor = (props: InitializedSiteContentViewProps) => {
                   }
                   <SiteFooter footerSection={localContent.footerSection}/>
                 </ApiProvider>
-              </ErrorBoundary>
-            </Tab>
-            <Tab
-              eventKey={'systemTextOverride'}
-              title={'System Text Overrides'}
-              disabled={hasInvalidSection}
-            >
-              <ErrorBoundary>
-                <LanguageTextOverridesEditor
-                  initialLanguageTextOverrides={localContent.languageTextOverrides}
-                  onChange={overrides => {
-                    const updatedLocalContent = {
-                      ...localContent,
-                      languageTextOverrides: overrides
-                    }
-                    updateLocalContent(updatedLocalContent)
-                  }}
-                />
               </ErrorBoundary>
             </Tab>
           </Tabs> }
