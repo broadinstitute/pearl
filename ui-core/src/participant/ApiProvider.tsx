@@ -1,14 +1,24 @@
-import React, { createContext, useContext } from 'react'
-import { StudyEnvParams } from 'src/types/study'
+import React, {
+  createContext,
+  useContext
+} from 'react'
+import {
+  EnvironmentName,
+  StudyEnvParams
+} from 'src/types/study'
 import { HubResponse } from 'src/types/user'
-import { AddressValidationResult, MailingAddress } from 'src/types/address'
+import {
+  AddressValidationResult,
+  MailingAddress
+} from 'src/types/address'
 import { SurveyResponseWithJustification } from 'src/types/forms'
 import { SystemSettings } from 'src/types/maintenance'
 
 export type ImageUrlFunc = (cleanFileName: string, version: number) => string
 export type SubmitMailingListContactFunc = (name: string, email: string) => Promise<object>
-export type GetLanguageTextsFunc = (selectedLanguage: string, portalShortcode?: string) =>
-    Promise<Record<string, string>>
+export type GetLanguageTextsFunc = (selectedLanguage: string,
+                                    portalShortcode?: string,
+                                    environmentName?: EnvironmentName) => Promise<Record<string, string>>
 export type UpdateSurveyResponseFunc = ({
   studyEnvParams, stableId, version, enrolleeShortcode, response, taskId,
   alertErrors

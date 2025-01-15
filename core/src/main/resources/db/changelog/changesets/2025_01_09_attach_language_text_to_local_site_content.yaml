@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: "attach_language_text_to_local_site_content"
+      author: connorlbark
+      changes:
+        - addColumn:
+            tableName: language_text
+            columns:
+              - column:
+                  name: localized_site_content_id
+                  type: uuid
+                  constraints:
+                    nullable: true
+                    references: localized_site_content(id)
+                    foreignKeyName: fk_language_text_local_site_content_id

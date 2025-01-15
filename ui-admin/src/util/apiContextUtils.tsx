@@ -1,4 +1,8 @@
-import { ApiContextT, MailingAddress } from '@juniper/ui-core'
+import {
+  ApiContextT,
+  EnvironmentName,
+  MailingAddress
+} from '@juniper/ui-core'
 import Api from '../api/api'
 
 /** uses the admin image retrieval endpoint */
@@ -17,7 +21,7 @@ export const previewApi = (portalShortcode: string, portalEnvName: string): ApiC
     getImageUrl,
     submitMailingListContact: () => Promise.resolve({}),
     getLanguageTexts: (selectedLanguage: string) => {
-      return Api.getLanguageTexts(selectedLanguage, portalShortcode)
+      return Api.getLanguageTexts(selectedLanguage, portalShortcode, portalEnvName as EnvironmentName)
     },
     updateSurveyResponse: ({ studyEnvParams, stableId, version, enrolleeShortcode, response, taskId }) => {
       return Api.updateSurveyResponse({
