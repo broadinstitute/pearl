@@ -65,9 +65,7 @@ public class LocalizedSiteContentService extends ImmutableEntityService<Localize
             savedSite.getNavbarItems().add(savedItem);
         }
 
-        for (int i = 0; i < localSite.getLanguageTextOverrides().size(); i++) {
-            LanguageText languageText = localSite.getLanguageTextOverrides().get(i);
-
+        for (LanguageText languageText : localSite.getLanguageTextOverrides()) {
             languageText.setLocalizedSiteContentId(savedSite.getId());
             languageText.setLanguage(savedSite.getLanguage());
 

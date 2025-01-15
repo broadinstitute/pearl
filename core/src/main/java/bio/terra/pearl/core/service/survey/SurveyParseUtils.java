@@ -1,7 +1,6 @@
 package bio.terra.pearl.core.service.survey;
 
 import bio.terra.pearl.core.model.i18n.LanguageText;
-import bio.terra.pearl.core.model.site.LocalizedSiteContent;
 import bio.terra.pearl.core.model.survey.QuestionChoice;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyQuestionDefinition;
