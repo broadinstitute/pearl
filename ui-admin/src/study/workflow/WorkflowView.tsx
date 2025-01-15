@@ -76,7 +76,7 @@ export default function WorkflowView({ studyEnvContext, portalContext }:
   </Link>
 
   return <div className="container-fluid px-4 py-2">
-    { renderPageHeader('Participant flow') }
+    { renderPageHeader('Participant Flow') }
     <ul className="list-unstyled">
       {isLoading && <LoadingSpinner/>}
 

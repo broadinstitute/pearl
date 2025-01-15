@@ -83,7 +83,7 @@ export default function CreateTriggerModal({ studyEnvContext, onDismiss, onCreat
 
   return <Modal show={true} className="modal-lg" onHide={onDismiss}>
     <Modal.Header closeButton>
-      <Modal.Title>Create Trigger</Modal.Title>
+      <Modal.Title>Create Automation</Modal.Title>
     </Modal.Header>
     <Modal.Body>
       <form className="bg-white p-3 my-2">
