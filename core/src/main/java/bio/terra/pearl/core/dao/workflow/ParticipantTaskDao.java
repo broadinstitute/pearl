@@ -98,9 +98,9 @@ public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> impl
                                 where portal_participant_user_id = :ppUserId
                                 and target_stable_id = :activityStableId
                                 and study_environment_id = :studyEnvironmentId
-                                and ABS(EXTRACT(EPOCH FROM completed_at) - EXTRACT(EPOCH FROM :completedAt::timestamp)) < 43200
+                                and %s
                                 limit 1
-                                """.formatted(tableName)
+                                """.formatted(tableName, approximateDateMatchQueryStr("completed_at", ":completedAt::timestamp", "43200"))
                         )
                         .bind("ppUserId", ppUserId)
                         .bind("activityStableId", activityStableId)
