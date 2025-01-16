@@ -4,7 +4,6 @@ import {
   MailingAddress, ParticipantFile, StudyEnvParams
 } from '@juniper/ui-core'
 import Api from '../api/api'
-import { Response } from 'mixpanel-browser'
 
 /** uses the admin image retrieval endpoint */
 const createGetImageUrl = (portalShortcode: string, portalEnvName: string) => {

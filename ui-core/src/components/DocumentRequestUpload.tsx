@@ -80,7 +80,7 @@ export const DocumentRequestUpload = (
         <DragAndDrop uploadNewFile={uploadAndSelectFile}/>
       </div>
       {/* show on mobile */}
-      <div className={'d-lg-none'}>
+      <div className={'d-lg-none my-4'}>
         <FileUpload uploadNewFile={uploadAndSelectFile}/>
       </div>
 
@@ -108,12 +108,14 @@ const SelectedFiles = (
     }
 ) => {
   return <div className='card'>
+    <p className='card-header p-3'>Selected documents ({selectedFiles.length})</p>
     <div className='card-body'>
-      <p className='card-title mb-2'>Selected documents ({selectedFiles.length})</p>
       {selectedFiles.length > 0 && <div className="fst-italic text-muted text-wrap pb-2">
         These documents are included in your response:
       </div>}
-      {selectedFiles.length === 0 && <div className='fst-italic text-muted mt-3'>No documents selected</div>}
+      {selectedFiles.length === 0 && <div className='fst-italic text-wrap text-muted my-2'>
+          No documents selected. Please upload a new document or select an existing document below.
+      </div>}
       {selectedFiles.map(selectedFile => {
         return <FileRow
           fileType={selectedFile.fileType}
@@ -156,23 +158,22 @@ const Library = (
   const unselectedFiles = files.filter(f => !isSelected(f))
 
   return <div className='card'>
-    <div className='card-body'>
-      <p className='card-title mb-2'>
-            Available documents <span>({unselectedFiles.length})</span>
-        <button className='btn btn-link p-0 ps-2' onClick={() => setExpanded(!expanded)}>
-          <FontAwesomeIcon icon={expanded ? faCaretUp : faCaretDown}/>
-        </button>
-      </p>
-
+    <p className='card-header p-3'>
+          Available documents <span>({unselectedFiles.length})</span>
+      <button className='btn btn-link p-0 ps-2' onClick={() => setExpanded(!expanded)}>
+        <FontAwesomeIcon icon={expanded ? faCaretUp : faCaretDown}/>
+      </button>
+    </p>
+    {expanded && <div className='card-body'>
       {uploadingFile && <FileRow
         fileType={''}
         fileName={uploadingFile}
         isUploading={true}
         isSelected={false}
       />}
-      {expanded && <>
+      <>
         {unselectedFiles.length > 0 && <div className="fst-italic text-muted text-wrap pb-2">
-          These documents are not included in your response:
+                  These documents are not included in your response:
         </div>}
         {unselectedFiles.length === 0 && <div className='fst-italic text-muted'>No documents available</div>}
         {unselectedFiles.map(file => {
@@ -189,8 +190,8 @@ const Library = (
             }}
             key={file.id}
           />
-        })}</>}
-    </div>
+        })}</>
+    </div>}
 
   </div>
 }
