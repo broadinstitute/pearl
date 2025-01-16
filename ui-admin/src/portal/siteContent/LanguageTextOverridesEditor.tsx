@@ -48,7 +48,7 @@ const isEditable = (row: LanguageTextRow): row is EditableLanguageText => {
 }
 
 /**
- * Table which allows viewing, deleting, and creating new answer mappings.
+ * Table which allows viewing, deleting, and creating text overrides.
  */
 export default function LanguageTextOverridesEditor(
   {
