@@ -1,7 +1,6 @@
 import React, {
   useEffect,
   useMemo,
-  useRef,
   useState
 } from 'react'
 import {
@@ -11,7 +10,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
+  EnvironmentName,
   LanguageText,
+  LocalSiteContent,
   useI18n
 } from '@juniper/ui-core'
 import {
@@ -34,6 +35,10 @@ import { basicTableLayout } from '../../util/tableUtils'
 import { faTrashCan } from '@fortawesome/free-solid-svg-icons/faTrashCan'
 import { TextInput } from 'components/forms/TextInput'
 import Select from 'react-select'
+import Api from 'api/api'
+import { useLoadingEffect } from 'api/api-utils'
+import LoadingSpinner from 'util/LoadingSpinner'
+import { PortalEnvContext } from 'portal/PortalRouter'
 
 
 type EditableLanguageText = Partial<LanguageText> & { isEditing: boolean }
@@ -47,28 +52,53 @@ const isEditable = (row: LanguageTextRow): row is EditableLanguageText => {
  */
 export default function LanguageTextOverridesEditor(
   {
-    initialLanguageTextOverrides, onChange
+    portalEnvContext,
+    localContent,
+    selectedLanguage,
+    onChange
   } : {
-    initialLanguageTextOverrides: LanguageText[], onChange: (newLanguageTexts: LanguageText[]) => void
+    portalEnvContext: PortalEnvContext,
+    localContent: LocalSiteContent,
+    selectedLanguage: string,
+    onChange: (newLanguageTexts: LanguageText[]) => void
   }
 ) {
-  const {
-    languageTexts,
-    selectedLanguage
-  } = useI18n()
+  const [languageTexts, setLanguageTexts] = useState<Record<string, string>>({})
 
-  const languageKeys = Object.keys(languageTexts)
+  const languageKeys = Object.keys(languageTexts).sort()
 
-  const [languageTextOverrides, setLanguageTextOverrides] = useState<LanguageText[]>(initialLanguageTextOverrides || [])
+  const [languageTextOverrides, setLanguageTextOverrides] = useState<LanguageText[]>(
+    localContent.languageTextOverrides || []
+  )
+
+  const { isLoading } = useLoadingEffect(async () => {
+    const texts = await Api.getLanguageTexts(
+      selectedLanguage,
+      portalEnvContext.portal.shortcode,
+      portalEnvContext.portalEnv.environmentName as EnvironmentName)
+
+    setLanguageTexts(texts)
+    setNewOverride({ isEditing: false })
+  }, [selectedLanguage])
+
+  useEffect(() => {
+    setLanguageTextOverrides(localContent.languageTextOverrides || [])
+  }, [localContent.languageTextOverrides])
 
   const [overrideSelectedForDeletion, setOverrideSelectedForDeletion] = useState<LanguageText | null>(null)
 
+  const {
+    languageTexts: i18nLanguageTexts
+  } = useI18n()
 
   useEffect(() => {
-    for (const override of languageTextOverrides) {
-      languageTexts[override.keyName] = override.text
+    for (const key of languageKeys) {
+      i18nLanguageTexts[key] = languageTexts[key]
     }
-  }, [languageTextOverrides])
+    for (const override of languageTextOverrides) {
+      i18nLanguageTexts[override.keyName] = override.text
+    }
+  }, [languageTextOverrides, i18nLanguageTexts])
 
   // state for new mapping
   const [newOverride, setNewOverride] = useState<EditableLanguageText>({ isEditing: false })
@@ -105,8 +135,6 @@ export default function LanguageTextOverridesEditor(
     setNewOverride({ ...newOverride, isEditing })
   }
 
-  const languageTextOverrideTextRef = useRef(null)
-
   const columns = useMemo<ColumnDef<LanguageTextRow>[]>(() => [
     {
       header: 'Key Name',
@@ -140,7 +168,6 @@ export default function LanguageTextOverridesEditor(
         const value = row.original.text
         if (isEditable(row.original)) {
           return row.original.isEditing && <TextInput
-            ref={languageTextOverrideTextRef}
             disabled={isEmpty(newOverride.keyName)}
             readOnly={isEmpty(newOverride.keyName)}
             autoFocus={!isEmpty(newOverride.keyName)}
@@ -193,7 +220,7 @@ export default function LanguageTextOverridesEditor(
         </button>
       }
     }
-  ], [newOverride, languageTextOverrides])
+  ], [newOverride, languageTextOverrides, selectedLanguage, localContent])
 
   const data = useMemo(
     () => (languageTextOverrides as LanguageTextRow[]).concat(newOverride),
@@ -204,6 +231,10 @@ export default function LanguageTextOverridesEditor(
     columns,
     getCoreRowModel: getCoreRowModel()
   })
+
+  if (isLoading) {
+    return <LoadingSpinner/>
+  }
 
   return <div className='px-3 pt-1'>
     <p>

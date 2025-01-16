@@ -393,16 +393,20 @@ const SiteContentEditor = (props: InitializedSiteContentViewProps) => {
               disabled={hasInvalidSection}
             >
               <ErrorBoundary>
-                <LanguageTextOverridesEditor
-                  initialLanguageTextOverrides={localContent.languageTextOverrides}
-                  onChange={overrides => {
-                    const updatedLocalContent = {
-                      ...localContent,
-                      languageTextOverrides: overrides
-                    }
-                    updateLocalContent(updatedLocalContent)
-                  }}
-                />
+                <ApiProvider api={previewApi}>
+                  <LanguageTextOverridesEditor
+                    portalEnvContext={portalEnvContext}
+                    localContent={localContent}
+                    selectedLanguage={selectedLanguage?.languageCode || ''}
+                    onChange={overrides => {
+                      const updatedLocalContent = {
+                        ...localContent,
+                        languageTextOverrides: overrides
+                      }
+                      updateLocalContent(updatedLocalContent)
+                    }}
+                  />
+                </ApiProvider>
               </ErrorBoundary>
             </Tab>
             <Tab
