@@ -32,11 +32,15 @@ public abstract class ModuleFormatter<T, F extends ItemFormatter<T>> {
     }
 
     public String getColumnKey(F itemFormatter, boolean isOtherDescription, QuestionChoice choice, int moduleRepeatNum) {
+        return formatColumnKey(moduleRepeatNum, itemFormatter.getBaseColumnKey());
+    }
+
+    public String formatColumnKey(Integer repeatNum, String baseColumnKey) {
         return "%s%s%s%s".formatted(
                 moduleName,
-                moduleRepeatNum > 1 ? ExportFormatUtils.formatIndex(moduleRepeatNum) : "",
+                repeatNum > 1 ? ExportFormatUtils.formatIndex(repeatNum) : "",
                 ExportFormatUtils.COLUMN_NAME_DELIMITER,
-                itemFormatter.getBaseColumnKey());
+                baseColumnKey);
     }
 
     protected abstract List<F> generateItemFormatters(ExportOptions options);
@@ -59,7 +63,7 @@ public abstract class ModuleFormatter<T, F extends ItemFormatter<T>> {
 
     public abstract Map<String, String> toStringMap(EnrolleeExportData enrolleeExportData);
 
-    public T fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap) {
+    public T fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap, int moduleRepeatNum) {
         throw new NotImplementedException();
     };
 }

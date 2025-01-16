@@ -69,6 +69,14 @@ public class ParticipantTaskService extends ParticipantDataAuditedService<Partic
         return dao.findTaskForActivity(ppUserId, studyEnvironmentId, activityStableId, createdBefore);
     }
 
+    public List<ParticipantTask> findAllTasksForActivity(UUID ppUserId, UUID studyEnvironmentId, String activityStableId) {
+        return dao.findAllTasksForActivity(ppUserId, studyEnvironmentId, activityStableId);
+    }
+
+    public Optional<ParticipantTask> findTaskForActivityWithCompletionTime(UUID ppUserId, UUID studyEnvironmentId, String activityStableId, Instant completedAt) {
+        return dao.findTaskForActivityWithCompletionTime(ppUserId, studyEnvironmentId, activityStableId, completedAt);
+    }
+
     public Optional<ParticipantTask> findByKitRequestId(UUID kitRequestId) {
         return dao.findByKitRequestId(kitRequestId);
     }

@@ -12,6 +12,7 @@ import bio.terra.pearl.core.model.participant.*;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyResponse;
+import bio.terra.pearl.core.model.survey.SurveyResponseWithTaskDto;
 import bio.terra.pearl.core.model.workflow.HubResponse;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskType;
@@ -350,7 +351,7 @@ public class EnrolleeImportService {
         ).build();
 
         ParticipantUserFormatter participantUserFormatter = new ParticipantUserFormatter(exportOptions);
-        final ParticipantUser participantUserInfo = participantUserFormatter.fromStringMap(studyEnv.getId(), enrolleeMap);
+        final ParticipantUser participantUserInfo = participantUserFormatter.fromStringMap(studyEnv.getId(), enrolleeMap, 1);
 
         final RegistrationService.RegistrationResult regResult = registerIfNeeded(portalShortcode, studyEnv, participantUserInfo);
 
@@ -373,7 +374,7 @@ public class EnrolleeImportService {
 
     private void importKitRequests(Map<String, String> enrolleeMap, UUID adminId, Enrollee enrollee) {
         KitRequestFormatter formatter = new KitRequestFormatter(new ExportOptions());
-        formatter.listFromStringMap(enrolleeMap).stream().forEach(kitRequestDto -> {
+        formatter.listFromStringMap(enrollee.getStudyEnvironmentId(), enrolleeMap).stream().forEach(kitRequestDto -> {
             KitRequest kitRequest = kitRequestService.create(convertKitRequestDto(adminId, enrollee, kitRequestDto));
             timeShiftDao.changeKitCreationTime(kitRequest.getId(), kitRequestDto.getCreatedAt());
         });
@@ -418,7 +419,7 @@ public class EnrolleeImportService {
         return enrolleeService.findByParticipantUserIdAndStudyEnvId(regResult.participantUser().getId(), studyEnv.getId()).orElseGet(() -> {
             /** user is not enrolled in this study, so we need to create a new enrollee */
             EnrolleeFormatter enrolleeFormatter = new EnrolleeFormatter(exportOptions);
-            Enrollee enrolleeInfo = enrolleeFormatter.fromStringMap(studyEnv.getId(), enrolleeMap);
+            Enrollee enrolleeInfo = enrolleeFormatter.fromStringMap(studyEnv.getId(), enrolleeMap, 1);
             /** temporarily update the profile to no emails since they'll receive a special welcome email */
             regResult.profile().setDoNotEmail(true);
             profileService.update(regResult.profile(), auditInfo);
@@ -451,7 +452,7 @@ public class EnrolleeImportService {
     protected Profile importProfile(Map<String, String> enrolleeMap, Profile registrationProfile,
                                     ExportOptions exportOptions, StudyEnvironment studyEnv, DataAuditInfo auditInfo) {
         ProfileFormatter profileFormatter = new ProfileFormatter(exportOptions);
-        Profile importProfile = profileFormatter.fromStringMap(studyEnv.getId(), enrolleeMap);
+        Profile importProfile = profileFormatter.fromStringMap(studyEnv.getId(), enrolleeMap, 1);
         // only copy non-null properties -- this avoids overwriting already set values (especially in the case of multi-study imports)
         copyNonNullProperties(importProfile, registrationProfile, List.of("mailingAddress"));
         if (importProfile.getMailingAddress() != null) {
@@ -476,16 +477,16 @@ public class EnrolleeImportService {
         Survey preEnroll = studyEnv.getPreEnrollSurveyId() != null ? surveyService.find(studyEnv.getPreEnrollSurveyId()).orElse(null) : null;
 
         for (SurveyFormatter formatter : surveyModules) {
-            SurveyResponse surveyResponse;
+            List<SurveyResponse> surveyResponses;
 
             if (preEnroll != null && formatter.getModuleName().equals(preEnroll.getStableId())) {
-                surveyResponse = importPreEnrollResponse(preEnroll, portalId, formatter, enrolleeMap, exportOptions, studyEnv, ppUser, user, enrollee, auditInfo);
+                surveyResponses = List.of(importPreEnrollResponse(preEnroll, portalId, formatter, enrolleeMap, exportOptions, studyEnv, ppUser, user, enrollee, auditInfo));
             } else {
-                surveyResponse = importSurveyResponse(portalId, formatter, enrolleeMap, exportOptions, studyEnv, ppUser, enrollee, auditInfo);
+                surveyResponses = importSurveyResponses(portalId, formatter, enrolleeMap, exportOptions, studyEnv, ppUser, enrollee, auditInfo);
             }
 
-            if (surveyResponse != null) {
-                responses.add(surveyResponse);
+            if (surveyResponses != null) {
+                responses.addAll(surveyResponses);
             }
         }
         return responses;
@@ -501,7 +502,7 @@ public class EnrolleeImportService {
                                                      ParticipantUser participantUser,
                                                      Enrollee enrollee,
                                                      DataAuditInfo auditInfo) {
-        SurveyResponse response = formatter.fromStringMap(studyEnv.getId(), enrolleeMap);
+        SurveyResponse response = formatter.fromStringMap(studyEnv.getId(), enrolleeMap, 1);
         if (response == null) {
             return null;
         }
@@ -524,14 +525,39 @@ public class EnrolleeImportService {
         return created;
     }
 
-    protected SurveyResponse importSurveyResponse(UUID portalId, SurveyFormatter formatter, Map<String, String> enrolleeMap, ExportOptions exportOptions,
+    protected List<SurveyResponse> importSurveyResponses(UUID portalId, SurveyFormatter formatter, Map<String, String> enrolleeMap, ExportOptions exportOptions,
                                                   StudyEnvironment studyEnv, PortalParticipantUser ppUser, Enrollee enrollee, DataAuditInfo auditInfo) {
-        SurveyResponse response = formatter.fromStringMap(studyEnv.getId(), enrolleeMap);
-        if (response == null) {
-            return null;
+        List<SurveyResponseWithTaskDto> responses = formatter.listFromStringMap(studyEnv.getId(), enrolleeMap);
+        if (responses == null || responses.isEmpty()) {
+            return List.of();
         }
-        ParticipantTask relatedTask = participantTaskService.findTaskForActivity(ppUser.getId(), studyEnv.getId(), formatter.getModuleName())
-                .orElse(null);
+
+        List<SurveyResponse> imported = new ArrayList<>();
+        for (int i = 0; i < responses.size(); i++) {
+            SurveyResponseWithTaskDto response = responses.get(i);
+            imported.add(importSurveyResponse(ppUser, enrollee, studyEnv, formatter, response, portalId, auditInfo, enrolleeMap, i + 1));
+        }
+
+        return imported;
+    }
+
+    private SurveyResponse importSurveyResponse(PortalParticipantUser ppUser, Enrollee enrollee, StudyEnvironment studyEnv, SurveyFormatter formatter, SurveyResponseWithTaskDto response, UUID portalId, DataAuditInfo auditInfo, Map<String, String> enrolleeMap, Integer repeatNum) {
+
+        ParticipantTask relatedTask = findOrCreateTask(ppUser, enrollee, studyEnv, formatter, response, portalId, auditInfo, enrolleeMap, repeatNum);
+
+        SurveyResponse updatedResponse = surveyResponseService.updateResponse(response, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "importSurveyResponse")),
+                "Imported", ppUser, enrollee, relatedTask.getId(), portalId).getResponse();
+
+
+        shiftTime(updatedResponse, relatedTask, formatter, enrolleeMap, repeatNum);
+
+        return updatedResponse;
+    }
+
+    private ParticipantTask findOrCreateTask(PortalParticipantUser ppUser, Enrollee enrollee, StudyEnvironment studyEnv, SurveyFormatter formatter, SurveyResponseWithTaskDto response, UUID portalId, DataAuditInfo auditInfo, Map<String, String> enrolleeMap, Integer repeatNum) {
+
+        ParticipantTask relatedTask = findTask(ppUser, studyEnv, formatter, enrolleeMap, repeatNum);
+
         if (relatedTask == null) {
             ParticipantTaskAssignDto assignDto = new ParticipantTaskAssignDto(
                     TaskType.SURVEY,
@@ -551,39 +577,65 @@ public class EnrolleeImportService {
 
         participantTaskService.update(relatedTask, auditInfo);
 
-        // we're not worrying about dating the response yet
-        SurveyResponse surveyResponse = surveyResponseService.updateResponse(response, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "importSurveyResponse")),
-                "Imported", ppUser, enrollee, relatedTask.getId(), portalId).getResponse();
-
-
-        shiftTime(surveyResponse, relatedTask, formatter, enrolleeMap);
-
-        return surveyResponse;
+        return relatedTask;
     }
+
+    private ParticipantTask findTask(PortalParticipantUser ppUser, StudyEnvironment studyEnv, SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum) {
+        ParticipantTask relatedTask = null;
+
+        Optional<Instant> completedAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt");
+
+        // attempt to find existing task to update
+        if (repeatNum == 1) {
+            // case 1; it's first repeat and no completedAt specified,
+            // just grab latest
+            relatedTask = participantTaskService.findTaskForActivity(ppUser.getId(), studyEnv.getId(), formatter.getModuleName())
+                    .orElse(null);
+        } else {
+            if (completedAt.isEmpty()) {
+                throw new IllegalStateException("completedAt must be specified for importing survey response history");
+            }
+            // case 2: completedAt is specified, find task with that completion time
+            relatedTask = participantTaskService.findTaskForActivityWithCompletionTime(ppUser.getId(), studyEnv.getId(), formatter.getModuleName(), completedAt.get())
+                    .orElse(null);
+        }
+        
+        return relatedTask;
+    }
+
 
     // preserving response creation and task creation/completion
     // is important for recurring surveys
-    private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap) {
+    private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum) {
         // make sure the task reflects created and completion status
         // so that recurrences are properly scheduled
-        String completedAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "completedAt";
-        String createdAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "createdAt";
-        String lastUpdatedAtKey = formatter.getModuleName() + ExportFormatUtils.COLUMN_NAME_DELIMITER + "lastUpdatedAt";
+        Optional<Instant> completedAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt");
+        Optional<Instant> createdAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "createdAt");
+        Optional<Instant> lastUpdatedAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "lastUpdatedAt");
 
-        if (enrolleeMap.containsKey(completedAtKey)) {
-            Instant completedAt = ExportFormatUtils.importInstant(enrolleeMap.get(completedAtKey));
+        // use any of the three times if available
+        Instant completedAt = completedAtOpt.orElseGet(() -> createdAtOpt.orElseGet(() -> lastUpdatedAtOpt.orElse(null)));
+        Instant createdAt = createdAtOpt.orElseGet(() -> completedAtOpt.orElseGet(() -> lastUpdatedAtOpt.orElse(null)));
+        Instant lastUpdatedAt = lastUpdatedAtOpt.orElseGet(() -> completedAtOpt.orElseGet(() -> createdAtOpt.orElse(null)));
+
+        if (completedAt != null) {
             timeShiftDao.changeTaskCompleteTime(relatedTask.getId(), completedAt);
         }
-        if (enrolleeMap.containsKey(createdAtKey)) {
-            Instant createdAt = ExportFormatUtils.importInstant(enrolleeMap.get(createdAtKey));
+        if (createdAt != null) {
             timeShiftDao.changeTasksCreationTime(List.of(relatedTask.getId()), createdAt);
             timeShiftDao.changeSurveyResponseCreationTime(surveyResponse.getId(), createdAt);
         }
-        if (enrolleeMap.containsKey(lastUpdatedAtKey)) {
-            Instant lastUpdatedAt = ExportFormatUtils.importInstant(enrolleeMap.get(lastUpdatedAtKey));
-
+        if (lastUpdatedAt != null) {
             timeShiftDao.changeSurveyResponseLastUpdatedTime(surveyResponse.getId(), lastUpdatedAt);
         }
+    }
+
+    private Optional<Instant> parseSurveyFieldToInstant(SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum, String field) {
+        String key = formatter.formatColumnKey(repeatNum, field);
+        if (enrolleeMap.containsKey(key)) {
+            return Optional.of(ExportFormatUtils.importInstant(enrolleeMap.get(key)));
+        }
+        return Optional.empty();
     }
 
     public static void copyNonNullProperties(Object source, Object target, List<String> ignoreProperties) {

@@ -589,6 +589,11 @@ public abstract class BaseJdbiDao<T extends BaseEntity> implements JdbiDao<T> {
         );
     }
 
+    protected String approximateDateMatchQueryStr(String col1, String col2, String maxDifferenceSeconds) {
+        return "abs(extract(epoch from %s) - extract(epoch from %s)) < %s".formatted(col1, col2, maxDifferenceSeconds);
+
+    }
+
     protected String prefixedGetQueryColumns(String prefix) {
         List<String> prefixedCols = getQueryColumns.stream().map(col -> prefix + "." + col)
                 .collect(Collectors.toList());
