@@ -7,7 +7,7 @@ import {
   faCaretDown,
   faCaretUp,
   faFile, faFileImage,
-  faFilePdf, faInfoCircle, faSquareMinus, faSquarePlus,
+  faFilePdf, faSquareMinus, faSquarePlus,
   faUpload
 } from '@fortawesome/free-solid-svg-icons'
 import { isNil } from 'lodash'
@@ -35,11 +35,8 @@ export const DocumentRequestUpload = (
 
   const [uploadingFile, setUploadingFile] = useState<string>()
 
-  console.log(studyEnvParams)
-
   useEffect(() => {
     Api.listParticipantFiles({ studyEnvParams, enrolleeShortcode }).then(files => {
-      console.log(files)
       setFiles(files)
       setSelectedFiles(files.filter(f => selectedFileNames.includes(f.fileName)))
     })
@@ -75,7 +72,7 @@ export const DocumentRequestUpload = (
 
   return <div className='pt-2'>
     <div className='mb-2'>
-      <SelectedFiles selectedFiles={selectedFiles} removeFile={unselectFile}/>
+      <SelectedFiles selectedFiles={selectedFiles} removeFile={unselectFile} onDownload={downloadFile}/>
     </div>
     <div className='mb-2'>
       {/* show on desktops */}
@@ -102,15 +99,17 @@ export const DocumentRequestUpload = (
 const SelectedFiles = (
   {
     selectedFiles,
-    removeFile
+    removeFile,
+    onDownload
   }: {
         selectedFiles: ParticipantFile[],
-        removeFile: (file: ParticipantFile) => void
+        removeFile: (file: ParticipantFile) => void,
+        onDownload?: (file: ParticipantFile) => void
     }
 ) => {
   return <div className='card'>
     <div className='card-body'>
-      <p className='card-title mb-1'>Selected documents ({selectedFiles.length})</p>
+      <p className='card-title mb-2'>Selected documents ({selectedFiles.length})</p>
       {selectedFiles.length === 0 && <div className='fst-italic text-muted mt-3'>No documents selected</div>}
       {selectedFiles.map(selectedFile => {
         return <FileRow
@@ -120,6 +119,7 @@ const SelectedFiles = (
           isSelected={true}
           onUnselect={() => removeFile(selectedFile)}
           onSelect={() => removeFile(selectedFile)}
+          onDownload={onDownload ? () => onDownload(selectedFile) : undefined}
           key={selectedFile.id}
         />
       })}
@@ -154,8 +154,8 @@ const Library = (
 
   return <div className='card'>
     <div className='card-body'>
-      <p className='card-title mb-0'>
-            My documents <span>({unselectedFiles.length})</span>
+      <p className='card-title mb-2'>
+            Available documents <span>({unselectedFiles.length})</span>
         <button className='btn btn-link p-0 ps-2' onClick={() => setExpanded(!expanded)}>
           <FontAwesomeIcon icon={expanded ? faCaretUp : faCaretDown}/>
         </button>
@@ -168,9 +168,7 @@ const Library = (
         isSelected={false}
       />}
       {expanded && <>
-        <div className="text-muted mb-2">
-          <FontAwesomeIcon icon={faInfoCircle}/> You may also add these existing documents to your response
-        </div>
+        {unselectedFiles.length === 0 && <div className='fst-italic text-muted'>No documents available</div>}
         {unselectedFiles.map(file => {
           return <FileRow
             fileType={file.fileType}
@@ -179,7 +177,10 @@ const Library = (
             isSelected={isSelected(file)}
             onUnselect={() => unselectFile(file)}
             onSelect={() => selectFile(file)}
-            onDownload={() => downloadFile(file)}
+            onDownload={() => {
+              console.log(file)
+              downloadFile(file)
+            }}
             key={file.id}
           />
         })}</>}
@@ -209,20 +210,17 @@ const FileRow = ({
     className={'border border-1 rounded-1 bg-light-subtle p-2 d-flex align-items-center justify-content-between mb-2'}>
     <div className='d-flex align-items-center justify-content-between'>
       <FileIcon mimeType={fileType}/>
-      <button className='btn btn-link'>{fileName}</button>
-
+      <button onClick={onDownload} className='btn btn-link text-wrap text-start'>{fileName}</button>
     </div>
     {isUploading && <LoadingSpinner/>}
 
     <div className='d-flex justify-content-end'>
       {isSelected
-        ? <button
-          onClick={onUnselect}
+        ? <button onClick={onUnselect}
           className='float-end btn btn-outline-primary text-decoration-none border-0'>
           <FontAwesomeIcon icon={faSquareMinus}/>
         </button>
-        : <button
-          onClick={onSelect}
+        : <button onClick={onSelect}
           className='float-end btn btn-outline-primary text-decoration-none border-0'>
           <FontAwesomeIcon icon={faSquarePlus}/>
         </button>}
@@ -267,6 +265,16 @@ const DragAndDrop = ({ uploadNewFile }: { uploadNewFile: (file: File) => void })
       </div>
     </div>
   </div>
+}
+
+const truncateFileName = (text: string, maxLength: number) => {
+  const extension = text.substring(text.lastIndexOf('.'))
+  const nameWithoutExtension = text.substring(0, text.lastIndexOf('.'))
+
+  if (nameWithoutExtension.length > maxLength) {
+    return `${nameWithoutExtension.substring(0, maxLength)  }...${  extension}`
+  }
+  return text
 }
 
 const FileUpload = ({ uploadNewFile }: { uploadNewFile: (file: File) => void }) => {

@@ -13,7 +13,7 @@ import {
 } from 'src/types/address'
 import { SurveyResponseWithJustification } from 'src/types/forms'
 import { SystemSettings } from 'src/types/maintenance'
-import { ParticipantFile } from '@juniper/ui-core'
+import { ParticipantFile } from 'src/types/participantFile'
 
 export type ImageUrlFunc = (cleanFileName: string, version: number) => string
 export type SubmitMailingListContactFunc = (name: string, email: string) => Promise<object>
