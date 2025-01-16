@@ -24,7 +24,7 @@ public class LanguageTextPopulator extends BasePopulator<LanguageText, LanguageT
 
     @Override
     public Optional<LanguageText> findFromDto(LanguageTextDto popDto, FilePopulateContext context) {
-        return languageTextService.findByKeyNameAndLanguage(popDto.getKeyName(), popDto.getLanguage());
+        return languageTextService.findSystemTextByKeyAndLanguage(popDto.getKeyName(), popDto.getLanguage());
     }
 
     @Override
