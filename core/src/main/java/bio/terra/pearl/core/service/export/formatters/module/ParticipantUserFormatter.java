@@ -17,7 +17,7 @@ public class ParticipantUserFormatter extends BeanModuleFormatter<ParticipantUse
 
     @Override
     protected List<PropertyItemFormatter<ParticipantUser>> generateItemFormatters(ExportOptions options) {
-        return INCLUDED_PROPERTIES.stream().map(propName -> new PropertyItemFormatter<>(propName, ParticipantUser.class))
+        return INCLUDED_PROPERTIES.stream().map(propName -> new PropertyItemFormatter<>(propName, ParticipantUser.class, options.getZoneId()))
                 .collect(Collectors.toList());
     }
 

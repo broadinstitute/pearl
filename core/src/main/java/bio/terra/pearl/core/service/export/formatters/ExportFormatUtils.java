@@ -48,24 +48,25 @@ public class ExportFormatUtils {
         return LocalDate.parse(localDateString, DateTimeFormatter.ofPattern(ANALYSIS_DATE_FORMAT));
     }
 
-    public static String formatInstant(Instant instant) {
+    public static String formatInstant(Instant instant, ZoneId timeZone) {
         return DateTimeFormatter.ofPattern(ANALYSIS_DATE_TIME_FORMAT)
-                .withZone(ZoneOffset.UTC).format(instant);
+                .withZone(timeZone).format(instant);
     }
 
-    public static Instant importInstant(String instantString) {
+    public static Instant importInstant(String instantString, ZoneId timeZone) {
         if (StringUtils.isBlank(instantString)) {
             return null;
         }
         return Instant.from(
                 DateTimeFormatter.ofPattern(ANALYSIS_DATE_TIME_FORMAT)
-                        .withZone(ZoneId.of("Z")) // for now do everything in UTC
+                        .withZone(timeZone)
                         .parse(instantString)
         );
     }
 
-    /** simple property formatter -- just branches on the class of the thing to format */
-    public static String formatForExport(Object value) {
+    /** simple property formatter -- just branches on the class of the thing to format.
+     * note that time zone has to be provided so that UTC-stored timestamps can be converted correctly */
+    public static String formatForExport(Object value, ZoneId timeZone) {
         if (value == null) {
             return NULL_STRING;
         }
@@ -74,7 +75,7 @@ public class ExportFormatUtils {
         } else if (LocalDate.class.isInstance(value)) {
             return formatLocalDate((LocalDate) value);
         } else if (Instant.class.isInstance(value)) {
-            return formatInstant((Instant) value);
+            return formatInstant((Instant) value, timeZone);
         }
         return value.toString();
     }
@@ -99,9 +100,9 @@ public class ExportFormatUtils {
                         StringUtils.capitalize(spacedString)), " ");
     }
 
-    public static Object getValueFromString(String exportString, DataValueExportType dataType) {
+    public static Object getValueFromString(String exportString, DataValueExportType dataType, ZoneId zoneId) {
         if (dataType.equals(DataValueExportType.DATE_TIME)) {
-            return ExportFormatUtils.importInstant(exportString);
+            return ExportFormatUtils.importInstant(exportString, zoneId);
         } else if (dataType.equals(DataValueExportType.DATE)) {
             return ExportFormatUtils.importLocalDate(exportString);
         } else if (dataType.equals(DataValueExportType.BOOLEAN)) {

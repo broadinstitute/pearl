@@ -10,6 +10,7 @@ import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.model.participant.*;
 import bio.terra.pearl.core.model.study.StudyEnvironment;
+import bio.terra.pearl.core.model.study.StudyEnvironmentConfig;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyResponse;
 import bio.terra.pearl.core.model.survey.SurveyResponseWithTaskDto;
@@ -25,6 +26,7 @@ import bio.terra.pearl.core.service.kit.KitRequestDto;
 import bio.terra.pearl.core.service.kit.KitRequestService;
 import bio.terra.pearl.core.service.participant.*;
 import bio.terra.pearl.core.service.portal.PortalService;
+import bio.terra.pearl.core.service.study.StudyEnvironmentConfigService;
 import bio.terra.pearl.core.service.survey.AnswerProcessingService;
 import bio.terra.pearl.core.service.survey.SurveyResponseService;
 import bio.terra.pearl.core.service.survey.SurveyService;
@@ -51,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -93,6 +96,7 @@ public class EnrolleeImportService {
     private final ImportService importService;
     private final ImportItemService importItemService;
     private final KitRequestService kitRequestService;
+    private final StudyEnvironmentConfigService studyEnvironmentConfigService;
     private final char CSV_DELIMITER = ',';
     private final char TSV_DELIMITER = '\t';
 
@@ -100,9 +104,9 @@ public class EnrolleeImportService {
                                  ProfileService profileService, EnrolleeExportService enrolleeExportService,
                                  SurveyResponseService surveyResponseService, ParticipantTaskService participantTaskService, PortalService portalService,
                                  ImportService importService, ImportItemService importItemService, SurveyTaskDispatcher surveyTaskDispatcher,
-                                EnrolleeRelationService enrolleeRelationService,
+                                 EnrolleeRelationService enrolleeRelationService,
                                  TimeShiftDao timeShiftDao, EnrolleeService enrolleeService, ParticipantUserService participantUserService,
-                                 PortalParticipantUserService portalParticipantUserService, KitRequestService kitRequestService, SurveyService surveyService, AnswerProcessingService answerProcessingService, AnswerMappingDao answerMappingDao) {
+                                 PortalParticipantUserService portalParticipantUserService, KitRequestService kitRequestService, SurveyService surveyService, AnswerProcessingService answerProcessingService, AnswerMappingDao answerMappingDao, StudyEnvironmentConfigService studyEnvironmentConfigService) {
         this.registrationService = registrationService;
         this.enrollmentService = enrollmentService;
         this.profileService = profileService;
@@ -122,6 +126,7 @@ public class EnrolleeImportService {
         this.surveyService = surveyService;
         this.answerProcessingService = answerProcessingService;
         this.answerMappingDao = answerMappingDao;
+        this.studyEnvironmentConfigService = studyEnvironmentConfigService;
     }
 
     @Transactional
@@ -146,6 +151,8 @@ public class EnrolleeImportService {
         if (ImportFileFormat.CSV.equals(fileFormat)) {
             exportOptions = IMPORT_OPTIONS_CSV;
         }
+        StudyEnvironmentConfig studyEnvConfig = studyEnvironmentConfigService.findByStudyEnvironmentId(studyEnv.getId());
+        exportOptions.setTimeZone(studyEnvConfig.getTimeZone());
         List<Map<String, String>> enrolleeMaps = generateImportMaps(in, fileFormat);
         List<AccountImportData> accountData = groupImportMapsByAccount(enrolleeMaps);
 
@@ -535,28 +542,28 @@ public class EnrolleeImportService {
         List<SurveyResponse> imported = new ArrayList<>();
         for (int i = 0; i < responses.size(); i++) {
             SurveyResponseWithTaskDto response = responses.get(i);
-            imported.add(importSurveyResponse(ppUser, enrollee, studyEnv, formatter, response, portalId, auditInfo, enrolleeMap, i + 1));
+            imported.add(importSurveyResponse(ppUser, enrollee, studyEnv, formatter, response, portalId, auditInfo, enrolleeMap, i + 1, exportOptions));
         }
 
         return imported;
     }
 
-    private SurveyResponse importSurveyResponse(PortalParticipantUser ppUser, Enrollee enrollee, StudyEnvironment studyEnv, SurveyFormatter formatter, SurveyResponseWithTaskDto response, UUID portalId, DataAuditInfo auditInfo, Map<String, String> enrolleeMap, Integer repeatNum) {
+    private SurveyResponse importSurveyResponse(PortalParticipantUser ppUser, Enrollee enrollee, StudyEnvironment studyEnv, SurveyFormatter formatter, SurveyResponseWithTaskDto response, UUID portalId, DataAuditInfo auditInfo, Map<String, String> enrolleeMap, Integer repeatNum, ExportOptions options) {
 
-        ParticipantTask relatedTask = findOrCreateTask(ppUser, enrollee, studyEnv, formatter, response, portalId, auditInfo, enrolleeMap, repeatNum);
+        ParticipantTask relatedTask = findOrCreateTask(ppUser, enrollee, studyEnv, formatter, response, portalId, auditInfo, enrolleeMap, repeatNum, options.getZoneId());
 
         SurveyResponse updatedResponse = surveyResponseService.updateResponse(response, new ResponsibleEntity(DataAuditInfo.systemProcessName(getClass(), "importSurveyResponse")),
                 "Imported", ppUser, enrollee, relatedTask.getId(), portalId).getResponse();
 
 
-        shiftTime(updatedResponse, relatedTask, formatter, enrolleeMap, repeatNum);
+        shiftTime(updatedResponse, relatedTask, formatter, enrolleeMap, repeatNum, options.getZoneId());
 
         return updatedResponse;
     }
 
-    private ParticipantTask findOrCreateTask(PortalParticipantUser ppUser, Enrollee enrollee, StudyEnvironment studyEnv, SurveyFormatter formatter, SurveyResponseWithTaskDto response, UUID portalId, DataAuditInfo auditInfo, Map<String, String> enrolleeMap, Integer repeatNum) {
+    private ParticipantTask findOrCreateTask(PortalParticipantUser ppUser, Enrollee enrollee, StudyEnvironment studyEnv, SurveyFormatter formatter, SurveyResponseWithTaskDto response, UUID portalId, DataAuditInfo auditInfo, Map<String, String> enrolleeMap, Integer repeatNum, ZoneId zoneId) {
 
-        ParticipantTask relatedTask = findTask(ppUser, studyEnv, formatter, enrolleeMap, repeatNum);
+        ParticipantTask relatedTask = findTask(ppUser, studyEnv, formatter, enrolleeMap, repeatNum, zoneId);
 
         if (relatedTask == null) {
             ParticipantTaskAssignDto assignDto = new ParticipantTaskAssignDto(
@@ -580,10 +587,10 @@ public class EnrolleeImportService {
         return relatedTask;
     }
 
-    private ParticipantTask findTask(PortalParticipantUser ppUser, StudyEnvironment studyEnv, SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum) {
+    private ParticipantTask findTask(PortalParticipantUser ppUser, StudyEnvironment studyEnv, SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum, ZoneId zoneId) {
         ParticipantTask relatedTask = null;
 
-        Optional<Instant> completedAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt");
+        Optional<Instant> completedAt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt", zoneId);
 
         // attempt to find existing task to update
         if (repeatNum == 1) {
@@ -599,19 +606,19 @@ public class EnrolleeImportService {
             relatedTask = participantTaskService.findTaskForActivityWithCompletionTime(ppUser.getId(), studyEnv.getId(), formatter.getModuleName(), completedAt.get())
                     .orElse(null);
         }
-        
+
         return relatedTask;
     }
 
 
     // preserving response creation and task creation/completion
     // is important for recurring surveys
-    private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum) {
+    private void shiftTime(SurveyResponse surveyResponse, ParticipantTask relatedTask, SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum, ZoneId zoneId) {
         // make sure the task reflects created and completion status
         // so that recurrences are properly scheduled
-        Optional<Instant> completedAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt");
-        Optional<Instant> createdAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "createdAt");
-        Optional<Instant> lastUpdatedAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "lastUpdatedAt");
+        Optional<Instant> completedAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "completedAt", zoneId);
+        Optional<Instant> createdAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "createdAt", zoneId);
+        Optional<Instant> lastUpdatedAtOpt = parseSurveyFieldToInstant(formatter, enrolleeMap, repeatNum, "lastUpdatedAt", zoneId);
 
         // use any of the three times if available
         Instant completedAt = completedAtOpt.orElseGet(() -> createdAtOpt.orElseGet(() -> lastUpdatedAtOpt.orElse(null)));
@@ -630,10 +637,10 @@ public class EnrolleeImportService {
         }
     }
 
-    private Optional<Instant> parseSurveyFieldToInstant(SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum, String field) {
+    private Optional<Instant> parseSurveyFieldToInstant(SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum, String field, ZoneId zoneId) {
         String key = formatter.formatColumnKey(repeatNum, field);
         if (enrolleeMap.containsKey(key)) {
-            return Optional.of(ExportFormatUtils.importInstant(enrolleeMap.get(key)));
+            return Optional.of(ExportFormatUtils.importInstant(enrolleeMap.get(key), zoneId == null ? ZoneId.of("America/New_York") : zoneId));
         }
         return Optional.empty();
     }

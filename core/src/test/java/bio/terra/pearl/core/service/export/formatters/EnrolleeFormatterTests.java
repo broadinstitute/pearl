@@ -7,6 +7,7 @@ import bio.terra.pearl.core.service.export.formatters.module.EnrolleeFormatter;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -26,6 +27,7 @@ public class EnrolleeFormatterTests {
 
         assertThat(valueMap.get("enrollee.shortcode"), equalTo("TESTER"));
         assertThat(valueMap.get("enrollee.consented"), equalTo("true"));
-        assertThat(valueMap.get("enrollee.createdAt"), equalTo("2023-08-21 05:17AM"));
+        assertThat(valueMap.get("enrollee.createdAt"), equalTo(ExportFormatUtils.formatInstant(enrollee.getCreatedAt(),
+                ZoneId.of("America/New_York"))));
     }
 }

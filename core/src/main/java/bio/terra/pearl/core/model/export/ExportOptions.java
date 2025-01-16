@@ -2,12 +2,11 @@ package bio.terra.pearl.core.model.export;
 
 import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.service.export.ExportFileFormat;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,4 +30,10 @@ public class ExportOptions extends BaseEntity {
     private List<String> excludeModules = new ArrayList<>();
     @Builder.Default
     private List<String> includeFields = new ArrayList<>();
+    private String timeZone; // defaults to null since the default is to use the study home time zone
+
+    @JsonIgnore
+    public ZoneId getZoneId() {
+        return timeZone == null ? null : ZoneId.of(timeZone);
+    }
 }

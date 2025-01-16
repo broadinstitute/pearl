@@ -29,7 +29,7 @@ public class ProxyFormatter extends BeanListModuleFormatter<ParticipantUser> {
 
     @Override
     protected List<PropertyItemFormatter<ParticipantUser>> generateItemFormatters(ExportOptions options) {
-        return INCLUDED_PROPERTIES.stream().map(propName -> new PropertyItemFormatter<ParticipantUser>(propName, ParticipantUser.class))
+        return INCLUDED_PROPERTIES.stream().map(propName -> new PropertyItemFormatter<ParticipantUser>(propName, ParticipantUser.class, options.getZoneId()))
                 .collect(Collectors.toList());
     }
 }

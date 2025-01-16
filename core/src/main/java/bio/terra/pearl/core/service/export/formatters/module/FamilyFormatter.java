@@ -20,7 +20,7 @@ public class FamilyFormatter extends BeanListModuleFormatter<Family> {
     @Override
     protected List<PropertyItemFormatter<Family>> generateItemFormatters(ExportOptions options) {
         return INCLUDED_PROPERTIES.stream()
-                .map(propName -> new PropertyItemFormatter<>(propName, Family.class))
+                .map(propName -> new PropertyItemFormatter<>(propName, Family.class, options.getZoneId()))
                 .collect(Collectors.toList());
     }
 
