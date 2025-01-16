@@ -1,4 +1,11 @@
-import { Enrollee, instantToDateString, ParticipantFile, saveBlobAsDownload, Study, useI18n } from '@juniper/ui-core'
+import {
+  Enrollee, EnvironmentName,
+  instantToDateString,
+  ParticipantFile,
+  saveBlobAsDownload,
+  StudyEnvParams,
+  useI18n
+} from '@juniper/ui-core'
 import React, { useEffect, useState } from 'react'
 import { useActiveUser } from 'providers/ActiveUserProvider'
 import Api from 'api/api'
@@ -20,10 +27,20 @@ export default function DocumentLibrary() {
     pStudy.study.studyEnvironments.find(studyEnv =>
       studyEnv.environmentName === portalEnv.environmentName))?.study
 
+  if (!currentStudy) {
+    return <div>Study not found</div>
+  }
+
+  const studyEnvParams: StudyEnvParams = {
+    portalShortcode: portal.shortcode,
+    studyShortcode: currentStudy?.shortcode,
+    envName: portalEnv.environmentName as EnvironmentName
+  }
+
   const loadDocuments = async () => {
     if (!currentStudy) { return }
     const enrolleeShortcode = enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!.shortcode
-    const documents = await Api.listParticipantFiles(currentStudy.shortcode, enrolleeShortcode)
+    const documents = await Api.listParticipantFiles({ studyEnvParams, enrolleeShortcode })
     setParticipantFiles(documents)
   }
 
@@ -39,7 +56,7 @@ export default function DocumentLibrary() {
         <div className="card-body">
           <div className="align-items-center">
             <DocumentsList
-              currentStudy={currentStudy!}
+              studyEnvParams={studyEnvParams}
               enrollee={enrollees.find(enrollee => enrollee.profileId === ppUser?.profileId)!}
               participantFiles={participantFiles}/>
           </div>
@@ -49,8 +66,8 @@ export default function DocumentLibrary() {
   </div>
 }
 
-const DocumentsList = ({ currentStudy, enrollee, participantFiles }: {
-  currentStudy: Study, enrollee: Enrollee, participantFiles: ParticipantFile[]
+const DocumentsList = ({ studyEnvParams, enrollee, participantFiles }: {
+  studyEnvParams: StudyEnvParams, enrollee: Enrollee, participantFiles: ParticipantFile[]
 }) => {
   const { i18n } = useI18n()
 
@@ -85,8 +102,9 @@ const DocumentsList = ({ currentStudy, enrollee, participantFiles }: {
               <td className="align-middle">
                 <div className={'d-flex justify-content-end'}>
                   <button className="btn btn-outline-primary" onClick={async () => {
-                    const response = await Api.downloadParticipantFile(
-                      currentStudy.shortcode, enrollee.shortcode, participantFile.fileName)
+                    const response = await Api.downloadParticipantFile({
+                      studyEnvParams, enrolleeShortcode: enrollee.shortcode, fileName: participantFile.fileName
+                    })
                     saveBlobAsDownload(await response.blob(), participantFile.fileName)
                   }}>
                     <span className="d-flex align-items-center">

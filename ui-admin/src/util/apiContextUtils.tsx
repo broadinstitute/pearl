@@ -1,9 +1,10 @@
 import {
   ApiContextT,
   EnvironmentName,
-  MailingAddress
+  MailingAddress, ParticipantFile, StudyEnvParams
 } from '@juniper/ui-core'
 import Api from '../api/api'
+import { Response } from 'mixpanel-browser'
 
 /** uses the admin image retrieval endpoint */
 const createGetImageUrl = (portalShortcode: string, portalEnvName: string) => {
@@ -27,6 +28,31 @@ export const previewApi = (portalShortcode: string, portalEnvName: string): ApiC
       return Api.updateSurveyResponse({
         studyEnvParams, stableId, version, enrolleeShortcode, response, taskId
       })
+    },
+    listParticipantFiles: () => {
+      //stub- not implemented for admin api yet
+      return Promise.resolve([])
+    },
+    deleteParticipantFile: () => {
+      //stub- not implemented for admin api yet
+      return Promise.resolve(new Response())
+    },
+    uploadParticipantFile: () => {
+      //stub- not implemented for admin api yet
+      return Promise.resolve({} as ParticipantFile)
+    },
+    downloadParticipantFile({ studyEnvParams, enrolleeShortcode, fileName }: {
+      studyEnvParams: StudyEnvParams
+      enrolleeShortcode: string;
+      fileName: string
+    }) {
+      return Api.downloadParticipantFile(
+        studyEnvParams.portalShortcode,
+        studyEnvParams.studyShortcode,
+        studyEnvParams.envName,
+        enrolleeShortcode,
+        fileName
+      )
     },
     validateAddress: (address: MailingAddress) => {
       return Api.validateAddress(address)

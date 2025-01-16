@@ -20,7 +20,7 @@ import { mockUsePortalEnv } from '../test-utils/test-portal-factory'
 import { useUser } from '../providers/UserProvider'
 import { mockUseActiveUser, mockUseUser } from '../test-utils/user-mocking-utils'
 import { useActiveUser } from '../providers/ActiveUserProvider'
-import { mockEnrollee } from '../test-utils/test-participant-factory'
+import { mockEnrollee, mockProfile } from '../test-utils/test-participant-factory'
 
 jest.mock('providers/PortalProvider', () => ({ usePortalEnv: jest.fn() }))
 jest.mock('providers/UserProvider')
@@ -120,7 +120,7 @@ const dynamicSurvey = generateSurvey({
 })
 
 test('enables hide on profile attributes', () => {
-  const maleProfile: Profile = { sexAtBirth: 'male' }
+  const maleProfile: Profile = { ...mockProfile(), sexAtBirth: 'male' }
   asMockedFn(useUser).mockReturnValue(mockUseUser(false))
   asMockedFn(useActiveUser).mockReturnValue({
     ...mockUseActiveUser(),
@@ -138,7 +138,7 @@ test('enables hide on profile attributes', () => {
 })
 
 test('enables show on profile attributes', () => {
-  const femaleProfile: Profile = { sexAtBirth: 'female' }
+  const femaleProfile: Profile = { ...mockProfile(), sexAtBirth: 'female' }
   asMockedFn(useUser).mockReturnValue(mockUseUser(false))
   asMockedFn(useActiveUser).mockReturnValue({
     ...mockUseActiveUser(),

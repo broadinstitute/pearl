@@ -62,6 +62,7 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@types/react-dropzone": "^5.1.0",
     "@yudiel/react-qr-scanner": "^2.0.8",
     "mixpanel-browser": "^2.54.0",
     "react-dropzone": "^14.3.5",
