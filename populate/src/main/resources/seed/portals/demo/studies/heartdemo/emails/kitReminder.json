@@ -1,0 +1,19 @@
+{
+  "stableId": "kitReminder",
+  "name": "Kit reminder email",
+  "version": 1,
+  "publishedVersion": 1,
+  "localizedEmailTemplateDtos": [{
+    "language": "en",
+    "subject": "Please send back your kit",
+    "bodyPopulateFile": "en/kitReminder.html"
+  },{
+    "language": "es",
+    "subject": "Por favor devuelva su kit",
+    "bodyPopulateFile": "es/kitReminder.html"
+  },{
+    "language": "dev",
+    "subject": "DEV_Please send back your kit",
+    "bodyPopulateFile": "dev/kitReminder.html"
+  }]
+}

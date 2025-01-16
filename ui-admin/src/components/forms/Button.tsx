@@ -112,6 +112,6 @@ export const EllipsisDropdownButton = (props: ButtonProps & {'aria-label': strin
     aria-expanded="false"
     {...props}>
     { props.text ? <span className="me-2">{props.text}</span> : '' }
-    <FontAwesomeIcon icon={faEllipsisV} className="fa-lg"/>
+    <FontAwesomeIcon icon={faEllipsisV} />
   </Button>
 }

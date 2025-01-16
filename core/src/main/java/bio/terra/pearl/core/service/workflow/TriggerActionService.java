@@ -82,7 +82,6 @@ public class TriggerActionService {
         }
     }
 
-
     /**
      * for tasks of type TASK_STATUS_CHANGE, update the task status
      */

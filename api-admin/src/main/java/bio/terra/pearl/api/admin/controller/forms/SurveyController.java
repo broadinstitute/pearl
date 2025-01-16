@@ -8,6 +8,7 @@ import bio.terra.pearl.core.model.admin.AdminUser;
 import bio.terra.pearl.core.model.survey.Survey;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -27,6 +28,13 @@ public class SurveyController implements SurveyApi {
     this.request = request;
     this.surveyExtService = surveyExtService;
     this.objectMapper = objectMapper;
+  }
+
+  @Override
+  public ResponseEntity<Object> getById(String portalShortcode, UUID id) {
+    AdminUser operator = authUtilService.requireAdminUser(request);
+    Survey survey = surveyExtService.get(PortalAuthContext.of(operator, portalShortcode), id);
+    return ResponseEntity.ok(survey);
   }
 
   @Override
