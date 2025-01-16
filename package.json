@@ -64,6 +64,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@yudiel/react-qr-scanner": "^2.0.8",
     "mixpanel-browser": "^2.54.0",
+    "react-dropzone": "^14.3.5",
     "react-qr-code": "^2.0.15"
   },
   "overrides": {

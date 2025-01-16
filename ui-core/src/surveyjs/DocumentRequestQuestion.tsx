@@ -7,7 +7,6 @@ import {
 } from 'survey-core'
 import { SurveyQuestionElementBase } from 'survey-react-ui'
 import { StudyEnvParams } from 'src/types/study'
-import { DocumentRequestUpload } from 'src/components/DocumentRequestUpload'
 import {
   isEmpty,
   isNil,
@@ -15,6 +14,7 @@ import {
 } from 'lodash'
 import Modal from 'react-bootstrap/Modal'
 import { ModalProps } from 'react-bootstrap'
+import { DocumentRequestUpload } from '../components/DocumentRequestUpload'
 
 const DOCUMENT_REQUEST_TYPE = 'documentrequest'
 
