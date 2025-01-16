@@ -273,16 +273,6 @@ const DragAndDrop = ({ uploadNewFile }: { uploadNewFile: (file: File) => void })
   </div>
 }
 
-const truncateFileName = (text: string, maxLength: number) => {
-  const extension = text.substring(text.lastIndexOf('.'))
-  const nameWithoutExtension = text.substring(0, text.lastIndexOf('.'))
-
-  if (nameWithoutExtension.length > maxLength) {
-    return `${nameWithoutExtension.substring(0, maxLength)  }...${  extension}`
-  }
-  return text
-}
-
 const FileUpload = ({ uploadNewFile }: { uploadNewFile: (file: File) => void }) => {
   return <div>
     <input type="file" className={'form-control'} onChange={e => {

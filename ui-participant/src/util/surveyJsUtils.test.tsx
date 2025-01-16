@@ -257,7 +257,9 @@ test('testGetUpdatedAnswersStringUpdated', () => {
 
 test('testGetUpdatedAnswersOtherAdded', () => {
   const updatedAnswers = getUpdatedAnswers(null, { 'foo': 'bar' }, { 'foo': 'baz', 'foo-Comment': 'blah' })
-  expect(updatedAnswers).toEqual([{ format: 'NONE', questionStableId: 'foo', stringValue: 'baz', otherDescription: 'blah' }])
+  expect(updatedAnswers).toEqual([
+    { format: 'NONE', questionStableId: 'foo', stringValue: 'baz', otherDescription: 'blah' }
+  ])
 })
 
 test('testGetUpdatedAnswersOtherRemoved', () => {
@@ -268,7 +270,8 @@ test('testGetUpdatedAnswersOtherRemoved', () => {
 test('testGetUpdatedAnswersOtherChanged', () => {
   const updatedAnswers = getUpdatedAnswers(null, { 'foo': 'bar', 'foo-Comment': 'blah' },
     { 'foo': 'baz', 'foo-Comment': 'blah2' })
-  expect(updatedAnswers).toEqual([{ format: 'NONE', questionStableId: 'foo', stringValue: 'baz', otherDescription: 'blah2' }])
+  expect(updatedAnswers).toEqual(
+    [{ format: 'NONE', questionStableId: 'foo', stringValue: 'baz', otherDescription: 'blah2' }])
 })
 
 test('testGetUpdatedAnswersBooleanNew', () => {

@@ -183,7 +183,8 @@ export function getSurveyJsAnswerList(surveyJSModel: SurveyModel, selectedLangua
     .filter(([key]) => {
       return !key.endsWith(SURVEY_JS_OTHER_SUFFIX) && surveyJSModel.getQuestionByName(key)?.getType() !== 'html'
     })
-    .map(([key, value]) => makeAnswer(surveyJSModel, value as SurveyJsValueType, key, surveyJSModel.data, selectedLanguage))
+    .map(([key, value]) =>
+      makeAnswer(surveyJSModel, value as SurveyJsValueType, key, surveyJSModel.data, selectedLanguage))
 }
 
 /** return an Answer for the given value.  This should be updated to take some sort of questionType/dataType param */
