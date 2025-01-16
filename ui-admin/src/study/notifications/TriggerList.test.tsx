@@ -6,6 +6,7 @@ import {
 } from '@testing-library/react'
 
 import {
+  mockEmailTemplate,
   mockPortalContext,
   mockStudyEnvContext,
   mockTrigger
@@ -22,7 +23,11 @@ test('renders routable trigger list', async () => {
     ...mockTrigger(),
     id: 'event1',
     triggerType: 'EVENT',
-    eventType: 'STUDY_ENROLLMENT'
+    eventType: 'STUDY_ENROLLMENT',
+    emailTemplate: {
+      ...mockEmailTemplate(),
+      name: 'Enrollment welcome email'
+    }
   }
   const triggers: Trigger[] = [
     enrollEmailConfig,
@@ -30,13 +35,21 @@ test('renders routable trigger list', async () => {
       ...mockTrigger(),
       id: 'reminder1',
       triggerType: 'TASK_REMINDER',
-      taskType: 'CONSENT'
+      taskType: 'CONSENT',
+      emailTemplate: {
+        ...mockEmailTemplate(),
+        name: 'Consent reminder'
+      }
     },
     {
       ...mockTrigger(),
       id: 'reminder2',
       triggerType: 'TASK_REMINDER',
-      taskType: 'SURVEY'
+      taskType: 'SURVEY',
+      emailTemplate: {
+        ...mockEmailTemplate(),
+        name: 'Survey reminder'
+      }
     }
   ]
   jest.spyOn(Api, 'findTriggersForStudyEnv')
@@ -51,28 +64,36 @@ test('renders routable trigger list', async () => {
       </>)
   render(RoutedComponent)
   expect(screen.getByText('Study Automation')).toBeInTheDocument()
-  await waitFor(() => expect(screen.getByText('Study enrollment')).toBeInTheDocument())
-  expect(screen.getByText('Reminder: CONSENT')).toBeInTheDocument()
-  expect(screen.getByText('Reminder: SURVEY')).toBeInTheDocument()
+  await waitFor(() => expect(screen.getByText('Enrollment welcome email')).toBeInTheDocument())
+  expect(screen.getByText('Consent reminder')).toBeInTheDocument()
+  expect(screen.getByText('Survey reminder')).toBeInTheDocument()
 
-  await userEvent.click(screen.getByText('Study enrollment'))
-  expect(router.state.location.pathname).toEqual(`/triggers/${enrollEmailConfig.id}`)
+  await userEvent.click(screen.getByText('Enrollment welcome email'))
+  expect(router.state.location.pathname).toEqual(`/${enrollEmailConfig.id}`)
 })
 
-test('allows deletion of notification config', async () => {
+test('allows deletion of trigger', async () => {
   const studyEnvContext = mockStudyEnvContext()
   const consentConfig: Trigger = {
     ...mockTrigger(),
     id: 'reminder1',
     triggerType: 'TASK_REMINDER',
-    taskType: 'CONSENT'
+    taskType: 'CONSENT',
+    emailTemplate: {
+      ...mockEmailTemplate(),
+      name: 'Consent reminder'
+    }
   }
   const notificationConfigs: Trigger[] = [
     {
       ...mockTrigger(),
       id: 'event1',
       triggerType: 'EVENT',
-      eventType: 'STUDY_ENROLLMENT'
+      eventType: 'STUDY_ENROLLMENT',
+      emailTemplate: {
+        ...mockEmailTemplate(),
+        name: 'Enrollment welcome email'
+      }
     },
     consentConfig,
     {
@@ -95,16 +116,14 @@ test('allows deletion of notification config', async () => {
     </>)
   render(RoutedComponent)
 
-  await waitFor(() => expect(screen.getByText('Study enrollment')).toBeInTheDocument())
+  await waitFor(() => expect(screen.getByText('Enrollment welcome email')).toBeInTheDocument())
 
-  expect(screen.getByText('Reminder: CONSENT')).toBeInTheDocument()
-  await userEvent.click(screen.getByText('Reminder: CONSENT'))
+  expect(screen.getByText('Consent reminder')).toBeInTheDocument()
+  await userEvent.click(screen.getByText('Consent reminder'))
 
   await waitFor(() => expect(screen.getByText('Delete')).toBeInTheDocument())
-
   await userEvent.click(screen.getByText('Delete'))
-
-  await waitFor(() => expect(screen.getByText('Delete Notification Config')).toBeInTheDocument())
+  await waitFor(() => expect(screen.getByText('Delete automatic action')).toBeInTheDocument())
 
   // modal has popped up now, so delete
   const deleteButtons = screen.getAllByText('Delete')

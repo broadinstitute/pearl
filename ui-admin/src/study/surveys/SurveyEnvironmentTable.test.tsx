@@ -36,7 +36,7 @@ describe('SurveyEnvironmentTest', () => {
       setShowDeleteSurveyModal={jest.fn()}
       showArchiveSurveyModal={false}
       setShowArchiveSurveyModal={jest.fn()}
-      updateConfiguredSurvey={jest.fn()}
+      updateConfiguredSurveys={jest.fn()}
     />)
 
     expect(screen.getByText(configuredSurveys[0].survey.name)).toBeInTheDocument()
@@ -67,7 +67,7 @@ describe('SurveyEnvironmentTest', () => {
       setShowDeleteSurveyModal={jest.fn()}
       showArchiveSurveyModal={false}
       setShowArchiveSurveyModal={jest.fn()}
-      updateConfiguredSurvey={jest.fn()}
+      updateConfiguredSurveys={jest.fn()}
     />)
 
     expect(screen.getByText(configuredSurveys[0].survey.name)).toBeInTheDocument()
