@@ -34,7 +34,7 @@ export const StudyEnrollmentSettings = (
     selectInputId: timeZoneSelectId
   } = useNonNullReactSingleSelect<string>(
     // Intl won't be recognized by TypeScript until we upgrade to 5.1+, so do some funky casting for now
-    (Intl as unknown as {supportedValuesOf: (key: string) => string[]}).supportedValuesOf('timeZone'),
+    (Intl as unknown as {supportedValuesOf: (key: string) => string[]}).supportedValuesOf?.('timeZone') ?? [],
     timeZone => ({ label: timeZone, value: timeZone }),
     (opt: string) => updateConfig('timeZone', opt),
     config.timeZone)
