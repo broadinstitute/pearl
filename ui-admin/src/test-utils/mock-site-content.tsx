@@ -9,7 +9,7 @@ import {
 import {
   ApiContextT,
   HtmlSection,
-  HubResponse, SystemSettings
+  HubResponse, ParticipantFile, SystemSettings
 } from '@juniper/ui-core'
 
 /** mock site content */
@@ -96,5 +96,9 @@ export const emptyApi: ApiContextT = {
   getLanguageTexts: () => Promise.resolve({}),
   updateSurveyResponse: () => Promise.resolve({} as HubResponse),
   validateAddress: () => Promise.resolve({} as AddressValidationResult),
-  loadSystemSettings: () => Promise.resolve({} as SystemSettings)
+  loadSystemSettings: () => Promise.resolve({} as SystemSettings),
+  listParticipantFiles: () => Promise.resolve([]),
+  uploadParticipantFile: () => Promise.resolve({} as ParticipantFile),
+  downloadParticipantFile: () => Promise.resolve({} as Response),
+  deleteParticipantFile: () => Promise.resolve({} as Response)
 }
