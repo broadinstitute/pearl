@@ -807,6 +807,171 @@ public class EnrolleeImportServiceTests extends BaseSpringBootTest {
 
         ParticipantTask task = participantTaskService.findTaskForActivity(ppUser.getId(), bundle.getStudyEnv().getId(), survey.getStableId()).orElseThrow();
         assertThat(task.getCompletedAt(), equalTo(instantFromZone("2023-08-22 05:17AM")));
+    }
+
+    @Test
+    @Transactional
+    public void testImportMultipleSurveyResponses(TestInfo info) {
+        StudyEnvironmentBundle bundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.irb);
+        Survey survey = surveyFactory.buildPersisted(surveyFactory.builder(getTestName(info))
+                .stableId("importTest1")
+                .content(TWO_QUESTION_SURVEY_CONTENT)
+                .portalId(bundle.getPortal().getId())
+                .version(1)
+        );
+        surveyFactory.attachToEnv(survey, bundle.getStudyEnv().getId(), true);
+        String username = "test@test.com";
+
+        Map<String, String> enrolleeMap = Map.of("enrollee.subject", "true", "account.username", username,
+                "importTest1.complete", "true",
+                "importTest1.importFirstName", "Jeff",
+                "importTest1.importFavColors", "[\"red\", \"blue\"]",
+                "importTest1.completedAt", "2023-08-21 05:17AM",
+                "importTest1[2].complete", "true",
+                "importTest1[2].importFirstName", "Jeffrey",
+                "importTest1[2].importFavColors", "[\"green\"]",
+                "importTest1[2].completedAt", "2023-08-20 05:17AM");
+
+        Enrollee enrollee = enrolleeImportService.importEnrollee(
+                bundle.getPortal().getShortcode(),
+                bundle.getStudy().getShortcode(),
+                bundle.getStudyEnv(),
+                enrolleeMap,
+                new ExportOptions(), null);
+
+        List<SurveyResponse> responses = surveyResponseService.findByEnrolleeId(enrollee.getId());
+
+        assertThat(responses, hasSize(2));
+
+        responses.sort(Comparator.comparing(SurveyResponse::getLastUpdatedAt));
+
+        SurveyResponse previousResponse = surveyResponseService.findOneWithAnswers(responses.get(0).getId()).orElseThrow();
+        SurveyResponse latestResponse = surveyResponseService.findOneWithAnswers(responses.get(1).getId()).orElseThrow();
+
+        assertThat(previousResponse.getSurveyId(), equalTo(survey.getId()));
+        assertThat(previousResponse.isComplete(), equalTo(true));
+        assertThat(previousResponse.getLastUpdatedAt(), equalTo(instantFromZone("2023-08-20 05:17AM")));
+        assertThat(previousResponse.getAnswers().stream().filter(answer -> answer.getQuestionStableId().equals("importFirstName"))
+                .findFirst().get().getStringValue(), equalTo("Jeffrey"));
+
+        assertThat(latestResponse.getSurveyId(), equalTo(survey.getId()));
+        assertThat(latestResponse.isComplete(), equalTo(true));
+        assertThat(latestResponse.getLastUpdatedAt(), equalTo(instantFromZone("2023-08-21 05:17AM")));
+        assertThat(latestResponse.getAnswers().stream().filter(answer -> answer.getQuestionStableId().equals("importFirstName"))
+                .findFirst().get().getStringValue(), equalTo("Jeff"));
+
+
+    }
+
+    @Test
+    @Transactional
+    public void testImportAndReimportMultipleSurveyResponses(TestInfo info) {
+        StudyEnvironmentBundle studyEnvBundle = studyEnvironmentFactory.buildBundle(getTestName(info), EnvironmentName.irb);
+        Survey survey = surveyFactory.buildPersisted(surveyFactory.builder(getTestName(info))
+                .stableId("importTest1")
+                .content(TWO_QUESTION_SURVEY_CONTENT)
+                .portalId(studyEnvBundle.getPortal().getId())
+                .autoAssign(true)
+                .version(1)
+        );
+        surveyFactory.attachToEnv(survey, studyEnvBundle.getStudyEnv().getId(), true);
+        String username = "asdf@asdf.com";
+
+        String oldCompletionDateStr = "2023-08-20 05:17AM";
+        String latestCompletionDateStr = "2023-08-24 05:17AM";
+        Instant oldCompletionDate = instantFromZone("2023-08-20 05:17AM");
+        Instant latestCompletionDate = instantFromZone("2023-08-24 05:17AM");
+
+        EnrolleeBundle enrolleeBundle = enrolleeFactory.enroll(
+                username,
+                studyEnvBundle.getPortal().getShortcode(),
+                studyEnvBundle.getStudy().getShortcode(),
+                studyEnvBundle.getStudyEnv().getEnvironmentName());
+
+        // IMPORT 1 - update latest completion, add old response
+        Map<String, String> enrolleeMap1 = Map.of("enrollee.subject", "true", "account.username", username,
+                "importTest1.complete", "true",
+                "importTest1.importFirstName", "Jeff",
+                "importTest1.importFavColors", "[\"red\", \"blue\"]",
+                "importTest1.completedAt", latestCompletionDateStr,
+                "importTest1[2].complete", "true",
+                "importTest1[2].importFirstName", "Jeffrey",
+                "importTest1[2].importFavColors", "[\"green\"]",
+                "importTest1[2].completedAt", oldCompletionDateStr);
+
+        Enrollee enrollee = enrolleeImportService.importEnrollee(
+                studyEnvBundle.getPortal().getShortcode(),
+                studyEnvBundle.getStudy().getShortcode(),
+                studyEnvBundle.getStudyEnv(),
+                enrolleeMap1,
+                new ExportOptions(), null);
+
+        List<SurveyResponse> importedResponses = surveyResponseService.findByEnrolleeId(enrollee.getId()).stream().map(response -> surveyResponseService.findOneWithAnswers(response.getId()).orElseThrow()).sorted(Comparator.comparing(SurveyResponse::getCreatedAt)).collect(Collectors.toList());
+        List<ParticipantTask> importedTasks = participantTaskService.findAllTasksForActivity(enrolleeBundle.portalParticipantUser().getId(), studyEnvBundle.getStudyEnv().getId(), survey.getStableId()).stream().sorted(Comparator.comparing(ParticipantTask::getCompletedAt)).collect(Collectors.toList());
+
+        assertThat(importedResponses, hasSize(2));
+        assertThat(importedTasks, hasSize(2));
+
+        SurveyResponse importedOldResponse = importedResponses.get(0);
+        ParticipantTask importedOldTask = importedTasks.get(0);
+
+        assertThat(importedOldResponse.getCreatedAt(), equalTo(oldCompletionDate));
+        assertThat(importedOldTask.getSurveyResponseId(), equalTo(importedOldResponse.getId()));
+        assertThat(importedOldTask.getCompletedAt(), equalTo(oldCompletionDate));
+        assertThat(importedOldResponse.getAnswers().size(), equalTo(2));
+        assertThat(importedOldResponse.getAnswers().stream().map(Answer::valueAsString).collect(Collectors.toSet()), equalTo(Set.of("Jeffrey", "[\"green\"]")));
+
+        SurveyResponse importedLatestResponse = importedResponses.get(1);
+        ParticipantTask importedLatestTask = importedTasks.get(1);
+
+        assertThat(importedLatestResponse.getCreatedAt(), equalTo(latestCompletionDate));
+        assertThat(importedLatestTask.getCompletedAt(), equalTo(latestCompletionDate));
+        assertThat(importedLatestTask.getSurveyResponseId(), equalTo(importedLatestResponse.getId()));
+        assertThat(importedLatestResponse.getAnswers().size(), equalTo(2));
+        assertThat(importedLatestResponse.getAnswers().stream().map(Answer::valueAsString).collect(Collectors.toSet()), equalTo(Set.of("Jeff", "[\"red\", \"blue\"]")));
+
+
+        // IMPORT 2 - replace answers from import 1
+        Map<String, String> enrolleeMap2 = Map.of("enrollee.subject", "true", "account.username", username,
+                "importTest1.complete", "true",
+                "importTest1.importFirstName", "Alex",
+                "importTest1.importFavColors", "[\"aquamarine\", \"purple\"]",
+                "importTest1.completedAt", latestCompletionDateStr,
+                "importTest1[2].complete", "true",
+                "importTest1[2].importFirstName", "Alexander",
+                "importTest1[2].importFavColors", "[\"orange\"]",
+                "importTest1[2].completedAt", oldCompletionDateStr);
+
+        enrollee = enrolleeImportService.importEnrollee(
+                studyEnvBundle.getPortal().getShortcode(),
+                studyEnvBundle.getStudy().getShortcode(),
+                studyEnvBundle.getStudyEnv(),
+                enrolleeMap2,
+                new ExportOptions(), null);
+
+        importedResponses = surveyResponseService.findByEnrolleeId(enrollee.getId()).stream().map(response -> surveyResponseService.findOneWithAnswers(response.getId()).orElseThrow()).sorted(Comparator.comparing(SurveyResponse::getCreatedAt)).collect(Collectors.toList());
+        importedTasks = participantTaskService.findAllTasksForActivity(enrolleeBundle.portalParticipantUser().getId(), studyEnvBundle.getStudyEnv().getId(), survey.getStableId()).stream().sorted(Comparator.comparing(ParticipantTask::getCompletedAt)).collect(Collectors.toList());
+
+        assertThat(importedResponses, hasSize(2));
+        assertThat(importedTasks, hasSize(2));
+
+        importedOldResponse = importedResponses.get(0);
+        importedOldTask = importedTasks.get(0);
+
+        assertThat(importedOldResponse.getCreatedAt(), equalTo(oldCompletionDate));
+        assertThat(importedOldTask.getCompletedAt(), equalTo(oldCompletionDate));
+        assertThat(importedOldTask.getSurveyResponseId(), equalTo(importedOldResponse.getId()));
+        assertThat(importedOldResponse.getAnswers().size(), equalTo(2));
+        assertThat(importedOldResponse.getAnswers().stream().map(Answer::valueAsString).collect(Collectors.toSet()), equalTo(Set.of("Alexander", "[\"orange\"]")));
+
+        importedLatestResponse = importedResponses.get(1);
+        importedLatestTask = importedTasks.get(1);
+
+        assertThat(importedLatestResponse.getCreatedAt(), equalTo(latestCompletionDate));
+        assertThat(importedLatestTask.getCompletedAt(), equalTo(latestCompletionDate));
+        assertThat(importedLatestTask.getSurveyResponseId(), equalTo(importedLatestResponse.getId()));
+        assertThat(importedLatestResponse.getAnswers().size(), equalTo(2));
+        assertThat(importedLatestResponse.getAnswers().stream().map(Answer::valueAsString).collect(Collectors.toSet()), equalTo(Set.of("Alex", "[\"aquamarine\", \"purple\"]")));
 
     }
 

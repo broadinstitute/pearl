@@ -38,7 +38,7 @@ public class ParticipantUserFormatterTests {
                 "account.createdAt", "2023-08-21 05:17AM"
         );
         ParticipantUserFormatter moduleFormatter = new ParticipantUserFormatter(new ExportOptions());
-        ParticipantUser user = moduleFormatter.fromStringMap(UUID.randomUUID(), valueMap);
+        ParticipantUser user = moduleFormatter.fromStringMap(UUID.randomUUID(), valueMap, 1);
         assertThat(user.getUsername(), equalTo(valueMap.get("account.username")));
     assertThat(ExportFormatUtils.formatInstant(user.getCreatedAt(), ZoneId.of("America/New_York")),
                 equalTo(valueMap.get("account.createdAt")));
