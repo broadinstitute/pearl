@@ -110,6 +110,9 @@ const SelectedFiles = (
   return <div className='card'>
     <div className='card-body'>
       <p className='card-title mb-2'>Selected documents ({selectedFiles.length})</p>
+      {selectedFiles.length > 0 && <div className="fst-italic text-muted text-wrap pb-2">
+        These documents are included in your response:
+      </div>}
       {selectedFiles.length === 0 && <div className='fst-italic text-muted mt-3'>No documents selected</div>}
       {selectedFiles.map(selectedFile => {
         return <FileRow
@@ -168,6 +171,9 @@ const Library = (
         isSelected={false}
       />}
       {expanded && <>
+        {unselectedFiles.length > 0 && <div className="fst-italic text-muted text-wrap pb-2">
+          These documents are not included in your response:
+        </div>}
         {unselectedFiles.length === 0 && <div className='fst-italic text-muted'>No documents available</div>}
         {unselectedFiles.map(file => {
           return <FileRow
