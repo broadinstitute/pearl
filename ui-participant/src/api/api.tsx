@@ -3,6 +3,7 @@ import {
   Answer,
   Enrollee,
   EnrolleeRelation,
+  EnvironmentName,
   HubResponse,
   LogEvent,
   MailingAddress,
@@ -155,8 +156,10 @@ export default {
     return parsedResponse
   },
 
-  async getLanguageTexts(selectedLanguage: string, portalShortcode?: string): Promise<Record<string, string>> {
-    const params = queryString.stringify({ portalShortcode, language: selectedLanguage  })
+  async getLanguageTexts(
+    selectedLanguage: string, portalShortcode?: string, environmentName?: EnvironmentName
+  ): Promise<Record<string, string>> {
+    const params = queryString.stringify({ portalShortcode, language: selectedLanguage, environmentName })
     const url = `${API_ROOT}/public/i18n/v1?${params}`
     const response = await fetch(url, this.getGetInit())
     return await this.processJsonResponse(response)

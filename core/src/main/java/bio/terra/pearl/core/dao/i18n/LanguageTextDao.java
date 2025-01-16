@@ -29,14 +29,27 @@ public class LanguageTextDao extends BaseMutableJdbiDao<LanguageText> {
         deleteByTwoProperties("key_name", keyName, "portal_id", portalId);
     }
 
-    //returns all language texts that are either global or portal specific
-    public List<LanguageText> findByPortalIdOrNullPortalId(UUID portalId, String language) {
+    //returns all language texts for a portal environment, with overrides for the given language
+    public List<LanguageText> findWithOverridesByPortalEnvId(UUID portalEnvId, String language) {
         return jdbi.withHandle(
             handle ->
                 handle
                     .createQuery(
-                        "SELECT * FROM language_text WHERE (portal_id = :portalId OR portal_id IS NULL) AND language = :language")
-                    .bind("portalId", portalId)
+                            // distinct on key_name and order by localized_site_content_id is used to ensure that
+                            // if there are conflicting keys, the one with localized_site_content_id will be used
+                            """
+                                    SELECT DISTINCT ON(lt.key_name) lt.* FROM language_text lt
+                                    WHERE (
+                                        lt.localized_site_content_id IN (select lsc.id from portal_environment pe
+                                                                          inner join site_content sc on pe.site_content_id = sc.id
+                                                                          inner join localized_site_content lsc on sc.id = lsc.site_content_id
+                                                                          where pe.id = :portalEnvId )
+                                        OR lt.portal_id = (select portal_id from portal_environment where id = :portalEnvId)
+                                        OR (lt.localized_site_content_id IS NULL and lt.portal_id IS NULL)
+                                    ) AND lt.language = :language
+                                    ORDER BY lt.key_name, lt.localized_site_content_id, lt.portal_id ASC
+                                    """)
+                        .bind("portalEnvId", portalEnvId)
                     .bind("language", language)
                     .mapToBean(LanguageText.class)
                     .list());
@@ -48,5 +61,9 @@ public class LanguageTextDao extends BaseMutableJdbiDao<LanguageText> {
 
     public List<LanguageText> findByPortalId(UUID id, String lang) {
         return findAllByTwoProperties("portal_id", id, "language", lang);
+    }
+
+    public void deleteByLocalSite(UUID localSiteId) {
+        deleteByProperty("localized_site_content_id", localSiteId);
     }
 }

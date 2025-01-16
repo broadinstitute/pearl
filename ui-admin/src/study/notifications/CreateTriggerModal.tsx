@@ -42,13 +42,17 @@ const getDefaultConfig = (): Trigger => {
 }
 
 /** Modal for a new notification config -- only specifies the basic attributes */
-export default function CreateTriggerModal({ studyEnvContext, onDismiss, onCreate }:
+export default function CreateTriggerModal({ studyEnvContext, onDismiss, onCreate, initialOpts }:
                                              {
                                                studyEnvContext: StudyEnvContextT,
                                                onDismiss: () => void,
                                                onCreate: (config: Trigger) => void
+                                               initialOpts?: Partial<Trigger>
                                              }) {
-  const [config, setConfig] = React.useState<Trigger>(getDefaultConfig())
+  const [config, setConfig] = React.useState<Trigger>({
+    ...getDefaultConfig(),
+    ...initialOpts
+  })
   const [isLoading, setIsLoading] = useState(false)
   const localizedEmailTemplate = config.emailTemplate.localizedEmailTemplates[0]
 
@@ -79,12 +83,12 @@ export default function CreateTriggerModal({ studyEnvContext, onDismiss, onCreat
 
   return <Modal show={true} className="modal-lg" onHide={onDismiss}>
     <Modal.Header closeButton>
-      <Modal.Title>Create Notification</Modal.Title>
+      <Modal.Title>Create Automation</Modal.Title>
     </Modal.Header>
     <Modal.Body>
       <form className="bg-white p-3 my-2">
         <label className="form-label" htmlFor="templateName">
-                    Notification name (this name is only for staff use -- participants will not see it)
+                    Trigger name (this name is only for staff use -- participants will not see it)
         </label>
         <input type="text" size={20} id="templateName" className="form-control mb-3"
           value={config.emailTemplate.name}

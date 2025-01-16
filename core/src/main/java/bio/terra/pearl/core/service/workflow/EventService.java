@@ -1,5 +1,6 @@
 package bio.terra.pearl.core.service.workflow;
 
+import bio.terra.pearl.core.dao.kit.KitTypeDao;
 import bio.terra.pearl.core.dao.workflow.EventDao;
 import bio.terra.pearl.core.model.BaseEntity;
 import bio.terra.pearl.core.model.kit.KitRequest;
@@ -13,6 +14,7 @@ import bio.terra.pearl.core.model.survey.SurveyResponse;
 import bio.terra.pearl.core.model.workflow.*;
 import bio.terra.pearl.core.service.ImmutableEntityService;
 import bio.terra.pearl.core.service.consent.EnrolleeConsentEvent;
+import bio.terra.pearl.core.service.exception.NotFoundException;
 import bio.terra.pearl.core.service.kit.KitStatusEvent;
 import bio.terra.pearl.core.service.rule.EnrolleeContext;
 import bio.terra.pearl.core.service.rule.EnrolleeContextService;
@@ -37,12 +39,14 @@ import java.util.UUID;
 public class EventService extends ImmutableEntityService<Event, EventDao> {
     private final ParticipantTaskService participantTaskService;
     private final EnrolleeContextService enrolleeContextService;
+    private final KitTypeDao kitTypeDao;
 
     public EventService(EventDao dao, ParticipantTaskService participantTaskService,
-                        EnrolleeContextService enrolleeContextService) {
+                        EnrolleeContextService enrolleeContextService, KitTypeDao kitTypeDao) {
         super(dao);
         this.participantTaskService = participantTaskService;
         this.enrolleeContextService = enrolleeContextService;
+        this.kitTypeDao = kitTypeDao;
     }
 
     /**
@@ -53,7 +57,16 @@ public class EventService extends ImmutableEntityService<Event, EventDao> {
      */
     public KitStatusEvent publishKitStatusEvent(KitRequest kitRequest, Enrollee enrollee,
                                                 PortalParticipantUser portalParticipantUser, KitRequestStatus priorStatus) {
-        KitStatusEvent event = KitStatusEvent.newInstance(kitRequest, priorStatus);
+        if (kitRequest.getKitTypeId() == null) {
+            throw new IllegalArgumentException("Kit type must be provided to publish a kit status event");
+        }
+        if (kitRequest.getKitType() == null) {
+            // ensure the kitRequest has the type on it for filter processing
+            kitRequest.setKitType(kitTypeDao.find(kitRequest.getKitTypeId())
+                    .orElseThrow(() -> new NotFoundException("Could not find kit type, kit id: %s".formatted(kitRequest.getId()))));
+        }
+
+        KitStatusEvent event = KitStatusEvent.newInstance(kitRequest, priorStatus, kitRequest.getKitType());
         event.setEnrollee(enrollee);
         event.setPortalParticipantUser(portalParticipantUser);
         populateEvent(event);

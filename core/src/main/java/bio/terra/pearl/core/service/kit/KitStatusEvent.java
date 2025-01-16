@@ -2,6 +2,7 @@ package bio.terra.pearl.core.service.kit;
 
 import bio.terra.pearl.core.model.kit.KitRequest;
 import bio.terra.pearl.core.model.kit.KitRequestStatus;
+import bio.terra.pearl.core.model.kit.KitType;
 import bio.terra.pearl.core.service.workflow.EnrolleeEvent;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,8 +16,9 @@ import lombok.experimental.SuperBuilder;
 public class KitStatusEvent extends EnrolleeEvent {
     private KitRequestStatus priorStatus;
     private KitRequest kitRequest;
+    private KitType kitType;
 
-    public static KitStatusEvent newInstance(KitRequest kitRequest, KitRequestStatus priorStatus) {
+    public static KitStatusEvent newInstance(KitRequest kitRequest, KitRequestStatus priorStatus, KitType kitType) {
         KitStatusEventBuilder<?, ?> builder = KitStatusEvent.builder();
         if (KitRequestStatus.SENT.equals(kitRequest.getStatus())) {
             builder = KitSentEvent.builder();
@@ -26,6 +28,12 @@ public class KitStatusEvent extends EnrolleeEvent {
         return builder
             .kitRequest(kitRequest)
             .priorStatus(priorStatus)
+            .kitType(kitType)
             .build();
+    }
+
+    @Override
+    public String getTargetStableId() {
+        return kitType.getName();
     }
 }

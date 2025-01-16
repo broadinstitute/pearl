@@ -112,10 +112,10 @@ export const TriggerDesigner = (
 
     {showDeleteModal && (
       <Modal show className="modal" onHide={() => setShowDeleteModal(false)}>
-        <Modal.Header closeButton className="danger"><strong>Delete Notification Config</strong></Modal.Header>
+        <Modal.Header closeButton className="danger"><strong>Delete automatic action</strong></Modal.Header>
         <Modal.Body>
           <p className="fst-italic">
-            Are you sure you want to delete this notification configuration? This cannot be undone.
+            Are you sure you want to delete this automation? This cannot be undone.
           </p>
         </Modal.Body>
         <Modal.Footer>

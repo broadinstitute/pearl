@@ -2,14 +2,12 @@ package bio.terra.pearl.core.service.i18n;
 
 import bio.terra.pearl.core.dao.i18n.LanguageTextDao;
 import bio.terra.pearl.core.model.i18n.LanguageText;
+import bio.terra.pearl.core.service.CascadeProperty;
 import bio.terra.pearl.core.service.CrudService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class LanguageTextService extends CrudService<LanguageText, LanguageTextDao> {
@@ -22,8 +20,8 @@ public class LanguageTextService extends CrudService<LanguageText, LanguageTextD
     }
 
     @Cacheable(value = "languageTexts", key = "#language")
-    public HashMap<String, String> getLanguageTextMapForLanguage(UUID portalId, String language) {
-        List<LanguageText> languageTexts = languageTextDao.findByPortalIdOrNullPortalId(portalId, language);
+    public HashMap<String, String> getLanguageTextMapForLanguage(UUID portalEnvId, String language) {
+        List<LanguageText> languageTexts = languageTextDao.findWithOverridesByPortalEnvId(portalEnvId, language);
 
         HashMap<String, String> languageTextMap = new HashMap<>();
         for (LanguageText languageText : languageTexts) {
@@ -41,4 +39,7 @@ public class LanguageTextService extends CrudService<LanguageText, LanguageTextD
         return languageTextDao.findByKeyNameAndLanguage(keyName, language);
     }
 
+    public void deleteByLocalSite(UUID localSiteId, Set<CascadeProperty> cascades) {
+        languageTextDao.deleteByLocalSite(localSiteId);
+    }
 }

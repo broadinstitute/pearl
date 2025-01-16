@@ -13,7 +13,14 @@
       "populateFileName": "en/participation.json"
     }, {
       "populateFileName": "en/learnMore.json"
-    }]
+    }],
+    "languageTextOverrides": [
+      {
+        "text": "Join Us",
+        "keyName": "navbarJoin"
+      }
+    ]
+
   },{
     "language": "es",
     "navLogoCleanFileName": "juniper-demo-logo.png",
@@ -39,6 +46,12 @@
       "populateFileName": "dev/participation.json"
     }, {
       "populateFileName": "dev/learnMore.json"
-    }]
+    }],
+    "languageTextOverrides": [
+      {
+        "text": "DEV_Join Us",
+        "keyName": "navbarJoin"
+      }
+    ]
   }]
 }

@@ -9,9 +9,7 @@ import {
   Routes,
   useNavigate
 } from 'react-router-dom'
-import TriggerTypeDisplay, { deliveryTypeDisplayMap } from './TriggerTypeDisplay'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
+
 import {
   StudyEnvContextT,
   triggerPath
@@ -31,6 +29,9 @@ import {
 import CollapsableMenu from 'navbar/CollapsableMenu'
 import TriggerNotifications from './TriggerNotifications'
 import { TriggerDesigner } from 'study/notifications/TriggerDesigner'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { triggerName } from '../workflow/workflowUtils'
 
 const TRIGGER_GROUPS = [
   { title: 'Events', type: 'EVENT' },
@@ -74,7 +75,6 @@ export default function TriggerList({ studyEnvContext, portalContext }:
 
   return <div className="container-fluid px-4 py-2">
     {renderPageHeader('Study Automation')}
-
     <div className="d-flex">
       {isLoading && <LoadingSpinner/>}
       {!isLoading && <div style={navDivStyle}>
@@ -86,10 +86,8 @@ export default function TriggerList({ studyEnvContext, portalContext }:
                   .filter(trigger => trigger.triggerType === group.type)
                   .map(trigger => <li key={trigger.id} className="mb-2">
                     <div className="d-flex">
-                      <NavLink to={`triggers/${trigger.id}`} style={navLinkStyleFunc}>
-                        <TriggerTypeDisplay config={trigger}/>
-                        <span
-                          className="text-muted fst-italic"> ({deliveryTypeDisplayMap[trigger.deliveryType]})</span>
+                      <NavLink to={trigger.id} style={navLinkStyleFunc}>
+                        { triggerName(trigger) }
                       </NavLink>
                     </div>
                   </li>
@@ -106,10 +104,10 @@ export default function TriggerList({ studyEnvContext, portalContext }:
       </div> }
       <div className="flex-grow-1 bg-white px-3">
         <Routes>
-          <Route path="triggers/:triggerId"
+          <Route path=":triggerId"
             element={<TriggerDesigner studyEnvContext={studyEnvContext}
               portalContext={portalContext} onDelete={onDelete}/>}/>
-          <Route path="triggers/:triggerId/notifications" element={
+          <Route path=":triggerId/notifications" element={
             <TriggerNotifications studyEnvContext={studyEnvContext}/>}/>
         </Routes>
         <Outlet/>

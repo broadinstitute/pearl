@@ -1,0 +1,19 @@
+{
+  "stableId": "kitReceived",
+  "name": "Kit received email",
+  "version": 1,
+  "publishedVersion": 1,
+  "localizedEmailTemplateDtos": [{
+    "language": "en",
+    "subject": "Your kit was received -- thanks!",
+    "bodyPopulateFile": "en/kitReceived.html"
+  },{
+    "language": "es",
+    "subject": "¡Su kit fue recibido - gracias!",
+    "bodyPopulateFile": "es/kitReceived.html"
+  },{
+    "language": "dev",
+    "subject": "DEV_Your kit was received -- thanks!",
+    "bodyPopulateFile": "dev/kitReceived.html"
+  }]
+}

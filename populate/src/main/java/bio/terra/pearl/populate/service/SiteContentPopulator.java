@@ -113,6 +113,7 @@ public class SiteContentPopulator extends BasePopulator<SiteContent, SiteContent
                 // if a navbar item has any html pages in its dto, add it to the top level pages list
                 lsc.getPages().addAll(getPages(navItem));
             }
+
             lsc.getNavbarItems().clear();
             lsc.getNavbarItems().addAll(lsc.getNavbarItemDtos());
             initializeFooterConfig(lsc, context);

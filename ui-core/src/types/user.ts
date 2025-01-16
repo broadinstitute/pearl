@@ -33,6 +33,8 @@ export type PortalParticipantUser = {
     createdAt: number
     lastLogin: number
     profile?: Profile
+    profileId?: string
+    participantUserId: string
 }
 
 export type Enrollee = {

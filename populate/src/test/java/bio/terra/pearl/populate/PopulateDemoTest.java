@@ -45,6 +45,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
     @Transactional
     public void testPopulateDemo() throws Exception {
         baseSeedPopulator.populateRolesAndPermissions();
+        baseSeedPopulator.populateKitTypes();
         Portal portal = portalPopulator.populate(new FilePopulateContext("portals/demo/portal.json"), true);
         Assertions.assertEquals("demo", portal.getShortcode());
         PortalEnvironment sandbox = portalEnvironmentService.findOne("demo", EnvironmentName.sandbox).get();
@@ -235,6 +236,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
     public void testPopulateWithShortcodeOverride() {
         String newShortcode = RandomStringUtils.randomAlphabetic(6);
         baseSeedPopulator.populateRolesAndPermissions();
+        baseSeedPopulator.populateKitTypes();
         Portal portal = portalPopulator.populate(new FilePopulateContext("portals/demo/portal.json", false, newShortcode), true);
         assertThat(portal.getShortcode(), equalTo(newShortcode));
         Study mainStudy = portal.getPortalStudies().stream().findFirst().get().getStudy();
@@ -247,7 +249,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
             assertThat(siteContent.getStableId(), Matchers.startsWith(newShortcode));
         });
         List<EmailTemplate> emailTemplates = emailTemplateService.findByPortalId(portal.getId());
-        assertThat(emailTemplates, hasSize(9));
+        assertThat(emailTemplates, hasSize(13));
         emailTemplates.forEach(emailTemplate -> {
             assertThat(emailTemplate.getStableId(), Matchers.startsWith(newShortcode));
         });
@@ -271,7 +273,7 @@ public class PopulateDemoTest extends BasePopulatePortalsTest {
         List<StudyEnvironmentSurvey> socialHealthSurveys = studyEnvironmentSurveys.stream().filter((ses) -> ses.getSurvey().getStableId().equals("hd_hd_socialHealth")).toList();
         // check that the past versions of the social health survey are included
         assertThat(socialHealthSurveys, hasSize(3));
-        assertThat(socialHealthSurveys.stream().map(ses -> ses.getSurvey().getVersion()).toList(), contains(1, 2, 3));
+        assertThat(socialHealthSurveys.stream().map(ses -> ses.getSurvey().getVersion()).collect(Collectors.toSet()), contains(1, 2, 3));
         // and they all got assigned to the same ordering
         assertThat(socialHealthSurveys, everyItem(hasProperty("surveyOrder", equalTo(7))));
         // check that outreach surveys are independently ordered

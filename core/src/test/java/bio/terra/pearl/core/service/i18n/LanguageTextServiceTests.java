@@ -4,18 +4,16 @@ import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.i18n.LanguageTextFactory;
 import bio.terra.pearl.core.factory.portal.PortalFactory;
 import bio.terra.pearl.core.model.i18n.LanguageText;
-import bio.terra.pearl.core.model.portal.Portal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 public class LanguageTextServiceTests extends BaseSpringBootTest  {
 
@@ -56,30 +54,6 @@ public class LanguageTextServiceTests extends BaseSpringBootTest  {
         assertThat(langTexts, equalTo(Map.of(
             testName + "login", testName + " text",
             testName + "logout", testName + " text"
-        )));
-    }
-
-    @Test
-    @Transactional
-    public void testGetLanguageTextMapForPortal(TestInfo testInfo) {
-        String testName = getTestName(testInfo);
-
-        Portal portalA = portalFactory.buildPersisted(testName);
-        Portal portalB = portalFactory.buildPersisted(testName);
-
-        languageTextFactory.buildPersisted(testName, "globalKey", "testLang");
-        languageTextFactory.buildPersisted(testName, "login", "testLang", portalA.getId());
-        languageTextFactory.buildPersisted(testName, "login", "testLang", portalB.getId());
-        languageTextFactory.buildPersisted(testName, "logout", "testLang", portalA.getId());
-        languageTextFactory.buildPersisted(testName, "logout", "testLang", portalB.getId());
-
-        Map<String, String> langTexts = languageTextService.getLanguageTextMapForLanguage(portalA.getId(), "testLang");
-
-        //This should only return the texts for portalA, as well as the global texts
-        assertThat(langTexts, equalTo(Map.of(
-            testName + "login", testName + " text",
-            testName + "logout", testName + " text",
-            testName + "globalKey", testName + " text"
         )));
     }
 

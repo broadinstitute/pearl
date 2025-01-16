@@ -2,6 +2,7 @@ import { mockEnrollee } from 'test-utils/mocking-utils'
 import { mockParticipantUser } from '@juniper/ui-participant/src/test-utils/test-participant-factory'
 import { identifyDupes } from './UseParticipantDupeTab'
 import { ParticipantUserWithEnrollees } from '../participantList/PortalUserList'
+import { mockProfile } from '@juniper/ui-core'
 
 test('identifies username dupes', async () => {
   const users: ParticipantUserWithEnrollees[] = [{
@@ -35,6 +36,7 @@ test('identifies profile name dupes', async () => {
     enrollees: [{
       ...mockEnrollee(),
       profile: {
+        ...mockProfile(),
         givenName: 'John',
         familyName: 'Doe'
       }
@@ -46,6 +48,7 @@ test('identifies profile name dupes', async () => {
     enrollees: [{
       ...mockEnrollee(),
       profile: {
+        ...mockProfile(),
         givenName: 'Steve',
         familyName: 'Doe'
       }
@@ -57,6 +60,7 @@ test('identifies profile name dupes', async () => {
     enrollees: [{
       ...mockEnrollee(),
       profile: {
+        ...mockProfile(),
         givenName: 'john',
         familyName: 'Doe'
       }

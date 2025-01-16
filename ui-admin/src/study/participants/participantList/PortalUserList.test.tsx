@@ -5,8 +5,9 @@ import { mockStudy, mockStudyEnv } from '@juniper/ui-participant/src/test-utils/
 import Api, { ParticipantUsersAndEnrollees, Study } from 'api/api'
 import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
-import { expectCellToHaveText } from '../../../test-utils/table-testing-utils'
+import { expectCellToHaveText } from 'test-utils/table-testing-utils'
 import { userEvent } from '@testing-library/user-event'
+import { mockProfile } from '@juniper/ui-core'
 
 // confirm it can show a user list, identify duplicates, and preview a merge
 test('shows participantUser list', async () => {
@@ -50,13 +51,13 @@ test('shows participantUser list', async () => {
     }],
     enrollees: [{
       ...mockEnrollee(),
-      profile: { givenName: 'John', familyName: 'Doe' },
+      profile: { ...mockProfile(), givenName: 'John', familyName: 'Doe' },
       participantUserId: 'id1',
       shortcode: 'AAAAAA',
       studyEnvironmentId: 'studyEnv1'
     }, {
       ...mockEnrollee(),
-      profile: { givenName: 'John', familyName: 'Doe' },
+      profile: { ...mockProfile(), givenName: 'John', familyName: 'Doe' },
       participantUserId: 'id3',
       shortcode: 'CCCCCCC',
       studyEnvironmentId: 'studyEnv2'
