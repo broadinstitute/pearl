@@ -99,8 +99,7 @@ describe('Portal Settings', () => {
         'emailSourceAddress': 'testing@test.com',
         'initialized': true,
         'password': 'broad_institute',
-        'passwordProtected': false,
-        timeZone: 'America/New_York'
+        'passwordProtected': false
       })
   })
 })
