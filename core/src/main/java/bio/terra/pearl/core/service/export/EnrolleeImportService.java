@@ -277,6 +277,10 @@ public class EnrolleeImportService {
                 importItems.add(createImportItemFromEnrollee(accountEnrollee, importId));
             }
         } catch (Exception e) {
+            System.out.println("Error importing enrollee: " + e.getMessage());
+            System.out.println(Arrays.toString(e.getStackTrace()));
+            System.out.println("exception class: " + e.getClass());
+
             importItems.add(createFailedImportItem(importId, e.getMessage(), Arrays.toString(e.getStackTrace()), adminId));
             if (!accountData.getProxyData().isEmpty()) {
                 log.warn("failed to import primary enrollee, skipping proxy import for username: {}", accountData.getEmail());
@@ -304,6 +308,7 @@ public class EnrolleeImportService {
                         auditInfo
                 );
             } catch (Exception e) {
+                System.out.println("Error importing proxy: " + e.getMessage());
                 importItems.add(createFailedImportItem(importId, e.getMessage(), Arrays.toString(e.getStackTrace()), adminId));
             }
         }
@@ -593,7 +598,7 @@ public class EnrolleeImportService {
                     .orElse(null);
         } else {
             if (completedAt.isEmpty()) {
-                throw new IllegalStateException("completedAt must be specified for importing survey response history");
+                throw new IllegalStateException("Failed importing %s: completedAt must be specified for importing survey response history".formatted(formatter.getModuleName()));
             }
             // case 2: completedAt is specified, find task with that completion time
             relatedTask = participantTaskService.findTaskForActivityWithCompletionTime(ppUser.getId(), studyEnv.getId(), formatter.getModuleName(), completedAt.get())
@@ -633,7 +638,7 @@ public class EnrolleeImportService {
     private Optional<Instant> parseSurveyFieldToInstant(SurveyFormatter formatter, Map<String, String> enrolleeMap, Integer repeatNum, String field) {
         String key = formatter.formatColumnKey(repeatNum, field);
         if (enrolleeMap.containsKey(key)) {
-            return Optional.of(ExportFormatUtils.importInstant(enrolleeMap.get(key)));
+            return Optional.ofNullable(ExportFormatUtils.importInstant(enrolleeMap.get(key)));
         }
         return Optional.empty();
     }
