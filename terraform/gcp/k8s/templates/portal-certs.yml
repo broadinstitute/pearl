@@ -18,6 +18,7 @@ metadata:
 spec:
   domains:
       - {{.customDomain}}
+      - www.{{.customDomain}}
       - sandbox.{{.customDomain}}
       - irb.{{.customDomain}}
 ---
