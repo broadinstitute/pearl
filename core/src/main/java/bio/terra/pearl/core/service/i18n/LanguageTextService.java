@@ -35,8 +35,8 @@ public class LanguageTextService extends CrudService<LanguageText, LanguageTextD
         languageTextDao.deleteByPortalId(portalId);
     }
 
-    public Optional<LanguageText> findByKeyNameAndLanguage(String keyName, String language) {
-        return languageTextDao.findByKeyNameAndLanguage(keyName, language);
+    public Optional<LanguageText> findSystemTextByKeyAndLanguage(String keyName, String language) {
+        return languageTextDao.findSystemTextByKeyAndLanguage(keyName, language);
     }
 
     public void deleteByLocalSite(UUID localSiteId, Set<CascadeProperty> cascades) {
