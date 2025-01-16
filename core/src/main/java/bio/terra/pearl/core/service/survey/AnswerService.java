@@ -70,8 +70,13 @@ public class AnswerService extends CrudService<Answer, AnswerDao> {
         }
 
         if (answer.getFormat().equals(AnswerFormat.FILE_NAME) && answer.getStringValue() != null) {
-            participantFileService.findByEnrolleeIdAndFileName(answer.getEnrolleeId(), answer.getStringValue())
-                    .orElseThrow(() -> new IllegalArgumentException("File (%s) not found for answer".formatted(answer.getStringValue())));
+            //Document request answers can have a list of file names, so we'll split them out and validate each one
+            List<String> fileNames = List.of(answer.getStringValue().split(","));
+
+            fileNames.forEach(fileName -> {
+                participantFileService.findByEnrolleeIdAndFileName(answer.getEnrolleeId(), fileName)
+                        .orElseThrow(() -> new IllegalArgumentException("File (%s) not found for answer".formatted(fileName)));
+            });
         }
     }
 }
