@@ -184,10 +184,7 @@ const Library = (
             isSelected={isSelected(file)}
             onUnselect={() => unselectFile(file)}
             onSelect={() => selectFile(file)}
-            onDownload={() => {
-              console.log(file)
-              downloadFile(file)
-            }}
+            onDownload={() => downloadFile(file)}
             key={file.id}
           />
         })}</>
@@ -276,7 +273,7 @@ const DragAndDrop = ({ uploadNewFile }: { uploadNewFile: (file: File) => void })
 
 const FileUpload = ({ uploadNewFile }: { uploadNewFile: (file: File) => void }) => {
   return <div>
-    <input type="file" className={'form-control'} onChange={e => {
+    <input type="file" data-testid="fileInput" className={'form-control'} onChange={e => {
       const file = e.target.files?.item(0) || null
       if (!isNil(file)) {
         uploadNewFile(file)
