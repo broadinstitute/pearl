@@ -238,7 +238,9 @@ export default function LanguageTextOverridesEditor(
 
   return <div className='px-3 pt-1'>
     <p>
-      This page allows you to override any default text across the participant website.
+      This page allows you to override any text in the participant application not found in your website content.
+      If you are unable to find the key of the text you would like to override, please contact Juniper support for
+      assistance.
     </p>
     {basicTableLayout(table, { tdClass: 'col-1 ' })}
     {overrideSelectedForDeletion && <DeleteOverrideModal
