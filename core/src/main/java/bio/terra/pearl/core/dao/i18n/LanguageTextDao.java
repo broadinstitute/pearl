@@ -21,8 +21,14 @@ public class LanguageTextDao extends BaseMutableJdbiDao<LanguageText> {
         super(jdbi);
     }
 
-    public Optional<LanguageText> findByKeyNameAndLanguage(String keyName, String language) {
-        return findByTwoProperties("key_name", keyName, "language", language);
+    public Optional<LanguageText> findSystemTextByKeyAndLanguage(String keyName, String language) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("select * from " + tableName + " where key_name = :keyName and language = :language and portal_id is null and localized_site_content_id is null")
+                        .bind("keyName", keyName)
+                        .bind("language", language)
+                        .mapTo(clazz)
+                        .findOne()
+        );
     }
 
     public void deleteByKeyNameAndPortal(String keyName, UUID portalId) {

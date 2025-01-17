@@ -241,7 +241,7 @@ const SettingsPage = ({
   return <div>
     <h2 className="h4">{title}</h2>
     {children}
-    <div>
+    <div className="py-3">
       {savePortalConfig && <Button
         variant="primary"
         onClick={savePortalConfig}

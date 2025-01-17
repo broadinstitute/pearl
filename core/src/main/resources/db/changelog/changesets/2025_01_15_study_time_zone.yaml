@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: "study_time_zone"
+      author: dbush
+      changes:
+        - addColumn:
+            tableName: study_environment_config
+            columns:
+              - column: { name: time_zone, type: text, defaultValue: "America/New_York"}  # per stackoverflow, this is the best way to store time zone
+        - addColumn:
+            tableName: export_options
+            columns:
+              - column: { name: time_zone, type: text }  # this defaults to null because the default is to use the study time zone
+        - sql:
+            sql:
+              update study_environment_config set time_zone = 'Europe/London' 
+              from study_environment 
+              join study on study_environment.study_id = study.id
+              where study_environment.study_environment_config_id = study_environment_config.id and
+              study.shortcode IN ('hh_registry', 'cmyop', 'pacing', 'pregheart'); # hearthive studies
+
+        - dropColumn: # carryover from prior PR
+            tableName: trigger
+            columnName: update_task_target_stable_id

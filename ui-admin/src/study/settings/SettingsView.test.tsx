@@ -1,5 +1,5 @@
 import React from 'react'
-import { setupRouterTest } from '@juniper/ui-core'
+import { renderWithRouter, setupRouterTest } from '@juniper/ui-core'
 import {
   mockPortalContext,
   mockPortalEnvironmentConfig,
@@ -106,14 +106,12 @@ describe('Portal Settings', () => {
 
 describe('Study Settings', () => {
   test('renders study settings', async () => {
-    const { RoutedComponent } = setupRouterTest(<MockUserProvider user={mockAdminUser(true)}>
+    renderWithRouter(<MockUserProvider user={mockAdminUser(true)}>
       <LoadedSettingsView
         studyEnvContext={mockStudyEnvContext()}
         portalContext={mockPortalContext()}
       />
     </MockUserProvider>, ['/enrollment'])
-
-    render(RoutedComponent)
 
     // renders general settings
 
@@ -135,32 +133,28 @@ describe('Study Settings', () => {
   })
   test('updates study settings', async () => {
     const mock = jest.spyOn(Api, 'updateStudyEnvironmentConfig')
+      .mockImplementation(jest.fn())
 
     const portalContext = mockPortalContext()
     const studyEnvContext = mockStudyEnvContext()
 
-    const { RoutedComponent } = setupRouterTest(<MockUserProvider user={mockAdminUser(true)}>
+    renderWithRouter(<MockUserProvider user={mockAdminUser(true)}>
       <LoadedSettingsView
-        studyEnvContext={studyEnvContext}
-        portalContext={portalContext}
+        studyEnvContext={mockStudyEnvContext()}
+        portalContext={mockPortalContext()}
       />
+      <ReactNotifications/>
     </MockUserProvider>, ['/enrollment'])
-
-    render(RoutedComponent)
 
     // renders general settings
 
     expect(screen.getByText('Study Enrollment Settings')).toBeInTheDocument()
 
-    await act(async () => {
-      await userEvent.clear(screen.getByLabelText('password'))
-      await userEvent.type(screen.getByLabelText('password'), 'super_secret')
-    })
 
-    await act(async () => {
-      await userEvent.click(screen.getByText('Save study settings'))
-    })
+    await userEvent.clear(screen.getByLabelText('password'))
+    await userEvent.type(screen.getByLabelText('password'), 'super_secret')
 
+    await userEvent.click(screen.getByText('Save study settings'))
 
     expect(mock).toHaveBeenCalledWith(
       portalContext.portal.shortcode,
@@ -175,7 +169,8 @@ describe('Study Settings', () => {
         'passwordProtected': false,
         'useDevDsmRealm': false,
         'useStubDsm': false,
-        'enableInPersonKits': false
+        'enableInPersonKits': false,
+        timeZone: 'America/New_York'
       }
     )
   })

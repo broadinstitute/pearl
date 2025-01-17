@@ -4,6 +4,7 @@ import bio.terra.pearl.core.BaseSpringBootTest;
 import bio.terra.pearl.core.factory.i18n.LanguageTextFactory;
 import bio.terra.pearl.core.factory.portal.PortalFactory;
 import bio.terra.pearl.core.model.i18n.LanguageText;
+import bio.terra.pearl.core.model.portal.Portal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,17 +29,31 @@ public class LanguageTextServiceTests extends BaseSpringBootTest  {
 
     @Test
     @Transactional
-    public void testFindByKeyNameAndLanguage(TestInfo testInfo) {
+    public void testFindSystemTextByKeyAndLanguage(TestInfo testInfo) {
         String testName = getTestName(testInfo);
         languageTextFactory.buildPersisted(testName, "testLogin", "fr");
         languageTextFactory.buildPersisted(testName, "testLogin", "es");
 
-        Optional<LanguageText> frenchLoginText = languageTextService.findByKeyNameAndLanguage(testName + "testLogin", "fr");
+        Optional<LanguageText> frenchLoginText = languageTextService.findSystemTextByKeyAndLanguage(testName + "testLogin", "fr");
         assertThat(frenchLoginText.isPresent(), equalTo(true));
         assertThat(frenchLoginText.get().getText(), equalTo(testName + " text"));
 
-        Optional<LanguageText> missingText = languageTextService.findByKeyNameAndLanguage("doesNotExist", "fr");
+        Optional<LanguageText> missingText = languageTextService.findSystemTextByKeyAndLanguage("doesNotExist", "fr");
         assertThat(missingText.isPresent(), equalTo(false));
+
+        Portal portal = portalFactory.buildPersisted(testName);
+
+        languageTextService.create(
+                LanguageText
+                        .builder()
+                        .text("SHOULD NOT RETURN OVERRIDE")
+                        .language("fr")
+                        .keyName("testLogin").build());
+
+        Optional<LanguageText> portalFrenchLoginText = languageTextService.findSystemTextByKeyAndLanguage(testName + "testLogin", "fr");
+
+        assertThat(portalFrenchLoginText.isPresent(), equalTo(true));
+        assertThat(portalFrenchLoginText.get().getText(), equalTo(testName + " text"));
     }
 
     @Test
