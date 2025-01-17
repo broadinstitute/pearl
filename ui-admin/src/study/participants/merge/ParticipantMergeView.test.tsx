@@ -3,6 +3,7 @@ import Api, { ParticipantUserMerge } from 'api/api'
 import React from 'react'
 import { waitFor, screen } from '@testing-library/react'
 import ParticipantMergeView from './ParticipantMergeView'
+import { mockProfile } from '@juniper/ui-core'
 
 test('renders a one-sided enrollee merge', async () => {
   const mergePlan: ParticipantUserMerge = {
@@ -33,7 +34,9 @@ test('renders a one-sided enrollee merge', async () => {
           'id': '7c1472bd-f069-4ca3-98ee-fe95513ac675',
           'createdAt': 0,
           'lastLogin': 0,
+          participantUserId: '05726fff-16d5-49cd-bac7-d09f1c3c2222',
           'profile': {
+            ...mockProfile(),
             'id': 'd1d3d01b-5ec7-49f4-9946-27669560042f',
             'givenName': 'somebody',
             'familyName': 'fam',
@@ -51,7 +54,9 @@ test('renders a one-sided enrollee merge', async () => {
         'target': {
           'id': 'cf7207b8-9cef-48f1-b289-bf7dcedb08a8',
           'createdAt': 0,
+          participantUserId: '05726fff-16d5-49cd-bac7-d09f1c31111',
           'profile': {
+            ...mockProfile(),
             'id': '4ca732af-061d-4c85-94f9-75877457862d',
             'preferredLanguage': '',
             'contactEmail': 'Gavredhead@gmail.com',
@@ -82,7 +87,7 @@ test('renders a one-sided enrollee merge', async () => {
             'participantNotes': [],
             'kitRequests': [],
             'relations': [],
-            profile: {}
+            profile: mockProfile()
           }
         },
         'action': 'MOVE_SOURCE'

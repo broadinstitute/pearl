@@ -44,7 +44,8 @@ export default function PortalProvider({ children }: { children: React.ReactNode
     const savedLanguage = localStorage.getItem('selectedLanguage')
     const selectedLanguage = savedLanguage === null ? undefined : savedLanguage
     setIsLoading(true)
-    Api.getPortal(selectedLanguage).then(result => {
+    // the ! below is unnecessary and wrong, but Vite ts validation insists on it?
+    Api.getPortal(selectedLanguage!).then(result => {
       setEnvState(result)
       setIsError(false)
       setIsLoading(false)

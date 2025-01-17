@@ -19,6 +19,7 @@ import bio.terra.pearl.core.model.study.StudyEnvironmentConfig;
 import bio.terra.pearl.core.model.survey.Survey;
 import bio.terra.pearl.core.model.survey.SurveyResponseWithTaskDto;
 import bio.terra.pearl.core.model.survey.SurveyType;
+import bio.terra.pearl.core.service.export.formatters.ExportFormatUtils;
 import bio.terra.pearl.core.service.export.formatters.item.AnswerItemFormatter;
 import bio.terra.pearl.core.service.export.formatters.item.ItemFormatter;
 import bio.terra.pearl.core.service.export.formatters.item.PropertyItemFormatter;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -119,6 +121,30 @@ public class EnrolleeExportServiceTests extends BaseSpringBootTest {
 
         assertThat(stream.toString(), startsWith("enrollee.shortcode\tprofile.familyName\nShortcode"));
     }
+
+    @Test
+    @Transactional
+    public void testExportTimeZone(TestInfo testInfo) {
+        // first check that it defaults to the time one of the study (New York)
+        String testName = getTestName(testInfo);
+        StudyEnvironment studyEnv = studyEnvironmentFactory.buildPersisted(testName);
+        Enrollee enrollee = enrolleeFactory.buildPersisted(testName, studyEnv, new Profile());
+
+        ExportOptionsWithExpression opts = ExportOptionsWithExpression.builder().timeZone("America/New_York").build();
+        List<EnrolleeExportData> exportData = enrolleeExportService.loadEnrolleeExportData(studyEnv.getId(), opts);
+        List<ModuleFormatter> exportModuleInfo = enrolleeExportService.generateModuleInfos(opts, studyEnv.getId(), exportData);
+        List<Map<String, String>> exportMaps = enrolleeExportService.generateExportMaps(exportData, exportModuleInfo);
+
+        assertThat(exportMaps.get(0).get("enrollee.createdAt"), equalTo(ExportFormatUtils.formatInstant(enrollee.getCreatedAt(), ZoneId.of("America/New_York"))));
+
+        // then check that we can explicitly specify a time zone in the opts
+        opts = ExportOptionsWithExpression.builder().timeZone("Europe/London").build();
+        exportData = enrolleeExportService.loadEnrolleeExportData(studyEnv.getId(), opts);
+        exportModuleInfo = enrolleeExportService.generateModuleInfos(opts, studyEnv.getId(), exportData);
+        exportMaps = enrolleeExportService.generateExportMaps(exportData, exportModuleInfo);
+        assertThat(exportMaps.get(0).get("enrollee.createdAt"), equalTo(ExportFormatUtils.formatInstant(enrollee.getCreatedAt(), ZoneId.of("Europe/London"))));
+    }
+
 
     @Test
     @Transactional

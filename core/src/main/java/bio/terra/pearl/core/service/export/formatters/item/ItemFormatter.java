@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.time.ZoneId;
+
 /** An 'item' corresponds to either a survey question or a specific field of a data model */
 @Getter @SuperBuilder @NoArgsConstructor
 public abstract class ItemFormatter<T> {
@@ -23,6 +25,7 @@ public abstract class ItemFormatter<T> {
 
     @Setter
     protected boolean importable = true;
+    protected ZoneId zoneId;
 
 
     /** if this item maps to a single column in the export, this function is trivial.

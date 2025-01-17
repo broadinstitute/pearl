@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.time.ZoneId;
+
 @Getter @Setter @SuperBuilder
 @NoArgsConstructor
 public class StudyEnvironmentConfig extends BaseEntity {
@@ -48,4 +50,12 @@ public class StudyEnvironmentConfig extends BaseEntity {
      */
     @Builder.Default
     private boolean enableInPersonKits = false;
+
+    /**
+     * the "home" timezone of the study (e.g. where the study staff is located).  For now, this only impacts export behavior
+     * This is a ZoneId stored as a String
+     */
+    @Builder.Default
+    private String timeZone = ZoneId.of("America/New_York").toString();
+
 }

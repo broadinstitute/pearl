@@ -196,7 +196,8 @@ export const mockStudyEnvironmentConfig = (): StudyEnvironmentConfig => {
     acceptingProxyEnrollment: false,
     useDevDsmRealm: false,
     useStubDsm: false,
-    enableInPersonKits: false
+    enableInPersonKits: false,
+    timeZone: 'America/New_York'
   }
 }
 

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -25,13 +26,15 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class TsvExporterTests extends BaseSpringBootTest {
     @Autowired
     ObjectMapper objectMapper;
+    private ZoneId defaultZoneId = ZoneId.of("America/New_York");
+
     @Test
     public void testBasicExport() throws Exception {
         EnrolleeFormatter sampleFormatter = new EnrolleeFormatter(new ExportOptions());
         // replace the formatters with a simple set we control
         sampleFormatter.getItemFormatters().clear();
-        sampleFormatter.getItemFormatters().add(new PropertyItemFormatter<Enrollee>("shortcode", Enrollee.class));
-        sampleFormatter.getItemFormatters().add(new PropertyItemFormatter<Enrollee>("consented", Enrollee.class));
+        sampleFormatter.getItemFormatters().add(new PropertyItemFormatter<Enrollee>("shortcode", Enrollee.class, defaultZoneId));
+        sampleFormatter.getItemFormatters().add(new PropertyItemFormatter<Enrollee>("consented", Enrollee.class, defaultZoneId));
         Map<String, String> valueMap = Map.of("enrollee.shortcode", "ABCDEF",
                 "enrollee.consented", "false");
         String outString = getExportResult(List.of(valueMap), List.of(sampleFormatter));
@@ -44,8 +47,8 @@ public class TsvExporterTests extends BaseSpringBootTest {
         // replace the formatters with a simple set we control
         // replace the formatters with a simple set we control
         sampleFormatter.getItemFormatters().clear();
-        sampleFormatter.getItemFormatters().add(new PropertyItemFormatter<Enrollee>("shortcode", Enrollee.class));
-        sampleFormatter.getItemFormatters().add(new PropertyItemFormatter<Enrollee>("consented", Enrollee.class));
+        sampleFormatter.getItemFormatters().add(new PropertyItemFormatter<Enrollee>("shortcode", Enrollee.class, defaultZoneId));
+        sampleFormatter.getItemFormatters().add(new PropertyItemFormatter<Enrollee>("consented", Enrollee.class, defaultZoneId));
         Map<String, String> valueMap = Map.of("enrollee.shortcode", "ABCD\"EF",
                 "enrollee.consented", "fa\tlse");
         String outString = getExportResult(List.of(valueMap), List.of(sampleFormatter));

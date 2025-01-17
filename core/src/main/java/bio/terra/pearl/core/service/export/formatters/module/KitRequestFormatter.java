@@ -8,10 +8,7 @@ import bio.terra.pearl.core.service.export.formatters.item.PropertyItemFormatter
 import bio.terra.pearl.core.service.kit.KitRequestDto;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class KitRequestFormatter extends BeanListModuleFormatter<KitRequestDto> {
@@ -26,10 +23,10 @@ public class KitRequestFormatter extends BeanListModuleFormatter<KitRequestDto> 
     @Override
     protected List<PropertyItemFormatter<KitRequestDto>> generateItemFormatters(ExportOptions options) {
         itemFormatters = KIT_REQUEST_INCLUDED_PROPERTIES.stream()
-                .map(propName -> new PropertyItemFormatter<>(propName, KitRequestDto.class))
+                .map(propName -> new PropertyItemFormatter<>(propName, KitRequestDto.class, options.getZoneId()))
                 .collect(Collectors.toList());
         // we have to handle kitType separately because we'll need to match it to the kitType name
-        itemFormatters.add(new KitTypeFormatter());
+        itemFormatters.add(new KitTypeFormatter(options.getZoneId()));
         return itemFormatters;
     }
 
@@ -43,19 +40,20 @@ public class KitRequestFormatter extends BeanListModuleFormatter<KitRequestDto> 
         return Comparator.comparing(KitRequestDto::getCreatedAt);
     }
 
-    public List<KitRequestDto> listFromStringMap(Map<String, String> enrolleeMap) {
+    public List<KitRequestDto> listFromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap) {
         List<KitRequestDto> kitRequests = new ArrayList<>();
         int requestNum = 1;
-        KitRequestDto kitRequestDto = getKitRequestDto(enrolleeMap, requestNum);
+        KitRequestDto kitRequestDto = fromStringMap(studyEnvironmentId, enrolleeMap, requestNum);
         while (kitRequestDto != null) {
             kitRequests.add(kitRequestDto);
             requestNum++;
-            kitRequestDto = getKitRequestDto(enrolleeMap, requestNum);
+            kitRequestDto = fromStringMap(studyEnvironmentId, enrolleeMap, requestNum);
         }
         return kitRequests;
     }
 
-    private KitRequestDto getKitRequestDto(Map<String, String> enrolleeMap, int requestNum) {
+    @Override
+    public KitRequestDto fromStringMap(UUID studyEnvironmentId, Map<String, String> enrolleeMap, int requestNum) {
         KitRequestDto kitRequestDto = null;
         for (PropertyItemFormatter<KitRequestDto> itemFormatter : itemFormatters) {
             String columnName = getColumnKey(itemFormatter, false, null, requestNum);

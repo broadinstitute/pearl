@@ -6,11 +6,6 @@ import bio.terra.pearl.core.model.participant.Enrollee;
 import bio.terra.pearl.core.model.workflow.ParticipantTask;
 import bio.terra.pearl.core.model.workflow.TaskStatus;
 import bio.terra.pearl.core.model.workflow.TaskType;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +15,12 @@ import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.mapper.reflect.BeanMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> implements StudyEnvAttachedDao<ParticipantTask> {
@@ -66,6 +67,45 @@ public class ParticipantTaskDao extends BaseMutableJdbiDao<ParticipantTask> impl
                         .bind("ppUserId", ppUserId)
                         .bind("activityStableId", activityStableId)
                         .bind("studyEnvironmentId", studyEnvironmentId)
+                        .mapTo(clazz)
+                        .findOne()
+        );
+    }
+
+
+    public List<ParticipantTask> findAllTasksForActivity(UUID ppUserId, UUID studyEnvironmentId, String activityStableId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                                select * from %s 
+                                where portal_participant_user_id = :ppUserId
+                                and target_stable_id = :activityStableId 
+                                and study_environment_id = :studyEnvironmentId 
+                                order by created_at desc""".formatted(tableName)
+                        )
+                        .bind("ppUserId", ppUserId)
+                        .bind("activityStableId", activityStableId)
+                        .bind("studyEnvironmentId", studyEnvironmentId)
+                        .mapTo(clazz)
+                        .list()
+        );
+    }
+
+    public Optional<ParticipantTask> findTaskForActivityWithCompletionTime(UUID ppUserId, UUID studyEnvironmentId, String activityStableId, Instant completedAt) {
+        return jdbi.withHandle(handle ->
+                // Note: 43200 seconds is 12 hours. Any task that was completed within 12 hours of the given time is considered a match
+                handle.createQuery("""
+                                select * from %s
+                                where portal_participant_user_id = :ppUserId
+                                and target_stable_id = :activityStableId
+                                and study_environment_id = :studyEnvironmentId
+                                and %s
+                                limit 1
+                                """.formatted(tableName, approximateDateMatchQueryStr("completed_at", ":completedAt::timestamp", "43200"))
+                        )
+                        .bind("ppUserId", ppUserId)
+                        .bind("activityStableId", activityStableId)
+                        .bind("studyEnvironmentId", studyEnvironmentId)
+                        .bind("completedAt", Timestamp.from(completedAt))
                         .mapTo(clazz)
                         .findOne()
         );

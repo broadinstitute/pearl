@@ -168,7 +168,7 @@ public class AnswerItemFormatter extends ItemFormatter<SurveyResponseWithTaskDto
             answer.setAnswerType(AnswerType.OBJECT);
             answer.setObjectValue(exportString);
         } else {
-            answer.setValueAndType(ExportFormatUtils.getValueFromString(exportString, dataType));
+            answer.setValueAndType(ExportFormatUtils.getValueFromString(exportString, dataType, zoneId));
         }
         response.getAnswers().add(answer);
     }
