@@ -277,11 +277,9 @@ public class EnrolleeImportService {
                 importItems.add(createImportItemFromEnrollee(accountEnrollee, importId));
             }
         } catch (Exception e) {
-            System.out.println("Error importing enrollee: " + e.getMessage());
-            System.out.println(Arrays.toString(e.getStackTrace()));
-            System.out.println("exception class: " + e.getClass());
+            String message = "%s: %s".formatted(e.getClass().getSimpleName(), e.getMessage());
 
-            importItems.add(createFailedImportItem(importId, e.getMessage(), Arrays.toString(e.getStackTrace()), adminId));
+            importItems.add(createFailedImportItem(importId, message, Arrays.toString(e.getStackTrace()), adminId));
             if (!accountData.getProxyData().isEmpty()) {
                 log.warn("failed to import primary enrollee, skipping proxy import for username: {}", accountData.getEmail());
             }
