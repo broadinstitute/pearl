@@ -313,7 +313,6 @@ public class EnrolleeImportService {
                         auditInfo
                 );
             } catch (Exception e) {
-                System.out.println("Error importing proxy: " + e.getMessage());
                 importItems.add(createFailedImportItem(importId, e.getMessage(), Arrays.toString(e.getStackTrace()), adminId));
             }
         }
