@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
-import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -78,7 +77,13 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponseWithTaskDto, 
         )).values().stream().sorted(Comparator.comparingInt(a -> a.get(0).getExportOrder())).toList();
 
         for (List<SurveyQuestionDefinition> questionVersions : questionDefsByStableId) {
-            SurveyQuestionDefinition mostRecent = questionVersions.get(0);
+
+            Optional<SurveyQuestionDefinition> mostRecentOpt = getLatest(questionVersions);
+            if (mostRecentOpt.isEmpty()) {
+                continue;
+            }
+
+            SurveyQuestionDefinition mostRecent = mostRecentOpt.get();
 
             if (List.of("signaturepad", "html").contains(mostRecent.getQuestionType())) {
                 continue;
@@ -94,6 +99,10 @@ public class SurveyFormatter extends ModuleFormatter<SurveyResponseWithTaskDto, 
             itemFormatters.addAll(buildChildrenItemFormatters(exportOptions, questionDefsByStableId, data, mostRecent));
 
         }
+    }
+
+    private Optional<SurveyQuestionDefinition> getLatest(List<SurveyQuestionDefinition> questionVersions) {
+        return questionVersions.stream().max(Comparator.comparing(SurveyQuestionDefinition::getSurveyVersion));
     }
 
     private Collection<List<SurveyQuestionDefinition>> getChildrenOf(Collection<List<SurveyQuestionDefinition>> questionDefs, SurveyQuestionDefinition parent) {
