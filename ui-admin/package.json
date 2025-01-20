@@ -28,7 +28,7 @@
     "react-dom": "^18.2.0",
     "react-email-editor": "^1.7.9",
     "react-notifications-component": "^4.0.1",
-    "react-oidc-context": "^2.2.0",
+    "react-oidc-context": "^3.2.0",
     "react-plotly.js": "^2.6.0",
     "react-querybuilder": "^6.5.4",
     "react-router-dom": "^6.4.0",
